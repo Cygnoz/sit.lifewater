@@ -1,44 +1,15 @@
 // const BusinessCustomer = require('../Models/BussinessCustomerSchema');
-const axios = require('axios');
 const Customer = require('../Models/CustomerSchema');
+const Account = require('../Models/account');
+const TrialBalance = require('../Models/trialBalance');
+
  
  
 const createCustomer = async (req, res) => {
+  console.log("Add Customer:", req.body);
   try {
-    const {
-      customerType,
-      companyName,
-      companyWebsite,
-      firstName,
-      lastName,
-      taxPreference,
-      mobileNo,
-      workPhone,
-      workPhone2,
-      whatsappNo,
-      currency,
-      currencyCode,
-      placeOfSupply,
-      state,
-      city,
-      area,
-      zipPostalCode,
-      billingAddress,
-      email, // Now optional
-      landmark,
-      buildingNo,
-      street,
-      salesman,
-      nationality,
-      mainRoute,
-      subRoute,
-      noOfBottles,
-      ratePerBottle,
-      depositAmount,
-      paymentMode
-    } = req.body;
-
-    console.log(req.body);
+    const cleanedData = cleanCustomerData(req.body);
+    const { firstName, whatsappNo, location } = cleanedData;
 
     // Validate required fields
     if (!firstName) {
@@ -51,42 +22,49 @@ const createCustomer = async (req, res) => {
       return res.status(400).json({ message: 'A customer with this WhatsApp number already exists.' });
     }
 
-    // Create a new customer based on type
-    const newCustomer = new Customer({
-      customerType,
-      companyName: customerType === 'Business' ? companyName : null,
-      logo: req.file ? req.file.filename : null,
-      companyWebsite,
-      firstName,
-      lastName,
-      taxPreference,
-      mobileNo,
-      workPhone,
-      workPhone2,
-      whatsappNo,
-      currency,
-      currencyCode,
-      placeOfSupply,
-      state,
-      city,
-      area,
-      zipPostalCode,
-      billingAddress,
-      email: email || null, // Set email to null if not provided
-      landmark,
-      buildingNo,
-      street,
-      salesman,
-      nationality,
-      mainRoute,
-      subRoute,
-      noOfBottles,
-      ratePerBottle,
-      depositAmount,
-      paymentMode
-    });
+    const allCustomer = await Customer.find({ organizationId });
+    const nextIdNumber = allCustomer.length + 1;        
+    cleanedData.customerID = `LW${nextIdNumber.toString().padStart(3, '0')}`;
+
+    // Transform location only if it's provided and contains valid coordinates
+    let transformedLocation;
+    if (location && location.coordinates && location.coordinates.latitude && location.coordinates.longitude) {
+      transformedLocation = {
+        address: location.address || '', // Default to empty string if address is not provided
+        coordinates: {
+          type: "Point",
+          coordinates: [location.coordinates.longitude, location.coordinates.latitude]
+        }
+      };
+    }
+
+    //Create a new customer
+    const newCustomer = new Customer({ ...cleanedData, location: transformedLocation  });
 
     const savedCustomer = await newCustomer.save();
+
+    //Create a new accounts
+    const newAccount = new Account({
+      accountName: customerDisplayName,
+      accountId: savedCustomer._id,
+      accountSubhead: "Sundry Debtors",
+      accountHead: "Asset",
+      accountGroup: "Asset",
+      description: "Customer",
+    });
+
+    const savedAccount = await newAccount.save();
+
+    //Create trial balance entry
+    const trialEntry = new TrialBalance({
+      operationId: savedCustomer._id,
+      date: savedCustomer.createdDate,
+      accountId: savedAccount._id,
+      accountName: savedAccount.accountName,
+      action: "Opening Balance",
+      remark: savedCustomer.remark,
+    });
+    await trialEntry.save();
 
     return res.status(201).json({
       message: 'Customer created successfully!',
@@ -152,13 +130,6 @@ const addCustomerFromSalesman = async (req, res) => {
       subRoute,
       location: transformedLocation // This will be undefined if location is not provided
     });
-
-    const response = await axios.post('https://account-api.dev.billbizz.cloud:5001/lw-account', { customerDisplayName: firstName });
-    if (response.status === 201) {
-      console.log('Customer added successfully to billbizz account');
-    } else {
-      console.error('Failed to add customer to billbizz account');
-    }
 
     const savedCustomer = await newCustomer.save();
     res.status(201).json({ message: 'Customer added successfully', customer: savedCustomer, status: 201 });
@@ -331,3 +302,28 @@ module.exports = {
   addCustomerFromSalesman,
   editCustomerFromSalesman
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //Clean Data 
+  function cleanCustomerData(data) {
+    const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+    return Object.keys(data).reduce((acc, key) => {
+      acc[key] = cleanData(data[key]);
+      return acc;
+    }, {});
+  }

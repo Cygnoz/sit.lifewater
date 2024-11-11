@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Counter = require('./Counter'); // Import the counter model
  
 const customerSchema = new mongoose.Schema({
   customerID: {
@@ -8,15 +7,11 @@ const customerSchema = new mongoose.Schema({
   },
   customerType: {
     type: String,
-    enum: ['Business', 'Individual'],
     required: true
   },
   companyName: {
     type: String,
     trim: true,
-    required: function () {
-      return this.customerType === 'Business';
-    }
   },
   logo: {
     type: String,
@@ -34,10 +29,6 @@ const customerSchema = new mongoose.Schema({
   lastName: {
     type: String,
     trim: true
-  },
-  taxPreference: {
-    type: String,
-    enum: ['inclusive', 'exclusive']
   },
   mobileNo: {
     type: String,
@@ -131,7 +122,7 @@ const customerSchema = new mongoose.Schema({
   },
   paymentMode: {
     type: String,
-    enum: ['Cash', 'Credit','Coupon']
+    enum: ['Cash','Credit','Coupon']
   },
   location: {
     address: {
@@ -154,23 +145,7 @@ const customerSchema = new mongoose.Schema({
 
 customerSchema.index({ 'location.coordinates': '2dsphere' });
 
-// Pre-save hook to auto-generate customerID
-customerSchema.pre('save', async function (next) {
-  if (!this.isNew) return next(); // Only generate ID for new documents
 
-  try {
-    const counter = await Counter.findOneAndUpdate(
-      { id: 'customerID' },
-      { $inc: { seq: 1 } },
-      { new: true, upsert: true }
-    );
-
-    this.customerID = `LW-${String(counter.seq).padStart(3, '0')}`; // Format: LW-001, LW-002, etc.
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
 
  
 module.exports = mongoose.model('Customer', customerSchema);
