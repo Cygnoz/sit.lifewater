@@ -65,13 +65,12 @@ router.get('/getSRoute/:id', subrouteController.getSubroutebyID);
 // router.post("/main-route/:mainRouteId/sub-route", mainRouteController.addSubRoute)
 
 //customer
-router.post("/addcustomer", upload.single("logo"), CustomerController.createCustomer)
+router.post("/addcustomer", CustomerController.createCustomer)
 router.get("/customer", CustomerController.getAllCustomers)
-router.post('/addsalesmancustomer',CustomerController.addCustomerFromSalesman);
-router.put("/editcustomer/:id", upload.single("logo"), CustomerController.updateCustomerById)
-router.put('/editcustomer/:id',CustomerController.editCustomerFromSalesman);
+// router.post('/addsalesmancustomer',CustomerController.addCustomerFromSalesman);
+router.put("/editcustomer/:id",CustomerController.updateCustomerById)
+// router.put('/editcustomer/:id',CustomerController.editCustomerFromSalesman);
 router.get("/customer/:id", CustomerController.getCustomerById)
-router.put("/editcustomer/:id", upload.single("logo"), CustomerController.updateCustomerById)
 router.delete("/customer/:id", CustomerController.deleteCustomerById)
 
 // Active Route
