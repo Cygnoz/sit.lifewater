@@ -1,33 +1,39 @@
 const ActiveRoute = require('../Models/ActiveRoute');
 const EndRide = require('../Models/EndRide');
 
-const endRide = async (req, res) => {
-  const { endingKM, travelledKM, expenses, activeRouteId, salesMan, driver, vehicleNo, mainRoute, stock ,subRoute } = req.body;
-
-  if (!activeRouteId) {
-    return res.status(400).json({ message: "Active Route ID is required." });
-  }
-
-  console.log("Received end ride data:", req.body);  // Initial log of request data
-
+exports.endRide = async (req, res) => {
   try {
+    console.log("End Ride Data:", req.body);
+
+    const cleanedData = cleanCustomerData(req.body);
+
+    const { activeRouteId } = cleanedData;
+
+    if (!activeRouteId) {
+      return res.status(400).json({ message: "Active Route ID is required." });
+    }
+
+
+
     // Create a new EndRide entry
-    const endRideEntry = new EndRide({
-      endingKM,
-      travelledKM,
-      expenses,
-      activeRouteId,
-      salesMan,
-      driver,
-      vehicleNo,
-      mainRoute,
-      stock,
-      subRoute,
-    });
+    const endRideEntry = new EndRide({ ...cleanedData });
+
+    // const endRideEntry = new EndRide({
+    //   endingKM,
+    //   travelledKM,
+    //   expenses,
+    //   activeRouteId,
+    //   salesMan,
+    //   driver,
+    //   vehicleNo,
+    //   mainRoute,
+    //   stock,
+    //   subRoute,
+    // });
 
     // Save the new EndRide entry and log success
     await endRideEntry.save();
-    console.log("EndRide entry created successfully:", endRideEntry);
+    console.log("End ride entry created successfully:", endRideEntry);
 
     // Delete the active route
     const deletedRoute = await ActiveRoute.findByIdAndDelete(activeRouteId);
@@ -53,10 +59,10 @@ const endRide = async (req, res) => {
 
 
 
-const getEndRide = async (req, res) => {
-  const { endRideId } = req.params;
-
+exports.getEndRide = async (req, res) => {
   try {
+    const { endRideId } = req.params;
+
     let endRideEntry;
     if (endRideId) {
       // Specific end ride entry
@@ -82,7 +88,13 @@ const getEndRide = async (req, res) => {
 };
 
 
-module.exports = { 
-  endRide,
-  getEndRide,
-};
+
+
+  //Clean Data 
+  function cleanCustomerData(data) {
+    const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+    return Object.keys(data).reduce((acc, key) => {
+      acc[key] = cleanData(data[key]);
+      return acc;
+    }, {});
+  }

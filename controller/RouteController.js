@@ -4,29 +4,33 @@ const SubRoute = require('../Models/SubrouteSchema');
  
  
 // Add a new route
-const addRoute = async (req, res) => {
+exports.addRoute = async (req, res) => {
   try {
     // Log the body to check if data is being received correctly
-    console.log(req.body);
+    console.log("Add Route:",req.body);
+    const cleanedData = cleanCustomerData(req.body);
+
 
     // Validate required fields
-    if (!req.body.routeCode || !req.body.mainRoute) {
-      return res.status(400).json({ message: 'Missing required fields: routeCode or mainRoute' });
+    if (!cleanedData.routeCode || !cleanedData.mainRoute) {
+      return res.status(400).json({ message: 'Missing required fields: Route Code or Main Route' });
     }
 
     // Check if a route with the same routeCode already exists
-    const existingRoute = await MainRoute.findOne({ routeCode: req.body.routeCode });
+    const existingRoute = await MainRoute.findOne({ routeCode: cleanedData.routeCode });
 
     if (existingRoute) {
       return res.status(400).json({ message: 'Route with this code already exists.' });
     }
 
     // Create a new route
-    const newRoute = new MainRoute({
-      mainRoute: req.body.mainRoute,
-      routeCode: req.body.routeCode,
-      description: req.body.description,
-    });
+    const newRoute = new MainRoute({ ...cleanedData });
+
+    // const newRoute = new MainRoute({
+    //   mainRoute: req.body.mainRoute,
+    //   routeCode: req.body.routeCode,
+    //   description: req.body.description,
+    // });
 
     // Save the new route in the database
     const savedRoute = await newRoute.save();
@@ -43,7 +47,7 @@ const addRoute = async (req, res) => {
  
  
 // Delete a route by ObjectId
-const deleteRoute = async (req, res) => {
+exports.deleteRoute = async (req, res) => {
   try {
     const { id } = req.params;
     console.log("ID received for deletion:", id);  // Log the ID to verify it's being passed correctly
@@ -62,12 +66,14 @@ const deleteRoute = async (req, res) => {
  
  
 // Update a route by ObjectId
-const updateRoute = async (req, res) => {
+exports.updateRoute = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const cleanedData = cleanCustomerData(req.body);
 
-    const updatedRoute = await MainRoute.findByIdAndUpdate(id, updateData, { new: true });
+    // const updateData = req.body;
+
+    const updatedRoute = await MainRoute.findByIdAndUpdate(id, cleanedData, { new: true });
     if (!updatedRoute) {
       return res.status(404).json({ message: 'Route not found' });
     }
@@ -80,7 +86,7 @@ const updateRoute = async (req, res) => {
 };
  
 // View all routes
- const getAllRoutes = async (req, res) => {
+exports.getAllRoutes = async (req, res) => {
   try {
     const routes = await MainRoute.find();
     res.status(200).json(routes);
@@ -90,7 +96,7 @@ const updateRoute = async (req, res) => {
 };
  
 // View a route by ObjectId
-const viewRouteById = async (req, res) => {
+exports.viewRouteById = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -141,10 +147,21 @@ const viewRouteById = async (req, res) => {
 };
 
  
-module.exports = {
-  addRoute,
-  deleteRoute,
-  updateRoute,
-  getAllRoutes,
-  viewRouteById
-};
+
+
+
+
+
+
+
+
+
+
+  //Clean Data 
+  function cleanCustomerData(data) {
+    const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+    return Object.keys(data).reduce((acc, key) => {
+      acc[key] = cleanData(data[key]);
+      return acc;
+    }, {});
+  }

@@ -1,13 +1,9 @@
-
-
-
-// Add new staff
 const bcrypt = require('bcrypt');
-const Staff = require("../Models/StaffSchema"); // Ensure the path matches the casing
+const Staff = require("../Models/StaffSchema");
 
 
 // Get all staff members
-const getAllStaff = async (req, res) => {
+exports.getAllStaff = async (req, res) => {
   try {
     const staff = await Staff.find();
     res.status(200).json(staff);
@@ -17,7 +13,7 @@ const getAllStaff = async (req, res) => {
 };
 
 // Get staff by ID
-const getStaffById = async (req, res) => {
+exports.getStaffById = async (req, res) => {
   try {
     const staff = await Staff.findById(req.params.id);
     if (!staff) return res.status(404).json({ message: 'Staff not found' });
@@ -33,9 +29,13 @@ const normalizeFilePath = (filePath) => {
   return filePath.replace(/\\/g, "/").replace(/^uploads\//, ""); // remove "uploads/" prefix if it exists
 };
 
-const addStaff = async (req, res) => {
+exports.addStaff = async (req, res) => {
   try {
-    const { firstname, lastname, username, designation, password, emiratesId, mobileNumber } = req.body;
+    console.log("Add Staff:", req.body);
+
+    const cleanedData = cleanCustomerData(req.body);
+
+    const { mobileNumber, designation, username, password,  } = cleanedData;
 
     // Check for existing staff with the same mobile number
     const existingStaff = await Staff.findOne({ mobileNumber });
@@ -48,59 +48,63 @@ const addStaff = async (req, res) => {
       if (!username || !password) {
         return res.status(400).json({ message: 'Username and password are required for Sales staff.' });
       }
-
       // Check if username already exists
       const existingSalesStaff = await Staff.findOne({ username });
       if (existingSalesStaff) {
         return res.status(400).json({ message: 'User with this username already exists.' });
       }
 
-      // Hash the password
-      const hashedPassword = await bcrypt.hash(password.trim(),10);
+      cleanedData.hashedPassword = await bcrypt.hash(password.trim(),10);
+    }
+
+      
+
+      
       
       // Create the new staff record for "Sales"
-      const newStaff = new Staff({
-        firstname,
-        lastname,
-        username: username.trim(),
-        password: hashedPassword,
-        profile: req.file ? normalizeFilePath(req.file.path) : null,
-        address: req.body.address,
-        visaStatus: req.body.visaStatus,
-        visaValidity: req.body.visaValidity,
-        mobileNumber,
-        whatsAppNumber: req.body.whatsAppNumber,
-        visaNumber: req.body.visaNumber,
-        dateofBirth: req.body.dateofBirth,
-        nationality: req.body.nationality,
-        designation,
-        emiratesId,
-      });
+      const newStaff = new Staff({ ...cleanedData });
+
+      // const newStaff = new Staff({
+      //   firstname,
+      //   lastname,
+      //   username: username.trim(),
+      //   password: hashedPassword,
+      //   address: req.body.address,
+      //   visaStatus: req.body.visaStatus,
+      //   visaValidity: req.body.visaValidity,
+      //   mobileNumber,
+      //   whatsAppNumber: req.body.whatsAppNumber,
+      //   visaNumber: req.body.visaNumber,
+      //   dateofBirth: req.body.dateofBirth,
+      //   nationality: req.body.nationality,
+      //   designation,
+      //   emiratesId,
+      // });
 
       // Save the staff record
       const savedStaff = await newStaff.save();
       return res.status(201).json(savedStaff);
-    }
+    
 
     // For other designations (Driver, Helper)
-    const newStaff = new Staff({
-      firstname,
-      lastname,
-      profile: req.file ? normalizeFilePath(req.file.path) : null,
-      address: req.body.address,
-      visaStatus: req.body.visaStatus,
-      visaValidity: req.body.visaValidity,
-      mobileNumber,
-      whatsAppNumber: req.body.whatsAppNumber,
-      visaNumber: req.body.visaNumber,
-      dateofBirth: req.body.dateofBirth,
-      nationality: req.body.nationality,
-      designation,
-      emiratesId,
-    });
+    // const newStaff = new Staff({
+    //   firstname,
+    //   lastname,
+    //   profile: req.file ? normalizeFilePath(req.file.path) : null,
+    //   address: req.body.address,
+    //   visaStatus: req.body.visaStatus,
+    //   visaValidity: req.body.visaValidity,
+    //   mobileNumber,
+    //   whatsAppNumber: req.body.whatsAppNumber,
+    //   visaNumber: req.body.visaNumber,
+    //   dateofBirth: req.body.dateofBirth,
+    //   nationality: req.body.nationality,
+    //   designation,
+    //   emiratesId,
+    // });
 
-    const savedStaff = await newStaff.save();
-    res.status(201).json(savedStaff);
+    // const savedStaff = await newStaff.save();
+    // res.status(201).json(savedStaff);
 
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -110,7 +114,7 @@ const addStaff = async (req, res) => {
 
 
 
-const editStaff = async (req, res) => {
+exports.editStaff = async (req, res) => {
   try {
     const { designation, username, password, emiratesId } = req.body;
     const updatedData = { ...req.body };
@@ -170,7 +174,7 @@ const editStaff = async (req, res) => {
 
 
 // Delete staff
-const deleteStaff = async (req, res) => {
+exports.deleteStaff = async (req, res) => {
   try {
     const deletedStaff = await Staff.findByIdAndDelete(req.params.id);
     if (!deletedStaff) return res.status(404).json({ message: 'Staff not found' });
@@ -182,7 +186,7 @@ const deleteStaff = async (req, res) => {
 
 
 // Login for Sales staff
-const loginSalesStaff = async (req, res) => {
+exports.loginSalesStaff = async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -231,11 +235,4 @@ const loginSalesStaff = async (req, res) => {
 
 
 
-module.exports = {
-  addStaff,
-  getAllStaff,
-  getStaffById,
-  editStaff,
-  deleteStaff,
-  loginSalesStaff
-};
+
