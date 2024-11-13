@@ -236,7 +236,7 @@ const CreateCustomer: React.FC = () => {
                   </td>
 
                 <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                 {customer.firstName} {customer.lastName} </td>
+                 {customer.fullName} </td>
                 <td className="p-2 text-[14px] text-center text-[#4B5C79]">
                 {customer.mobileNo}
                 </td>
