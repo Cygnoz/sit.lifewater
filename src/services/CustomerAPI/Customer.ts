@@ -63,17 +63,45 @@ interface ApiResponse {
 // };
 
 
-export const addCustomerAPI = async (customerData: FormData): Promise<ApiResponse> => {
+export const addCustomerAPI = async (customerData: FormData | Record<string, any>): Promise<ApiResponse> => {
   try {
-    const response = await commonAPI('POST', `${BASEURL}/api/addcustomer`, customerData);
+    const isFormData = customerData instanceof FormData;
+    
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+    };
 
-    console.log("Response Status:", response.status); // Check the response status
-    console.log("Response Data:", response.data); // Check the response data
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
 
-    return response;
+    const response = await axios.post(`${BASEURL}/api/addcustomer`, customerData, { headers });
+
+    console.log("Response Status:", response.status);
+    console.log("Response Data:", response.data);
+
+    return response.data;
   } catch (error: any) {
-    console.error(`Error adding customer:`, error);
-    throw error; // Rethrow the error to be caught in the component
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        console.error("Backend Error:", error.response.data);
+        return {
+          status: error.response.status,
+          message: error.response.data.message || "An error occurred while adding the customer.",
+        };
+      } else if (error.request) {
+        console.error("Network Error:", error.message);
+        return {
+          status: 0,
+          message: "Network error. Please check your internet connection.",
+        };
+      }
+    }
+    console.error("Unexpected Error:", error);
+    return {
+      status: 500,
+      message: "An unexpected error occurred.",
+    };
   }
 };
 
