@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Build the application (if applicable, for React or Next.js)
-# RUN npm run build
+RUN npm run build
 
 # Expose the port your app runs on (e.g., 5173 for Node.js app)
 EXPOSE 5173
