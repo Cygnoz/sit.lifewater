@@ -1,38 +1,33 @@
-# Stage 1: Build the Node.js application
-FROM node:18 AS builder
+# Stage 1: Build the application
+FROM node:18-alpine AS builder
 
-# Set the working directory
-WORKDIR /usr/src/app
+# Set working directory
+WORKDIR /app
 
-# Copy package files and install dependencies
-COPY package*.json ./
+# Copy package files
+COPY package.json package-lock.json ./
+
+# Install dependencies
 RUN npm install
 
-# Copy the application code
+# Copy all project files
 COPY . .
 
-# Build the application (if using a frontend framework like React or Vite)
+# Build the application
 RUN npm run build
 
-# Expose the port your app runs on
-EXPOSE 5173
+# Stage 2: Set up Nginx server
+FROM nginx:stable-alpine
 
-# Start the Node.js application
-CMD ["npm", "run", "dev"]
-
-
-# Stage 2: Set up Nginx
-FROM nginx:latest
-
-# Copy Nginx configuration file to the container
+# Copy nginx config file
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy the built application code from the builder stage (if serving static files)
-# COPY --from=builder /usr/src/app/build /usr/share/nginx/html
+# Copy built files from the builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Expose Nginx port
-EXPOSE 80
+# Expose port 5173
+EXPOSE 5173
 
-# Run Nginx in the foreground
+# Start Nginx server
 CMD ["nginx", "-g", "daemon off;"]
 
