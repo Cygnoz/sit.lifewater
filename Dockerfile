@@ -1,33 +1,18 @@
-# Stage 1: Build the application
-FROM node:18-alpine AS builder
+# Use an official Nginx image as the base
+FROM nginx:alpine
 
-# Set working directory
-WORKDIR /app
+# Set the working directory
+WORKDIR /usr/share/nginx/html
 
-# Copy package files
-COPY package.json package-lock.json ./
+# Copy the application files to the Nginx HTML directory
+# Assuming your app files (e.g., index.html) are in the 'app' folder in the same directory as the Dockerfile
+COPY ./app /usr/share/nginx/html
 
-# Install dependencies
-RUN npm install
-
-# Copy all project files
-COPY . .
-
-# Build the application
-RUN npm run build
-
-# Stage 2: Set up Nginx server
-FROM nginx:stable-alpine
-
-# Copy nginx config file
+# Copy custom Nginx configuration file
 COPY nginx.conf /etc/nginx/nginx.conf
-
-# Copy built files from the builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Expose port 5173
 EXPOSE 5173
 
-# Start Nginx server
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
-
