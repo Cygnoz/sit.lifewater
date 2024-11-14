@@ -6,13 +6,15 @@ import { commonAPI } from "../CommonApi";
 interface CustomerFormData {
   customerType: 'Business' | 'Individual';
   companyName: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
+  addressLine1:string;
+  addressLine2:string;
+  // lastName: string;
   email: string;
   numberOfBottles: string;
-  rate: string;
-  paymentMode: 'Cash' | 'Credit';
-  contactNumber: string;
+  ratePerBottle: string;
+  paymentMode: 'Cash' | 'Credit' | 'Coupon';
+  mobileNo: string;
   whatsappNumber: string;
   depositAmount: string;
   location: {
@@ -24,6 +26,8 @@ interface CustomerFormData {
   };
 }
 
+
+
 interface ApiResponse {
   message?: string;
   data?: any;
@@ -32,7 +36,7 @@ interface ApiResponse {
 
 export const addCustomerAPI = async (customerData: CustomerFormData): Promise<ApiResponse> => {
   try {
-    const response = await axios.post(`${BASEURL}/api/addsalesmancustomer`, customerData);
+    const response = await axios.post(`${BASEURL}/api/addcustomer`, customerData);
 
     console.log("Response Status:", response.status); // Check the response status
     console.log("Response Data:", response.data); // Check the response data
@@ -64,13 +68,19 @@ export const getACustomerAPI = async (id: string): Promise<ApiResponse> => {
 
 export const updateCustomerAPI = async (id: string, formData: FormData) => {
   try {
+    // Log the FormData to ensure it's populated correctly
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
+
     const response = await axios.put(`${BASEURL}/api/editcustomer/${id}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data', // Set the correct content type for form data
+        'Content-Type': 'application/json',  // Set the correct content type for form data
       },
     });
     return response.data; // Return the response data
   } catch (error: any) {
+    console.error("Error updating customer:", error);
     throw new Error(error.response?.data?.message || 'Failed to update customer');
   }
 };

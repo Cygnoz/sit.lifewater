@@ -26,54 +26,20 @@ interface Location {
 interface CustomerData {
   _id: string;
   customerType: string;
-  companyName: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
   email: string;
-  noOfBottles: number;
+  addressLine1: string;
+  addressLine2: string;
+  numberOfBottles: number;
   ratePerBottle: number;
   paymentMode: string;
   mobileNo: string;
-  whatsappNo: string;
+  whatsappNumber: string;
   depositAmount: number;
   mainRoute: string;
   subRoute: string;
   location: Location;
 }
-// interface ApiResponse {
-//   data: CustomerData; // Define `CustomerData` as the type you expect
-//   status: number;
-//   message: string;
-// }
-
-interface CustomerData {
-  _id: string;
-  customerType: string;
-  companyName: string;
-  firstName: string;
-  lastName: string;
-  mobileNo: string;
-  whatsappNo: string;
-  email: string;
-  mainRoute: string;
-  subRoute: string;
-  noOfBottles: number;
-  ratePerBottle: number;
-  depositAmount: number;
-  paymentMode: string;
-  createdAt: string;
-  updatedAt: string;
-  customerID: string;
-  Location: {
-    coordinates: {
-      type: string;
-      coordinates: [number, number]; // Longitude and latitude
-    };
-    address: string;
-  };
-  __v: number;
-}
-
 
 const EditCustomer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -83,7 +49,6 @@ const EditCustomer: React.FC = () => {
   const [customerData, setCustomerData] = useState<CustomerData | null>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
 
   useEffect(() => {
     const fetchSubRoutes = async () => {
@@ -109,10 +74,8 @@ const EditCustomer: React.FC = () => {
     const fetchCustomerData = async () => {
       if (id) {
         try {
-          const response = await getACustomerAPI(id) ; // Assuming ApiResponse has a data property of type CustomerData
-          setCustomerData(response as any); // Pass only the relevant data to setCustomerData
-          console.log(customerData);
-          
+          const response = await getACustomerAPI(id); 
+          setCustomerData(response as any); 
         } catch (error) {
           console.error("Error fetching customer data:", error);
           toast.error("Failed to fetch customer data");
@@ -121,7 +84,6 @@ const EditCustomer: React.FC = () => {
         }
       }
     };
-    
 
     fetchCustomerData();
   }, [id]);
@@ -189,8 +151,6 @@ const EditCustomer: React.FC = () => {
               }
             : null
         );
-        console.log(customerData?.location);
-
         toast.success("Location fetched successfully");
       } catch (error) {
         console.error("Error fetching location:", error);
@@ -203,56 +163,55 @@ const EditCustomer: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+  
     if (!customerData) {
       toast.error("No customer data to update");
       return;
     }
-
+  
     try {
-      const formData = new FormData();
-
-      // Create a clean customer data object
-      const cleanedCustomerData = {
+      const cleanedCustomerData: CustomerData = {
         ...customerData,
-        // Convert number fields
-        noOfBottles: Number(customerData.noOfBottles),
+        numberOfBottles: Number(customerData.numberOfBottles),
         ratePerBottle: Number(customerData.ratePerBottle),
         depositAmount: Number(customerData.depositAmount),
-        // Format location exactly as needed
         location: {
-          address: "",
+          address: customerData.location?.address || "",
           coordinates: {
-            latitude:
-              customerData.location?.coordinates?.latitude !== null
-                ? Number(customerData.location.coordinates.latitude)
-                : null,
-            longitude:
-              customerData.location?.coordinates?.longitude !== null
-                ? Number(customerData.location.coordinates.longitude)
-                : null,
+            latitude: customerData.location?.coordinates?.latitude ?? null,
+            longitude: customerData.location?.coordinates?.longitude ?? null,
           },
         },
       };
-
-      // Add all fields to FormData
-      Object.entries(cleanedCustomerData).forEach(([key, value]) => {
+  
+      // Create a new FormData object
+      const formData = new FormData();
+      Object.keys(cleanedCustomerData).forEach((key) => {
+        const value = cleanedCustomerData[key as keyof CustomerData];
+        // Flatten location data and append
         if (key === "location") {
-          // Add location as a properly structured object
-          formData.append(key, JSON.stringify(cleanedCustomerData.location));
-        } else {
-          formData.append(key, value?.toString() || "");
+          const locationData = value as Location;
+          formData.append("location[address]", locationData.address);
+          formData.append("location[latitude]", locationData.coordinates.latitude?.toString() || "");
+          formData.append("location[longitude]", locationData.coordinates.longitude?.toString() || "");
+        } else if (value !== null && value !== undefined) {
+          formData.append(key, value as any);
         }
       });
-
+  
+      // Log FormData to check the contents before sending
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+  
+      // Send FormData to the API
       const response = await updateCustomerAPI(customerData._id, formData);
-
+      console.log("Update response:", response);
+  
       toast.success("Customer updated successfully");
-      navigate("/viewcustomers");
-
-      console.log(formData);
-
-      console.log(response);
+      setTimeout(() => {
+        navigate("/viewcustomers");
+      }, 2000);
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -262,6 +221,7 @@ const EditCustomer: React.FC = () => {
       console.error("Error updating customer:", error);
     }
   };
+  
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -312,7 +272,7 @@ const EditCustomer: React.FC = () => {
           </div>
 
           {/* Company Name (for Business customers) */}
-          {customerData.customerType === "Business" && (
+          {/* {customerData.customerType === "Business" && (
             <div>
               <label className="block text-[#303F58] font-[14px] mb-2">
                 Company Name
@@ -326,15 +286,15 @@ const EditCustomer: React.FC = () => {
                 placeholder="Enter Company Name"
               />
             </div>
-          )}
+          )} */}
 
           {/* First Name */}
           <div>
-            <label className="block text-gray-700">First Name</label>
+            <label className="block text-gray-700">Full Name</label>
             <input
               type="text"
-              name="firstName"
-              value={customerData.firstName}
+              name="fullName"
+              value={customerData.fullName}
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter First Name"
@@ -342,7 +302,7 @@ const EditCustomer: React.FC = () => {
           </div>
 
           {/* Last Name */}
-          <div>
+          {/* <div>
             <label className="block text-gray-700">Last Name</label>
             <input
               type="text"
@@ -352,10 +312,10 @@ const EditCustomer: React.FC = () => {
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter Last Name"
             />
-          </div>
+          </div> */}
 
           {/* Email */}
-          <div>
+          {/* <div>
             <label className="block text-gray-700">Email</label>
             <input
               type="email"
@@ -365,6 +325,35 @@ const EditCustomer: React.FC = () => {
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter Email"
             />
+          </div> */}
+
+          <div>
+            <label className="block text-gray-700">addressLine 1</label>
+            <input
+              type="text"
+              name="addressLine1"
+              value={customerData.addressLine1}
+              onChange={handleInputChange}
+              className="w-full p-2 mt-1 border rounded-md"
+              placeholder="Enter address 1"
+            />
+            {/* {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )} */}
+          </div>
+          <div>
+            <label className="block text-gray-700">addressLine 2</label>
+            <input
+              type="text"
+              name="addressLine2"
+              value={customerData.addressLine2}
+              onChange={handleInputChange}
+              className="w-full p-2 mt-1 border rounded-md"
+              placeholder="Enter address 2"
+            />
+            {/* {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )} */}
           </div>
 
           {/* Number of Bottles and Rate */}
@@ -374,7 +363,7 @@ const EditCustomer: React.FC = () => {
               <input
                 type="number"
                 name="noOfBottles"
-                value={customerData.noOfBottles}
+                value={customerData.numberOfBottles}
                 onChange={handleInputChange}
                 className="w-full p-2 mt-1 border rounded-md"
                 placeholder="Number of Bottles"
@@ -426,7 +415,7 @@ const EditCustomer: React.FC = () => {
             <input
               type="text"
               name="whatsappNo"
-              value={customerData.whatsappNo}
+              value={customerData.whatsappNumber}
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter Whatsapp Number"
