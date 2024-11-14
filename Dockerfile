@@ -1,35 +1,32 @@
-# Step 1: Use a Node.js image to build the application
-FROM node:16 as build-stage
+# Dockerfile for the Staff Microservice
 
-# Set the working directory for the build stage
+# Stage 1: Build Stage
+FROM node:18-alpine AS builder
+
+# Set the working directory
 WORKDIR /app
 
-# Copy the package.json and package-lock.json (if it exists)
+# Copy package files and install dependencies
 COPY package*.json ./
-
-# Install the npm dependencies
 RUN npm install
 
-# Copy the entire project (including source code) into the container
+# Copy the rest of the application source code
 COPY . .
 
-# Run the build command (this will generate the dist folder)
+# Build the application
 RUN npm run build
 
-# Step 2: Use the Nginx image to serve the built application
-FROM nginx:latest
+# Stage 2: Production Stage
+FROM nginx:1.23-alpine
 
-# Set the working directory for Nginx to serve the app
-WORKDIR /usr/share/nginx/html
-
-# Copy the build output (dist folder) from the build stage to the Nginx container
-COPY --from=build-stage /app/dist /usr/share/nginx/html
-
-# Copy the custom Nginx configuration (nginx.conf) into the container
+# Copy custom nginx configuration file
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose the port on which Nginx will listen
+# Copy built assets from the build stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Expose the application port
 EXPOSE 5173
 
-# Run Nginx in the foreground
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
