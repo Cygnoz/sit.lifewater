@@ -13,7 +13,7 @@ import search from "../assets/images/search.svg"
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { deleteStaffByIdAPI, getAllStaffsAPI } from "../services/AllApi"
-import { BASEURL } from "../services/Baseurl"
+
 
 const CreateStaff: React.FC = () => {
   interface Staff {
@@ -29,7 +29,6 @@ const CreateStaff: React.FC = () => {
   const [filteredStaffList, setFilteredStaffList] = useState<Staff[]>([]) // Fix here
   const [searchQuery, setSearchQuery] = useState("") // Search query state
 
-  const defaultImage = "https://cdn1.iconfinder.com/data/icons/avatar-3/512/Manager-512.png"
 
   const handleCreate = (): void => {
     navigate("/addstaff")
@@ -202,7 +201,7 @@ const CreateStaff: React.FC = () => {
 
                           <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16">{index + 1}</td>
                           <td className="p-2 text-center w-24">
-                            <img className="mx-auto object-cover w-11 h-11 rounded-full" src={staff.profile ? `${BASEURL}/uploads/${staff.profile}` : defaultImage} alt={`${staff.firstname} ${staff.lastname}`} />
+                            <img className="mx-auto object-cover w-11 h-11 rounded-full" src={staff.profile} alt={`${staff.firstname} ${staff.lastname}`} />
                           </td>
                           <td className="p-2 text-[14px] text-center text-[#4B5C79] w-36">{staff.firstname } {staff.lastname}
                           </td>

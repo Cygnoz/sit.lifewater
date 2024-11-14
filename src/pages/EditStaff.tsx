@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react"
 import { Link, useParams, useNavigate } from "react-router-dom"
 import backbutton from "../assets/images/backbutton.svg"
 import { getStaffByIdAPI, updateStaffAPI } from "../services/AllApi"
-import { BASEURL } from "../services/Baseurl"
 import { ToastContainer, toast } from "react-toastify"
 import 'react-toastify/dist/ReactToastify.css' // Import the styles
 
@@ -17,7 +16,7 @@ const EditStaff: React.FC = () => {
   const [err,setErr] = useState("")
   const { id } = useParams()
   const navigate = useNavigate()
-  const defaultImage = "https://cdn1.iconfinder.com/data/icons/avatar-3/512/Manager-512.png"
+
 
   useEffect(() => {
     const fetchStaff = async () => {
@@ -64,13 +63,18 @@ const EditStaff: React.FC = () => {
     const { name, value } = e.target
     setStaff((prevStaff: any) => ({ ...prevStaff, [name]: value }))
   }
+  const [imageFile, setImageFile] = useState("")
 
-  const handleProfileChange = (e: any) => {
-    const file = e.target.files[0]
-    if (file) {
-      setProfile(file)
+  const handleImageUpload = (event) => {    
+    const file = event.target.files[0];    
+    if (file) {      
+      const reader = new FileReader();       
+      reader.onloadend = () => {        
+        setImageFile(reader.result as string); // This is the Base64 string
+      }; 
+      reader.readAsDataURL(file); // Read the file as a Data URL (Base64)
     }
-  }
+  };
 
   const handleSave = async () => {
     try {
@@ -149,22 +153,23 @@ const EditStaff: React.FC = () => {
               {/* Left Column */}
               <div className="space-y-4">
                 {/* Profile Picture */}
-                <div className="flex flex-col items-start space-y-2">
-                  <div className="flex items-center space-x-4">
-                    <img className="mx-auto object-cover w-11 h-11 rounded-full" src={staff.profile ? `${BASEURL}/uploads/${staff.profile}` : defaultImage} alt={`${staff.firstname} ${staff.lastname}`} />
-                    <label className="ml-4 p-2 border border-gray-300 rounded-lg cursor-pointer text-gray-700">
-                      Upload New Photo
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleProfileChange} // Handle file change
-                      />
-                    </label>
-                  </div>
+                <div>
+            <label className="block text-[#303F58] text-sm font-medium mb-1">Staff Image</label>
+            <div className="flex items-center space-x-4">
+              <img
+                className="object-cover w-11 h-11 rounded-full"
+                src={
+                  imageFile? `${imageFile}`: staff.profile? `${staff.profile}`: `${staff.profile
+                }`}
+                alt={`Staff ${staff.profile}`}
+              />
 
-                  <p className="mt-1 text-sm text-gray-600 text-center ml-1 mx-20">At least 800 x 800 px Recommended. JPG or PNG is Allowed</p>
-                </div>
+              <label className="p-2 border border-gray-300 rounded-lg cursor-pointer text-gray-700 hover:bg-gray-50 transition duration-300">
+                Upload New Photo
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              </label>
+            </div>
+          </div>
 
                 {/* Mobile Number */}
                 <div>

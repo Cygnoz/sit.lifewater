@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css"
 import { getVehicleByIdAPI, updateVehicleAPI, Vehicle } from "../../services/VehicleAPI/Vehicle"
 import uploadedVehicle from "../../assets/images/uploadedvehicle.svg"
 import back from "../../assets/images/backbutton.svg"
-import { BASEURL } from "../../services/Baseurl"
+
 
 interface EditVehiclesProps {}
 
@@ -29,8 +29,7 @@ const EditVehicles: React.FC<EditVehiclesProps> = () => {
     updatedAt: "",
   })
 
-  const [imageFile, setImageFile] = useState<File | null>(null)
-
+  const [imageFile, setImageFile] = useState("")
   useEffect(() => {
     const fetchVehicle = async () => {
       if (!id) return
@@ -59,15 +58,18 @@ const EditVehicles: React.FC<EditVehiclesProps> = () => {
   };
   
 
-const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0]; // Ensure the file exists
-  if (file) {
-    setImageFile(file); // Update local state with the selected file
-    console.log("Selected file:", file); // Debugging
-  } else {
-    console.error("No file selected");
-  }
-};
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {    
+    const file = event.target.files?.[0];    
+    if (file) {      
+      const reader = new FileReader();       
+      reader.onloadend = () => {        
+        setImageFile(reader.result as string); // Cast to string
+      }; 
+      reader.readAsDataURL(file); // Read the file as a Data URL (Base64)
+    }
+  };
+  
+
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -75,19 +77,20 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   try {
     const formData = new FormData();
+    
+    if (imageFile) {
+      formData.append("image", imageFile);
+      console.log("img",typeof( imageFile));
+      
+    } else {
+      console.error("No image file to append");
+    }
+
 
     // Append vehicle data
     Object.entries(vehicleData).forEach(([key, value]) => {
       formData.append(key, value.toString());
     });
-
-    // Append the image file if it exists
-    if (imageFile) {
-      formData.append("image", imageFile);
-    } else {
-      console.error("No image file to append");
-    }
-
     // Debug: Check if formData contains image and vehicle data
     for (const pair of formData.entries()) {
       console.log(`${pair[0]}: ${pair[1]}`);
@@ -150,18 +153,14 @@ const handleSubmit = async (e: React.FormEvent) => {
               <img
                 className="object-cover w-11 h-11 rounded-full"
                 src={
-                  imageFile
-                    ? URL.createObjectURL(imageFile)
-                    : vehicleData.image
-                    ? `${BASEURL}/uploads/${vehicleData.image}` // Assuming the images are stored in 'uploads' folder on the server
-                    : uploadedVehicle
-                }
+                  imageFile? `${imageFile}`: vehicleData.image? `${vehicleData.image}`: `${uploadedVehicle
+                }`}
                 alt={`Vehicle ${vehicleData.vehicleNo}`}
               />
 
               <label className="p-2 border border-gray-300 rounded-lg cursor-pointer text-gray-700 hover:bg-gray-50 transition duration-300">
                 Upload New Photo
-                <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               </label>
             </div>
           </div>

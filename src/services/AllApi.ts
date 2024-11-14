@@ -8,8 +8,10 @@ interface ApiResponse {
 
 export const addStaffAPI = async (staffData: FormData): Promise<ApiResponse> => {
   try {
-    const response = await commonAPI('POST', `${BASEURL}/api/addstaff`, staffData, {
-      // No need to specify Content-Type for FormData
+    const response = await axios.post(`${BASEURL}/api/addstaff`, staffData, {
+      headers: {
+        'Content-Type': 'application/json'  // Ensure correct content type
+      }
     });
 
     return response; // Ensure response matches the expected ApiResponse structure
@@ -68,22 +70,12 @@ export const deleteStaffByIdAPI = async (id: string) => {
 
 
 // Update staff by ID
-export const updateStaffAPI = async (id: string, updatedStaffData: any, profileImage: File | null) => {
+export const updateStaffAPI = async (id: string, formData: FormData) => {
   try {
-    const formData = new FormData();
-    // Append staff data
-    for (const key in updatedStaffData) {
-      formData.append(key, updatedStaffData[key]);
-    }
-    // Append the profile image if it exists
-    if (profileImage) {
-      formData.append('profile', profileImage);
-    }
-
     const response = await axios.put(`${BASEURL}/api/staff/${id}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data', // Set the correct content type
-      },
+        'Content-Type': 'application/json'  // Ensure correct content type
+      }
     });
     return response.data;
   } catch (error: any) {

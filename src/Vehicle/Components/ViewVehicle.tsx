@@ -7,13 +7,14 @@ import mappinned from "../../assets/images/map-pinned.svg"
 import calender from "../../assets/images/calendar-minus-2.svg"
 import calender1 from "../../assets/images/calendar-search.svg"
 import { getVehicleByIdAPI } from "../../services/VehicleAPI/Vehicle"
-import { BASEURL } from "../../services/Baseurl"
+
+
 
 const ViewVehicle: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"information" | "rideHistory">("information")
   const [vehicle, setVehicle] = useState<any>(null) // Changed to any for flexibility
   const { id } = useParams() // Get the staff ID from the URL
-  const defaultImage = "https://cdn1.iconfinder.com/data/icons/avatar-3/512/Manager-512.png"
+
 
   useEffect(() => {
     const fetchVehicle = async () => {
@@ -48,7 +49,7 @@ const ViewVehicle: React.FC = () => {
 
       {/* Row 2: Profile Picture and Vehicle Number in a rounded container */}
       <div className="bg-gradient-to-r from-[#E3E6D5] to-[#F7E7CE] rounded-[8px] p-[16px_18px] flex items-center space-x-[24px] mb-6 w-[1299px] h-[92px]">
-        <img src={vehicle.vehicle.image ? `${BASEURL}/uploads/${vehicle.vehicle.image}` : defaultImage} alt="Uploaded Vehicle" className="w-19 h-12 bg-gradient-to-r from-white-100 to-gray-200 rounded-full flex items-center justify-center" />
+        <img src={vehicle.vehicle.image} alt="Vehicle" className="w-19 h-12 bg-gradient-to-r from-white-100 to-gray-200 rounded-full flex items-center justify-center" />
         <span className="text-[18px] font-bold text-gray-700 leading-[21.78px] text-left font-inter">{vehicle?.vehicle.vehicleNo}</span>
       </div>
 

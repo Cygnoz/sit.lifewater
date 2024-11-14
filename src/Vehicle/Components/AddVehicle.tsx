@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import uploadvehicle from '../../assets/images/uploadvehicle.svg';
+import React, {  useState } from 'react';
+import upload from '../../assets/images/upload image.svg'
 import { Link } from 'react-router-dom';
 import back from '../../assets/images/backbutton.svg';
 import { addVehicleAPI } from '../../services/VehicleAPI/Vehicle';
@@ -18,34 +18,20 @@ const AddVehicle: React.FC<Props> = () => {
   const [licenseValidity, setLicenseValidity] = useState('');
   const [startingKilometer, setStartingKilometer] = useState('');
   const [expenses, setExpenses] = useState('');
-  const [vehicleImage, setVehicleImage] = useState<File | null>(null);
+  const [image, setImage] = useState<string | null>(null); // Accepts string or null
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
 
-
-
-  console.log(error);
-  console.log(success);
-  
-  
-
-
-  const fileInputRef = useRef<HTMLInputElement | null>(null); // Create a ref for the file input
-
-   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setVehicleImage(file);
-
-      // Generate preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string); // Set the preview URL
-      };
-      reader.readAsDataURL(file);
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {    
+    const file = event.target.files?.[0];    
+    if (file) {      
+      const reader = new FileReader();       
+      reader.onloadend = () => {        
+        setImage(reader.result as string); // Cast to string
+      }; 
+      reader.readAsDataURL(file); // Read the file as a Data URL (Base64)
     }
-  }
+  };
 
   const handleAddVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,9 +48,7 @@ const AddVehicle: React.FC<Props> = () => {
     formData.append('licenseValidity', licenseValidity);
     formData.append('startingKilometer', startingKilometer);
     formData.append('expenses', expenses);
-    if (vehicleImage) {
-      formData.append('vehicleImage', vehicleImage);
-    }
+    if (image) formData.append('image', image); // Add Base64 string to FormData if exists
 
     try {
       const response = await addVehicleAPI(formData);
@@ -84,8 +68,7 @@ const AddVehicle: React.FC<Props> = () => {
         setLicenseValidity('');
         setStartingKilometer('');
         setExpenses('');
-        setVehicleImage(null);
-        setPreview(null);
+        setImage(null); // Reset to null
 
         // Clear success message after 3 seconds
         setTimeout(() => {
@@ -98,11 +81,10 @@ const AddVehicle: React.FC<Props> = () => {
     }
   };
 
-  const handleUploadClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click(); // Trigger the file input click
-    }
-  };
+console.log(error)
+  console.log(success);
+  
+
   return (
     <div className='p-1'>
 
@@ -162,47 +144,40 @@ const AddVehicle: React.FC<Props> = () => {
 
 
           {/* Uploaded Vehicle Image */}
-          {/* <div className="flex">
-            <div className="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden">
-              {preview ? (
-                <img src={preview} alt="Vehicle Preview" className="object-cover w-full h-full" />
-              ) : (
-                <img src={uploadvehicle} alt="Upload Vehicle" className="object-cover w-full h-full" />
-              )}
-            </div>
-            <div className="mx-5">
-              <h2 className="font-bold mb-1 text-[#303F58]">Upload Vehicle image</h2>
-              <p className="text-[#8F99A9] text-base font-[14px]">Upload vehicle image</p>
+          <div className="flex">
+            <label className="mt-4 border text-[#8F99A9] text-base font-[14px] rounded-lg cursor-pointer">
+              <div className="w-[80px] h-[80px] bg-[#F7E7CE] rounded-lg overflow-hidden">
+                <img
+                  src={image? image : upload}
+                  alt=""
+                  className="object-cover w-20 h-20 rounded-md"
+                />
+              </div>
               <input
                 type="file"
-                onChange={handleImageChange}
-                className="mt-2"
-                
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
               />
-            </div>
-          </div> */}
+            </label>
+            <h2 className="font-bold mt-10 ms-3 text-[#303F58]">
+              Upload Item Image
+            </h2>
+          </div>
 
 
-<div className="flex">
-      <div className="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden cursor-pointer" onClick={handleUploadClick}>
-        {preview ? (
-          <img src={preview} alt="Vehicle Preview" className="object-cover w-full h-full" />
-        ) : (
-          <img src={uploadvehicle} alt="Upload Vehicle" className="object-cover w-full h-full" />
-        )}
-      </div>
-      <div className="mx-5">
-        <h2 className="font-bold mb-1 text-[#303F58]">Upload Vehicle Image</h2>
-        <p className="text-[#8F99A9] text-base font-[14px]">Click the image to upload a vehicle image</p>
-        <input
-          type="file"
-          ref={fileInputRef} // Attach ref to file input
-          onChange={handleImageChange}
-          className="hidden" // Hide the file input
-          accept="image/*"
-        />
-      </div>
+{/* <div className="flex">
+<div>
+      <input type="file" onChange={handleImageUpload} />
+      
+      {image && (
+        <div>
+          <p>Uploaded Image:</p>
+          <img src={image} alt="Uploaded" style={{ width: "200px" }} />
+        </div>
+      )}
     </div>
+    </div> */}
 
     
           {/* Insurance Status */}

@@ -4,112 +4,8 @@ import back from "../assets/images/backbutton.svg";
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css'; 
+import upload from '../assets/images/upload image.svg'
 type Props = {};
-
-// function AddStaff({}: Props) {
-//   const [mobileNumber, setMobileNumber] = useState<string>("");
-//   const [whatsAppNumber, setWhatsAppNumber] = useState("");
-//   const [isSameAsPhone, setIsSameAsPhone] = useState(false);
-//   const [visaStatus, setVisaStatus] = useState("");
-//   const [visaNumber, setVisaNumber] = useState<string>("");
-//   const [emiratesId, setEmiratesId] = useState<string>("");
-//   const [fullname, setFullname] = useState("");
-//   const [lastname, setLastname] = useState("");
-//   const [dateOfBirth, setDateOfBirth] = useState("");
-//   const [address, setAddress] = useState("");
-//   const [designation, setDesignation] = useState("");
-//   const [visaValidity, setVisaValidity] = useState("");
-//   const [profile, setProfile] = useState<File | null>(null);
-//   const [nationality, setNationality] = useState("");
-//   const [error, setError] = useState("");
-//   const [successMessage, setSuccessMessage] = useState("");
-//   const [userName, setUserName] = useState<string>("");
-//   const [password, setPassword] = useState<string>("");
-//   const [confirmPassword, setConfirmPassword] = useState<string>("");
-//   const [err, setErr] = useState<string>("");
-
-//   console.log(profile);
-
-//   const handleWhatsAppCheckbox = () => {
-//     setIsSameAsPhone(!isSameAsPhone);
-//     if (!isSameAsPhone) {
-//       setWhatsAppNumber(mobileNumber);
-//     } else {
-//       setWhatsAppNumber("");
-//     }
-//   };
-
-//   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     if (e.target.files && e.target.files[0]) {
-//       const file = e.target.files[0];
-//       setProfile(file); // Set the selected file to state
-//       console.log(file); // Log the file for inspection
-//     }
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-//     e.preventDefault();
-
-//     const staffData = new FormData();
-//     staffData.append("firstname", fullname);
-//     staffData.append("lastname", lastname);
-//     if (profile) {
-//       staffData.append("profile", profile);
-//     }
-//     staffData.append("address", address);
-//     staffData.append(
-//       "visaStatus",
-//       visaStatus as "Valid" | "Expired" | "In Process"
-//     );
-//     staffData.append("visaValidity", visaValidity);
-//     staffData.append("mobileNumber", mobileNumber);
-//     staffData.append("whatsAppNumber", whatsAppNumber);
-//     staffData.append("visaNumber", visaNumber);
-//     staffData.append("dateofBirth", dateOfBirth);
-//     staffData.append("nationality", nationality);
-//     staffData.append(
-//       "designation",
-//       designation as "Sales" | "Driver" | "Helper"
-//     );
-//     staffData.append("emiratesId", emiratesId);
-//     staffData.append("username", userName);
-//     staffData.append("password", password);
-//     staffData.append("confirmPassword", confirmPassword);
-
-//     try {
-//       const response = await addStaffAPI(staffData);
-//       if (response.message) {
-//         setError(response.message);
-//         console.log(response.message);
-//       } else {
-//         clearForm();
-//         setSuccessMessage("Staff added successfully!");
-//       }
-//     } catch (error) {
-//       setError("An error occurred while adding the staff member.");
-//     }
-//   };
-
-//   const clearForm = () => {
-//     setFullname("");
-//     setLastname("");
-//     setDateOfBirth("");
-//     setMobileNumber("");
-//     setWhatsAppNumber("");
-//     setVisaStatus("");
-//     setVisaNumber("");
-//     setVisaValidity("");
-//     setNationality("");
-//     setAddress("");
-//     setEmiratesId("");
-//     setDesignation("");
-//     setError("");
-//     setUserName("")
-//     setPassword("")
-//     setSuccessMessage("");
-//     setProfile(null);
-//     setIsSameAsPhone(false);
-//   };
 
 function AddStaff({}: Props) {
   const [mobileNumber, setMobileNumber] = useState<string>("");
@@ -124,7 +20,7 @@ function AddStaff({}: Props) {
   const [address, setAddress] = useState("");
   const [designation, setDesignation] = useState("");
   const [visaValidity, setVisaValidity] = useState("");
-  const [profile, setProfile] = useState<File | null>(null);
+  const [profile, setProfile] = useState("");
   const [nationality, setNationality] = useState("");
   const [userName, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -140,13 +36,19 @@ function AddStaff({}: Props) {
     }
   };
 
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setProfile(file); // Set the selected file to state
-      console.log(file); // Log the file for inspection
+  
+
+  const handleImageUpload = (event) => {    
+    const file = event.target.files[0];    
+    if (file) {      
+      const reader = new FileReader();       
+      reader.onloadend = () => {        
+        setProfile(reader.result as string); // This is the Base64 string
+      }; 
+      reader.readAsDataURL(file); // Read the file as a Data URL (Base64)
     }
   };
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -237,31 +139,26 @@ function AddStaff({}: Props) {
               {/* Left Column */}
               <div className="space-y-6">
                 {/* Profile Picture */}
-                <div className="flex flex-col items-start ">
-                  <div className="flex items-center space-x-4">
-                    <img
-                      src={
-                        profile
-                          ? URL.createObjectURL(profile)
-                          : "https://via.placeholder.com/100"
-                      }
-                      alt={profile ? profile.name : "Profile"}
-                      className="w-24 h-24 rounded-full object-cover"
-                    />
-                    <label className="ml-4 p-2 border border-gray-300 rounded-lg cursor-pointer text-gray-700">
-                      Upload New Photo
-                      <input
-                        type="file"
-                        onChange={handleProfileChange}
-                        accept="image/*"
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                  <p className="mt-1 text-sm text-gray-600 text-center ml-1 mx-20">
-                    At least 800 x 800 px Recommended. JPG or PNG is Allowed
-                  </p>
-                </div>
+                <div className="flex">
+            <label className="mt-4 border text-[#8F99A9] text-base font-[14px] rounded-lg cursor-pointer">
+              <div className="w-[80px] h-[80px] bg-[#F7E7CE] rounded-lg overflow-hidden">
+                <img
+                  src={profile? profile : upload}
+                  alt=""
+                  className="object-cover w-20 h-20 rounded-md"
+                />
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+            </label>
+            <h2 className="font-bold mt-10 ms-3 text-[#303F58]">
+              Upload Staff Image
+            </h2>
+          </div>
 
                 {/* Mobile Number */}
                 <div>

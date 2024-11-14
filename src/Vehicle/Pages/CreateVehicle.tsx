@@ -11,7 +11,7 @@ import vehicle from "../../assets/images/vehicle 1.svg"
 import { useNavigate } from "react-router-dom"
 import React, { useEffect, useRef, useState } from "react"
 import { deleteVehicleByIdAPI, getVehicleAPI, Vehicle } from "../../services/VehicleAPI/Vehicle"
-import { BASEURL } from "../../services/Baseurl"
+
 
 const CreateVehicle: React.FC = () => {
   const [vehicleList, setVehicleList] = useState<Vehicle[]>([])
@@ -19,7 +19,7 @@ const CreateVehicle: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("")
   const navigate = useNavigate()
 
-  const defaultImage = "https://cdn1.iconfinder.com/data/icons/avatar-3/512/Manager-512.png"
+
 
   useEffect(() => {
     const fetchVehicle = async () => {
@@ -178,7 +178,7 @@ const CreateVehicle: React.FC = () => {
                     </td>
                     <td className="p-2 text-[14] text-center text-[#4B5C79]">{index + 1}</td>
                     <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                      <img className="mx-auto object-cover w-11 h-11 rounded-full" src={vehicle.image ? `${BASEURL}/uploads/${vehicle.image}` : defaultImage} alt="Vehicle" />
+                      <img className="mx-auto object-cover w-11 h-11 rounded-full" src={vehicle.image} alt="Vehicle" />
                     </td>
                     <td className="p-2 text-[14] text-center text-[#4B5C79]">{vehicle.vehicleNo || "N/A"}</td>
                     <td className="p-2 text-[14] text-center text-[#4B5C79]">{vehicle.insuranceValidity ? new Date(vehicle.insuranceValidity).toLocaleDateString() : "N/A"}</td>
