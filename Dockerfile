@@ -1,18 +1,11 @@
-# Use an official Nginx image as the base
+# Use the NGINX base image
 FROM nginx:alpine
 
-# Set the working directory
+# Set the working directory to NGINX's default HTML directory
 WORKDIR /usr/share/nginx/html
 
-# Copy the application files to the Nginx HTML directory
-# Assuming your app files (e.g., index.html) are in the 'app' folder in the same directory as the Dockerfile
-COPY ./app /usr/share/nginx/html
+# Copy the contents of the 'public' folder (or a different folder as needed)
+COPY ./public /usr/share/nginx/html
 
-# Copy custom Nginx configuration file
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Expose port 5173
-EXPOSE 5173
-
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Copy the NGINX configuration file (assuming you want to modify the port)
+COPY ./nginx.conf /etc/nginx/nginx.conf
