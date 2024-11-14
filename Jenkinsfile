@@ -38,15 +38,6 @@ pipeline {
                 }
             }
         }
-        stage('Build Frontend') {
-            steps {
-                script {
-                    // Install dependencies
-                    sh 'npm install'
-                    
-                    // Build the frontend project (this will generate the dist folder)
-                    sh 'npm run build'
-                }
         stage('Build Docker Image') {
             steps {
                 script {
