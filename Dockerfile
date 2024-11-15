@@ -17,3 +17,4 @@ COPY . .
 EXPOSE 4000
  
 # Define the command to run your application
+CMD [ "node", "index.js" ]
