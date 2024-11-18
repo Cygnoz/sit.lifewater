@@ -3,18 +3,36 @@ const Item = require('../Models/ItemSchema'); // Assuming you have an Item schem
 // Create a new item
 const addItem = async (req, res) => {
   try {
+    // Validate if required fields are present
+    if (!req.body.itemName || !req.body.SKU) {
+      return res.status(400).json({ message: 'Required fields missing' });
+    }
+
+    // Handle the base64 image
+    let imageData = req.body.itemImage;
+    
+    // Optional: Validate if the image is actually a base64 string
+    if (imageData && !imageData.startsWith('data:image')) {
+      return res.status(400).json({ message: 'Invalid image format' });
+    }
+
     const newItem = new Item({
       itemName: req.body.itemName,
       SKU: req.body.SKU,
       purchasePrice: req.body.purchasePrice,
       retailPrice: req.body.retailPrice,
       description: req.body.description,
-      itemImage: req.file ? req.file.path : null // Handle file upload
+      itemImage: imageData // Store the base64 string directly
     });
+
     const savedItem = await newItem.save();
     res.status(201).json(savedItem);
   } catch (error) {
-    res.status(500).json({ message: 'Error adding item', error });
+    console.error('Error adding item:', error);
+    res.status(500).json({ 
+      message: 'Error adding item', 
+      error: error.message 
+    });
   }
 };
 
@@ -23,6 +41,8 @@ const getItems = async (req, res) => {
   try {
     const items = await Item.find(); // Find all items in the database
     res.status(200).json(items);
+    console.log(items);
+    
   } catch (error) {
     res.status(500).json({ message: 'Failed to retrieve items', error: error.message });
   }
@@ -45,9 +65,9 @@ const getItemById = async (req, res) => {
 const updateItem = async (req, res) => {
   try {
       // Destructure data from req.body and check for uploaded file
-      const { itemName, SKU, purchasePrice, retailPrice, description } = req.body;
-      const itemImage = req.file ? req.file.path : null; // Get the file path if a file was uploaded
-
+      const { itemName, SKU, purchasePrice, retailPrice, description ,itemImage} = req.body;
+      //const itemImage = req.file ? req.file.path : null; // Get the file path if a file was uploaded
+      console.log(req.body);
       const updatedItem = await Item.findByIdAndUpdate(
           req.params.id,
           { itemName, SKU, purchasePrice, retailPrice, description, itemImage },
