@@ -27,6 +27,13 @@ const vehicleRoute = require('./routes/router.js');
  
 app.use(cors());
 
+// Increase the limit for JSON payloads
+app.use(express.json({ limit: '10mb' })); // Set limit to 10MB
+
+// Increase the limit for URL-encoded payloads
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+
 // app.use(cors())
 app.use(express.json());
 

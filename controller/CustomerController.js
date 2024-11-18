@@ -26,9 +26,10 @@ exports.createCustomer = async (req, res) => {
     const nextIdNumber = allCustomer.length + 1;        
     cleanedData.customerID = `LW${nextIdNumber.toString().padStart(3, '0')}`;
 
-    // Transform location only if it's provided and contains valid coordinates
-    let transformedLocation;
+    // Handle location: check if it's provided and valid, otherwise set a default location
+    let transformedLocation = null;
     if (location && location.coordinates && location.coordinates.latitude && location.coordinates.longitude) {
+      // Valid location data
       transformedLocation = {
         address: location.address || '', // Default to empty string if address is not provided
         coordinates: {
@@ -36,14 +37,20 @@ exports.createCustomer = async (req, res) => {
           coordinates: [location.coordinates.longitude, location.coordinates.latitude]
         }
       };
+    } else {
+      // Set default location with valid numeric coordinates [0, 0]
+      transformedLocation = {
+        address: '', // Default address if none provided
+        coordinates: { type: "Point", coordinates: [0, 0] } // Use [0, 0] instead of null values
+      };
     }
 
-    //Create a new customer
-    const newCustomer = new Customer({ ...cleanedData, location: transformedLocation  });
+    // Create a new customer with the transformed location
+    const newCustomer = new Customer({ ...cleanedData, location: transformedLocation });
 
     const savedCustomer = await newCustomer.save();
 
-    //Create a new accounts
+    // Create a new account
     const newAccount = new Account({
       accountName: savedCustomer.fullName,
       accountId: savedCustomer._id,
@@ -55,7 +62,7 @@ exports.createCustomer = async (req, res) => {
 
     const savedAccount = await newAccount.save();
 
-    //Create trial balance entry
+    // Create trial balance entry
     const trialEntry = new TrialBalance({
       operationId: savedCustomer._id,
       date: savedCustomer.createdAt,
@@ -78,6 +85,7 @@ exports.createCustomer = async (req, res) => {
     return res.status(500).json({ message: 'Error creating customer', error });
   }
 };
+
 
 
 // Ensure correct path to your model
@@ -169,35 +177,40 @@ exports.getCustomerById = async (req, res) => {
 };
  
 // Update a customer by ID
+// Update a customer by ID
 exports.updateCustomerById = async (req, res) => {
   try {
     console.log("Edit Customer:", req.body);
-    // // Clone the request body into updatedData
-    // let updatedData = { ...req.body };
-    // console.log('Updated Data:', updatedData);
-
-    // Check if a file (logo) is uploaded and add it to updatedData
-    // if (req.file) {
-    //   updatedData.logo = req.file.filename;
-    // }
-
+    
     // Parse location if it's a string and transform it
     if (typeof req.body.location === 'string') {
       req.body.location = JSON.parse(req.body.location);
     }
 
-    if (req.body.location) {
+    // Prepare location data in GeoJSON format if location and coordinates are provided
+    if (req.body.location && req.body.location.coordinates) {
       const { address, coordinates } = req.body.location;
-      updatedData.location = {
-        address,
-        coordinates: {
-          type: "Point",
-          coordinates: [coordinates.longitude, coordinates.latitude] // [longitude, latitude]
-        }
-      };
-    }
-    const cleanedData = cleanCustomerData(req.body);
 
+      // Ensure both latitude and longitude are available before setting the location
+      if (coordinates.latitude !== undefined && coordinates.longitude !== undefined) {
+        req.body.location = {
+          address,
+          coordinates: {
+            type: "Point",
+            coordinates: [coordinates.longitude, coordinates.latitude] // [longitude, latitude]
+          }
+        };
+      } else {
+        console.warn("Latitude or longitude is missing in the location data.");
+        req.body.location = {
+          address,
+          coordinates: null // Set coordinates to null if incomplete
+        };
+      }
+    }
+
+    // Clean the incoming customer data
+    const cleanedData = cleanCustomerData(req.body);
 
     // Update the customer in the database
     const updatedCustomer = await Customer.findByIdAndUpdate(req.params.id, cleanedData, { new: true });

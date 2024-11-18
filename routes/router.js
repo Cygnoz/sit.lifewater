@@ -6,20 +6,20 @@ const mainRouteController = require("../controller/RouteController")
 const subrouteController = require('../controller/SubRouteController');
 const CustomerController = require("../controller/CustomerController")
 
-const upload = require("../middleware/Multermiddleware")
+// const upload = require("../middleware/Multermiddleware")
 const ActiveRouteController = require("../controller/ActiveRouteController")
 const EndRideController = require('../controller/EndRideController')
 
 // STAFF
 
 // Add staff
-router.post("/addstaff", upload.single("profile"), staffController.addStaff)
+router.post("/addstaff", staffController.addStaff)
 // Get all staff
 router.get("/getallstaffs", staffController.getAllStaff)
 // Get staff by ID
 router.get("/staff/:id", staffController.getStaffById)
 // Edit staff
-router.put("/staff/:id", upload.single("profile"), staffController.editStaff)
+router.put("/staff/:id",  staffController.editStaff)
 // Delete staff
 router.delete("/staff/:id", staffController.deleteStaff)
 //login staff(sales)
@@ -27,13 +27,13 @@ router.post("/staff/login", staffController.loginSalesStaff)
 
 // VEHICLE
 // Add vehicle
-router.post("/addVehicle", upload.single("vehicleImage"), vehicleController.addVehicle)
+router.post("/addVehicle",  vehicleController.addVehicle)
 // view vehicle
 router.get("/viewVehicles", vehicleController.getAllVehicles)
 // view single vehicle
 router.get("/viewvehicle/:id", vehicleController.viewVehicleById)
 // edit vehicle
-router.put("/editvehicle/:id", upload.single("image"), vehicleController.updateVehicle)
+router.put("/editvehicle/:id",  vehicleController.updateVehicle)
 // delete vehicle
 router.delete("/deletevehicle/:id", vehicleController.deleteVehicle)
 

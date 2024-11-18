@@ -58,6 +58,9 @@ exports.updateVehicle = async (req, res) => {
     const { id } = req.params;
     const cleanedData = cleanCustomerData(req.body);
 
+    cleanedData.image=cleanedData.image[0];
+    
+
     // const updateData = { ...req.body }; // Spread the request body
 
     // Handle image update if provided
