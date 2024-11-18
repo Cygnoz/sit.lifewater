@@ -78,6 +78,12 @@ import Banking from '../Accounts/Pages/Banking';
 import CreateProfile from '../Settings/Pages/CreateProfile';
 import ChartOfAccounts from '../Accounts/Pages/ChartOfAccount';
 import AccountantViewUI from '../Accounts/accountantview/AccountantView';
+import NewJournal from '../Accounts/manualJournal/newJournal/Newjournal';
+import ManualHome from '../Accounts/manualJournal/ManualHome';
+import ManualView from '../Accounts/manualJournal/ManualView';
+import BankHome from '../Accounts/Bank/BankHome';
+import Cash from '../Accounts/Cash/Cash';
+import CashTableView from '../Accounts/Cash/CashTableView';
 
 
 
@@ -178,8 +184,8 @@ const App: React.FC = () => {
                    <Route path='/addwarehouse' element={<AddWarehouse/>}/>
                    <Route path='/warehouse' element={<CreateWarehouse/>}/>
 
-                        {/* REPORTS */}
-                        <Route path='/balancesheet' element={<BalanceSheet/>}/>
+            {/* REPORTS */}
+            <Route path='/balancesheet' element={<BalanceSheet/>}/>
             <Route path='/cashsale' element={<CashSale/>}/>
             <Route path='/couponsale' element={<CouponSale/>}/>
             <Route path='/creditsale' element={<CreditSale/>}/>
@@ -217,10 +223,15 @@ const App: React.FC = () => {
 
 
             {/* ACCOUNTS */}
-            <Route path='/addjournal' element={<AddJournalEntry/>}/>
+            <Route path='/journals' element={<ManualHome/>}/>
+            <Route path='/newjournal' element={<NewJournal/>}/>
+            <Route path='/viewjournal/:id' element={<ManualView/>}/>
             <Route path='/chartofaccount' element={<ChartOfAccounts/>}/>
             <Route path='/accountant/view' element={<AccountantViewUI/>}/>
-            <Route path='/banking' element={<Banking/>}/>
+            {/* <Route path='/banking' element={<BankHome/>}/>
+            <Route path='/cash' element={<Cash/>}/> */}
+           
+            
            
 
 

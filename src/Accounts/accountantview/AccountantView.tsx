@@ -10,7 +10,7 @@ function AccountantViewUI() {
   const baseCurrency = "USD";
 
   return (
-    <div className="px-6">
+    <div className="p-2">
       <div className="flex items-center gap-5 mb-2">
         <Link to="/chartofaccount">
           <div className="w-[40px] h-[40px] flex items-center justify-center bg-white rounded-full">

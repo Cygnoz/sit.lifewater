@@ -63,14 +63,15 @@ const EditStaff: React.FC = () => {
     const { name, value } = e.target
     setStaff((prevStaff: any) => ({ ...prevStaff, [name]: value }))
   }
+  
   const [imageFile, setImageFile] = useState("")
 
-  const handleImageUpload = (event) => {    
-    const file = event.target.files[0];    
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {    
+    const file = event.target.files?.[0];    
     if (file) {      
       const reader = new FileReader();       
       reader.onloadend = () => {        
-        setImageFile(reader.result as string); // This is the Base64 string
+        setImageFile(reader.result as string); // Cast to string
       }; 
       reader.readAsDataURL(file); // Read the file as a Data URL (Base64)
     }

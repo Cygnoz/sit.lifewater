@@ -202,7 +202,7 @@ export default function AddCustomer() {
               <label className="cursor-pointer">
                 <div className="flex flex-col items-center bg-orange-50 rounded-lg py-4 px-6">
                   {logo ? (
-                    <img src={URL.createObjectURL(logo)} alt="Uploaded Logo" className="object-cover w-20 h-20 rounded-md" />
+                    <img src={logo} alt="Uploaded Logo" className="object-cover w-20 h-20 rounded-md" />
                   ) : (
                     <img src={upload} alt="" />
                   )}

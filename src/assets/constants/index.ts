@@ -171,7 +171,9 @@ const navlist = [
     subhead: [
       { headName: "Dashbord", subRoute: "/" },
       { headName: "Chart of Account", subRoute: "/chartofaccount" },
-      { headName: "Banking", subRoute: "/banking" },
+      { headName: "Manual Journals", subRoute: "/journals" },
+      // { headName: "Banking", subRoute: "/banking" },
+      // { headName: "Cash", subRoute: "/cash" },
     ],
 
   },
@@ -198,3 +200,12 @@ const navlist = [
 ];
  
 export default navlist;
+
+
+export const bankAccountviewTableHaed = [
+  "Date",
+  "Transaction Details",
+  "Type",
+  "Debit",
+  "Credit",
+];

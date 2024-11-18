@@ -4,10 +4,8 @@ import trash from "../../assets/images/trash.svg"
 import split from "../../assets/images/list-filter.svg"
 import plus from "../../assets/circle-plus.svg"
 import eye from "../../assets/images/eye.svg"
-
 import search from "../../assets/images/search.svg"
 import vehicle from "../../assets/images/vehicle 1.svg"
-
 import { useNavigate } from "react-router-dom"
 import React, { useEffect, useRef, useState } from "react"
 import { deleteVehicleByIdAPI, getVehicleAPI, Vehicle } from "../../services/VehicleAPI/Vehicle"
@@ -18,8 +16,6 @@ const CreateVehicle: React.FC = () => {
   const [filteredVehicleList, setFilteredVehicleList] = useState<Vehicle[]>([])
   const [searchQuery, setSearchQuery] = useState<string>("")
   const navigate = useNavigate()
-
-
 
   useEffect(() => {
     const fetchVehicle = async () => {
@@ -158,7 +154,7 @@ const CreateVehicle: React.FC = () => {
            <table className="print-table w-full text-left">
               <thead className="bg-[#fdf8f0]">
                 <tr className="border-b">
-                  <th scope="col" className="no-print px-8 py-6">
+                  <th scope="col" className="no-print p-2">
                     <input type="checkbox" />
                   </th>
                   <th className="p-2 text-[14px] font-medium text-center leading-[18px] text-[#303F58]">Sl No</th>
