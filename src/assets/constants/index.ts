@@ -170,7 +170,8 @@ const navlist = [
     route: "/",
     subhead: [
       { headName: "Dashbord", subRoute: "/" },
-      { headName: "Expense", subRoute: "/expense/home" },
+      { headName: "Chart of Account", subRoute: "/chartofaccount" },
+      { headName: "Banking", subRoute: "/banking" },
     ],
 
   },

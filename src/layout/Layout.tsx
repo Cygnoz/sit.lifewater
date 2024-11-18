@@ -76,6 +76,8 @@ import MyComponent from '../dashboard/pages/DashBoard';
 import AddJournalEntry from '../Accounts/Components/AddJournalEntry';
 import Banking from '../Accounts/Pages/Banking';
 import CreateProfile from '../Settings/Pages/CreateProfile';
+import ChartOfAccounts from '../Accounts/Pages/ChartOfAccount';
+import AccountantViewUI from '../Accounts/accountantview/AccountantView';
 
 
 
@@ -216,6 +218,8 @@ const App: React.FC = () => {
 
             {/* ACCOUNTS */}
             <Route path='/addjournal' element={<AddJournalEntry/>}/>
+            <Route path='/chartofaccount' element={<ChartOfAccounts/>}/>
+            <Route path='/accountant/view' element={<AccountantViewUI/>}/>
             <Route path='/banking' element={<Banking/>}/>
            
 
