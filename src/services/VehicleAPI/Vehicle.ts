@@ -28,10 +28,11 @@ interface ApiResponse {
 
 export const addVehicleAPI = async (vehicleData: FormData): Promise<ApiResponse> => {
     try {
-      const response = await commonAPI('POST', `${BASEURL}/api/addVehicle`, vehicleData, {
-        // No need to specify Content-Type for FormData
+      const response = await axios.post(`${BASEURL}/api/addVehicle`, vehicleData, {
+        headers: {
+          'Content-Type': 'application/json'  // Ensure correct content type
+        }
       });
-  
       return response; // Ensure response matches the expected ApiResponse structure
     } catch (error: any) {
       console.error("Error adding vehicle:", error); // Log the full error for debugging
@@ -87,8 +88,8 @@ export const deleteVehicleByIdAPI = async (id: string) => {
     try {
       const response = await axios.put(`${BASEURL}/api/editvehicle/${id}`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data', // Set the correct content type for form data
-        },
+          'Content-Type': 'application/json'  // Ensure correct content type
+        }
       });
       return response.data;
     } catch (error: any) {
