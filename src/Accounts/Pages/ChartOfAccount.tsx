@@ -1,28 +1,47 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import plus from "../../assets/circle-plus.svg";
 import NewAccountModal from "./NewAccountModal";
+import { getAllAccountsAPI } from "../../services/AccountsAPI/accounts";
 
 const ChartOfAccounts = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);  // Manage modal state
+  const [accounts, setAccounts] = useState<Account[]>([]);
 
   const handleModalToggle = () => {
     setIsModalOpen(!isModalOpen);  // Toggle modal visibility
   };
 
-  const accounts = [
-    { slNo: 1, name: "Distribution", code: "AC-12", type: "Equity", parentType: "Equity" },
-    { slNo: 2, name: "Capital Stock", code: "AC-11", type: "Equity", parentType: "Equity" },
-    { slNo: 3, name: "Undeposited Funds", code: "AC-10", type: "Cash", parentType: "Asset" },
-    { slNo: 4, name: "Petty Cash", code: "AC-09", type: "Cash", parentType: "Asset" },
-    { slNo: 5, name: "Inventory Asset", code: "AC-08", type: "Stock", parentType: "Asset" },
-    { slNo: 6, name: "Reverse Charge Tax Input but not due", code: "AC-06", type: "Current Asset", parentType: "Asset" },
-    { slNo: 7, name: "Sales to Customers (Cash)", code: "AC-05", type: "Current Asset", parentType: "Asset" },
-    { slNo: 8, name: "TDS Receivable", code: "AC-04", type: "Current Asset", parentType: "Asset" },
-    { slNo: 9, name: "Prepaid Expense", code: "AC-03", type: "Current Asset", parentType: "Asset" },
-    { slNo: 10, name: "Advance Tax", code: "AC-01", type: "Current Asset", parentType: "Asset" },
-  ];
+  const fetchAccounts = async () => {
+    try {
+      const accountsData = await getAllAccountsAPI(); // Pass organizationId
+      console.log(accountsData);
+      
+      setAccounts(accountsData); // Save accounts to state
+      console.log(accounts);
+      
+    } catch (error: any) {
+      console.error("Failed to fetch accounts:", error.message);
+    }
+  };
+
+  // Fetch accounts on component mount
+  useEffect(() => {
+    fetchAccounts();
+  }, []); 
+
+  interface Account {
+    _id: string;
+    accountName: string;
+    accountId: string;
+    accountSubhead: string;
+    accountHead: string;
+    accountGroup: string;
+    description: string;
+    __v: number;
+  }
+
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -34,8 +53,8 @@ const ChartOfAccounts = () => {
     setCurrentPage(pageNumber);
   };
 
-  const handleRowClick = () => {
-    navigate(`/accountant/view`);
+  const handleRowClick = (id:any) => {
+    navigate(`/accountant/view/${id}`);
   };
 
   const fetchAllAccounts = () => {
@@ -81,26 +100,26 @@ const ChartOfAccounts = () => {
               <tr className="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal">
                 <th className="py-3 px-6">Sl No</th>
                 <th className="py-3 px-6">Account Name</th>
-                <th className="py-3 px-6">Account Code</th>
+                <th className="py-3 px-6">Description</th>
                 <th className="py-3 px-6">Account Type</th>
                 <th className="py-3 px-6">Parent Account Type</th>
               </tr>
             </thead>
             <tbody className="text-gray-600 text-sm font-light">
-              {currentAccounts.map((account) => (
-                <tr
-                  key={account.slNo}
-                  className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => handleRowClick()}
-                >
-                  <td className="py-3 px-6">{account.slNo}</td>
-                  <td className="py-3 px-6">{account.name}</td>
-                  <td className="py-3 px-6">{account.code}</td>
-                  <td className="py-3 px-6">{account.type}</td>
-                  <td className="py-3 px-6">{account.parentType}</td>
-                </tr>
-              ))}
-            </tbody>
+  {currentAccounts.map((account, index) => (
+    <tr
+      key={account._id}
+      className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
+      onClick={() => handleRowClick(account._id)} // Pass account ID or other data
+    >
+      <td className="py-3 px-6">{index + 1}</td> {/* Generate Sl No */}
+      <td className="py-3 px-6">{account?.accountName}</td>
+      <td className="py-3 px-6">{account?.description || "No description"}</td>
+      <td className="py-3 px-6">{account?.accountHead}</td>
+      <td className="py-3 px-6">{account?.accountSubhead}</td>
+    </tr>
+  ))}
+</tbody>
           </table>
         </div>
 

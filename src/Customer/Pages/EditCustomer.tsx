@@ -24,6 +24,13 @@ export default function EditCustomer() {
       zipPostalCode: "",
       mainRoute: "",
       subRoute: "",
+      location: {
+        address: "",
+        coordinates: {
+          type: "Point",
+          coordinates: [null, null]  // Adjust as needed
+        }
+      }
     })
   const { id } = useParams()
   const [logo, setLogo] = useState<File | null>(null)
@@ -34,7 +41,9 @@ export default function EditCustomer() {
     const fetchCustomer = async () => {
       try {
         const response = await getACustomerAPI(id as string)
-        setFormData(response)
+        setFormData(response as any)
+        console.log(formData);
+        
       } catch (error) {
         console.error("Error fetching customer:", error)
       }
@@ -69,31 +78,38 @@ export default function EditCustomer() {
   }
 
   const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const formDataToUpdate = new FormData()
-    Object.keys(formData).forEach((key) => {
-      formDataToUpdate.append(key, formData[key])
-    })
-
+    e.preventDefault();
+  
+    const formDataToUpdate = new FormData();
+  
+    // Explicitly assert that keys are keyof typeof formData
+    (Object.keys(formData) as Array<keyof typeof formData>).forEach((key) => {
+      const value = formData[key];
+      if (value !== undefined && value !== null) {
+        formDataToUpdate.append(key, value.toString());
+      }
+    });
+  
     if (logo) {
-      formDataToUpdate.append("logo", logo)
+      formDataToUpdate.append("logo", logo);
     }
-
+  
     try {
-      const response = await updateCustomerAPI(id as string, formDataToUpdate)
+      const response = await updateCustomerAPI(id as string, formDataToUpdate);
       if (response) {
-        toast.success("Customer updated successfully!")
+        toast.success("Customer updated successfully!");
         setTimeout(() => {
-          navigate("/customer")
-        }, 1000)
+          navigate("/customer");
+        }, 1000);
       } else {
-        toast.error("Failed to update customer")
+        toast.error("Failed to update customer");
       }
     } catch (error) {
-      toast.error("An error occurred while updating the customer.")
-      console.error("Error updating customer:", error)
+      toast.error("An error occurred while updating the customer.");
+      console.error("Error updating customer:", error);
     }
-  }
+  };
+  
 
   return (
     <div>

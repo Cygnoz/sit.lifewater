@@ -4,7 +4,7 @@ const chartOfAcc = [
     subhead: [
       "Current asset",
       "Cash",
-      "Bank",
+      // "Bank",
       "Fixed asset",
       "Stock",
       "Payment Clearing",

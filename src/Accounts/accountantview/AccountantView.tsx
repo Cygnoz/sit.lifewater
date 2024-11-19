@@ -1,13 +1,42 @@
+import { Link, useParams } from "react-router-dom"
+import { useEffect, useState } from "react"
+import CheveronLeftIcon from "../../assets/icons/CheveronLeft"
+import { getOneTrialBalanceAPI } from "../../services/AccountsAPI/accounts"
 
-import { Link } from "react-router-dom";
-import CheveronLeftIcon from "../../assets/icons/CheveronLeft";
+interface TrialBalance {
+  _id: string
+  date: string
+  accountName: string
+  action: string
+  debitAmount: number
+  creditAmount: number
+}
 
 function AccountantViewUI() {
-  const trialBalance = [
-    { _id: "1", date: "2024-11-15", accountName: "Account 1", action: "Credit", debitAmount: 100, creditAmount: 50 },
-    { _id: "2", date: "2024-11-14", accountName: "Account 2", action: "Debit", debitAmount: 200, creditAmount: 0 },
-  ];
-  const baseCurrency = "USD";
+  const { id } = useParams<{ id: string }>() // Extract the `id` parameter from the route
+  const [trialBalance, setTrialBalance] = useState<TrialBalance[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const baseCurrency = "USD"
+
+  const fetchTrialBalance = async () => {
+    try {
+      if (id) {
+        const response = await getOneTrialBalanceAPI(id) // Fetch trial balance by account ID
+        console.log(response)
+
+        setTrialBalance(response) // Update state with the fetched data
+        console.log(trialBalance)
+      } else {
+        setError("Invalid account ID.")
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch trial balance.")
+    }
+  }
+
+  useEffect(() => {
+    fetchTrialBalance()
+  }, [id])
 
   return (
     <div className="p-2">
@@ -17,16 +46,13 @@ function AccountantViewUI() {
             <CheveronLeftIcon />
           </div>
         </Link>
-        <p className="text-textColor text-xl font-bold">Account Name</p>
+        {/* <p className="text-textColor text-xl font-bold">{trialBalance.accountName}</p> */}
+        <p className="text-textColor text-xl font-bold">{trialBalance.length > 0 ? trialBalance[0].accountName : "No Account Name"}</p>
       </div>
 
       <div className="p-6 rounded-lg bg-white">
         <div className="flex justify-between mb-4">
           <p className="font-bold text-textColor text-base">Recent Transaction</p>
-          <div className="flex text-[#565148] text-xs font-medium">
-            <button className="border border-[#565148] border-r-0 px-3 py-1 rounded-s-lg text-sm">FCY</button>
-            <button className="border border-[#565148] px-3 py-1 rounded-e-lg text-sm">BCY</button>
-          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -43,7 +69,7 @@ function AccountantViewUI() {
             <tbody className="text-dropdownText text-center text-[13px]">
               {trialBalance.map((item) => (
                 <tr key={item._id}>
-                  <td className="py-3 px-4 border-b border-tableBorder">{item.date}</td>
+                  <td className="py-3 px-4 border-b border-tableBorder">{item?.date?.split("T")[0].split("-").reverse().join("/") || "N/A"}</td>
                   <td className="py-3 px-4 border-b border-tableBorder">{item.accountName}</td>
                   <td className="py-3 px-4 border-b border-tableBorder">{item.action}</td>
                   <td className="py-3 px-4 border-b border-tableBorder">{item.debitAmount}</td>
@@ -61,7 +87,7 @@ function AccountantViewUI() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default AccountantViewUI;
+export default AccountantViewUI

@@ -227,7 +227,7 @@ const App: React.FC = () => {
             <Route path='/newjournal' element={<NewJournal/>}/>
             <Route path='/viewjournal/:id' element={<ManualView/>}/>
             <Route path='/chartofaccount' element={<ChartOfAccounts/>}/>
-            <Route path='/accountant/view' element={<AccountantViewUI/>}/>
+            <Route path='/accountant/view/:id' element={<AccountantViewUI/>}/>
             {/* <Route path='/banking' element={<BankHome/>}/>
             <Route path='/cash' element={<Cash/>}/> */}
            

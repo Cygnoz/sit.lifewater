@@ -178,7 +178,7 @@ export const updateCustomerAPI = async (id: string, formData: FormData) => {
   try {
     const response = await axios.put(`${BASEURL}/api/editcustomer/${id}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data', // Set the correct content type for form data
+        'Content-Type': 'application/json', // Set the correct content type for form data
       },
     });
     return response.data; // Return the response data
