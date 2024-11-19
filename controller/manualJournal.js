@@ -62,7 +62,6 @@ exports.addJournalEntry = async (req, res) => {
         for (const trans of transaction) {
             const newTrialEntry = new TrialBalance({
                 operationId:newJournalEntry._id,
-                transactionId: journalId,
                 date:entryDate,
                 accountId: trans.accountId,
                 accountName: trans.accountName,

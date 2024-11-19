@@ -2,7 +2,7 @@
 
 const Account = require("../Models/account")
 const TrialBalance = require("../Models/trialBalance")
-
+const moment = require('moment-timezone');
 
 
 
@@ -21,6 +21,9 @@ exports.addAccount = async (req, res) => {
      //Validate Inputs  
      if (!validateInputs( cleanedData, res )) return;
     
+
+     const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai","DD/MM/YY","/");
+     const openingDate = generatedDateTime.dateTime; 
   
       // Check if an accounts with the same name already exists
       const existingAccount = await Account.findOne({
@@ -36,7 +39,7 @@ exports.addAccount = async (req, res) => {
 
      
 
-      const newAccount = new Account({ ...cleanedData });      
+      const newAccount = new Account({ ...cleanedData, openingDate });      
       await newAccount.save();
 
       const trialEntry = new TrialBalance({
@@ -228,8 +231,12 @@ exports.getOneTrailBalance = async (req, res) => {
 //Auoto generate
 exports.autoGenerateAccount = async (req, res) => {
     try {
+
+      const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai","DD/MM/YY","/");
+      const openingDate = generatedDateTime.dateTime; 
+      
     
-        insertAccounts(accounts);
+        insertAccounts( accounts, openingDate );
 
         res.status(201).json({ message: "Account created successfully." });
         console.log("Account created successfully");    
@@ -527,7 +534,7 @@ function isAlphanumeric(value) {
 
 
 
-async function insertAccounts(accounts) {
+async function insertAccounts(accounts,openingDate) {
 
     const accountDocuments = accounts.map(account => {
         return {
@@ -537,6 +544,7 @@ async function insertAccounts(accounts) {
             accountSubhead: account.accountSubhead,
             accountHead: account.accountHead,
             accountGroup: account.accountGroup,
+            openingDate:openingDate,
   
             description: account.description
         };});
@@ -658,3 +666,66 @@ async function insertAccounts(accounts) {
     { accountName: "Materials", accountSubhead: "Cost of Goods Sold", accountHead: "Expenses", accountGroup: "Liability",accountCode:"AC-68",description: "An expense account that tracks the amount you use in purchasing materials." },
     { accountName: "Subcontractor", accountSubhead: "Cost of Goods Sold", accountHead: "Expenses", accountGroup: "Liability",accountCode:"AC-69",description: "An expense account to track the amount that you pay subcontractors who provide service to you." }
   ];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // Function to generate time and date for storing in the database
+function generateTimeAndDateForDB(
+  timeZone,
+  dateFormat,
+  dateSplit,
+  baseTime = new Date(),
+  timeFormat = "HH:mm:ss",
+  timeSplit = ":"
+) {
+  // Convert the base time to the desired time zone
+  const localDate = moment.tz(baseTime, timeZone);
+
+  // Format date and time according to the specified formats
+  let formattedDate = localDate.format(dateFormat);
+
+  // Handle date split if specified
+  if (dateSplit) {
+    // Replace default split characters with specified split characters
+    formattedDate = formattedDate.replace(/[-/]/g, dateSplit); // Adjust regex based on your date format separators
+  }
+
+  const formattedTime = localDate.format(timeFormat);
+  const timeZoneName = localDate.format("z"); // Get time zone abbreviation
+
+  // Combine the formatted date and time with the split characters and time zone
+  const dateTime = `${formattedDate} ${formattedTime
+    .split(":")
+    .join(timeSplit)}`;
+
+  return {
+    date: formattedDate,
+    time: `${formattedTime} (${timeZoneName})`,
+    dateTime: dateTime,
+  };
+}
