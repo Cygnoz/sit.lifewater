@@ -11,8 +11,8 @@ import { Box, Modal, Typography } from '@mui/material';
 interface Customer {
   id: number;
   _id: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
+
   message: string;
   depositAmount: number;
   ratePerBottle: number;
@@ -53,7 +53,7 @@ const ViewCustomers: React.FC = () => {
   }, []);
 
   const filteredCustomers = customers.filter((customer) =>
-    `${customer.firstName} ${customer.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+    `${customer.fullName}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleOpen = (customer: Customer) => {
@@ -108,11 +108,11 @@ const ViewCustomers: React.FC = () => {
                   <img
                     className="object-cover w-11 h-11 rounded-full"
                     src={customer.logo ? `${BASEURL}/uploads/${customer.logo}` : defaultImage}
-                    alt={`${customer.firstName} ${customer.lastName}`}
+                    alt={`${customer.fullName}`}
                   />
                   <div>
                     <div className="font-bold mb-1">
-                      {customer.firstName} {customer.lastName}
+                      {customer.fullName} 
                     </div>
                     <div className="text-sm mb-1">Due Amount: <span className="text-red-700 font-bold">{dueAmount}</span></div>
                     <div className="text-sm">
@@ -158,7 +158,7 @@ const ViewCustomers: React.FC = () => {
     </div>
     <Typography id="modal-title" variant="h6" component="h2" fontWeight="bold">
       <span className="text-red-700">
-        {selectedCustomer ? `${selectedCustomer.firstName} ${selectedCustomer.lastName}` : ''}
+        {selectedCustomer ? `${selectedCustomer.fullName}` : ''}
       </span>
     </Typography>
     <Typography id="modal-title" variant="h6" component="h2">
