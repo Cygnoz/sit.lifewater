@@ -229,15 +229,14 @@ exports.getOneTrailBalance = async (req, res) => {
 exports.autoGenerateAccount = async (req, res) => {
     try {
     
-        insertAccounts(accounts );
-        
-      
-        console.log("Accounts created successfully for organization:", organizationId);
-        return { success: true, message: "Accounts created successfully." };
-    
+        insertAccounts(accounts);
+
+        res.status(201).json({ message: "Account created successfully." });
+        console.log("Account created successfully");    
+
       } catch (error) {
-        console.error("Error creating roles:", error);
-        return { success: false, message: "Failed to create tax." };
+        console.error("Error creating Account:", error);
+        res.status(500).json({ message: "Internal server error." });
       }
 };
 
@@ -553,7 +552,6 @@ async function insertAccounts(accounts) {
   
   
       const newTrialEntry = new TrialBalance({
-          organizationId,
           operationId: savedAccount._id,
           date: savedAccount.openingDate,
           accountId: savedAccount._id,

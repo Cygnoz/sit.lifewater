@@ -97,7 +97,7 @@ router.put('/edit-account/:accountId',accountController.editAccount);
 
 router.delete('/delete-account/:accountId',accountController.deleteAccount);
 
-router.get('/auto-generate-account',accountController.autoGenerateAccount);
+router.post('/auto-generate-account',accountController.autoGenerateAccount);
 
 
 

@@ -44,7 +44,7 @@ app.use('/api', Routes);
 
 // Test route
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.status(200).json('Life Water server started - Backend');
 });
 
 // Server listen
