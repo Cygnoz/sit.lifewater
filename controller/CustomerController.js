@@ -45,6 +45,9 @@ exports.createCustomer = async (req, res) => {
       };
     }
 
+    const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai","DD/MM/YY","/");
+    const openingDate = generatedDateTime.dateTime; 
+
     // Create a new customer with the transformed location
     const newCustomer = new Customer({ ...cleanedData, location: transformedLocation });
 
@@ -54,6 +57,7 @@ exports.createCustomer = async (req, res) => {
     const newAccount = new Account({
       accountName: savedCustomer.fullName,
       accountId: savedCustomer._id,
+      openingDate:openingDate,
       accountSubhead: "Sundry Debtors",
       accountHead: "Asset",
       accountGroup: "Asset",
@@ -66,6 +70,7 @@ exports.createCustomer = async (req, res) => {
     const trialEntry = new TrialBalance({
       operationId: savedCustomer._id,
       date: savedCustomer.createdAt,
+      date: savedCustomer.openingDate,
       accountId: savedAccount._id,
       accountName: savedAccount.accountName,
       action: "Opening Balance",
@@ -176,7 +181,7 @@ exports.getCustomerById = async (req, res) => {
   }
 };
  
-// Update a customer by ID
+
 // Update a customer by ID
 exports.updateCustomerById = async (req, res) => {
   try {
@@ -336,3 +341,42 @@ exports.deleteCustomerById = async (req, res) => {
       return acc;
     }, {});
   }
+
+
+
+
+    // Function to generate time and date for storing in the database
+function generateTimeAndDateForDB(
+  timeZone,
+  dateFormat,
+  dateSplit,
+  baseTime = new Date(),
+  timeFormat = "HH:mm:ss",
+  timeSplit = ":"
+) {
+  // Convert the base time to the desired time zone
+  const localDate = moment.tz(baseTime, timeZone);
+
+  // Format date and time according to the specified formats
+  let formattedDate = localDate.format(dateFormat);
+
+  // Handle date split if specified
+  if (dateSplit) {
+    // Replace default split characters with specified split characters
+    formattedDate = formattedDate.replace(/[-/]/g, dateSplit); // Adjust regex based on your date format separators
+  }
+
+  const formattedTime = localDate.format(timeFormat);
+  const timeZoneName = localDate.format("z"); // Get time zone abbreviation
+
+  // Combine the formatted date and time with the split characters and time zone
+  const dateTime = `${formattedDate} ${formattedTime
+    .split(":")
+    .join(timeSplit)}`;
+
+  return {
+    date: formattedDate,
+    time: `${formattedTime} (${timeZoneName})`,
+    dateTime: dateTime,
+  };
+}
