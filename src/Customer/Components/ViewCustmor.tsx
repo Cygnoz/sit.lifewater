@@ -79,9 +79,9 @@ const ViewCustmor: React.FC = () => {
         <div className="flex items-center space-x-[12px]">
           {/* <img src={customer.customerType ==="Business" ? {customer.logo? `${BASEURL/uploads/${StaffOverview.profile}}` : defaultImage}} alt={customer.firstName} className="w-[45px] h-[45px] rounded-full object-cover" /> */}
           {/* <img className="mx-5 object-cover w-11 h-11 rounded-full" src={staff.profile ? `${BASEURL}/uploads/${staff.profile}` : defaultImage} alt={`${staff.firstname} ${staff.lastname}`} /> */}
-          <img src={customer.customerType === "Business" ? (customer.logo ? `${BASEURL}/uploads/${customer.logo}` : defaultImage) : defaultImage} alt={customer.firstName} className="w-[45px] h-[45px] rounded-full object-cover" />
+          <img src={customer.customerType === "Business" ? (customer.logo ? `${BASEURL}/uploads/${customer.logo}` : defaultImage) : defaultImage} alt={customer.fullName} className="w-[45px] h-[45px] rounded-full object-cover" />
 
-          <span className="text-[18px] font-bold text-gray-700">{customer?.customerType === "Business" ? customer.companyName || "N/A" : `${customer?.firstName || "N/A"} ${customer?.lastName || "N/A"}`}</span>
+          <span className="text-[18px] font-bold text-gray-700">{customer?.customerType === "Business" ? customer.companyName || "N/A" : `${customer?.fullName || "N/A"}`}</span>
         </div>
 
         {/* Right Side: Placeholder for Icons */}

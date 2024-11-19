@@ -1,7 +1,9 @@
-import { useState } from "react";
-import Ellipsis from '../../../assets/icons/Ellipsis';
-import SearchBar from '../../Components/Searchbar';
+import { useState, useEffect } from "react";
+
+import SearchBar from '../../Components/SearchBar';
 import { useNavigate } from "react-router-dom";
+import { getAllJournalsAPI } from "../../../services/AccountsAPI/Journal";
+
 
 interface Journal {
   _id: string;
@@ -17,52 +19,28 @@ type Props = {};
 
 function Table({}: Props) {
   const navigate = useNavigate();
-  const [journalData, setJournalData] = useState<Journal[]>([
-    {
-      _id: "1",
-      date: "2024-11-15",
-      journalId: "JRN-001",
-      reference: "REF-1234",
-      note: "Monthly Expenses",
-      status: "Approved",
-      totalDebitAmount: "1200.50",
-    },
-    {
-      _id: "2",
-      date: "2024-11-14",
-      journalId: "JRN-002",
-      reference: "REF-5678",
-      note: "Office Supplies",
-      status: "Pending",
-      totalDebitAmount: "450.00",
-    },
-    {
-      _id: "3",
-      date: "2024-11-13",
-      journalId: "JRN-003",
-      reference: "REF-9101",
-      note: "Travel Expenses",
-      status: "Rejected",
-      totalDebitAmount: "800.75",
-    },
-    {
-      _id: "4",
-      date: "2024-11-12",
-      journalId: "JRN-004",
-      reference: "REF-1122",
-      note: "Employee Benefits",
-      status: "Approved",
-      totalDebitAmount: "1500.00",
-    },
-  ]);
+  const [journalData, setJournalData] = useState<Journal[]>([]);  // Initialize empty array for journalData
   const [searchValue, setSearchValue] = useState<string>("");
+
+  // Fetch journals on component mount
+  useEffect(() => {
+    const fetchJournals = async () => {
+      try {
+        const journals = await getAllJournalsAPI(); // Fetch data using the API function
+        setJournalData(journals);  // Set the fetched data to state
+      } catch (error) {
+        console.error("Error fetching journals:", error);
+      }
+    };
+    fetchJournals();
+  }, []);  // Empty dependency array to run only once when the component mounts
 
   const tableHeaders = [
     "Date",
-    "Journal",
+    // "Journal",
     "Reference Rating",
     "Notes",
-    "Status",
+    // "Status",
     "Amount",
     "",
   ];
@@ -121,26 +99,22 @@ function Table({}: Props) {
                 <td className="py-2.5 px-4 border-y border-tableBorder">
                   {item?.date}
                 </td>
-                <td className="py-2.5 px-4 border-y border-tableBorder">
+                {/* <td className="py-2.5 px-4 border-y border-tableBorder">
                   {item?.journalId}
-                </td>
+                </td> */}
                 <td className="py-2.5 px-4 border-y border-tableBorder">
                   {item?.reference}
                 </td>
                 <td className="py-2.5 px-4 border-y border-tableBorder">
                   {item?.note}
                 </td>
-                <td className="py-2.5 px-4 border-y border-tableBorder">
+                {/* <td className="py-2.5 px-4 border-y border-tableBorder">
                   {item?.status}
-                </td>
+                </td> */}
                 <td className="py-2.5 px-4 border-y border-tableBorder">
                   {item?.totalDebitAmount}
                 </td>
-                <td className="cursor-pointer py-2.5 px-4 border-y border-tableBorder">
-                  <div className="flex justify-end">
-                    <Ellipsis height={17} />
-                  </div>
-                </td>
+                
               </tr>
             ))
           ) : (

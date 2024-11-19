@@ -1,18 +1,34 @@
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+
 import CheveronLeftIcon from "../../assets/icons/CheveronLeft";
 import Pen from "../../assets/icons/Pen";
 import PrinterIcon from "../../assets/icons/PrinterIcon";
 import Trash2 from "../../assets/icons/Trash2";
 import Button from "../Components/Button";
-import { useState } from "react";
-
+import { getOneJournalAPI } from "../../services/AccountsAPI/Journal";
 
 type Props = {};
 
 function ManualView({}: Props) {
+  const { id } = useParams();  // Get the journal ID from the URL
+  const [oneJournal, setOneJournal] = useState<any>(null);  // State to hold the fetched journal data
 
-  const [oneJournal, setOneJournal] = useState<any>(null);
+  // Fetch the journal data when the component mounts or when the id changes
+  useEffect(() => {
+    const fetchJournal = async () => {
+      try {
+        const journal = await getOneJournalAPI(id);  // Fetch journal data using the API
+        setOneJournal(journal);  // Set the fetched journal data to state
+      } catch (error) {
+        console.error("Error fetching journal:", error);
+      }
+    };
 
+    if (id) {
+      fetchJournal();  // Fetch data only if the ID is available
+    }
+  }, [id]);  // Dependency array ensures the effect runs when the ID changes
 
   return (
     <>
@@ -26,9 +42,7 @@ function ManualView({}: Props) {
               <CheveronLeftIcon />
             </div>
           </Link>
-          <p className="text-textColor text-xl font-bold">
-            View Manual Journal
-          </p>
+          <p className="text-textColor text-xl font-bold">View Manual Journal</p>
         </div>
 
         <div className="bg-white rounded-xl px-5 mb-32 mt-5">
@@ -36,7 +50,7 @@ function ManualView({}: Props) {
           <div className="flex justify-between">
             <div className="flex gap-3 items-center">
               <p className="text-xl text-textColor font-bold pr-4 border-borderRight">
-                {oneJournal ? `#${oneJournal?.journalId}` : "#001"}
+                {oneJournal ? `#${oneJournal?.reference}` : "#001"}
               </p>
             </div>
             <div className="flex gap-3 items-center">
@@ -67,7 +81,7 @@ function ManualView({}: Props) {
                   <p className="font-bold text-2xl">JOURNAL</p>
                   {/* journalId */}
                   <p className="ml-auto">
-                    {oneJournal ? `#${oneJournal?.journalId}` : "#0001"}
+                    {oneJournal ? `#${oneJournal?.reference}` : "#0001"}
                   </p>
                 </div>
 
@@ -75,9 +89,7 @@ function ManualView({}: Props) {
                   <p className="mt-5">
                     {/* date */}
                     Billed Date:
-                    <b className="ms-4">
-                      {oneJournal ? oneJournal?.date : "*/*/*"}
-                    </b>
+                    <b className="ms-4">{oneJournal ? oneJournal?.date : "*/*/*"}</b>
                   </p>
 
                   {/* totalCreditAmount */}

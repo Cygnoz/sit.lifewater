@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AccountDropdown from "./AccountDropdown";
-import ContactDropdown from "./ContactDropdown";
+
 import CheveronLeftIcon from "../../../assets/icons/CheveronLeft";
 import TrashCan from "../../Components/Trashcan";
 import Button from "../../Components/Button";
 import PlusIcon from "../../Components/PlusIcon";
 import {  toast, ToastContainer } from "react-toastify";
-
+import { addJournalEntryAPI, getAllAccountsAPI } from "../../../services/AccountsAPI/Journal";
 type Props = {};
 
-function NewJournal({}: Props) {
+function NewJournal({ }: Props) {
   const navigate = useNavigate();
-
+ 
   // Initialize with two non-deletable rows
   const initialTransactions = [
     {
@@ -22,7 +22,7 @@ function NewJournal({}: Props) {
       debitAmount: 0,
       creditAmount: 0,
       description: "",
-      contact: "",
+     
     },
     {
       accountId: "",
@@ -31,9 +31,10 @@ function NewJournal({}: Props) {
       debitAmount: 0,
       creditAmount: 0,
       description: "",
-      contact: "",
+   
     },
   ];
+
 
   const [accountOptions, setAccountOptions] = useState(null);
   const [totalResult, setTotalResult] = useState({
@@ -43,7 +44,7 @@ function NewJournal({}: Props) {
     differencesLabel: "",
   });
   const [newJournalDatas, setNewJournelDatas] = useState({
-    journel: "",
+    transactionId: "",
     date: "",
     reference: "",
     note: "",
@@ -57,7 +58,7 @@ function NewJournal({}: Props) {
   const tableHeaders = [
     "Account",
     "Description",
-    "Contact (INR)",
+    // "Contact (INR)",
     "Debits",
     "Credits",
     "Actions",
@@ -119,7 +120,7 @@ function NewJournal({}: Props) {
     setContactSearch(contactSearch.filter((_, i) => i !== index));
   };
 
-  const contactOptions = ["John Doe", "Jane Smith", "Robert Brown"];
+  // const contactOptions = ["John Doe", "Jane Smith", "Robert Brown"];
 
   const currencies = [
     { value: "INR", display: "INR - Indian Rupees" },
@@ -139,7 +140,36 @@ function NewJournal({}: Props) {
     { value: "NOK", display: "NOK - Norwegian Krone" },
   ];
 
- 
+  // const getLastJournelsPrefix = async () => {
+  //   try {
+  //     const url = `${endponits.Get_LAST_Journel_Prefix}`;
+  //     const { response, error } = await GetLastJournelPrefix(url);
+  //     if (!error && response) {
+  //       console.log("response", response);
+  //       setNewJournelDatas({ ...newJournalDatas, journel: response?.data });
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching accounts:", error);
+  //   }
+  // };
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const response = await getAllAccountsAPI();
+        if (response) {
+          setAccountOptions(response);
+          console.log(response);
+          
+        }
+      } catch (error) {
+        toast.error("Failed to fetch accounts");
+        console.error("Error fetching accounts:", error);
+      }
+    };
+
+    fetchAccounts();
+  }, []);
 
   useEffect(() => {
     if (!Array.isArray(newJournalDatas.transaction)) {
@@ -154,8 +184,8 @@ function NewJournal({}: Props) {
           typeof transaction.debitAmount === "string"
             ? parseFloat(transaction.debitAmount)
             : typeof transaction.debitAmount === "number"
-            ? transaction.debitAmount
-            : 0;
+              ? transaction.debitAmount
+              : 0;
         return total + (isNaN(debitAmount) ? 0 : debitAmount);
       },
       0
@@ -168,8 +198,8 @@ function NewJournal({}: Props) {
           typeof transaction.creditAmount === "string"
             ? parseFloat(transaction.creditAmount)
             : typeof transaction.creditAmount === "number"
-            ? transaction.creditAmount
-            : 0;
+              ? transaction.creditAmount
+              : 0;
         return total + (isNaN(creditAmount) ? 0 : creditAmount);
       },
       0
@@ -193,7 +223,8 @@ function NewJournal({}: Props) {
 
   const handleAddNewJournel = async () => {
     const {
-      journel,
+      transactionId,
+     
       date,
       reference,
       note,
@@ -202,12 +233,13 @@ function NewJournal({}: Props) {
       totalDebitAmount,
       totalCreditAmount,
     } = newJournalDatas;
+  
     console.log(newJournalDatas);
-
+  
     let errors = [];
-
+  
     // Validate required fields
-    if (!journel) errors.push("Journal");
+    if (!transactionId) errors.push("Journal");
     if (!date) errors.push("Date");
     if (!reference) errors.push("Reference");
     if (!note) errors.push("Note");
@@ -218,53 +250,58 @@ function NewJournal({}: Props) {
     if (totalResult && totalResult.difference) {
       errors.push("Ensure that the debit and credits are equal!");
     }
-
+    
+  
     // Validate minimum two transactions and fields in transactions
     if (transaction.length < 2) {
       errors.push("At least two transactions");
     }
-
+  
     transaction.forEach((txn, index) => {
       if (!txn.accountId) errors.push(`Transaction ${index + 1}: Account ID`);
       if (txn.debitAmount === undefined && txn.creditAmount === undefined) {
         errors.push(`Transaction ${index + 1}: Debit or Credit Amount`);
       }
+      
     });
-
+  
     // Show detailed toast message if there are errors
-    if (errors.length > 0) {
-      toast.error(`Please fill the following fields: ${errors.join(", ")}`);
+    console.log(errors); // Check the content of errors
+if (errors.length > 0) {
+  toast.error(`Please fill the following fields: ${errors.join(", ")}`, {
+    position: "top-right",
+    autoClose: 5000,
+  });
+}
+ else {
+  try {
+    const apiResponse = await addJournalEntryAPI(newJournalDatas);
+    console.log("API response", apiResponse);  // Log the full response
+    const { response, error } = apiResponse;
+    if (!error && response) {
+      toast.error("Error creating Journal ", {
+        position: "top-right",
+        autoClose: 5000,
+      });
     } else {
-      try {
-        const url = `${endponits.Add_NEW_Journel}`;
-        const apiResponse = await (url, newJournalDatas);
-        console.log("api response", apiResponse);
-        const { response, error } = apiResponse;
-        if (!error && response) {
-          toast.success(response.data.message);
-          setNewJournelDatas({
-            journel: "",
-            date: "",
-            reference: "",
-            note: "",
-            cashBasedJournal: false,
-            currency: "INR",
-            transaction: initialTransactions,
-            totalDebitAmount: 0,
-            totalCreditAmount: 0,
-          });
-          setTimeout(() => {
-            navigate("/accountant/manualjournal");
-          }, 2000);
-        } else {
-          alert("An error occurred");
-          console.log("error", error);
-        }
-      } catch (error) {
-        console.log("Error during API call", error);
-      }
+      toast.success("Journal Created Successfully", {
+        position: "top-right",
+        autoClose: 6000,
+      });
+      setTimeout(() => {
+        navigate('/journals')
+      }, 2000);
+    
     }
-  };
+  } catch (error) {
+    toast.error("Error during API call", {
+      position: "top-right",
+      autoClose: 6000,
+    });
+    console.log("Error during API call", error);
+  }
+ }  
+  }
 
   const handleAccountSelect = (index: number, account: any) => {
     const newTransaction = [...newJournalDatas.transaction];
@@ -281,17 +318,17 @@ function NewJournal({}: Props) {
       isAccountDropdownOpen.map((open, i) => (i === index ? false : open))
     );
   };
-  const handleContactSelect = (index: number, contact: string) => {
-    const newTransaction = [...newJournalDatas.transaction];
-    newTransaction[index].contact = contact;
-    setNewJournelDatas({
-      ...newJournalDatas,
-      transaction: newTransaction,
-    });
-    setIsContactDropdownOpen(
-      isContactDropdownOpen.map((open, i) => (i === index ? false : open))
-    );
-  };
+  // const handleContactSelect = (index: number, contact: string) => {
+  //   const newTransaction = [...newJournalDatas.transaction];
+  //   newTransaction[index].contact = contact;
+  //   setNewJournelDatas({
+  //     ...newJournalDatas,
+  //     transaction: newTransaction,
+  //   });
+  //   setIsContactDropdownOpen(
+  //     isContactDropdownOpen.map((open, i) => (i === index ? false : open))
+  //   );
+  // };
 
   const handleAccountSearchChange = (index: number, value: string) => {
     const newSearch = [...accountSearch];
@@ -299,11 +336,11 @@ function NewJournal({}: Props) {
     setAccountSearch(newSearch);
   };
 
-  const handleContactSearchChange = (index: number, value: string) => {
-    const newSearch = [...contactSearch];
-    newSearch[index] = value;
-    setContactSearch(newSearch);
-  };
+  // const handleContactSearchChange = (index: number, value: string) => {
+  //   const newSearch = [...contactSearch];
+  //   newSearch[index] = value;
+  //   setContactSearch(newSearch);
+  // };
 
   const handleAccountDropdownToggle = (index: number, isOpen: boolean) => {
     setIsAccountDropdownOpen(
@@ -311,11 +348,11 @@ function NewJournal({}: Props) {
     );
   };
 
-  const handleContactDropdownToggle = (index: number, isOpen: boolean) => {
-    setIsContactDropdownOpen(
-      isContactDropdownOpen.map((open, i) => (i === index ? isOpen : open))
-    );
-  };
+  // const handleContactDropdownToggle = (index: number, isOpen: boolean) => {
+  //   setIsContactDropdownOpen(
+  //     isContactDropdownOpen.map((open, i) => (i === index ? isOpen : open))
+  //   );
+  // };
 
   const clearAccountSearch = (index: number) => {
     const newSearch = [...accountSearch];
@@ -323,11 +360,11 @@ function NewJournal({}: Props) {
     setAccountSearch(newSearch);
   };
 
-  const clearContactSearch = (index: number) => {
-    const newSearch = [...contactSearch];
-    newSearch[index] = "";
-    setContactSearch(newSearch);
-  };
+  // const clearContactSearch = (index: number) => {
+  //   const newSearch = [...contactSearch];
+  //   newSearch[index] = "";
+  //   setContactSearch(newSearch);
+  // };
 
   const handleInputChange = (index: number, field: string, value: any) => {
     const newTransaction = [...newJournalDatas.transaction];
@@ -357,23 +394,12 @@ function NewJournal({}: Props) {
     });
   };
 
-  console.log(newJournalDatas);
+  console.log("new", newJournalDatas);
 
   return (
     <div className="p-2">
-         <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={true}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-         // optional CSS class for further styling
-      />
+            <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} theme="colored" />
+
       <div className="flex items-center gap-5">
         <Link to={"/journals"}>
           <div
@@ -407,15 +433,15 @@ function NewJournal({}: Props) {
             <div className="w-[26%]">
               <label className="block text-sm text-textColor">Journal#</label>
               <input
-                disabled
+                
                 type="text"
                 className="mt-1 w-full border border-inputBorder rounded-md text-sm p-2"
-                placeholder="001"
-                value={newJournalDatas.journel}
+                placeholder=""
+                value={newJournalDatas.transactionId}
                 onChange={(e) =>
                   setNewJournelDatas({
                     ...newJournalDatas,
-                    journel: e.target.value,
+                    transactionId: e.target.value,
                   })
                 }
               />
@@ -537,7 +563,7 @@ function NewJournal({}: Props) {
                         }
                       />
                     </td>
-                    <ContactDropdown
+                    {/* <ContactDropdown
                       index={index}
                       contact={row.contact}
                       contactOptions={contactOptions}
@@ -547,58 +573,68 @@ function NewJournal({}: Props) {
                       onSearchChange={handleContactSearchChange}
                       onDropdownToggle={handleContactDropdownToggle}
                       clearSearch={clearContactSearch}
-                    />
+                    /> */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <input
                         type="number"
+                        min={0}
                         style={{
                           margin: "0 !important", // Remove margins
                           paddingRight: "0 !important", // Remove extra padding
                         }}
                         className="mt-1 w-[150px] border border-inputBorder rounded-md text-sm p-2"
                         placeholder="0.00"
-                        // value={row.debitAmount}
-                        onChange={(e) =>
-                          !row.creditAmount
-                            ? handleInputChange(
-                                index,
-                                "debitAmount",
-                                e.target.value
-                              )
-                            : toast.error(
-                                "Clear credit before entering debit; both can’t be in one row."
-                              )
-                        }
+                        onChange={(e) => {
+                          let value = parseFloat(e.target.value);
+
+                          // If the entered value is negative, reset it to 0
+                          if (value < 0) {
+                            value = 0;
+                            e.target.value = "0"; // Update the displayed value to 0
+                          }
+
+                          if (!row.creditAmount) {
+                            handleInputChange(index, "debitAmount", value);
+                          } else {
+                            toast.error("Clear credit before entering debit; both can’t be in one row.");
+                          }
+                        }}
                       />
+
+
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <input
                         type="number"
+                        min={0}
                         style={{
                           margin: "0 !important", // Remove margins
                           paddingRight: "0 !important", // Remove extra padding
                         }}
                         className="mt-1 w-[130px] border border-inputBorder rounded-md text-sm p-2"
                         placeholder="0.00"
-                        // value={row.creditAmount}
-                        onChange={(e) =>
-                          !row.debitAmount
-                            ? handleInputChange(
-                                index,
-                                "creditAmount",
-                                e.target.value
-                              )
-                            : toast.error(
-                                "Clear debit before entering credit; both can’t be in one row."
-                              )
-                        }
+                        onChange={(e) => {
+                          let value = parseFloat(e.target.value);
+
+                          // If the entered value is negative, reset it to 0
+                          if (value < 0) {
+                            value = 0;
+                            e.target.value = "0"; // Update the displayed value to 0
+                          }
+
+                          if (!row.debitAmount) {
+                            handleInputChange(index, "creditAmount", value);
+                          } else {
+                            toast.error("Clear debit before entering credit; both can’t be in one row.");
+                          }
+                        }}
                       />
+
                     </td>
                     <td
                       onClick={() => deleteRow(index)}
-                      className={`px-6 py-6 items-center whitespace-nowrap text-sm flex justify-center cursor-pointer ${
-                        index < 2 ? "cursor-not-allowed text-gray-400" : ""
-                      }`}
+                      className={`px-6 py-6 items-center whitespace-nowrap text-sm flex justify-center cursor-pointer ${index < 2 ? "cursor-not-allowed text-gray-400" : ""
+                        }`}
                     >
                       <TrashCan color={index < 2 ? "gray" : "red"} />
                     </td>
@@ -626,19 +662,19 @@ function NewJournal({}: Props) {
           </div>
           <div className="col-span-3 flex flex-col gap-3">
             <h4 className="text-[14px] text-[#4B5C79]">
-              Rs{totalResult.totalDebit.toFixed(2)}
+              {totalResult.totalDebit.toFixed(2)}
             </h4>
             <span className="text-textColor font-bold text-xl">
-              Rs{totalResult.totalDebit.toFixed(2)}
+              {" "}{totalResult.totalDebit.toFixed(2)}
             </span>
           </div>
 
           <div className="col-span-3 flex flex-col w-[130px]  gap-3 me-5">
             <h4 className="text-[14px] text-[#4B5C79] text-end">
-              Rs{totalResult.totalCredit.toFixed(2)}
+               {totalResult.totalCredit.toFixed(2)}
             </h4>
             <span className="text-textColor font-bold text-xl text-end">
-              Rs{totalResult.totalCredit.toFixed(2)}
+               {totalResult.totalCredit.toFixed(2)}
             </span>
           </div>
           <div className="col-span-2 flex flex-col gap-1 bg-[#FEF7F7] py-[4px] px-[14px]">
@@ -666,8 +702,6 @@ function NewJournal({}: Props) {
           </Button>
         </div>
       </div>
-
-      
     </div>
   );
 }

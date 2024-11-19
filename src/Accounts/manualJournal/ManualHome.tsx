@@ -77,9 +77,7 @@ function ManualHome({}: Props) {
               </Button>
             </Link>
             <div className="relative">
-              <div onClick={toggleDropdown} className="cursor-pointer">
-                <Ellipsis />
-              </div>
+              
               {isDropdownOpen && (
                 <div
                   ref={dropdownRef}
