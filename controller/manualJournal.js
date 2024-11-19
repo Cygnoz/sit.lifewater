@@ -1,8 +1,8 @@
 
 
-const Account = require("../database/model/account");
-const Journal = require("../database/model/journal");
-const TrialBalance = require("../database/model/trialBalance");
+const Journal = require("../Models/journal");
+const Account = require("../Models/account")
+const TrialBalance = require("../Models/trialBalance")
 
 
 
@@ -28,10 +28,7 @@ exports.addJournalEntry = async (req, res) => {
         
 
         
-        
-
-        const generatedDateTime = generateTimeAndDateForDB(existingOrganization.timeZoneExp, existingOrganization.dateFormatExp, existingOrganization.dateSplit);
-        const entryDate = generatedDateTime.dateTime;
+  
 
         // Check if all accounts exist for the given organization
         const allAccountIds = transaction.map(trans => trans.accountId);

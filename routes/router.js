@@ -1,12 +1,13 @@
-const express = require("express")
-const router = express.Router()
-const staffController = require("../controller/staffController")
-const vehicleController = require("../controller/VehicleController")
-const mainRouteController = require("../controller/RouteController")
+const express = require("express");
+const router = express.Router();
+const staffController = require("../controller/staffController");
+const vehicleController = require("../controller/VehicleController");
+const mainRouteController = require("../controller/RouteController");
 const subrouteController = require('../controller/SubRouteController');
-const CustomerController = require("../controller/CustomerController")
+const CustomerController = require("../controller/CustomerController");
+const journalController = require('../controller/manualJournal');
+const accountController = require("../controller/accountController");
 
-// const upload = require("../middleware/Multermiddleware")
 const ActiveRouteController = require("../controller/ActiveRouteController")
 const EndRideController = require('../controller/EndRideController')
 
@@ -67,9 +68,7 @@ router.get('/getSRoute/:id', subrouteController.getSubroutebyID);
 //customer
 router.post("/addcustomer", CustomerController.createCustomer)
 router.get("/customer", CustomerController.getAllCustomers)
-// router.post('/addsalesmancustomer',CustomerController.addCustomerFromSalesman);
 router.put("/editcustomer/:id",CustomerController.updateCustomerById)
-// router.put('/editcustomer/:id',CustomerController.editCustomerFromSalesman);
 router.get("/customer/:id", CustomerController.getCustomerById)
 router.delete("/customer/:id", CustomerController.deleteCustomerById)
 
@@ -82,5 +81,41 @@ router.get("/viewActiveRoute/:id", ActiveRouteController.viewActiveRouteById)
 //endride
 router.post('/end-ride', EndRideController.endRide);
 router.get('/getallendride', EndRideController.getEndRide);
+
+
+
+//Accounts
+
+
+router.post('/add-account',accountController.addAccount);
+
+router.get('/get-all-account',accountController.getAllAccount);
+
+router.get('/get-one-account/:accountId',accountController.getOneAccount);
+
+router.put('/edit-account/:accountId',accountController.editAccount);
+
+router.delete('/delete-account/:accountId',accountController.deleteAccount);
+
+router.get('/auto-generate-account',accountController.autoGenerateAccount);
+
+
+
+
+//Journal
+
+router.post('/add-journal-entry',journalController.addJournalEntry);
+
+router.get('/get-all-journal',journalController.getAllJournal);
+
+router.get('/get-one-journal/:id',journalController.getOneJournal);
+
+
+
+
+
+//Trial Balance
+
+router.get('/get-one-trial-balance/:accountId',accountController.getOneTrailBalance)
 
 module.exports = router

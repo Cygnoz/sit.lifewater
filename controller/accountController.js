@@ -1,8 +1,7 @@
 // v1.0
 
-const Account = require("../database/model/account")
-const TrialBalance = require("../database/model/trialBalance")
-const moment = require('moment-timezone');
+const Account = require("../Models/account")
+const TrialBalance = require("../Models/trialBalance")
 
 
 
@@ -240,7 +239,7 @@ exports.autoGenerateAccount = async (req, res) => {
         console.error("Error creating roles:", error);
         return { success: false, message: "Failed to create tax." };
       }
-  };
+};
 
 
 

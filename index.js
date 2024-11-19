@@ -6,10 +6,8 @@ require('dotenv').config();
 require('./db/connection');
 
 // Import routes
-const staffRoutes = require('./routes/router.js'); 
-const routeRoute = require('./routes/router.js');
-const subrouteRoute = require('./routes/router.js');
-const vehicleRoute = require('./routes/router.js');
+const Routes = require('./routes/router.js'); 
+
 
 // Middleware
 // const corsOptions = {
@@ -41,10 +39,8 @@ app.use('/uploads', express.static('uploads')); // Ensure the path is correct
 
 
 // Routes
-app.use('/api', staffRoutes); // This prefixes all your staff routes with '/api'
-app.use('/api', routeRoute);
-app.use('/api',vehicleRoute);
-app.use('/api',subrouteRoute);
+app.use('/api', Routes); 
+
 
 // Test route
 app.get('/', (req, res) => {
