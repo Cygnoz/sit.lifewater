@@ -15,7 +15,7 @@ exports.addJournalEntry = async (req, res) => {
         const cleanedData = cleanCustomerData(req.body);
         cleanedData.transaction = cleanedData.transaction?.map(acc => cleanCustomerData(acc)) || [];
 
-        const { transaction } = cleanedData;
+        const { transaction, journalId } = cleanedData;
 
         const transactionIds = transaction.map(item => item.accountId);
         
@@ -25,7 +25,16 @@ exports.addJournalEntry = async (req, res) => {
           return res.status(400).json({ message: "Duplicate Accounts found" });
         }
 
-        
+        const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai","DD/MM/YY","/");
+        const entryDate = generatedDateTime.dateTime; 
+
+        const existingJournalId = await Journal.find({ journalId: journalId });
+
+          if (existingJournalId.length > 0) {
+              return res.status(409).json({
+                  message: "Journal ID is already present in records!"
+              });
+          }
 
         
   
@@ -264,3 +273,52 @@ function validTransaction( data, transaction, errors ) {
   function isFloat(value) {
     return /^-?\d+(\.\d+)?$/.test(value);
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Function to generate time and date for storing in the database
+function generateTimeAndDateForDB(
+  timeZone,
+  dateFormat,
+  dateSplit,
+  baseTime = new Date(),
+  timeFormat = "HH:mm:ss",
+  timeSplit = ":"
+) {
+  // Convert the base time to the desired time zone
+  const localDate = moment.tz(baseTime, timeZone);
+
+  // Format date and time according to the specified formats
+  let formattedDate = localDate.format(dateFormat);
+
+  // Handle date split if specified
+  if (dateSplit) {
+    // Replace default split characters with specified split characters
+    formattedDate = formattedDate.replace(/[-/]/g, dateSplit); // Adjust regex based on your date format separators
+  }
+
+  const formattedTime = localDate.format(timeFormat);
+  const timeZoneName = localDate.format("z"); // Get time zone abbreviation
+
+  // Combine the formatted date and time with the split characters and time zone
+  const dateTime = `${formattedDate} ${formattedTime
+    .split(":")
+    .join(timeSplit)}`;
+
+  return {
+    date: formattedDate,
+    time: `${formattedTime} (${timeZoneName})`,
+    dateTime: dateTime,
+  };
+}
