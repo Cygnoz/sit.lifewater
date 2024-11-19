@@ -36,6 +36,8 @@ const normalizeFilePath = (filePath) => {
 const addStaff = async (req, res) => {
   try {
     const { firstname, lastname, username, designation, password, emiratesId, mobileNumber } = req.body;
+    console.log(req.body);
+    
 
     // Check for existing staff with the same mobile number
     const existingStaff = await Staff.findOne({ mobileNumber });
