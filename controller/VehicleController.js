@@ -1,32 +1,35 @@
 const Vehicle = require('../Models/VehicleSchema'); // Assuming Vehicle schema is in the Model folder
 
 // Add a new vehicle
-const addVehicle = async (req, res) => {
+exports.addVehicle = async (req, res) => {
   try {
-    const { vehicleNo, insuranceValidity, insuranceStatus, registrationValidity, insuranceAmount, licenseAmount, licenseValidity, startingKilometer, expenses } = req.body;
+    console.log("Add Vechile:", req.body);
+    const cleanedData = cleanCustomerData(req.body);
 
     // Handle the uploaded image
-    const vehicleImage = req.file ? req.file.filename : null;
+    // const vehicleImage = req.file ? req.file.filename : null;
 
     // Check if vehicle already exists by vehicle number
-    const existingVehicle = await Vehicle.findOne({ vehicleNo });
+    const existingVehicle = await Vehicle.findOne({ vehicleNo: cleanedData.vehicleNo });
     if (existingVehicle) {
       return res.status(400).json({ message: 'Vehicle number already exists' });
     }
 
     // Create a new vehicle instance
-    const vehicle = new Vehicle({
-      vehicleNo,
-      image: vehicleImage,
-      insuranceValidity,
-      insuranceStatus,
-      registrationValidity,
-      insuranceAmount,
-      licenseAmount,
-      licenseValidity,
-      startingKilometer,
-      expenses
-    });
+    const vehicle = new Vehicle({ ...cleanedData });
+
+    // const vehicle = new Vehicle({
+    //   vehicleNo,
+    //   image: vehicleImage,
+    //   insuranceValidity,
+    //   insuranceStatus,
+    //   registrationValidity,
+    //   insuranceAmount,
+    //   licenseAmount,
+    //   licenseValidity,
+    //   startingKilometer,
+    //   expenses
+    // });
 
     // Save vehicle to the database
     const savedVehicle = await vehicle.save();
@@ -38,7 +41,7 @@ const addVehicle = async (req, res) => {
 };
 
 // Get all vehicles
-const getAllVehicles = async (req, res) => {
+exports.getAllVehicles = async (req, res) => {
   try {
     const vehicles = await Vehicle.find(); // Fetch all vehicles
     return res.status(200).json(vehicles);
@@ -49,18 +52,24 @@ const getAllVehicles = async (req, res) => {
 };
 
 
-const updateVehicle = async (req, res) => {
+exports.updateVehicle = async (req, res) => {
   try {
+    console.log("Edit Customer:", req.body);
     const { id } = req.params;
-    const updateData = { ...req.body }; // Spread the request body
+    const cleanedData = cleanCustomerData(req.body);
+
+    cleanedData.image=cleanedData.image[0];
+    
+
+    // const updateData = { ...req.body }; // Spread the request body
 
     // Handle image update if provided
-    if (req.file) {
-      updateData.image = req.file.filename; // Store the image filename
-    }
+    // if (req.file) {
+    //   updateData.image = req.file.filename; // Store the image filename
+    // }
 
     // Update vehicle by Object ID
-    const updatedVehicle = await Vehicle.findByIdAndUpdate(id, updateData, { new: true });
+    const updatedVehicle = await Vehicle.findByIdAndUpdate(id, cleanedData, { new: true });
 
     if (!updatedVehicle) {
       return res.status(404).json({ message: 'Vehicle not found' });
@@ -76,7 +85,7 @@ const updateVehicle = async (req, res) => {
 
 
 // Delete vehicle by Object ID
-const deleteVehicle = async (req, res) => {
+exports.deleteVehicle = async (req, res) => {
   try {
     const { id } = req.params; // Using the vehicle's Object ID
 
@@ -93,7 +102,7 @@ const deleteVehicle = async (req, res) => {
 };
 
 // View a particular vehicle by Object ID
-const viewVehicleById = async (req, res) => {
+exports.viewVehicleById = async (req, res) => {
   try {
     const { id } = req.params; // Using the vehicle's Object ID
 
@@ -109,10 +118,16 @@ const viewVehicleById = async (req, res) => {
   }
 };
 
-module.exports = {
-  addVehicle,
-  getAllVehicles,
-  updateVehicle,
-  deleteVehicle,
-  viewVehicleById
-};
+
+
+
+
+
+  //Clean Data 
+  function cleanCustomerData(data) {
+    const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+    return Object.keys(data).reduce((acc, key) => {
+      acc[key] = cleanData(data[key]);
+      return acc;
+    }, {});
+  }

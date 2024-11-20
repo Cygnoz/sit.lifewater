@@ -1,30 +1,34 @@
 const ActiveRoute = require('../Models/ActiveRoute'); // Adjust the path accordingly
 
-// POST method to create a new ActiveRoute
-const createActiveRoute = async (req, res) => {
+//Create a new Active Route
+exports.createActiveRoute = async (req, res) => {
   try {
-    const { mainRoute, subRoute, helper, driver, vehicleNo, openingStock, loadedStock, totalStock, startingKm ,Salesman } = req.body;
+    console.log("Create Active Route:", req.body);
+    const cleanedData = cleanCustomerData(req.body);
+    // const { mainRoute, subRoute, helper, driver, vehicleNo, openingStock, loadedStock, totalStock, startingKm ,Salesman } = req.body;
 
     // Create a new ActiveRoute instance
-    const newActiveRoute = new ActiveRoute({
-      mainRoute,
-      subRoute,
-      helper,
-      driver,
-      vehicleNo,
-      openingStock,
-      loadedStock,
-      totalStock,
-      startingKm,
-      Salesman
-    });
+    const newActiveRoute = new ActiveRoute({ ...cleanedData,  });
+
+    // const newActiveRoute = new ActiveRoute({
+    //   mainRoute,
+    //   subRoute,
+    //   helper,
+    //   driver,
+    //   vehicleNo,
+    //   openingStock,
+    //   loadedStock,
+    //   totalStock,
+    //   startingKm,
+    //   Salesman
+    // });
 
     // Save the new ActiveRoute to the database
     await newActiveRoute.save();
 
     // Send a success response
     res.status(201).json({
-      message: 'ActiveRoute created successfully',
+      message: 'Active Route created successfully',
       data: newActiveRoute,
     });
   } catch (error) {
@@ -37,7 +41,7 @@ const createActiveRoute = async (req, res) => {
 };
 
 
-const getActiveRoutes = async (req, res) => {
+exports.getActiveRoutes = async (req, res) => {
   try {
     // Retrieve all active routes from the database
     const activeRoutes = await ActiveRoute.find();
@@ -56,7 +60,7 @@ const getActiveRoutes = async (req, res) => {
   }
 };
 
-const deleteActiveRoute = async (req, res) => {
+exports.deleteActiveRoute = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -85,7 +89,7 @@ const deleteActiveRoute = async (req, res) => {
 };
 
 // View a particular vehicle by Object ID
-const viewActiveRouteById = async (req, res) => {
+exports.viewActiveRouteById = async (req, res) => {
   try {
     const { id } = req.params; // Using the vehicle's Object ID
 
@@ -105,9 +109,20 @@ const viewActiveRouteById = async (req, res) => {
 
 
 
-module.exports = {
-  createActiveRoute,
-  getActiveRoutes,
-  deleteActiveRoute,
-  viewActiveRouteById
-};
+
+
+
+
+
+
+
+
+
+  //Clean Data 
+  function cleanCustomerData(data) {
+    const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+    return Object.keys(data).reduce((acc, key) => {
+      acc[key] = cleanData(data[key]);
+      return acc;
+    }, {});
+  }

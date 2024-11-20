@@ -1,28 +1,31 @@
-const Subroute = require('../Models/SubrouteSchema'); // Adjust the path as necessary
-const Route = require('../Models/RouteSchema'); // Adjust the path as necessary
+const Subroute = require('../Models/SubrouteSchema'); 
+const Route = require('../Models/RouteSchema'); 
 
 // Add a new subroute
 exports.addSubroute = async (req, res) => {
     try {
+      console.log("Add Sub Route:", req.body);
+      const cleanedData = cleanCustomerData(req.body);
       // Validate the subrouteCode
-      if (!req.body.subrouteCode) {
+      if (!cleanedData.subrouteCode) {
         return res.status(400).json({ message: 'Subroute code is required' });
       }
   
       // Check if a subroute with the same subrouteCode already exists
-      const existingSubroute = await Subroute.findOne({ subrouteCode: req.body.subrouteCode });
+      const existingSubroute = await Subroute.findOne({ subrouteCode: cleanedData.subrouteCode });
       if (existingSubroute) {
         return res.status(400).json({ message: 'Subroute with this code already exists.' });
       }
   
-      // Create a new subroute
-      const newSubroute = new Subroute({
-        subrouteCode: req.body.subrouteCode,  // ensure correct casing
-  subRoute: req.body.subRoute,
-  mainRoute: req.body.mainRoute,
-  description: req.body.description,
-        // Add other fields as needed
-      });
+      // Create a new subroute\
+      const newSubroute = new Subroute({ ...cleanedData });
+      // const newSubroute = new Subroute({
+      //   subrouteCode: req.body.subrouteCode,  // ensure correct casing
+      //   subRoute: req.body.subRoute,
+      //   mainRoute: req.body.mainRoute,
+      //   description: req.body.description,
+      //   // Add other fields as needed
+      // });
   
       // Save the new subroute in the database
       const savedSubroute = await newSubroute.save();
@@ -38,8 +41,10 @@ exports.addSubroute = async (req, res) => {
 // Edit an existing subroute by ID
 exports.editSubroute = async (req, res) => {
   try {
+    console.log("Edit Sub Route:", req.body);
     const { id } = req.params;
-    const { subRoute, subrouteCode, description, mainRoute } = req.body; // Use mainRoute (which is now an ObjectId)
+    const cleanedData = cleanCustomerData(req.body);
+    const { subRoute, subrouteCode, description, mainRoute } = cleanedData; // Use mainRoute (which is now an ObjectId)
 
     // Update the subRoute document, including the mainRoute reference
     const updatedSubroute = await Subroute.findByIdAndUpdate(
@@ -128,3 +133,35 @@ exports.getSubroutebyID = async (req, res) => {
         res.status(500).json({ message: 'Error fetching subroute', error: error.message });
     }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //Clean Data 
+  function cleanCustomerData(data) {
+    const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+    return Object.keys(data).reduce((acc, key) => {
+      acc[key] = cleanData(data[key]);
+      return acc;
+    }, {});
+  }

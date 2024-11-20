@@ -177,6 +177,9 @@ exports.deleteAccount = async (req, res) => {
 
 //Get one Account for a given organizationId
 exports.getOneTrailBalance = async (req, res) => {
+
+  console.log('inside trial balance fun');
+  
   try {
     const { accountId } = req.params
 

@@ -262,4 +262,3 @@ exports.deleteCustomerById = async (req, res) => {
       return acc;
     }, {});
   }
-
