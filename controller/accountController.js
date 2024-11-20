@@ -379,9 +379,6 @@ function validateItemData( data ) {
   validateReqFields( data, errors);
   validateAccountStructure(data.accountGroup, data.accountHead, data.accountSubhead, errors);
 
-
-  validateAlphanumericFields(['bankIfsc'], data, errors);
-  validateIntegerFields(['bankAccNum'], data, errors);
   //validateFloatFields([''], data, errors);
   //validateAlphabetsFields([''], data, errors);
 
@@ -419,15 +416,7 @@ function validateReqFields( data, errors ) {
     errors.push("Select Credit or Debit Opening Balance");
   }
 
-  if (data.accountSubhead === "Bank" && typeof data.bankAccNum === 'undefined' ) {
-  errors.push("Bank Account Number required");
-  }
-  if (data.accountSubhead === "Bank" && typeof data.bankIfsc === 'undefined' ) {
-    errors.push("IFSC required");
-  }
-  if (data.accountSubhead === "Bank" && typeof data.bankCurrency === 'undefined' ) {
-    errors.push("Currency required");
-  }
+  
 }
 
 
