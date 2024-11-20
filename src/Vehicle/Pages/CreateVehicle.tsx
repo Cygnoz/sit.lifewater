@@ -9,6 +9,7 @@ import vehicle from "../../assets/images/vehicle 1.svg"
 import { useNavigate } from "react-router-dom"
 import React, { useEffect, useRef, useState } from "react"
 import { deleteVehicleByIdAPI, getVehicleAPI, Vehicle } from "../../services/VehicleAPI/Vehicle"
+import { toast, ToastContainer } from "react-toastify"
 
 
 const CreateVehicle: React.FC = () => {
@@ -55,7 +56,7 @@ const CreateVehicle: React.FC = () => {
 
     try {
       const response = await deleteVehicleByIdAPI(id)
-      alert(response.message)
+      toast.success(response.message)
       setVehicleList(vehicleList.filter((vehicle) => vehicle._id !== id))
     } catch (error) {
       console.error("Error deleting vehicle:", error)
@@ -89,6 +90,8 @@ const CreateVehicle: React.FC = () => {
 
   return (
     <div>
+            <ToastContainer position="top-center" autoClose={2000} hideProgressBar={false} theme="colored" />
+
       <div className="flex min-h-screen w-full">
         <div className="p-2">
           {/* Header Section */}

@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css' // Import the styles
 
 const EditStaff: React.FC = () => {
   const [staff, setStaff] = useState<any>(null)
-  const [profile, setProfile] = useState(null)
+  const [profile, setProfile] = useState("")
   const [userName, setUserName] = useState<string>("")
   const [password, setPassword] = useState<string>("")
   const [confirmPassword, setConfirmPassword] = useState<string>("")
@@ -64,14 +64,14 @@ const EditStaff: React.FC = () => {
     setStaff((prevStaff: any) => ({ ...prevStaff, [name]: value }))
   }
   
-  const [imageFile, setImageFile] = useState("")
+  // const [imageFile, setImageFile] = useState("")
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {    
     const file = event.target.files?.[0];    
     if (file) {      
       const reader = new FileReader();       
       reader.onloadend = () => {        
-        setImageFile(reader.result as string); // Cast to string
+        setProfile(reader.result as string); // Cast to string
       }; 
       reader.readAsDataURL(file); // Read the file as a Data URL (Base64)
     }
@@ -101,14 +101,24 @@ const EditStaff: React.FC = () => {
       } else if (staff.designation === "Sales" && password !== confirmPassword) {
         toast.error("Passwords do not match.")
       } else {
-        const payload = {
-          ...staff,
-          whatsAppNumber: isSameAsPhone ? staff.mobileNumber : whatsAppNumber,
-          username: staff.designation === "Sales" ? userName : undefined,
-          password: staff.designation === "Sales" ? password : undefined,
+        const formData = new FormData();
+        formData.append("firstname", staff.firstname);
+        formData.append("lastname", staff.lastname);
+        formData.append("address", staff.address);
+        formData.append("visaStatus", staff.visaStatus);
+        formData.append("mobileNumber", staff.mobileNumber);
+        formData.append("whatsAppNumber", isSameAsPhone ? staff.mobileNumber : whatsAppNumber);
+        formData.append("designation", staff.designation);
+        formData.append("emiratesId", staff.emiratesId);
+        formData.append("visaNumber", staff.visaNumber);
+        formData.append("visaValidity", staff.visaValidity);
+        formData.append("dateofBirth", staff.dateofBirth);
+    
+        if (profile) {
+          formData.append("profile", profile); // Append the image file
         }
 
-        await updateStaffAPI(id!, payload, profile)
+        await updateStaffAPI(id!, formData)
         toast.success("Staff updated successfully!")
 
         setTimeout(() => {
@@ -160,9 +170,9 @@ const EditStaff: React.FC = () => {
               <img
                 className="object-cover w-11 h-11 rounded-full"
                 src={
-                  imageFile? `${imageFile}`: staff.profile? `${staff.profile}`: `${staff.profile
+                  profile? `${profile}`: staff.profile? `${staff.profile}`: `${staff.profile
                 }`}
-                alt={`Staff ${staff.profile}`}
+                alt={`Staff ${staff.firstname}`}
               />
 
               <label className="p-2 border border-gray-300 rounded-lg cursor-pointer text-gray-700 hover:bg-gray-50 transition duration-300">

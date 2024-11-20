@@ -89,7 +89,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     // Append vehicle data
     Object.entries(vehicleData).forEach(([key, value]) => {
-      formData.append(key, value.toString());
+      formData.append(key, value?.toString());
     });
     // Debug: Check if formData contains image and vehicle data
     for (const pair of formData.entries()) {
