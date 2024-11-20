@@ -130,7 +130,7 @@ exports.addStaff = async (req, res) => {
 
 exports.editStaff = async (req, res) => {
   try {
-    const { designation, username, password, emiratesId } = req.body;
+    const { designation, username, password } = req.body;
     const updatedData = { ...req.body };
 
     // Check if a new profile image is uploaded
@@ -250,3 +250,10 @@ exports.loginSalesStaff = async (req, res) => {
 
 
 
+function cleanCustomerData(data) {
+  const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+  return Object.keys(data).reduce((acc, key) => {
+    acc[key] = cleanData(data[key]);
+    return acc;
+  }, {});
+}
