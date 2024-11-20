@@ -225,6 +225,8 @@ exports.updateCustomerById = async (req, res) => {
     const cleanedData = cleanCustomerData(req.body);
     console.log("Cleaned Data:", cleanedData);
 
+    cleanedData.logo=cleanedData.logo[1]
+    
     // Update the customer in the database
     const updatedCustomer = await Customer.findByIdAndUpdate(
       req.params.id,
