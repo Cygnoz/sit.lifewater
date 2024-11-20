@@ -98,11 +98,11 @@ exports.addJournalEntry = async (req, res) => {
 
 
 
-// Get all Journal for a given organizationId
+// Get all Journal for a given 
 exports.getAllJournal = async (req, res) => {
     try {
 
-        // Find all accounts where organizationId matches
+        // Find all accounts where  matches
         const journal = await Journal.find();
 
         if (!journal.length) {
@@ -118,12 +118,12 @@ exports.getAllJournal = async (req, res) => {
     }
 };
 
-// Get one Journal by ID for a given organizationId
+// Get one Journal by ID for a given 
 exports.getOneJournal = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Find the journal where id and organizationId matches
+        // Find the journal where id and  matches
         const journal = await Journal.findOne({ _id: id });
         
         if (!journal) {
