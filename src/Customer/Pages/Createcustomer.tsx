@@ -230,7 +230,7 @@ const CreateCustomer: React.FC = () => {
                   {index + 1} </td>
                 <td className="p-2 text-[14px] text-center text-[#4B5C79]">
                   {/* <img className="mx-auto object-cover w-11 h-11 rounded-full" src={customer.logo} alt="" />  */}
-                  <img className="mx-auto object-cover w-11 h-11 rounded-full" src={customer.logo ? `${BASEURL}/uploads/${customer.logo}` : defaultImage} alt={`${customer.firstName} ${customer.lastName}`} />
+                  <img className="mx-auto object-cover w-11 h-11 rounded-full" src={customer.logo} alt={`${customer.firstName} ${customer.lastName}`} />
                   </td>
 
                 <td className="p-2 text-[14px] text-center text-[#4B5C79]">

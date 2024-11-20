@@ -167,9 +167,9 @@ const navlist = [
   {
     nav: "Accountant",
     icon:accountant,
-    route: "/",
+    route: "/chartofaccount",
     subhead: [
-      { headName: "Dashbord", subRoute: "/" },
+ 
       { headName: "Chart of Account", subRoute: "/chartofaccount" },
       { headName: "Manual Journals", subRoute: "/journals" },
       // { headName: "Banking", subRoute: "/banking" },

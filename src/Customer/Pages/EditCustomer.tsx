@@ -16,6 +16,7 @@ export default function EditCustomer() {
       whatsappNumber: "",
       city: "",
       street: "",
+      logo:"",
       flatNumber: "",
       numberOfBottles: 0,
       ratePerBottle: "",
@@ -33,7 +34,7 @@ export default function EditCustomer() {
       }
     })
   const { id } = useParams()
-  const [logo, setLogo] = useState<File | null>(null)
+  const [logo, setLogo] = useState("")
   const [whatsappSameAsMobile, setWhatsappSameAsMobile] = useState(false)
   const navigate = useNavigate()
 
@@ -61,14 +62,17 @@ export default function EditCustomer() {
       [name]: value,
     }))
   }
-
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setLogo(file)
+  
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {    
+    const file = event.target.files?.[0];    
+    if (file) {      
+      const reader = new FileReader();       
+      reader.onloadend = () => {        
+        setLogo(reader.result as string); // Cast to string
+      }; 
+      reader.readAsDataURL(file); // Read the file as a Data URL (Base64)
     }
-  }
-
+  };
   const handleWhatsappCheckbox = () => {
     setWhatsappSameAsMobile(!whatsappSameAsMobile)
     setFormData((prev) => ({
@@ -126,16 +130,23 @@ export default function EditCustomer() {
         
       <form onSubmit={handleUpdate}>
   <div className="flex gap-6">
-    <div className="flex flex-col items-center border-2 border-dashed border-gray-300 rounded-lg p-4 w-52">
-      <label className="cursor-pointer">
-        <div className="flex flex-col items-center bg-orange-50 rounded-lg py-4 px-6">
-          <img src={upload} alt="Upload" />
-          <span className="text-gray-700 font-semibold text-base">Add Image</span>
-        </div>
-        <input type="file" accept="image/*" onChange={handleProfileChange} className="hidden" />
-      </label>
-      <h2 className="text-gray-800 font-bold mt-2">Upload Company Logo</h2>
-    </div>
+  <div>
+            <label className="block text-[#303F58] text-sm font-medium mb-1">Staff Image</label>
+            <div className="flex items-center space-x-4">
+              <img
+                className="object-cover w-11 h-11 rounded-full"
+                src={
+                  logo? `${logo}`: formData.logo? `${formData.logo}`: `${formData.logo
+                }`}
+                alt={`Staff ${formData.fullName}`}
+              />
+
+              <label className="p-2 border border-gray-300 rounded-lg cursor-pointer text-gray-700 hover:bg-gray-50 transition duration-300">
+                Upload New Photo
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              </label>
+            </div>
+          </div>
 
     <div className="grid grid-cols-2 gap-4 w-full">
       <div className="col-span-1">

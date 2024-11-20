@@ -24,6 +24,7 @@ interface CustomerFormData {
   street: string
   mainRoute: string
   subRoute: string
+  logo:string
 }
 
 interface Route {
@@ -50,9 +51,10 @@ export default function AddCustomer() {
     zipPostalCode: "",
     mainRoute: "",
     subRoute: "",
+    logo:""
   })
 
-  const [logo, setLogo] = useState<File | null>(null)
+  const [logo, setLogo] = useState("")
   const [whatsappSameAsMobile, setWhatsappSameAsMobile] = useState(false)
   const [routesList, setRouteList] = useState<Route[]>([]);
   const [mainRouteList, setMainRouteList] = useState<string[]>([]);
@@ -126,12 +128,23 @@ export default function AddCustomer() {
       street: "",
       mainRoute: "",
       subRoute: "",
+      logo:""
     })
-    setLogo(null)
+    setLogo("")
     setWhatsappSameAsMobile(false)
     setSelectedMainRoute('')
     setSelectedSubRoute('')
   }
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {    
+    const file = event.target.files?.[0];    
+    if (file) {      
+      const reader = new FileReader();       
+      reader.onloadend = () => {        
+        setLogo(reader.result as string); // Cast to string
+      }; 
+      reader.readAsDataURL(file); // Read the file as a Data URL (Base64)
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -140,25 +153,17 @@ export default function AddCustomer() {
       ...formData,
       mainRoute: selectedMainRoute,
       subRoute: selectedSubRoute,
+      logo:logo
     }
-
     if (logo) {
       const formDataWithLogo = new FormData()
       formDataWithLogo.append('logo', logo)
       
       Object.entries(customerData).forEach(([key, value]) => {
         if (value !== null && value !== undefined && value !== "") {
-          formDataWithLogo.append(key, value.toString())
+          formDataWithLogo.append(key, value?.toString())
         }
       })
-
-      try {
-        const response = await addCustomerAPI(formDataWithLogo)
-        handleApiResponse(response)
-      } catch (error: any) {
-        handleApiError(error)
-      }
-    } else {
       try {
         const response = await addCustomerAPI(customerData)
         handleApiResponse(response)
@@ -208,7 +213,7 @@ export default function AddCustomer() {
                   )}
                   <span className="text-gray-700 font-semibold text-base">{logo ? "Change Image" : "Add Image"}</span>
                 </div>
-                <input type="file" accept="image/*" className="hidden" onChange={handleProfileChange} />
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               </label>
               <h2 className="text-gray-800 font-bold mt-2">Upload Company Logo</h2>
               <p className="text-gray-500 text-sm">Support: JPG, PNG</p>

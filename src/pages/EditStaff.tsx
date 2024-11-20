@@ -81,14 +81,9 @@ const EditStaff: React.FC = () => {
     try {
       if (
         staff.firstname === "" ||
-        
-       
         staff.designation === "" ||
-      
         staff.mobileNumber === "" ||
-       
         staff.visaStatus === "" ||
-      
         (staff.designation === "Sales" && (userName === "" || password === ""))
       ) {
         toast.error("Please fill in the missing field")
