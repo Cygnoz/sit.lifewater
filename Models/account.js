@@ -11,13 +11,9 @@ const accountSchema = new Schema({
     accountSubhead: {type:String},
     accountHead: {type:String},
     accountGroup: {type:String},
-    openingDate: {type:String},
-    
-    description: {type:String},
 
-    bankAccNum: {type:String},
-    bankIfsc: {type:String},
-    bankCurrency: {type:String},
+    openingDate: {type:String},    
+    description: {type:String},
 });
 
 const Accounts = mongoose.model("Accounts", accountSchema);

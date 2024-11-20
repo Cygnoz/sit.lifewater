@@ -25,9 +25,9 @@ exports.getStaffById = async (req, res) => {
 
 // Edit (Update) staff
 // Utility function to normalize file paths
-const normalizeFilePath = (filePath) => {
-  return filePath.replace(/\\/g, "/").replace(/^uploads\//, ""); // remove "uploads/" prefix if it exists
-};
+// const normalizeFilePath = (filePath) => {
+//   return filePath.replace(/\\/g, "/").replace(/^uploads\//, ""); // remove "uploads/" prefix if it exists
+// };
 
 exports.addStaff = async (req, res) => {
   try {
@@ -45,6 +45,20 @@ exports.addStaff = async (req, res) => {
 
     // Handle logic specific to "Sales"
     if (designation === 'Sales') {
+      if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required for Sales staff.' });
+      }
+      // Check if username already exists
+      const existingSalesStaff = await Staff.findOne({ username });
+      if (existingSalesStaff) {
+        return res.status(400).json({ message: 'User with this username already exists.' });
+      }
+
+      cleanedData.hashedPassword = await bcrypt.hash(password.trim(),10);
+    }
+
+    // Handle logic specific to "Admin"
+    if (designation === 'Admin') {
       if (!username || !password) {
         return res.status(400).json({ message: 'Username and password are required for Sales staff.' });
       }
@@ -120,9 +134,9 @@ exports.editStaff = async (req, res) => {
     const updatedData = { ...req.body };
 
     // Check if a new profile image is uploaded
-    if (req.file) {
-      updatedData.profile = normalizeFilePath(req.file.path); // Normalize path on update
-    }
+    // if (req.file) {
+    //   updatedData.profile = normalizeFilePath(req.file.path); // Normalize path on update
+    // }
 
     // If the designation is "Sales", handle username and password logic
     if (designation === 'Sales') {
