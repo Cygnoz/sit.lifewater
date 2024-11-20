@@ -97,7 +97,7 @@ const ChartOfAccounts = () => {
         <div className="overflow-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal">
+              <tr className=" bg-[#fdf8f0]   font-semibold">
                 <th className="py-3 px-6">Sl No</th>
                 <th className="py-3 px-6">Account Name</th>
                 <th className="py-3 px-6">Description</th>

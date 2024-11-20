@@ -72,9 +72,9 @@ function Table({}: Props) {
       <table className="min-w-full bg-white mb-5">
         <thead className="text-[12px] text-center text-dropdownText">
           <tr style={{ backgroundColor: "#F9F7F0" }}>
-            <th className="py-3 px-4 border-b border-tableBorder">
+            {/* <th className="py-3 px-4 border-b border-tableBorder">
               <input type="checkbox" className="form-checkbox w-4 h-4" />
-            </th>
+            </th> */}
             {tableHeaders.map((heading, index) => (
               <th
                 className="py-2 px-4 font-medium border-b border-tableBorder"
@@ -91,11 +91,11 @@ function Table({}: Props) {
               <tr
                 onClick={() => navigate(`/viewjournal/${item._id}`)}
                 key={item._id}
-                className="relative"
+                className="relative cursor-pointer hover:bg-slate-50"
               >
-                <td className="py-2.5 px-4 border-y border-tableBorder">
+                {/* <td className="py-2.5 px-4 border-y border-tableBorder">
                   <input type="checkbox" className="form-checkbox w-4 h-4" />
-                </td>
+                </td> */}
                 <td className="py-2.5 px-4 border-y border-tableBorder">
                   {item?.date}
                 </td>

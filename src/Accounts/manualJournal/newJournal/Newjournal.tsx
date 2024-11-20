@@ -7,7 +7,8 @@ import TrashCan from "../../Components/Trashcan";
 import Button from "../../Components/Button";
 import PlusIcon from "../../Components/PlusIcon";
 import {  toast, ToastContainer } from "react-toastify";
-import { addJournalEntryAPI, getAllAccountsAPI } from "../../../services/AccountsAPI/Journal";
+import { addJournalEntryAPI,  } from "../../../services/AccountsAPI/Journal";
+import { getAllAccountsAPI } from "../../../services/AccountsAPI/accounts";
 type Props = {};
 
 function NewJournal({ }: Props) {
@@ -44,7 +45,7 @@ function NewJournal({ }: Props) {
     differencesLabel: "",
   });
   const [newJournalDatas, setNewJournelDatas] = useState({
-    transactionId: "",
+    journalId: "",
     date: "",
     reference: "",
     note: "",
@@ -223,7 +224,7 @@ function NewJournal({ }: Props) {
 
   const handleAddNewJournel = async () => {
     const {
-      transactionId,
+      journalId,
      
       date,
       reference,
@@ -239,7 +240,7 @@ function NewJournal({ }: Props) {
     let errors = [];
   
     // Validate required fields
-    if (!transactionId) errors.push("Journal");
+    if (!journalId) errors.push("Journal");
     if (!date) errors.push("Date");
     if (!reference) errors.push("Reference");
     if (!note) errors.push("Note");
@@ -437,11 +438,11 @@ if (errors.length > 0) {
                 type="text"
                 className="mt-1 w-full border border-inputBorder rounded-md text-sm p-2"
                 placeholder=""
-                value={newJournalDatas.transactionId}
+                value={newJournalDatas.journalId}
                 onChange={(e) =>
                   setNewJournelDatas({
                     ...newJournalDatas,
-                    transactionId: e.target.value,
+                    journalId: e.target.value,
                   })
                 }
               />
