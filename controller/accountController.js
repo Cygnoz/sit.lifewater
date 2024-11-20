@@ -77,14 +77,13 @@ exports.editAccount = async (req, res) => {
   
 
     //Validate Inputs  
-    if (!validateInputs( cleanedData, organizationId, currencyExists, res )) return;
+    if (!validateInputs( cleanedData, currencyExists, res )) return;
      
      
 
-    // Check if an account with the given organizationId and accountId exists
+    // Check if an account with the given  and accountId exists
     const account = await Account.findOne({
       _id: accountId,
-      organizationId: organizationId,
     });
 
     if (!account) {
@@ -123,12 +122,11 @@ exports.editAccount = async (req, res) => {
 };
 
 
-// Get all accounts for a given organizationId
+// Get all accounts for a given 
 exports.getAllAccount = async (req, res) => {
     try {
-      const organizationId = req.user.organizationId;
 
-        // Find all accounts where organizationId matches
+        // Find all accounts where  matches
         const accounts = await Account.find( );
 
     if (!accounts.length) {
@@ -145,13 +143,13 @@ exports.getAllAccount = async (req, res) => {
 };
 
 
-//Get one Account for a given organizationId
+//Get one Account for a given 
 exports.getOneAccount = async (req, res) => {
   try {
     const { accountId } = req.params;
 
 
-    // Find the account by accountId and organizationId
+    // Find the account by accountId and 
     const account = await Account.findOne({ _id: accountId });
 
     if (!account) {
@@ -177,7 +175,7 @@ exports.deleteAccount = async (req, res) => {
   try {
     const { accountId } = req.params;
 
-    // Check if an account with the given organizationId and accountId exists
+    // Check if an account with the given  and accountId exists
     const account = await Account.findOne({
       _id: accountId,
     });
@@ -204,12 +202,12 @@ exports.deleteAccount = async (req, res) => {
 };
 
 
-//Get one Account for a given organizationId
+//Get one Account for a given 
 exports.getOneTrailBalance = async (req, res) => {
   try {
       const { accountId } = req.params;
 
-      // Find the TrialBalance by accountId and organizationId
+      // Find the TrialBalance by accountId and 
       const trialBalance = await TrialBalance.find({
           accountId: accountId,
       });
