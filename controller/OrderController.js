@@ -1,8 +1,12 @@
-const Order = require('../Models/OrderSchema'); // Adjust the path as needed
+const Order = require('../Models/OrderSchema'); 
+
 
 // Function to add a new order
-const createOrder = async (req, res) => {
+exports.createOrder = async (req, res) => {
+  console.log("Create Order:", req.body);
   try {
+    const cleanedData = cleanCustomerData(req.body);
+
     const {
       orderNumber,
       customer,
@@ -14,9 +18,9 @@ const createOrder = async (req, res) => {
       notes,
       termsAndCondition,
       status
-    } = req.body;
+    } = cleanedData;
 
-    console.log(req.body);
+
     
 
     // Validate required fields
@@ -58,7 +62,7 @@ const createOrder = async (req, res) => {
 };
 
 // Function to view a single order by ID
-const viewOrder = async (req, res) => {
+exports.viewOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) {
@@ -71,7 +75,7 @@ const viewOrder = async (req, res) => {
 };
 
 // Function to view all orders
-const viewAllOrders = async (req, res) => {
+exports.viewAllOrders = async (req, res) => {
   try {
     const orders = await Order.find();
     res.status(200).json(orders);
@@ -81,7 +85,7 @@ const viewAllOrders = async (req, res) => {
 };
 
 // Function to delete an order by ID
-const deleteOrder = async (req, res) => {
+exports.deleteOrder = async (req, res) => {
   try {
     const deletedOrder = await Order.findByIdAndDelete(req.params.id);
     if (!deletedOrder) {
@@ -93,9 +97,18 @@ const deleteOrder = async (req, res) => {
   }
 };
 
-module.exports = {
-  createOrder,
-  viewOrder,
-  viewAllOrders,
-  deleteOrder
-};
+
+
+
+
+
+
+
+  //Clean Data 
+  function cleanCustomerData(data) {
+    const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+    return Object.keys(data).reduce((acc, key) => {
+      acc[key] = cleanData(data[key]);
+      return acc;
+    }, {});
+  }

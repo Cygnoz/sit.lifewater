@@ -2,9 +2,11 @@ const WStock = require('../Models/WStockSchema');
 const Warehouse = require('../Models/WarehouseSchema');
 
 // Create new stock entry
-const createStock = async (req, res) => {
+exports.createStock = async (req, res) => {
+  console.log("Add warehouse:", req.body);
   try {
-    const { warehouse, transferNumber, date, items, notes, termsAndConditions } = req.body;
+    const cleanedData = cleanCustomerData(req.body);
+    const { warehouse, transferNumber, date, items, notes, termsAndConditions } = cleanedData;
 
     // Validate required fields
     if (!transferNumber || !items || !items.length) {
@@ -15,15 +17,17 @@ const createStock = async (req, res) => {
     }
     const warehouseExists = await WStock.findOne({ warehouseName: warehouse });
     if (!warehouseExists) {
-            // Create new stock entry
-    const wStock = new WStock({
-      warehouse,
-      transferNumber,
-      date: date || new Date(),
-      items,
-      notes,
-      termsAndConditions
-    });
+    
+    // Create new stock entry
+    const wStock = new WStock({ ...cleanedData });
+    // const wStock = new WStock({
+    //   warehouse,
+    //   transferNumber,
+    //   date: date || new Date(),
+    //   items,
+    //   notes,
+    //   termsAndConditions
+    // });
 
     await wStock.save();
 
@@ -45,7 +49,7 @@ const createStock = async (req, res) => {
 };
 
 // Get all stock entries
-const getAllStock = async (req, res) => {
+exports.getAllStock = async (req, res) => {
   try {
     const stocks = await WStock.find().sort({ createdAt: -1 });
 
@@ -62,9 +66,11 @@ const getAllStock = async (req, res) => {
 };
  
 // Function to add a new warehouse
-const addWarehouse = async (req, res) => {
+exports.addWarehouse = async (req, res) => {
+  console.log("Add Warehouse:", req.body);
   try {
-    const { warehouseName, contactNo, address } = req.body;
+    const cleanedData = cleanCustomerData(req.body);
+    const { warehouseName, contactNo, address } = cleanedData;
 
     // Validate required fields
     if (!warehouseName || !contactNo || !address) {
@@ -92,11 +98,13 @@ const addWarehouse = async (req, res) => {
     // }
 
     // Create new warehouse entry
-    const warehouse = new Warehouse({
-      warehouseName,
-      contactNo,
-      address
-    });
+    const warehouse = new Warehouse({ ...cleanedData });
+
+    // const warehouse = new Warehouse({
+    //   warehouseName,
+    //   contactNo,
+    //   address
+    // });
 
     await warehouse.save();
 
@@ -118,7 +126,7 @@ const addWarehouse = async (req, res) => {
 
 
 // Function to list all warehouses
-const getWarehouses = async (req, res) => {
+exports.getWarehouses = async (req, res) => {
   try {
     const warehouses = await Warehouse.find().sort({ createdAt: -1 });
 
@@ -132,7 +140,7 @@ const getWarehouses = async (req, res) => {
 
 
 // Function to delete an warehouse by ID
-const deleteWarehouse = async (req, res) => {
+exports.deleteWarehouse = async (req, res) => {
   try {
     const deleteWarehouse = await Warehouse.findByIdAndDelete(req.params.id);
     if (!deleteWarehouse) {
@@ -220,11 +228,17 @@ const updateWarehouseStock = async ({ warehouseName, items }) => {
 
 
 
-module.exports = {
-  createStock,
-  getAllStock,
-  addWarehouse,
-  getWarehouses,
-  deleteWarehouse,
-  updateWarehouseStock
-};
+
+
+
+
+
+
+//Clean Data 
+function cleanCustomerData(data) {
+  const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+  return Object.keys(data).reduce((acc, key) => {
+    acc[key] = cleanData(data[key]);
+    return acc;
+  }, {});
+}

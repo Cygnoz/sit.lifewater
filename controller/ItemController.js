@@ -1,29 +1,33 @@
-const Item = require('../Models/ItemSchema'); // Assuming you have an Item schema
+const Item = require('../Models/ItemSchema'); 
 
 // Create a new item
-const addItem = async (req, res) => {
+exports.addItem = async (req, res) => {
+  console.log("Add Item:", req.body);
   try {
-    // Validate if required fields are present
-    if (!req.body.itemName || !req.body.SKU) {
+    const cleanedData = cleanCustomerData(req.body);
+    if (!cleanedData.itemName || !cleanedData.SKU) {
       return res.status(400).json({ message: 'Required fields missing' });
     }
 
-    // Handle the base64 image
-    let imageData = req.body.itemImage;
+    // // Handle the base64 image
+    // let imageData = req.body.itemImage;
     
-    // Optional: Validate if the image is actually a base64 string
-    if (imageData && !imageData.startsWith('data:image')) {
-      return res.status(400).json({ message: 'Invalid image format' });
-    }
+    // // Optional: Validate if the image is actually a base64 string
+    // if (imageData && !imageData.startsWith('data:image')) {
+    //   return res.status(400).json({ message: 'Invalid image format' });
+    // }
 
-    const newItem = new Item({
-      itemName: req.body.itemName,
-      SKU: req.body.SKU,
-      purchasePrice: req.body.purchasePrice,
-      retailPrice: req.body.retailPrice,
-      description: req.body.description,
-      itemImage: imageData // Store the base64 string directly
-    });
+    const newItem = new Item({ ...cleanedData });
+
+
+    // const newItem = new Item({
+    //   itemName: req.body.itemName,
+    //   SKU: req.body.SKU,
+    //   purchasePrice: req.body.purchasePrice,
+    //   retailPrice: req.body.retailPrice,
+    //   description: req.body.description,
+    //   itemImage: imageData // Store the base64 string directly
+    // });
 
     const savedItem = await newItem.save();
     res.status(201).json(savedItem);
@@ -37,7 +41,7 @@ const addItem = async (req, res) => {
 };
 
 // Get all items
-const getItems = async (req, res) => {
+exports.getItems = async (req, res) => {
   try {
     const items = await Item.find(); // Find all items in the database
     res.status(200).json(items);
@@ -48,7 +52,7 @@ const getItems = async (req, res) => {
   }
 };
 // Get a single item by ID
-const getItemById = async (req, res) => {
+exports.getItemById = async (req, res) => {
   try {
     const item = await Item.findById(req.params.id); // Find the item by ID
 
@@ -62,17 +66,21 @@ const getItemById = async (req, res) => {
 
 // Update an item by ID
 
-const updateItem = async (req, res) => {
+exports.updateItem = async (req, res) => {
+  console.log("Edit Item:", req.body);
   try {
       // Destructure data from req.body and check for uploaded file
-      const { itemName, SKU, purchasePrice, retailPrice, description ,itemImage} = req.body;
+      // const { itemName, SKU, purchasePrice, retailPrice, description ,itemImage} = req.body;
+      const cleanedData = cleanCustomerData(req.body);
+
       //const itemImage = req.file ? req.file.path : null; // Get the file path if a file was uploaded
-      console.log(req.body);
-      const updatedItem = await Item.findByIdAndUpdate(
-          req.params.id,
-          { itemName, SKU, purchasePrice, retailPrice, description, itemImage },
-          { new: true, runValidators: true } // Returns the updated document
-      );
+      const updatedItem = await Item.findByIdAndUpdate(req.params.id, cleanedData, { new: true, runValidators: true });
+
+      // const updatedItem = await Item.findByIdAndUpdate(
+      //     req.params.id,
+      //     { itemName, SKU, purchasePrice, retailPrice, description, itemImage },
+      //     { new: true, runValidators: true } // Returns the updated document
+      // );
 
       if (!updatedItem) {
           return res.status(404).json({ message: 'Item not found' });
@@ -88,7 +96,7 @@ const updateItem = async (req, res) => {
 
 
 // Delete an item by ID
-const deleteItem = async (req, res) => {
+exports.deleteItem = async (req, res) => {
   try {
     const item = await Item.findByIdAndDelete(req.params.id); // Find and delete the item
 
@@ -100,11 +108,15 @@ const deleteItem = async (req, res) => {
   }
 };
 
-// Export all controllers as an object
-module.exports = {
-  addItem,
-  getItems,
-  getItemById,
-  updateItem,
-  deleteItem
-};
+
+
+
+
+//Clean Data 
+function cleanCustomerData(data) {
+  const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+  return Object.keys(data).reduce((acc, key) => {
+    acc[key] = cleanData(data[key]);
+    return acc;
+  }, {});
+}

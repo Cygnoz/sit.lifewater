@@ -2,7 +2,10 @@ const LoadedStock = require('../Models/StockloadedSchema');
 const Transfer = require('../Models/TransferSchema');
 const WStock = require('../Models/WStockSchema');
 
-const getAllStock = async (req, res) => {
+
+
+
+exports.getAllStock = async (req, res) => {
   try {
     const stocks = await LoadedStock.find().sort({ date: -1 });
     res.json(stocks);
@@ -11,7 +14,11 @@ const getAllStock = async (req, res) => {
   }
 };
 
-const addStock = async (req, res) => {
+
+
+exports.addStock = async (req, res) => {
+  console.log("Add Stock:", req.body);
+
   // try {
   //   const {mainRoute, subRoute,  warehouse, date, transferNumber, items, autoNotes, termsAndConditions} = req.body;
 
@@ -89,7 +96,8 @@ const addStock = async (req, res) => {
   //   });
   // }
   try {
-    const {mainRoute, subRoute,  warehouse, date, transferNumber, items, autoNotes, termsAndConditions} = req.body;
+    const cleanedData = cleanCustomerData(req.body);
+    const {mainRoute, subRoute,  warehouse, date, transferNumber, items, autoNotes, termsAndConditions} = cleanedData;
 
     // Validate required fields
     if (!transferNumber || !items || !items.length) {
@@ -135,7 +143,9 @@ const addStock = async (req, res) => {
 
 
 
-const getStockStats = async (req, res) => {
+
+
+exports.getStockStats = async (req, res) => {
   try {
     const totalStockLoad = await LoadedStock.aggregate([
       {
@@ -172,7 +182,7 @@ const getStockStats = async (req, res) => {
   }
 };
 
-const internalTransfer = async (req, res) => {
+exports.internalTransfer = async (req, res) => {
   const { fromTransferNumber, toTransferNumber, filledBottles } = req.body;
 
   try {
@@ -359,9 +369,22 @@ const updateWarehouseStock = async ({ warehouseName, items }) => {
 
 
 
-module.exports = {
-  getAllStock,
-  addStock,
-  getStockStats,
-  internalTransfer
-};
+
+
+
+
+
+
+
+
+
+
+
+  //Clean Data 
+  function cleanCustomerData(data) {
+    const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+    return Object.keys(data).reduce((acc, key) => {
+      acc[key] = cleanData(data[key]);
+      return acc;
+    }, {});
+  }

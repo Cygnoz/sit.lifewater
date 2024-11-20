@@ -6,7 +6,7 @@ const warehouseController = require('../controller/WarehouseController');
 const orderController = require('../controller/OrderController');
 const unloadController = require('../controller/UnloadController');
 
-const upload = require('../middleware/Multermiddleware')
+// const upload = require('../middleware/Multermiddleware')
 
 //Stock
 router.post('/stock', stockController.addStock);
@@ -15,9 +15,9 @@ router.get('/stockstats', stockController.getStockStats);
 router.put('/internaltransfer', stockController.internalTransfer);
 
 //Item
-router.post('/item',upload.single('itemImage'), itemController.addItem);
+router.post('/item', itemController.addItem);
 router.get('/item', itemController.getItems);
-router.put('/edititem/:id', upload.single('itemImage'), itemController.updateItem); 
+router.put('/edititem/:id',  itemController.updateItem); 
 router.get('/getitem/:id', itemController.getItemById);
 router.delete('/item/:id', itemController.deleteItem);
 
@@ -31,7 +31,7 @@ router.delete('/warehouse/:id', warehouseController.deleteWarehouse);
 
 
 //Orders
-router.post('/orders',upload.single('itemImage'), orderController.createOrder);
+router.post('/orders', orderController.createOrder);
 router.get('/orders/:id', orderController.viewOrder);
 router.get('/orders', orderController.viewAllOrders);
 router.delete('/orders/:id', orderController.deleteOrder);

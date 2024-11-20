@@ -1,14 +1,16 @@
-const Unload = require('../Models/UnloadedSchema'); // Adjust the path as necessary
-const { updateWarehouseStock } = require('../controller/WarehouseController'); // Adjust the path as necessary
-const Warehouse = require('../Models/WarehouseSchema'); // Adjust the path as necessary
-const Item = require('../Models/ItemSchema'); // Ensure you import the Item model
+const Unload = require('../Models/UnloadedSchema');
+const { updateWarehouseStock } = require('../controller/WarehouseController');
+const Warehouse = require('../Models/WarehouseSchema');
+const Item = require('../Models/ItemSchema'); 
 
 // Function to add a new unload document
-const addUnload = async (req, res) => {
-  try {
-    const { mainRoute, warehouseName, date, transferNumber, items, autoNotes, termsAndConditions } = req.body;
+exports.addUnload = async (req, res) => {
+  console.log("Unload Item:", req.body);
+  try { 
+    const cleanedData = cleanCustomerData(req.body);
+    const { mainRoute, warehouseName, date, transferNumber, items, autoNotes, termsAndConditions } = cleanedData;
 
-    console.log(req.body);
+
     
     // Check if the warehouse exists in the database
     const warehouseExists = await Warehouse.findOne({ warehouseName });
@@ -44,7 +46,7 @@ const addUnload = async (req, res) => {
     });
 
     const savedUnload = await newUnload.save();
-    console.log("adding items", newUnload);
+    console.log("Adding items", newUnload);
 
     // Update warehouse stock
     await updateWarehouseStock({ warehouseName, items: validItems });
@@ -61,7 +63,7 @@ const addUnload = async (req, res) => {
 
   
   // Function to get all unload documents
-  const getAllUnloads = async (req, res) => {
+exports.getAllUnloads = async (req, res) => {
     try {
       const unloads = await Unload.find();
       res.status(200).json(unloads);
@@ -71,7 +73,24 @@ const addUnload = async (req, res) => {
     }
   };
   
-module.exports = {
-  addUnload,
-  getAllUnloads
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //Clean Data 
+  function cleanCustomerData(data) {
+    const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+    return Object.keys(data).reduce((acc, key) => {
+      acc[key] = cleanData(data[key]);
+      return acc;
+    }, {});
+  }
