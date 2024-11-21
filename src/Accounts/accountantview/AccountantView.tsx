@@ -16,7 +16,7 @@ function AccountantViewUI() {
   const { id } = useParams<{ id: string }>() // Extract the `id` parameter from the route
   const [trialBalance, setTrialBalance] = useState<TrialBalance[]>([])
   const [error, setError] = useState<string | null>(null)
-  const baseCurrency = "USD"
+  const baseCurrency = "AED"
 
   const fetchTrialBalance = async () => {
     try {
@@ -28,6 +28,8 @@ function AccountantViewUI() {
         console.log(trialBalance)
       } else {
         setError("Invalid account ID.")
+        console.log(error);
+        
       }
     } catch (err: any) {
       setError(err.message || "Failed to fetch trial balance.")
@@ -37,6 +39,11 @@ function AccountantViewUI() {
   useEffect(() => {
     fetchTrialBalance()
   }, [id])
+
+  const totalDebits = trialBalance.reduce((acc, item) => acc + (item.debitAmount || 0), 0);
+  const totalCredits = trialBalance.reduce((acc, item) => acc + (item.creditAmount || 0), 0);
+  const netTotal = totalDebits - totalCredits;
+  
 
   return (
     <div className="p-2">
@@ -81,7 +88,7 @@ function AccountantViewUI() {
 
           <div className="mt-4 text-end">
             <p className="text-textColor font-bold me-36">
-              Total: <span>150.00 ({baseCurrency})</span>
+              Total: <span>{netTotal} ({baseCurrency})</span>
             </p>
           </div>
         </div>

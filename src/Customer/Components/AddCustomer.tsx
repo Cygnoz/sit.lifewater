@@ -103,13 +103,6 @@ export default function AddCustomer() {
     }))
   }
 
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setLogo(file)
-    }
-  }
-
   const clearForm = () => {
     setFormData({
       customerType: "Business",

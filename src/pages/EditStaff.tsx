@@ -86,44 +86,59 @@ const EditStaff: React.FC = () => {
         staff.visaStatus === "" ||
         (staff.designation === "Sales" && (userName === "" || password === ""))
       ) {
-        toast.error("Please fill in the missing field")
-      } else if (
+        toast.error("Please fill in the missing field");
+        return;
+      }
+  
+      if (
         staff.mobileNumber.length < 10 ||
         staff.emiratesId.length < 15 ||
         staff.visaNumber.length < 10
       ) {
-        toast.error("Either the Mobile No, Visa No, or Emirates ID is incorrect.")
-      } else if (staff.designation === "Sales" && password !== confirmPassword) {
-        toast.error("Passwords do not match.")
-      } else {
-        const formData = new FormData();
-        formData.append("firstname", staff.firstname);
-        formData.append("lastname", staff.lastname);
-        formData.append("address", staff.address);
-        formData.append("visaStatus", staff.visaStatus);
-        formData.append("mobileNumber", staff.mobileNumber);
-        formData.append("whatsAppNumber", isSameAsPhone ? staff.mobileNumber : whatsAppNumber);
-        formData.append("designation", staff.designation);
-        formData.append("emiratesId", staff.emiratesId);
-        formData.append("visaNumber", staff.visaNumber);
-        formData.append("visaValidity", staff.visaValidity);
-        formData.append("dateofBirth", staff.dateofBirth);
-    
-        if (profile) {
-          formData.append("profile", profile); // Append the image file
-        }
-
-        await updateStaffAPI(id!, formData)
-        toast.success("Staff updated successfully!")
-
-        setTimeout(() => {
-          navigate("/staff")
-        }, 2000)
+        toast.error("Either the Mobile No, Visa No, or Emirates ID is incorrect.");
+        return;
       }
+  
+      if (staff.designation === "Sales" && password !== confirmPassword) {
+        toast.error("Passwords do not match.");
+        return;
+      }
+  
+      const formData = new FormData();
+      formData.append("firstname", staff.firstname);
+      formData.append("lastname", staff.lastname);
+      formData.append("address", staff.address);
+      formData.append("visaStatus", staff.visaStatus);
+      formData.append("mobileNumber", staff.mobileNumber);
+      formData.append("whatsAppNumber", isSameAsPhone ? staff.mobileNumber : whatsAppNumber);
+      formData.append("designation", staff.designation);
+  
+      // Only append username and password for Sales designation
+      if (staff.designation === "Sales") {
+        formData.append("username", userName);
+        formData.append("password", password);
+      }
+  
+      formData.append("emiratesId", staff.emiratesId);
+      formData.append("visaNumber", staff.visaNumber);
+      formData.append("visaValidity", staff.visaValidity);
+      formData.append("dateofBirth", staff.dateofBirth);
+  
+      if (profile) {
+        formData.append("profile", profile); // Append the image file
+      }
+  
+      await updateStaffAPI(id!, formData);
+      toast.success("Staff updated successfully!");
+  
+      setTimeout(() => {
+        navigate("/staff");
+      }, 2000);
     } catch (error: any) {
-      toast.error(error.message || "Failed to update staff.")
+      toast.error(error.message || "Failed to update staff.");
     }
-  }
+  };
+  
   
   return (
     <div className="min-h-screen bg-gray-100  items-center justify-center my-2">

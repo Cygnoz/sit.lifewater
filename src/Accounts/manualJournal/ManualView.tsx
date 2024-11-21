@@ -18,7 +18,7 @@ function ManualView({}: Props) {
   useEffect(() => {
     const fetchJournal = async () => {
       try {
-        const journal = await getOneJournalAPI(id);  // Fetch journal data using the API
+        const journal = await getOneJournalAPI(id as string);  // Fetch journal data using the API
         setOneJournal(journal);  // Set the fetched journal data to state
       } catch (error) {
         console.error("Error fetching journal:", error);
