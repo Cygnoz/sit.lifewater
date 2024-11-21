@@ -1,6 +1,6 @@
 pipeline {
     agent any
- 
+
     environment {
         // Define environment variables for AWS ECR and ECS
         AWS_REGION = 'ap-south-1'
@@ -8,16 +8,12 @@ pipeline {
         IMAGE_NAME = 'thurs/test'
         AWS_CREDENTIALS_ID = '2157424a-b8a7-45c0-90c2-bc0d407f6cea'
         AWS_ACCOUNT_ID = '654654462146' // Add your AWS account ID here
-        SONARQUBE_PROJECT_KEY = 'Lifewater-stock'
-        SONARQUBE_SCANNER_CREDENTIALS_ID = '8ce54268-3601-4f42-9eba-c96cfff28c2f' // Jenkins credentials ID for SonarQube token
         ECS_CLUSTER_NAME = 'thiruday' // Replace with your ECS cluster name
         ECS_SERVICE_NAME = 'thurday-service' // Replace with your ECS service name
         ECS_TASK_DEFINITION_NAME = 'thursday' // Replace with your ECS task definition name
     }
- 
-                
-            }
-        }
+
+    stages {
         stage('Build Docker Image') {
             steps {
                 script {
@@ -26,7 +22,7 @@ pipeline {
                 }
             }
         }
- 
+
         stage('Login to ECR') {
             steps {
                 script {
@@ -39,7 +35,7 @@ pipeline {
                 }
             }
         }
- 
+
         stage('Push Docker Image') {
             steps {
                 script {
@@ -49,7 +45,7 @@ pipeline {
                 }
             }
         }
- 
+
         stage('Update ECS Service') {
             steps {
                 script {
@@ -81,7 +77,7 @@ pipeline {
             }
         }
     }
- 
+
     post {
         success {
             echo 'Pipeline completed successfully!'
