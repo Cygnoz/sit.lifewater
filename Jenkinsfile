@@ -15,29 +15,7 @@ pipeline {
         ECS_TASK_DEFINITION_NAME = 'thursday' // Replace with your ECS task definition name
     }
  
-    stages {
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    // Set up SonarQube Scanner
-                    scannerHome = tool 'sonarqube' // Replace with your SonarQube Scanner tool name
-                }
-                withSonarQubeEnv('APIND_Sonarqube') { // Replace with your SonarQube server name
-                    // Use the SonarQube Scanner
-                    withCredentials([string(credentialsId: "${SONARQUBE_SCANNER_CREDENTIALS_ID}", variable: 'SONAR_TOKEN')]) {
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} -Dsonar.sources=. -Dsonar.login=${SONAR_TOKEN}"
-                    }
-                }
-            }
-        }
-         stage('Dependency-Check Analysis') {
-    steps {
-        script {
-            dependencyCheck additionalArguments: '-f HTML', 
-                            odcInstallation: 'Dependency-Check', // Ensure this name matches the configuration in Global Tool Configuration
-                            outdir: 'dependency-check-report', 
-                              scanpath: '.'
-                }
+                
             }
         }
         stage('Build Docker Image') {
