@@ -1,7 +1,7 @@
 // v1.0
 
-const Account = require("../Models/account")
-const TrialBalance = require("../Models/trialBalance")
+const Account = require("../../Models/account")
+const TrialBalance = require("../../Models/trialBalance")
 const moment = require('moment-timezone');
 
 

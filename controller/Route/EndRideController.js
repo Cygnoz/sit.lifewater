@@ -1,5 +1,5 @@
-const ActiveRoute = require('../Models/ActiveRoute');
-const EndRide = require('../Models/EndRide');
+const ActiveRoute = require('../../Models/ActiveRoute');
+const EndRide = require('../../Models/EndRide');
 
 exports.endRide = async (req, res) => {
   try {

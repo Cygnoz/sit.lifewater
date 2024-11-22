@@ -1,5 +1,5 @@
-const Subroute = require('../Models/SubrouteSchema'); 
-const Route = require('../Models/RouteSchema'); 
+const Subroute = require('../../Models/SubrouteSchema'); 
+const Route = require('../../Models/RouteSchema'); 
 
 // Add a new subroute
 exports.addSubroute = async (req, res) => {

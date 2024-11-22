@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const Staff = require("../Models/StaffSchema");
+const Staff = require("../../Models/StaffSchema");
 
 
 // Get all staff members

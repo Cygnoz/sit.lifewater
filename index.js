@@ -39,7 +39,7 @@ app.use('/uploads', express.static('uploads')); // Ensure the path is correct
 
 
 // Routes
-app.use('/api', Routes); 
+app.use(Routes); 
 
 
 // Test route

@@ -1,4 +1,4 @@
-const ActiveRoute = require('../Models/ActiveRoute'); // Adjust the path accordingly
+const ActiveRoute = require('../../Models/ActiveRoute'); // Adjust the path accordingly
 
 //Create a new Active Route
 exports.createActiveRoute = async (req, res) => {

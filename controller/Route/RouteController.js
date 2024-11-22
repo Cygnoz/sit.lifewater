@@ -1,6 +1,6 @@
-const MainRoute = require("../Models/RouteSchema");
+const MainRoute = require("../../Models/RouteSchema");
 const mongoose = require('mongoose');
-const SubRoute = require('../Models/SubrouteSchema');
+const SubRoute = require('../../Models/SubrouteSchema');
  
  
 // Add a new route

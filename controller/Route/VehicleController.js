@@ -1,4 +1,4 @@
-const Vehicle = require('../Models/VehicleSchema'); // Assuming Vehicle schema is in the Model folder
+const Vehicle = require('../../Models/VehicleSchema'); // Assuming Vehicle schema is in the Model folder
 
 // Add a new vehicle
 exports.addVehicle = async (req, res) => {

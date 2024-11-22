@@ -1,8 +1,8 @@
 
 
-const Journal = require("../Models/journal");
-const Account = require("../Models/account")
-const TrialBalance = require("../Models/trialBalance");
+const Journal = require("../../Models/journal");
+const Account = require("../../Models/account")
+const TrialBalance = require("../../Models/trialBalance");
 const moment = require('moment-timezone');
 
 
