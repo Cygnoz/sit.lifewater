@@ -1,45 +1,19 @@
 pipeline {
     agent any
- 
+
     environment {
         // Define environment variables for AWS ECR and ECS
         AWS_REGION = 'ap-south-1'
-        ECR_REPOSITORY = 'lifewater-stock'
-        IMAGE_NAME = 'lifewater-stock'
+        ECR_REPOSITORY = 'thurs/test'
+        IMAGE_NAME = 'thurs/test'
         AWS_CREDENTIALS_ID = '2157424a-b8a7-45c0-90c2-bc0d407f6cea'
         AWS_ACCOUNT_ID = '654654462146' // Add your AWS account ID here
-        SONARQUBE_PROJECT_KEY = 'Lifewater-stock'
-        SONARQUBE_SCANNER_CREDENTIALS_ID = '8ce54268-3601-4f42-9eba-c96cfff28c2f' // Jenkins credentials ID for SonarQube token
-        ECS_CLUSTER_NAME = 'Life-water' // Replace with your ECS cluster name
-        ECS_SERVICE_NAME = 'Lifewater-stock1 ' // Replace with your ECS service name
-        ECS_TASK_DEFINITION_NAME = 'lifewater-stock' // Replace with your ECS task definition name
+        ECS_CLUSTER_NAME = 'thiruday' // Replace with your ECS cluster name
+        ECS_SERVICE_NAME = 'shvyucvuvfsyuf' // Replace with your ECS service name
+        ECS_TASK_DEFINITION_NAME = 'thursday' // Replace with your ECS task definition name
     }
- 
+
     stages {
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    // Set up SonarQube Scanner
-                    scannerHome = tool 'sonarqube' // Replace with your SonarQube Scanner tool name
-                }
-                withSonarQubeEnv('APIND_Sonarqube') { // Replace with your SonarQube server name
-                    // Use the SonarQube Scanner
-                    withCredentials([string(credentialsId: "${SONARQUBE_SCANNER_CREDENTIALS_ID}", variable: 'SONAR_TOKEN')]) {
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} -Dsonar.sources=. -Dsonar.login=${SONAR_TOKEN}"
-                    }
-                }
-            }
-        }
-         stage('Dependency-Check Analysis') {
-    steps {
-        script {
-            dependencyCheck additionalArguments: '-f HTML', 
-                            odcInstallation: 'Dependency-Check', // Ensure this name matches the configuration in Global Tool Configuration
-                            outdir: 'dependency-check-report', 
-                              scanpath: '.'
-                }
-            }
-        }
         stage('Build Docker Image') {
             steps {
                 script {
@@ -48,7 +22,7 @@ pipeline {
                 }
             }
         }
- 
+
         stage('Login to ECR') {
             steps {
                 script {
@@ -61,7 +35,7 @@ pipeline {
                 }
             }
         }
- 
+
         stage('Push Docker Image') {
             steps {
                 script {
@@ -71,7 +45,7 @@ pipeline {
                 }
             }
         }
- 
+
         stage('Update ECS Service') {
             steps {
                 script {
@@ -103,7 +77,7 @@ pipeline {
             }
         }
     }
- 
+
     post {
         success {
             echo 'Pipeline completed successfully!'
