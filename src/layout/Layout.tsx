@@ -21,7 +21,6 @@ import CreateVehicle from '../Vehicle/Pages/CreateVehicle';
 import EditVehicles from '../Vehicle/Pages/EditVehicles';
 import ViewVehicle from '../Vehicle/Components/ViewVehicle';
 import StaffOverview from '../components/Staffoverview';
-import CreateCustomer from '../Customer/Pages/Createcustomer';
 import AddCustomer from '../Customer/Components/AddCustomer';
 import EditCustomer from '../Customer/Pages/EditCustomer';
 import ViewCustmor from '../Customer/Components/ViewCustmor';
@@ -30,7 +29,7 @@ import CreateInternalTransfer from '../Stock/Internal transfer/Pages/CreateInter
 import AddItem from '../Stock/Items/Components/AddItem';
 import CreateItem from '../Stock/Items/Pages/CreateItem';
 import EditItem from '../Stock/Items/Pages/EditItem';
-import StockLoaded from '../Stock/Stock loaded/Pages/Stock_loaded';
+import StockLoaded from '../Modules/Stock/StockLoaded/Stock_loaded';
 import UnloadedAdd from '../Stock/Unload stock/Pages/UnloadAdd';
 import AddWStock from '../Stock/W stock/Components/AddWStock';
 import CreateWStock from '../Stock/W stock/Pages/CreateWstock';
@@ -73,17 +72,18 @@ import ViewActiveRoute from '../Route/Components/ViewActiveRoute';
 
 import ViewSubRoute from '../Route/Components/ViewSubRoute';
 import MyComponent from '../dashboard/pages/DashBoard';
-import AddJournalEntry from '../Accounts/Components/AddJournalEntry';
-import Banking from '../Accounts/Pages/Banking';
+// import AddJournalEntry from '../Accounts/Components/AddJournalEntry';
+// import Banking from '../Accounts/Pages/Banking';
 import CreateProfile from '../Settings/Pages/CreateProfile';
 import ChartOfAccounts from '../Accounts/Pages/ChartOfAccount';
 import AccountantViewUI from '../Accounts/accountantview/AccountantView';
 import NewJournal from '../Accounts/manualJournal/newJournal/Newjournal';
 import ManualHome from '../Accounts/manualJournal/ManualHome';
 import ManualView from '../Accounts/manualJournal/ManualView';
-import BankHome from '../Accounts/Bank/BankHome';
-import Cash from '../Accounts/Cash/Cash';
-import CashTableView from '../Accounts/Cash/CashTableView';
+import CustomerHome from '../Modules/Customer/CustomerHome.tsx/CustomerHome';
+// import BankHome from '../Accounts/Bank/BankHome';
+// import Cash from '../Accounts/Cash/Cash';
+// import CashTableView from '../Accounts/Cash/CashTableView';
 
 
 
@@ -98,8 +98,10 @@ const App: React.FC = () => {
 
   return (
     <>
+
       {/* Header at the top, spans full width */}
       <div className="flex h-[1200px] bg-[#f6f6f6]">
+        
         {/* Sidebar on the left, fixed width */}
         <Sidebar onSelect={handleNavSelect} className="w-1/4" />
         {/* Main content (SubHeader) on the right, takes up remaining space */}
@@ -150,7 +152,7 @@ const App: React.FC = () => {
 
 
               {/* CUSTOMER */}
-              <Route path='/customer' element={<CreateCustomer/>}/>
+              <Route path='/customer' element={<CustomerHome/>}/>
               <Route path='/editcustomer/:id' element={<EditCustomer/>}/>
               <Route path='/addcustomer' element={<AddCustomer/>}/>
               {/* <Route path='/editindividual' element={<EditIndividual/>}/> */}

@@ -1,6 +1,5 @@
 import { ChangeEvent } from "react";
-import SearchIcon from "../assets/images/search.svg";
-
+import SearchIcon from "../assets/icons/SerachIcon";
 type Props = {
   searchValue: string;
   onSearchChange: (value: string) => void;

@@ -28,6 +28,9 @@ export default {
         fourthiary_active: '#232A2F',
         fourthiary_disabled: '#BEC0C2',
 
+        Text:'#303F58',
+        Text_2:'#4B5C79'
+
       },
 
     },
