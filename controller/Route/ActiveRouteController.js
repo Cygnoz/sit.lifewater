@@ -1,4 +1,4 @@
-const ActiveRoute = require('../../Models/ActiveRoute'); // Adjust the path accordingly
+const ActiveRoute = require('../../Models/ActiveRoute'); 
 
 //Create a new Active Route
 exports.createActiveRoute = async (req, res) => {
@@ -8,7 +8,7 @@ exports.createActiveRoute = async (req, res) => {
     // const { mainRoute, subRoute, helper, driver, vehicleNo, openingStock, loadedStock, totalStock, startingKm ,Salesman } = req.body;
 
     // Create a new ActiveRoute instance
-    const newActiveRoute = new ActiveRoute({ ...cleanedData,  });
+    const newActiveRoute = new ActiveRoute({ ...cleanedData });
 
     // const newActiveRoute = new ActiveRoute({
     //   mainRoute,
