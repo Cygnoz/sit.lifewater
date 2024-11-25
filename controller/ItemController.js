@@ -5,31 +5,46 @@ exports.addItem = async (req, res) => {
   console.log("Add Item:", req.body);
   try {
     const cleanedData = cleanCustomerData(req.body);
-    if (!cleanedData.itemName || !cleanedData.SKU) {
-      return res.status(400).json({ message: 'Required fields missing' });
+    const { sku }=cleanedData;
+
+    //Required check
+    if ( typeof cleanedData.itemName ==='undefined' ) {
+      return res.status(400).json({ message: 'Item Name Required ' });
+    }
+    if ( typeof cleanedData.sku ==='undefined') {
+      return res.status(400).json({ message: 'SKU Required' });
+    }
+    if (typeof cleanedData.costPrice ==='undefined') {
+      return res.status(400).json({ message: 'Cost Price Required' });
+    }
+    if (typeof cleanedData.sellingPrice ==='undefined') {
+      return res.status(400).json({ message: 'Selling Price Required' });
+    }
+    if (typeof cleanedData.category ==='undefined') {
+      return res.status(400).json({ message: 'Select a Category' }); 
     }
 
-    // // Handle the base64 image
-    // let imageData = req.body.itemImage;
-    
-    // // Optional: Validate if the image is actually a base64 string
-    // if (imageData && !imageData.startsWith('data:image')) {
-    //   return res.status(400).json({ message: 'Invalid image format' });
-    // }
+    if (cleanedData.category !=='Resaleable' && cleanedData.category !=='Non-Resaleable') {
+      return res.status(400).json({ message: 'Select a valid category' }); 
+    }
+
+
+    if (cleanedData.category ==='Resaleable') {
+      cleanedData.status=["Filled", "Empty", "Bottle leak", "Damage Bottle cap", "Other Damage reason"]
+    }
+
+    //Sku check
+    const existSku = await Item.findOne({sku});
+    if (existSku) {
+      return res.status(400).json({ message: 'SKU exists in records' });
+    }
 
     const newItem = new Item({ ...cleanedData });
 
 
-    // const newItem = new Item({
-    //   itemName: req.body.itemName,
-    //   SKU: req.body.SKU,
-    //   purchasePrice: req.body.purchasePrice,
-    //   retailPrice: req.body.retailPrice,
-    //   description: req.body.description,
-    //   itemImage: imageData // Store the base64 string directly
-    // });
-
     const savedItem = await newItem.save();
+    console.log("Item Saved Successfully",savedItem);
+    
     res.status(201).json(savedItem);
   } catch (error) {
     console.error('Error adding item:', error);
@@ -51,6 +66,8 @@ exports.getItems = async (req, res) => {
     res.status(500).json({ message: 'Failed to retrieve items', error: error.message });
   }
 };
+
+
 // Get a single item by ID
 exports.getItemById = async (req, res) => {
   try {
@@ -64,23 +81,54 @@ exports.getItemById = async (req, res) => {
   }
 };
 
-// Update an item by ID
 
+// Update an item by ID
 exports.updateItem = async (req, res) => {
   console.log("Edit Item:", req.body);
   try {
       // Destructure data from req.body and check for uploaded file
-      // const { itemName, SKU, purchasePrice, retailPrice, description ,itemImage} = req.body;
       const cleanedData = cleanCustomerData(req.body);
+      const { sku } = req.body;
+
+      //Required check
+    if ( typeof cleanedData.itemName ==='undefined' ) {
+      return res.status(400).json({ message: 'Item Name Required ' });
+    }
+    if ( typeof cleanedData.sku ==='undefined') {
+      return res.status(400).json({ message: 'SKU Required' });
+    }
+    if (typeof cleanedData.costPrice ==='undefined') {
+      return res.status(400).json({ message: 'Cost Price Required' });
+    }
+    if (typeof cleanedData.sellingPrice ==='undefined') {
+      return res.status(400).json({ message: 'Selling Price Required' });
+    }
+    if (typeof cleanedData.category ==='undefined') {
+      return res.status(400).json({ message: 'Select a Category' }); 
+    }
+
+    if (cleanedData.category !=='Resaleable' && cleanedData.category !=='Non-Resaleable') {
+      return res.status(400).json({ message: 'Select a valid category' }); 
+    }
+
+    if (cleanedData.category ==='Resaleable') {
+      cleanedData.status=["Filled", "Empty", "Bottle leak", "Damage Bottle cap", "Other Damage reason"]
+    }
+    if (cleanedData.category ==='Non-Resaleable') {
+      cleanedData.status = undefined;
+    }
+
+    //Sku check
+    const existSku = await Item.findOne({sku});
+    if (existSku) {
+      return res.status(400).json({ message: 'SKU exists in records' });
+    }
+
 
       //const itemImage = req.file ? req.file.path : null; // Get the file path if a file was uploaded
       const updatedItem = await Item.findByIdAndUpdate(req.params.id, cleanedData, { new: true, runValidators: true });
 
-      // const updatedItem = await Item.findByIdAndUpdate(
-      //     req.params.id,
-      //     { itemName, SKU, purchasePrice, retailPrice, description, itemImage },
-      //     { new: true, runValidators: true } // Returns the updated document
-      // );
+     
 
       if (!updatedItem) {
           return res.status(404).json({ message: 'Item not found' });
