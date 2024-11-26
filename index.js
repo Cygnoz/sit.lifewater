@@ -11,16 +11,16 @@ app.use(cors())
 app.use(express.json());
 
 // Routes
-app.use('/api', orderRoutes); 
+app.use(orderRoutes); 
 
 
 // Test route
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.status(200).json('Life Water server started - Order');
 });
 
 // Server listen
 const PORT = process.env.PORT || 4002;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Life Water - Order Server is running on port ${PORT}`);
 });
