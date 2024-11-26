@@ -20,6 +20,7 @@ const ContextShare: React.FC<ContextShareProps> = ({ children }) => {
     skelton: false,
     noDataFound: false,
   });
+  
 
   return (
     <TableResponseContext.Provider value={{ loading, setLoading }}>
