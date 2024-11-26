@@ -10,6 +10,7 @@ interface CardProps {
   onCardClick: () => void;
 }
 
+
 const Cards: React.FC<CardProps> = ({
   imageSrc,
   title,

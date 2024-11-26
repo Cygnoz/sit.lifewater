@@ -12,6 +12,7 @@ import { TableResponseContext } from "../../../assets/Context/ContextShare";
 import { endpoints } from "../../../services/ApiEndpoint";
 import useApi from "../../../Hook/UseApi";
 
+
 const StockLoaded: React.FC = () => {
   const [activeCardIndex, setActiveCardIndex] = useState<number | null>(null);
   const [stockload, setStockload] = useState<any[]>([]);

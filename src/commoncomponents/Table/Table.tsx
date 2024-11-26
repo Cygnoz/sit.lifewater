@@ -7,6 +7,7 @@ import Trash2 from "../../assets/icons/Trash2";
 import TableSkelton from "../Skelton/TableSkelton";
 import PrintButton from "../Buttons/PrintButton";
 
+
 interface Column {
   id: string;
   label: string;

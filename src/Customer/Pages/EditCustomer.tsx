@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import back from "../../assets/images/backbutton.svg"
-import upload from "../../assets/images/upload image.svg"
+// import upload from "../../assets/images/upload image.svg"
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { getACustomerAPI, updateCustomerAPI } from "../../services/CustomerAPI/Customer"

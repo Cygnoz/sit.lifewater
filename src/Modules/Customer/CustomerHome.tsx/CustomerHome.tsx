@@ -13,6 +13,7 @@ import PlusIcon from "../../../assets/icons/PlusIcon";
 import total from "../../../assets/images/Group 2501.png"
 
 
+
 const CustomerHome = () => {
   const [activeCardIndex, setActiveCardIndex] = useState<number | null>(null);
   const [customersData, setCustomersData] = useState<any[]>([]);

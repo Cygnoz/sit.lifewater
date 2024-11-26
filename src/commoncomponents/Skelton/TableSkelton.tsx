@@ -12,6 +12,7 @@ type Props = {
           </div>
         </td>
       ))}
+      
     </tr>
   );
   }

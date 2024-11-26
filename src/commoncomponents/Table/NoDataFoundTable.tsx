@@ -4,6 +4,7 @@ type Props = {
     columns: any[]
 }
 
+
 function NoDataFoundTable({ columns }: Props) {
   return (
     <tr>

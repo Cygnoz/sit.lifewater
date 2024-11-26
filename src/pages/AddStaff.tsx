@@ -38,7 +38,7 @@ function AddStaff({}: Props) {
 
   
 
-  const handleImageUpload = (event) => {    
+  const handleImageUpload = (event:any) => {    
     const file = event.target.files[0];    
     if (file) {      
       const reader = new FileReader();       
