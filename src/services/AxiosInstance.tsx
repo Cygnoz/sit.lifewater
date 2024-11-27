@@ -1,15 +1,9 @@
 import axios from "axios";
 
 const BASE_URLS: Record<number, string> = {
-  5001: import.meta.env.VITE_REACT_APP_ACCOUNTS,
-  5002: import.meta.env.VITE_REACT_APP_CUSTOMERS,
-  5003: import.meta.env.VITE_REACT_APP_INVENTORY,
-  // 5004: import.meta.env.VITE_REACT_APP_ORGANIZATION,
-  5005: import.meta.env.VITE_REACT_APP_PURCHASE,
-  5006: import.meta.env.VITE_REACT_APP_REPORT,
-  5007: import.meta.env.VITE_REACT_APP_SALES,
-  5008: import.meta.env.VITE_REACT_APP_STAFF,
-  5009: import.meta.env.VITE_REACT_APP_SUPPLIER,
+  4000: import.meta.env.VITE_REACT_APP_BACKEND,
+  4001: import.meta.env.VITE_REACT_APP_STOCK,
+  4002: import.meta.env.VITE_REACT_APP_ORDER,
 };
 
 // console.log(import.meta.env.VITE_REACT_APP_ORGANIZATION,"api");

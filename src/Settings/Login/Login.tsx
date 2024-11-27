@@ -4,25 +4,63 @@ import EyeOffIcon from "../../assets/icons/EyeOffIcon"
 import { toast } from "react-toastify"
 import { useNavigate } from "react-router-dom"
 import Button from "../../commoncomponents/Buttons/Button"
+import useApi from "../../Hook/UseApi"
+import { endpoints } from "../../services/ApiEndpoint"
+import axios from "axios"
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-  const [error] = useState("")
-  const [isLoading] = useState(false)
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { request: CheckLogin } = useApi("post", 4000);
 
   const navigate = useNavigate()
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword)
   }
 
-  const handleLogin = () => {
-    if (username && password) {
-      localStorage.setItem("isLoggedIn", "true")
-      navigate("/dashboard")
-    } else {
-      toast.error("Please enter your credentials")
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setIsLoading(true);
+    setError(""); // Reset error message
+
+    try {
+      const response = await CheckLogin(endpoints.LOGIN, { username, password });
+      // Log the response to verify its structure
+      console.log("Login response:", response.response?.data.success);
+
+      // Check if login is successful
+      if (response.response?.data.success) {
+        // Display success message and navigate to dashboard
+        toast.success(response.response?.data.message || 'Login successful! Redirecting...');
+        const token = response.response?.data.token.split(' ')[1];
+
+        // Save the token for future authenticated requests
+        localStorage.setItem("authToken", token);
+        // Pass username via navigate state
+        navigate("/dashboard")
+      } else {
+        // Show an error message if login fails
+        const errorMessage = response.response?.data.message || "Invalid username or password";
+        setError(errorMessage);
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // Handle Axios error
+        const errorMessage = error.response?.data?.message || "Login failed. Please try again.";
+        setError(errorMessage);
+        toast.error(errorMessage);
+      } else {
+        // Handle non-Axios error
+        setError("Login failed. Please try again.");
+        toast.error("Login failed. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   }
 
