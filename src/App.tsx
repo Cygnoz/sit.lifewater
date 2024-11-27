@@ -8,8 +8,8 @@ const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   useEffect(() => {
-    const loggedInStatus = localStorage.getItem("isLoggedIn");
-    if (loggedInStatus === "true") {
+    const loggedInStatus = localStorage.getItem("authToken");
+    if (loggedInStatus) {
       setIsLoggedIn(true);
     }
   }, []);
