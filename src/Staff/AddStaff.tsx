@@ -1,111 +1,120 @@
-import { useState } from "react";
-import { addStaffAPI } from "../services/AllApi";
+import { ChangeEvent, FormEvent, useContext, useEffect, useState } from "react";
 import back from "../assets/images/backbutton.svg";
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css'; 
-import upload from '../assets/images/upload image.svg'
+import 'react-toastify/dist/ReactToastify.css';
+import { StaffResponseContext } from "../Context/ContextShare";
+import useApi from "../Hook/UseApi";
+import { endpoints } from "../services/ApiEndpoint";
+import upload from "../assets/images/addStaffFrame.jpg"
 type Props = {};
 
-function AddStaff({}: Props) {
-  const [mobileNumber, setMobileNumber] = useState<string>("");
-  const [whatsAppNumber, setWhatsAppNumber] = useState("");
+interface StaffData {
+  mobileNumber: string;
+  whatsAppNumber: string;
+  isSameAsPhone: string;
+  visaStatus: string;
+  visaNumber: string;
+  emiratesId: string;
+  firstname: string;
+  lastname: string;
+  dateOfBirth: string;
+  address: string;
+  designation: string;
+  profile: string;
+  nationality: string;
+  username: string;
+  password: string;
+  confirmPassword: string;
+  visaValidity: string;
+}
+
+function AddStaff({ }: Props) {
+  const { request: addStaff } = useApi("post", 4000);
   const [isSameAsPhone, setIsSameAsPhone] = useState(false);
-  const [visaStatus, setVisaStatus] = useState("");
-  const [visaNumber, setVisaNumber] = useState<string>("");
-  const [emiratesId, setEmiratesId] = useState<string>("");
-  const [fullname, setFullname] = useState("");
-  const [lastname, setLastname] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [address, setAddress] = useState("");
-  const [designation, setDesignation] = useState("");
-  const [visaValidity, setVisaValidity] = useState("");
-  const [profile, setProfile] = useState("");
-  const [nationality, setNationality] = useState("");
-  const [userName, setUserName] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [err, setErr] = useState<string>("");
+  const { staffResponse } = useContext(StaffResponseContext)!;
+  const [initialStaffData, setInitialStaffData] = useState<StaffData>(
+    {
+      address: "",
+      confirmPassword: "",
+      dateOfBirth: "",
+      designation: "",
+      emiratesId: "",
+      firstname: "",
+      isSameAsPhone: "",
+      lastname: "",
+      mobileNumber: "",
+      nationality: "",
+      password: "",
+      profile: "",
+      username: "",
+      visaNumber: "",
+      visaStatus: "",
+      visaValidity: "",
+      whatsAppNumber: "",
+    }
+  );
+  console.log(initialStaffData);
+
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value, } = event.target;
+
+    setInitialStaffData({ ...initialStaffData, [name]: value })
+  };
+
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setInitialStaffData((prevDetails: any) => ({
+          ...prevDetails,
+          profile: base64String,
+        }));
+      };
+
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleWhatsAppCheckbox = () => {
-    setIsSameAsPhone(!isSameAsPhone);
-    if (!isSameAsPhone) {
-      setWhatsAppNumber(mobileNumber);
-    } else {
-      setWhatsAppNumber("");
-    }
-  };
+    setIsSameAsPhone((prevState) => {
+      const newState = !prevState;
 
-  
+      setInitialStaffData((prevDetails: any) => ({
+        ...prevDetails,
+        whatsAppNumber: newState ? prevDetails.mobileNumber : "", // Copy mobileNumber or reset
+      }));
 
-  const handleImageUpload = (event:any) => {    
-    const file = event.target.files[0];    
-    if (file) {      
-      const reader = new FileReader();       
-      reader.onloadend = () => {        
-        setProfile(reader.result as string); // This is the Base64 string
-      }; 
-      reader.readAsDataURL(file); // Read the file as a Data URL (Base64)
-    }
+      return newState;
+    });
   };
 
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
 
-    const staffData = new FormData();
-    staffData.append("firstname", fullname);
-    staffData.append("lastname", lastname);
-    if (profile) {
-      staffData.append("profile", profile);
-    }
-    staffData.append("address", address);
-    staffData.append("visaStatus", visaStatus as "Valid" | "Expired" | "In Process");
-    staffData.append("visaValidity", visaValidity);
-    staffData.append("mobileNumber", mobileNumber);
-    staffData.append("whatsAppNumber", whatsAppNumber);
-    staffData.append("visaNumber", visaNumber);
-    staffData.append("dateofBirth", dateOfBirth);
-    staffData.append("nationality", nationality);
-    staffData.append("designation", designation as "Sales" | "Driver" | "Helper");
-    staffData.append("emiratesId", emiratesId);
-    staffData.append("username", userName);
-    staffData.append("password", password);
-    staffData.append("confirmPassword", confirmPassword);
-
+    const url = `${endpoints.ADD_STAFF}`;
     try {
-      const response = await addStaffAPI(staffData);
-      if (response.message) {
-        toast.error(response.message); // Display error toast
-        console.log(response.message);
-      } else {
-        clearForm();
-        toast.success("Staff added successfully!"); // Display success toast
+      const { response, error } = await addStaff(url, initialStaffData);
+      if (!error && response) {
+        toast.success(response?.data.message);
       }
+      // setStaffData(initialStaffDataState); // Reset form
+      console.log(response);
+
     } catch (error) {
-      toast.error("An error occurred while adding the staff member."); // Display error toast
+      toast.error("Failed to save staff.");
+      console.log(error);
     }
   };
 
-  const clearForm = () => {
-    setFullname("");
-    setLastname("");
-    setDateOfBirth("");
-    setMobileNumber("");
-    setWhatsAppNumber("");
-    setVisaStatus("");
-    setVisaNumber("");
-    setVisaValidity("");
-    setNationality("");
-    setAddress("");
-    setEmiratesId("");
-    setDesignation("");
-    setUserName("");
-    setPassword("");
-    setProfile(null);
-    setIsSameAsPhone(false);
-    setConfirmPassword("");
-  };
+
 
   return (
     <div>
@@ -120,7 +129,6 @@ function AddStaff({}: Props) {
         draggable
         pauseOnHover
         theme="colored"
-         // optional CSS class for further styling
       />
       <div className="min-h-screen bg-gray-100 items-center justify-center ">
         <div className="flex gap-3 items-center w-full max-w-8xl mt-2 mb-2 ms-1">
@@ -132,33 +140,54 @@ function AddStaff({}: Props) {
           <h2 className="text-2xl font-bold">Create New Staff</h2>
         </div>
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-8xl w-full mx-1">
-          
+
 
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-6">
                 {/* Profile Picture */}
-                <div className="flex">
-            <label className="mt-4 border text-[#8F99A9] text-base font-[14px] rounded-lg cursor-pointer">
-              <div className="w-[80px] h-[80px] bg-[#F7E7CE] rounded-lg overflow-hidden">
-                <img
-                  src={profile? profile : upload}
-                  alt=""
-                  className="object-cover w-20 h-20 rounded-md"
-                />
-              </div>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
-            </label>
-            <h2 className="font-bold mt-10 ms-3 text-[#303F58]">
-              Upload Staff Image
-            </h2>
-          </div>
+                <div className="col-span-2">
+                  <div className="    rounded-lg items-center  flex text-center">
+                    <label htmlFor="image">
+                      <div className="flex">
+                        <div
+                          className={`bg-lightPink flex items-center justify-center h-16 w-36 rounded-lg ${initialStaffData.profile ? "h-[90px] rounded-b-none" : ""
+                            }`}
+                        >
+                          {initialStaffData.profile ? (
+                            <img
+                              src={initialStaffData.profile}
+                              alt="Item"
+                              className="max-h-20 max-w-40"
+                            />
+                          ) : (
+                            <img
+                              src={upload}
+                              alt=""
+                              className="object-cover cursor-pointer rounded-md"
+                            />
+                          )}
+                        </div>
+                        <div className=" mt-2">
+                          <div className="text-[#565148] cursor-pointer border border-[#565148] text-[12px] w-32 rounded-lg px-3 py-1.5 h-8 " >
+                            Upload Staff Image
+                          </div>
+                          <p className="text-[#4B5C79] text-[12px] pt-1">At least 800 x 800 px Recommended. JPG or PNG is Allowed</p>
+                        </div>
+                      </div>
+
+                      <input
+                        type="file"
+                        id="image"
+                        className="hidden"
+                        name="profile"
+                        onChange={handleFileChange}
+                        accept="image/*"
+                      />
+                    </label>
+                  </div>
+                </div>
 
                 {/* Mobile Number */}
                 <div>
@@ -168,13 +197,9 @@ function AddStaff({}: Props) {
                   <input
                     required
                     type="tel"
-                    value={mobileNumber}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      const value = e.target.value.replace(/\D/g, ""); // Remove non-digit characters
-                      if (value.length <= 10) {
-                        setMobileNumber(value); // Set only if it's 10 digits or less
-                      }
-                    }}
+                    value={initialStaffData.mobileNumber}
+                    name="mobileNumber"
+                    onChange={handleInputChange}
                     className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
                     maxLength={10}
                     pattern="\d{10}" // Regex pattern to enforce exactly 10 digits
@@ -191,7 +216,7 @@ function AddStaff({}: Props) {
                   <div className="mt-1 flex items-center">
                     <input
                       type="checkbox"
-                      
+
                       checked={isSameAsPhone}
                       onChange={handleWhatsAppCheckbox}
                       className="form-checkbox h-4 w-4 text-red-600"
@@ -203,8 +228,9 @@ function AddStaff({}: Props) {
                   <input
                     type="number"
                     required
-                    value={whatsAppNumber}
-                    onChange={(e) => setWhatsAppNumber(e.target.value)}
+                    name="whatsAppNumber"
+                    value={initialStaffData.whatsAppNumber}
+                    onChange={handleInputChange}
                     className="mt-1 p-2 h-[36px] border border-gray-300 rounded-lg w-full"
                     placeholder="Enter WhatsApp number"
                     disabled={isSameAsPhone}
@@ -214,15 +240,15 @@ function AddStaff({}: Props) {
                 {/* Visa Status (Dropdown) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Visa Status *
+                    Visa Status
                   </label>
                   <select
-                    required
+                    name="visaStatus" // Name attribute is crucial for dynamic updates
                     className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
-                    value={visaStatus}
-                    onChange={(e) => setVisaStatus(e.target.value)}
+                    value={initialStaffData.visaStatus} // Controlled input
+                    onChange={handleInputChange}
                   >
-                    <option  value="">Enter Visa Status</option>
+                    <option value="">Enter Visa Status</option>
                     <option value="Valid">Valid</option>
                     <option value="Expired">Expired</option>
                     <option value="In Process">In Process</option>
@@ -235,15 +261,11 @@ function AddStaff({}: Props) {
                     Visa Number
                   </label>
                   <input
-                    
+
                     type="tel" // Use "tel" to allow numeric input
-                    value={visaNumber}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      const value = e.target.value.replace(/\D/g, ""); // Remove non-digit characters
-                      if (value.length <= 10) {
-                        setVisaNumber(value); // Set only if it's 10 digits or less
-                      }
-                    }}
+                    value={initialStaffData.visaNumber}
+                    name="visaNumber"
+                    onChange={handleInputChange}
                     className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
                     maxLength={10} // Limits the number of characters to 10
                     pattern="\d{10}" // Ensures that exactly 10 digits are entered
@@ -258,15 +280,11 @@ function AddStaff({}: Props) {
                     Emirates ID
                   </label>
                   <input
-                    
+
                     type="tel" // Use "tel" to allow numeric input
-                    value={emiratesId}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      const value = e.target.value.replace(/\D/g, ""); // Remove non-digit characters
-                      if (value.length <= 15) {
-                        setEmiratesId(value); // Set only if it's 15 digits or less
-                      }
-                    }}
+                    value={initialStaffData.emiratesId}
+                    onChange={handleInputChange}
+                    name="emiratesId"
                     className="mt-1 p-2 border h-[36px] border-gray-300 rounded-lg w-full"
                     maxLength={15} // Limits the number of characters to 15
                     pattern="\d{15}" // Ensures that exactly 15 digits are entered
@@ -281,15 +299,16 @@ function AddStaff({}: Props) {
                 {/* Full Name */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    
+
                     <label className="block text-sm font-medium text-gray-700">
                       First Name *
                     </label>
                     <input
                       required
                       type="text"
-                      value={fullname}
-                      onChange={(e) => setFullname(e.target.value)}
+                      name="firstname"
+                      value={initialStaffData.firstname}
+                      onChange={handleInputChange}
                       className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
                       placeholder="Enter First Name"
                     />
@@ -299,10 +318,11 @@ function AddStaff({}: Props) {
                       Last Name
                     </label>
                     <input
-                      
+
                       type="text"
-                      value={lastname}
-                      onChange={(e) => setLastname(e.target.value)}
+                      name="lastname"
+                      value={initialStaffData.lastname}
+                      onChange={handleInputChange}
                       className="mt-1 p-2  h-[36px] border border-gray-300 rounded-lg w-full"
                       placeholder="Enter Last Name"
                     />
@@ -315,10 +335,11 @@ function AddStaff({}: Props) {
                     Date of Birth
                   </label>
                   <input
-                    
+
                     type="date"
-                    value={dateOfBirth}
-                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    name="dateOfBirth"
+                    value={initialStaffData.dateOfBirth}
+                    onChange={handleInputChange}
                     className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
                   />
                 </div>
@@ -328,19 +349,16 @@ function AddStaff({}: Props) {
                   <label className="block text-sm font-medium text-gray-700">
                     Address
                   </label>
-                  
                   <textarea
-                    
-                    
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="mt-1 p-2  border border-gray-300 rounded-lg w-full"
+                    name="address" // Add the name attribute to match the property in state
+                    value={initialStaffData.address} // Bind the correct state property
+                    onChange={handleInputChange} // Reuse the existing handler
+                    className="mt-1 p-2 border border-gray-300 rounded-lg w-full"
                     placeholder="Enter Address"
                   ></textarea>
                 </div>
 
                 {/* designation */}
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Designation *
@@ -352,8 +370,8 @@ function AddStaff({}: Props) {
                         type="radio"
                         name="designation"
                         value="Sales"
-                        checked={designation === "Sales"}
-                        onChange={(e) => setDesignation(e.target.value)}
+                        checked={initialStaffData.designation === "Sales"}
+                        onChange={handleInputChange}
                         className="form-radio"
                       />
                       <span className="ml-2">Salesman</span>
@@ -364,8 +382,8 @@ function AddStaff({}: Props) {
                         type="radio"
                         name="designation"
                         value="Driver"
-                        checked={designation === "Driver"}
-                        onChange={(e) => setDesignation(e.target.value)}
+                        checked={initialStaffData.designation === "Driver"}
+                        onChange={handleInputChange}
                         className="form-radio"
                       />
                       <span className="ml-2">Driver</span>
@@ -376,8 +394,8 @@ function AddStaff({}: Props) {
                         type="radio"
                         name="designation"
                         value="Helper"
-                        checked={designation === "Helper"}
-                        onChange={(e) => setDesignation(e.target.value)}
+                        checked={initialStaffData.designation === "Helper"}
+                        onChange={handleInputChange}
                         className="form-radio"
                       />
                       <span className="ml-2">Helper</span>
@@ -385,7 +403,7 @@ function AddStaff({}: Props) {
                   </div>
 
                   {/* Conditionally render input fields based on the selected designation */}
-                  {designation === "Sales" && (
+                  {initialStaffData.designation === "Sales" && (
                     <div className="mt-2">
                       <label className="block text-sm font-medium text-gray-700">
                         Username
@@ -393,10 +411,11 @@ function AddStaff({}: Props) {
                       <input
                         required
                         type="text"
+                        name="username"
                         className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
-                        placeholder=" Username"
-                        value={userName}
-                        onChange={(e) => setUserName(e.target.value)}
+                        placeholder="Username"
+                        value={initialStaffData.username}
+                        onChange={handleInputChange}
                       />
                       <div className="grid grid-cols-2 gap-1">
                         <div className="mt-1">
@@ -406,10 +425,11 @@ function AddStaff({}: Props) {
                           <input
                             required
                             type="password"
+                            name="password"
                             className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
                             placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            value={initialStaffData.password}
+                            onChange={handleInputChange}
                           />
                         </div>
 
@@ -420,26 +440,12 @@ function AddStaff({}: Props) {
                           <input
                             required
                             type="password"
+                            name="confirmPassword"
                             className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
                             placeholder="Confirm Password"
-                            value={confirmPassword}
-                            onChange={(
-                              e: React.ChangeEvent<HTMLInputElement>
-                            ) => {
-                              const value = e.target.value; // Allow any character input
-                              setConfirmPassword(value); // Always update confirmPassword with the typed value
-                            }}
-                            onBlur={() => {
-                              if (confirmPassword !== password) {
-                                setErr("Passwords do not match"); // You can also show an error message here
-                              } else {
-                                setErr(""); // Clear the error if passwords match
-                              }
-                            }}
+                            value={initialStaffData.confirmPassword}
+                            onChange={handleInputChange}
                           />
-                          {err && (
-                            <p className="text-red-500 text-sm mt-1">{err}</p>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -452,10 +458,10 @@ function AddStaff({}: Props) {
                     Visa Validity
                   </label>
                   <input
-                    
                     type="date"
-                    value={visaValidity}
-                    onChange={(e) => setVisaValidity(e.target.value)}
+                    name="visaValidity"
+                    value={initialStaffData.visaValidity}
+                    onChange={handleInputChange}
                     className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
                   />
                 </div>
@@ -466,10 +472,10 @@ function AddStaff({}: Props) {
                     Nationality
                   </label>
                   <input
-                    
                     type="text"
-                    value={nationality}
-                    onChange={(e) => setNationality(e.target.value)}
+                    name="nationality"
+                    value={initialStaffData.nationality}
+                    onChange={handleInputChange}
                     className="mt-3 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
                     placeholder="Enter Nationality"
                   />
@@ -478,13 +484,13 @@ function AddStaff({}: Props) {
             </div>
 
             <div className="mt-6 flex justify-end">
-            <button
-                  type="button"
-                  className="me-4 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-                  onClick={clearForm}
-                >
-                  Cancel
-                </button>
+              <button
+                type="button"
+                className="me-4 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              // onClick={clearForm}
+              >
+                Cancel
+              </button>
               <button
                 type="submit"
                 className="px-4 py-2 bg-[#820000] rounded-lg text-white"
@@ -492,7 +498,7 @@ function AddStaff({}: Props) {
                 Submit
               </button>
               <Link to={"/staff"}>
-                
+
               </Link>
             </div>
           </form>
