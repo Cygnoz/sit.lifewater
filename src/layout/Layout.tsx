@@ -5,15 +5,12 @@ import Header from './Header';
 import SubHeader from './SubHeader';
 import CreateOrder from '../pages/Createorder';
 import ViewOrder from '../components/ViewOrder';
-import CreateStaff from '../pages/Createstaff';
 import NewOrder from '../pages/NewOrder';
-import EditStaff from '../pages/EditStaff';
 import ActiveRoute from '../Route/Pages/Activeroute';
 import SubRoute from '../Route/Pages/SubRoute';
 import EditSubRoute from '../Route/Pages/EditSubRoute';
 import CreateSubRoute from '../Route/Components/CreateSubRoute';
 import CreateRoute from '../Route/Pages/Createroute';
-import AddStaff from '../pages/AddStaff';
 import CreateMainRoute from '../Route/Components/CreateMainRoute';
 import ViewRoute from '../Route/Components/ViewRoute';
 import AddVehicle from '../Vehicle/Components/AddVehicle';
@@ -79,6 +76,9 @@ import ManualHome from '../Accounts/manualJournal/ManualHome';
 import ManualView from '../Accounts/manualJournal/ManualView';
 import CustomerHome from '../Modules/Customer/CustomerHome.tsx/CustomerHome';
 import Login from '../Settings/Login/Login';
+import CreateStaff from '../Staff/Createstaff';
+import AddStaff from '../Staff/AddStaff';
+import EditStaff from '../Staff/EditStaff';
 
 const App: React.FC = () => {
   const [selectedNav, setSelectedNav] = useState<string>('');
