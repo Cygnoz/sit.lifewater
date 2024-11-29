@@ -7,12 +7,11 @@ const itemSchema = new mongoose.Schema({
   costPrice: { type: Number },
   sellingPrice: { type: Number },
 
-  category:  {  type: String }, // Resaleable, Non-Resaleable
+  resaleable: { type: Boolean, default: false },
   description: {  type: String },
   itemImage: { type: String },
   createdAt: { type: Date, default: Date.now },
 
-  status: { type: [String] },
 });
 
 const Item = mongoose.model('Item', itemSchema);

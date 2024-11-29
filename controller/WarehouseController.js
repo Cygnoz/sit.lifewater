@@ -3,50 +3,98 @@ const Warehouse = require('../Models/WarehouseSchema');
 
 // Create new stock entry
 exports.createStock = async (req, res) => {
-  console.log("Add warehouse:", req.body);
+  console.log("Create Stock:", req.body);
   try {
     const cleanedData = cleanCustomerData(req.body);
+    cleanedData.items = cleanedData.items?.map(person => cleanCustomerData(person)) || [];
     const { warehouse, transferNumber, date, items, notes, termsAndConditions } = cleanedData;
+    console.log("11",items);
+    
 
     // Validate required fields
-    if (!transferNumber || !items || !items.length) {
+    if (!transferNumber) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields'
+        message: 'Transfer Number required',
       });
     }
-    const warehouseExists = await WStock.findOne({ warehouseName: warehouse });
-    if (!warehouseExists) {
-    
-    // Create new stock entry
-    const wStock = new WStock({ ...cleanedData });
-    // const wStock = new WStock({
-    //   warehouse,
-    //   transferNumber,
-    //   date: date || new Date(),
-    //   items,
-    //   notes,
-    //   termsAndConditions
-    // });
+    if (!items || !items.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'Select an item',
+      });
+    }
+    if (!warehouse) {
+      return res.status(400).json({
+        success: false,
+        message: 'Select a warehouse',
+      });
+    }
+    // Check for duplicate transferNumber
+    const existingStock = await WStock.findOne({ transferNumber });
+    if (existingStock) {
+      console.log(`Stock with transfer number ${transferNumber} already exists.`);      
+      return res.status(400).json({
+        success: false,
+        message: `Stock with transfer number ${transferNumber} already exists.`,
+      });
+    }
 
+    // Check if the warehouse exists
+    const warehouseExists = await Warehouse.findOne({ warehouseName: warehouse });
+    if (!warehouseExists) {
+      return res.status(400).json({
+        success: false,
+        message: 'Warehouse not found',
+      });
+    }
+
+    // console.log("Warehouse exists:", warehouseExists);
+
+    // Add stock items to the warehouse's existing stock
+    items.forEach(item => {
+      const existingItemIndex = warehouseExists.stock.findIndex(stockItem => stockItem.itemId === item.itemName);
+
+      if (existingItemIndex > -1) {
+        // If the item already exists in the stock, update its quantity
+        warehouseExists.stock[existingItemIndex].quantity += item.quantity;
+      } else {
+        // If the item does not exist in the stock, add it as a new stock entry
+        warehouseExists.stock.push({
+          itemId: item.itemName,
+          quantity: item.quantity,
+          status: item.resaleable ? "Filled" : undefined,
+        });
+      }
+    });
+
+    // Save the updated warehouse document
+    await warehouseExists.save();
+    console.log("Warehouse updated with new stock:", warehouseExists);
+
+    // Create a new warehouse stock record (if required separately)
+    const wStock = new WStock({ ...cleanedData });
     await wStock.save();
+    console.log("Stock record created:", wStock);
 
     res.status(201).json({
       success: true,
-      data: wStock
+      message: 'Stock added to warehouse successfully',
+      warehouse: warehouseExists,
     });
-    }
-    else{
-      await updateWarehouseStock({ warehouseName: warehouse, items });
-    }
-
   } catch (error) {
+    console.error("Error creating stock:", error.message);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
+
+
+
+
+
 
 // Get all stock entries
 exports.getAllStock = async (req, res) => {
@@ -65,6 +113,10 @@ exports.getAllStock = async (req, res) => {
   }
 };
  
+
+
+
+
 // Function to add a new warehouse
 exports.addWarehouse = async (req, res) => {
   console.log("Add Warehouse:", req.body);
@@ -73,19 +125,29 @@ exports.addWarehouse = async (req, res) => {
     const { warehouseName, contactNo, address } = cleanedData;
 
     // Validate required fields
-    if (!warehouseName || !contactNo || !address) {
+    if (!warehouseName) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields'
+        message: 'Warehouse Name required'
+      });
+    }
+    if (!contactNo) {
+      return res.status(400).json({
+        success: false,
+        message: 'Contact Number required'
+      });
+    }
+    if (!address) {
+      return res.status(400).json({
+        success: false,
+        message: 'Address required'
       });
     }
 
-    // Additional validation (optional)
-    // Check if warehouseName is too long
-    if (warehouseName.length > 100) {
+    if (warehouseName.length > 50) {
       return res.status(400).json({
         success: false,
-        message: 'Warehouse Name cannot exceed 100 characters'
+        message: 'Warehouse Name cannot exceed 50 characters'
       });
     }
 
@@ -100,14 +162,10 @@ exports.addWarehouse = async (req, res) => {
     // Create new warehouse entry
     const warehouse = new Warehouse({ ...cleanedData });
 
-    // const warehouse = new Warehouse({
-    //   warehouseName,
-    //   contactNo,
-    //   address
-    // });
+
 
     await warehouse.save();
-
+    console.log("Warehouse Addded Successfully",warehouse);
     res.status(201).json({
       success: true,
       message: 'Warehouse created successfully',
@@ -236,7 +294,7 @@ const updateWarehouseStock = async ({ warehouseName, items }) => {
 
 //Clean Data 
 function cleanCustomerData(data) {
-  const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+  const cleanData = (value) => (value === null || value === undefined || value === "" || value === 0 ? undefined : value);
   return Object.keys(data).reduce((acc, key) => {
     acc[key] = cleanData(data[key]);
     return acc;

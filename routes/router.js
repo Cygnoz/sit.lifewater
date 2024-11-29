@@ -6,7 +6,7 @@ const warehouseController = require('../controller/WarehouseController');
 const orderController = require('../controller/OrderController');
 const unloadController = require('../controller/UnloadController');
 
-// const upload = require('../middleware/Multermiddleware')
+const { verifyToken } = require('../middleware/auth');
 
 //Stock
 router.post('/stock', stockController.addStock);
