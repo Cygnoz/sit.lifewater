@@ -12,6 +12,7 @@ interface TrialBalance {
   creditAmount: number
 }
 
+
 function AccountantViewUI() {
   const { id } = useParams<{ id: string }>() // Extract the `id` parameter from the route
   const [trialBalance, setTrialBalance] = useState<TrialBalance[]>([])

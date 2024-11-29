@@ -21,7 +21,7 @@ export interface Item {
 // Function to add an item
 export const addItemAPI = async (formData: FormData): Promise<ApiResponse> => {
   try {
-    const response = await commonAPI('POST', `${STOCK_BASEURL}/api/item`, formData, {
+    const response = await commonAPI('POST', `${STOCK_BASEURL}/item`, formData, {
       // No need to specify Content-Type for FormData
     });
     return response; // Ensure response matches the expected ApiResponse structure
@@ -34,7 +34,7 @@ export const addItemAPI = async (formData: FormData): Promise<ApiResponse> => {
 // Function to get all items
 export const getItemsAPI = async (): Promise<any> => {
   try {
-    const response = await commonAPI('GET', `${STOCK_BASEURL}/api/item`, null);
+    const response = await commonAPI('GET', `${STOCK_BASEURL}/item`, null);
     return response; // Ensure the response matches the expected ApiResponse structure
   } catch (error: any) {
     console.error('Error fetching items:', error);
@@ -45,7 +45,7 @@ export const getItemsAPI = async (): Promise<any> => {
 // Function to get a single item by ID
 export const getItemByIdAPI = async (id: string): Promise<any> => {
   try {
-    const response = await commonAPI('GET', `${STOCK_BASEURL}/api/getitem/${id}`, null);
+    const response = await commonAPI('GET', `${STOCK_BASEURL}/getitem/${id}`, null);
     return response; // Ensure the response matches the expected ApiResponse structure
   } catch (error: any) {
     console.error('Error fetching item by ID:', error);
@@ -57,7 +57,7 @@ export const getItemByIdAPI = async (id: string): Promise<any> => {
 // Function to update an item by ID
 export const updateItemAPI = async (id: string, formData: FormData): Promise<ApiResponse> => {
   try {
-    const response = await commonAPI('PUT', `${STOCK_BASEURL}/api/edititem/${id}`, formData, {
+    const response = await commonAPI('PUT', `${STOCK_BASEURL}/edititem/${id}`, formData, {
       // No need to specify Content-Type for FormData
     });
     return response; // Ensure response matches the expected ApiResponse structure
@@ -70,7 +70,7 @@ export const updateItemAPI = async (id: string, formData: FormData): Promise<Api
 // Function to delete an item by ID
 export const deleteItemAPI = async (id: string): Promise<ApiResponse> => {
   try {
-    const response = await commonAPI('DELETE', `${STOCK_BASEURL}/api/item/${id}`, null);
+    const response = await commonAPI('DELETE', `${STOCK_BASEURL}/item/${id}`, null);
     return response; // Ensure response matches the expected ApiResponse structure
   } catch (error: any) {
     console.error('Error deleting item:', error);
