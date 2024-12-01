@@ -1,52 +1,19 @@
 const mongoose = require('mongoose');
 
 const stockSchema = new mongoose.Schema({
-  transferNumber: {
-    type: String,
-    // required: true,
-    // unique: true
-  },
-  date: {
-    type: Date,
-    required: true,
-    default: Date.now
-  },
-  mainRoute: {
-    type: String,
-  },
-  subRoute: {
-    type: String,
-  },
-  warehouse: {
-    type: String,
-  },
-  items: [{
-    itemName: {
-      type: String,
-    },
-    quantity: {
-      type: Number,
-      min: 0
-    },
-    amount: {
-      type: Number,
-      min: 0
-    },
-    rate: {
-      type: Number,
-      min: 0
-    }  
-    
+  transferNumber: { type: String },
+  date: { type: Date, default: Date.now },
+  mainRoute: { type: String },
+  subRoute: { type: String },
+  warehouse: { type: String },
+  items: [{ 
+    itemName: { type: String },
+    quantity: { type: Number, min: 0 },
+    amount: { type: Number, min: 0 },
+    rate: { type: Number, min: 0 }  
   }],
-
-  notes: {
-    type: String
-  },
-  
-  termsAndConditions: {
-    type: String
-  }
-
+  notes: { type: String },
+  termsAndConditions: { type: String }
 });
 
 // Virtual for calculating total stock

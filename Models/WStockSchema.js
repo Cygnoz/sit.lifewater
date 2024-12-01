@@ -6,10 +6,8 @@ const wStockSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
   items: [{
     itemName: { type: String },
-    quantity: { type: Number, min: 0 },
-    amount: { type: Number, min: 0 },
-    rate: { type: Number, min: 0 },   
-    itemImage: { type: String },
+    quantity: { type: Number, min: 1 },
+    costPrice: { type: Number },
   }],
   
   notes: { type: String },

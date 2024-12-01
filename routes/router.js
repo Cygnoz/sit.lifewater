@@ -3,6 +3,7 @@ const router = express.Router();
 const stockController = require('../controller/StockController');
 const itemController = require('../controller/ItemController');
 const warehouseController = require('../controller/WarehouseController');
+const wStockController = require('../controller/WstockController');
 const orderController = require('../controller/OrderController');
 const unloadController = require('../controller/UnloadController');
 
@@ -21,10 +22,11 @@ router.put('/edititem/:id',  itemController.updateItem);
 router.get('/getitem/:id', itemController.getItemById);
 router.delete('/item/:id', itemController.deleteItem);
 
-//Warehouse
-router.post('/wstock', warehouseController.createStock);
-router.get('/wstock', warehouseController.getAllStock);
+//Wstock
+router.post('/wstock', wStockController.createStock);
+router.get('/wstock', wStockController.getAllStock);
 
+//Warehouse
 router.post('/warehouse', warehouseController.addWarehouse);
 router.get('/warehouse', warehouseController.getWarehouses);
 router.delete('/warehouse/:id', warehouseController.deleteWarehouse);

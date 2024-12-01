@@ -3,6 +3,7 @@ const { Schema } = mongoose;
 
 const stockSchema = new Schema({
     itemId: { type: String },
+    itemName: { type: String },
     quantity: { type: Number },
     status: { type: String, default: undefined },
   }, { _id: false });
