@@ -14,7 +14,7 @@ const subRouteSchema = new Schema({
   subrouteCode: { type: String },
   description: { type: String },
   mainRouteId: { type: Schema.Types.ObjectId, ref: 'MainRoute' },
-  stock:[stockSchema]
+  stock: { type: [stockSchema], default: undefined }
 
 });
 
