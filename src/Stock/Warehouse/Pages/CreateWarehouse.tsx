@@ -1,13 +1,14 @@
-import printer from '../../../assets/images/printer.svg';
 import split from '../../../assets/images/list-filter.svg';
 import search from "../../../assets/images/search.svg";
-import plus from "../../../assets/circle-plus.svg";
 import trash from "../../../assets/images/trash.svg";
-import { toast,} from 'react-toastify';
-
+import { toast, ToastContainer, } from 'react-toastify';
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { deleteWarehouseIdAPI, getWarehouseAPI} from '../../../services/WarehouseAPI/WarehouseAPI'; // Import delete API
+import { useContext, useEffect, useState } from 'react';
+import useApi from '../../../Hook/UseApi';
+import { endpoints } from '../../../services/ApiEndpoint';
+import { WarehouseResponseContext } from '../../../Context/ContextShare';
+import PrintButton from '../../../commoncomponents/Buttons/PrintButton';
+import AddNewButton from '../../../commoncomponents/Buttons/AddNewButton';
 
 interface WarehouseItem {
   _id: string;
@@ -18,46 +19,64 @@ interface WarehouseItem {
 
 const CreateWarehouse: React.FC = () => {
   const [warehouses, setWarehouses] = useState<WarehouseItem[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const { request: getWarehouseData } = useApi("get", 4001);
 
-  useEffect(() => {
-    const fetchWarehouse = async () => {
-      try {
-        const response = await getWarehouseAPI();
-        setWarehouses(response.warehouses);
-        console.log('Warehouses set:', response); // Verify the data
-      } catch (error: any) {
-        setError(error.message || 'Failed to fetch warehouses');
-        console.error('Failed to fetch warehouses:', error);
+  const { setWarehouseResponse } = useContext(WarehouseResponseContext)!;
+
+
+  const getAllWarehouse = async () => {
+    try {
+      const url = `${endpoints.GET_ALL_WAREHOUSE}`;
+      const { response, error } = await getWarehouseData(url);
+      if (!error && response) {
+        setWarehouses(response.data.warehouses);
+        console.log(response.data.warehouses,"warehouse");
+        setWarehouseResponse(response.data.warehouses)
+      } else {
+        console.log(error);
+
       }
-    };
-    fetchWarehouse();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  useEffect(() => {
+    getAllWarehouse()
   }, []);
 
   // Delete function to remove a warehouse by its ID
-  const handleDelete = async (id: string) => {
-    // Confirm deletion with the user
-    const isConfirmed = window.confirm("Are you sure you want to delete this warehouse?");
-    if (!isConfirmed) return;
-  
-    try {
-      await deleteWarehouseIdAPI(id); // Call the delete API function
-      setWarehouses((prevWarehouses) =>
-        prevWarehouses.filter((warehouse) => warehouse._id !== id)
-      ); // Remove deleted warehouse from state
-  
-      // Display success toast
-      toast.success(`Warehouse deleted successfully.`);
-      console.log(`Warehouse with ID ${id} deleted successfully.`);
-    } catch (error: any) {
-      setError(error.message || 'Failed to delete warehouse');
-      toast.error('Failed to delete warehouse.');
-      console.error('Failed to delete warehouse:', error);
+  const { request: deleteWarehouse } = useApi("delete", 4001);
+
+  const handleDelete = async (_id: string)=>{
+    try{
+      const url =`${endpoints.DELETE_WAREHOUSE}/${_id}`;
+      const { response, error } = await deleteWarehouse(url);
+      getAllWarehouse()
+      if(!error && response){
+        toast.success(response?.data.message);
+      }
+      console.log(response);
+      
+    }catch (error) {
+      toast.error("Error occurred while deleting brand.");
     }
-  };
+  }
+   
 
   return (
     <div>
+       <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       {/* Header Section */}
       <div className="flex justify-between items-center p-2">
         <div>
@@ -65,11 +84,10 @@ const CreateWarehouse: React.FC = () => {
           <p className="text-[#4B5C79]">Lorem ipsum dolor sit amet consectetur</p>
         </div>
         <div className="flex">
-          <Link to={'/addwarehouse'}>
-            <button className="flex items-center gap-2 bg-[#820000] text-white px-5 py-2 rounded-md">
-              <img src={plus} alt="Add New" />
-              <p>Add New Warehouse</p>
-            </button>
+          <Link to={'/addwarehouse'}>        
+            <AddNewButton>
+            Add New Warehouse
+            </AddNewButton>
           </Link>
         </div>
       </div>
@@ -86,27 +104,20 @@ const CreateWarehouse: React.FC = () => {
             />
           </div>
           <div className="flex w-[60%] justify-end space-x-2">
-            <button className="flex items-center border text-[#565148] border-[#565148] px-4 py-2 rounded-lg">
+            <button className=" items-center border text-[#565148] hidden border-[#565148] px-4 py-2 rounded-lg">
               <img className="mr-1" src={split} alt="Sort" />
               Sort By
             </button>
-            <button className="flex items-center border text-[#565148] border-[#565148] px-4 py-2 rounded-lg">
-              <img className="mr-1" src={printer} alt="Print" />
-              Print
-            </button>
+           <PrintButton></PrintButton>
           </div>
         </div>
-        
-        {/* Error Message */}
-        {error && <p className="text-red-500 text-center">{error}</p>}
-        
+
+       
         {/* Warehouse Table */}
         <table className="w-full text-left">
           <thead className="bg-[#fdf8f0]">
             <tr className="border-b">
-              <th className="p-2 text-[12px] text-center text-[#303F58] w-16">
-                <input type="checkbox" />
-              </th>
+             
               <th className="p-2 text-[12px] text-center text-[#303F58]">Warehouse Name</th>
               <th className="p-2 text-[12px] text-center text-[#303F58]">Mobile Number</th>
               <th className="p-2 text-[12px] text-center text-[#303F58]">Address</th>
@@ -116,18 +127,15 @@ const CreateWarehouse: React.FC = () => {
           <tbody>
             {warehouses.length > 0 ? (
               warehouses.map((item) => (
-                <tr className="border-b" key={item._id}>
-                  <td className="p-2 text-center w-16">
-                    <input type="checkbox" />
-                  </td>
+                <tr className="border-b" key={item._id}>                 
                   <td className="p-2 text-center">{item.warehouseName}</td>
                   <td className="p-2 text-center">{item.contactNo}</td>
                   <td className="p-2 text-center">{item.address}</td>
                   <td className="p-2 text-center">
-  <button className="text-red-500" onClick={() => handleDelete(item._id)}>
-    <img src={trash} alt="Delete" />
-  </button>
-</td>
+                    <button className="text-red-500" onClick={() => handleDelete(item._id)}>
+                      <img src={trash} alt="Delete" />
+                    </button>
+                  </td>
 
                 </tr>
               ))

@@ -1,14 +1,11 @@
-import shopping from "../../../assets/images/Group 2510.png";
-import packing from "../../../assets/images/Group 2511.png";
-import processing from "../../../assets//images/Group 2512.png";
-import delivery from "../../../assets/images/Group 2513.png";
-import plus from "../../../assets/circle-plus.svg";
-import printer from "../../../assets/images/printer.svg";
 import split from "../../../assets/images/list-filter.svg";
 import search from "../../../assets/images/search.svg";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getAllStocks } from "../../../services/StockAPI/W-StockAPI";
+import useApi from "../../../Hook/UseApi";
+import { endpoints } from "../../../services/ApiEndpoint";
+import AddNewButton from "../../../commoncomponents/Buttons/AddNewButton";
+import PrintButton from "../../../commoncomponents/Buttons/PrintButton";
 interface StockData {
   warehouse: string;
   date: string;
@@ -18,42 +15,39 @@ interface StockData {
     quantity: number;
     rate: number;
     amount: number;
-    itemImage?: string;
   }>;
   notes: string;
   termsAndConditions: string;
 }
 
 const CreateWStock: React.FC = () => {
-  const navigate = useNavigate();
   const [stocks, setStocks] = useState<StockData[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  console.log(error);
+
+  const { request: getWStockData } = useApi("get", 4001);
+
+  const getAllWarehouseSock = async ()=>{
+    try{
+      const url = `${endpoints.GET_W_STOCK}`;
+      const { response, error } = await getWStockData(url);
+      if(!error && response){
+        setStocks(response.data.data);
+        console.log(response.data.data);
+      } else{
+        console.log(error);
   
-
-  const handleAdd = () => {
-    navigate("/addWstock");
-  };
-  useEffect(() => {
-    const fetchStocks = async () => {
-      try {
-        const data = await getAllStocks();
-        setStocks(data.data);
-        console.log(data.data);
-      } catch (err: any) {
-        setError(err.message);
-        console.log(err.message);
       }
-    };
-
-    fetchStocks();
+    }catch(error){
+      console.log(error);     
+    }
+  }
+  useEffect(() => {
+    getAllWarehouseSock()
   }, []);
 
   return (
     <div>
       <div className="flex min-h-screen w-full">
-        <div>
-          <div className="p-2">
+          <div className="p-2 w-full">
             {/* Header Section */}
             <div className="flex justify-between items-center">
               <div>
@@ -64,18 +58,16 @@ const CreateWStock: React.FC = () => {
                   Lorem ipsum dolor sit amet consectetur{" "}
                 </p>
               </div>
-              <div className="flex justify-between">
-                <button
-                  onClick={handleAdd}
-                  className="justify-between items-center gap-2 bg-[#820000] text-white flex px-5 py-2 rounded-md"
-                >
-                  <img src={plus} alt="" />
-                  <p>Add New Stock</p>
-                </button>
+              <div className="flex justify-between">  
+                <Link to={"/addWstock"}>
+                <AddNewButton  >
+                Add New Stock
+                </AddNewButton>
+                </Link>           
               </div>
             </div>
             {/* Cards Section */}
-            <div className="grid grid-cols-4 gap-4 my-3">
+            {/* <div className="grid grid-cols-4 gap-4 my-3">
               <div className="p-4 bg-white shadow-md rounded-lg">
                 <img src={shopping} className="h-[45px] w-[45px] " alt="" />
                 <div className="w-[700px] font-bold leading-normal text-[#303F58] text-[17px] mt-2">
@@ -128,10 +120,10 @@ const CreateWStock: React.FC = () => {
                   12
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Table Section */}
-            <div className="bg-white shadow-md rounded-lg p-4">
+            <div className="bg-white shadow-md rounded-lg p-6  my-2">
               <div className="flex justify-between items-center mb-4">
                 <div className="absolute ml-3 ">
                   <img src={search} alt="search" className="h-5 w-5" />
@@ -146,23 +138,17 @@ const CreateWStock: React.FC = () => {
                   placeholder="Search Stock"
                 />
                 <div className="flex w-[60%] justify-end">
-                  <button className="flex border text-[14] w-[500] text-[#565148] border-[#565148] px-4 py-2 me-2 rounded-lg">
+                  <button className=" hidden border text-[14] w-[500] text-[#565148] border-[#565148] px-4 py-2 me-2 rounded-lg">
                     <img className="mt-1 me-1" src={split} alt="" />
                     Sort By
                   </button>
-                  <button className="flex border text-[14] w-[500] text-[#565148] border-[#565148] px-4 py-2 rounded-lg">
-                    <img className="mt-1 me-1" src={printer} alt="" />
-                    Print
-                  </button>
+                  <PrintButton></PrintButton>                 
                 </div>
               </div>
               <table className="w-full text-left">
                 <thead className=" bg-[#fdf8f0]">
                   <tr className="border-b">
-                    <th className="p-2 text-[12px] text-center text-[#303F58] w-16">
-                      {" "}
-                      <input type="checkbox" />
-                    </th>
+                    
                     <th className="p-2 text-[12px] text-center text-[#303F58]">
                       Sl No
                     </th>
@@ -173,20 +159,17 @@ const CreateWStock: React.FC = () => {
                       Items
                     </th>
                     <th className="p-2 w-[333px] text-[12px] text-center text-[#303F58]">
-                      Remarks
+                      Warehouse
                     </th>
                     <th className="p-2 text-[12px] text-center text-[#303F58]">
-                      Stock
+                      TransferNumber
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {stocks.map((stock, index) => (
                     <tr className="border-b">
-                      <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16">
-                        {""}
-                        <input type="checkbox" />
-                      </td>
+                    
                       <td className="p-2 text-[14] text-center text-[#4B5C79]">
                         {index +1}
                       </td>
@@ -199,10 +182,10 @@ const CreateWStock: React.FC = () => {
                       ))}
                       </td>
                       <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                        Lorem
+                        {stock.warehouse}
                       </td>
                       <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                        60
+                        {stock.transferNumber}
                       </td>
                     </tr>
                   ))}
@@ -210,7 +193,7 @@ const CreateWStock: React.FC = () => {
               </table>
             </div>
           </div>
-        </div>
+        
       </div>
     </div>
   );
