@@ -5,6 +5,7 @@ const wStockSchema = new mongoose.Schema({
   transferNumber: { type: String },
   date: { type: Date, default: Date.now },
   items: [{
+    itemId: { type: String },
     itemName: { type: String },
     quantity: { type: Number, min: 1 },
     costPrice: { type: Number },
