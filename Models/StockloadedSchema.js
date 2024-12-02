@@ -1,30 +1,28 @@
 const mongoose = require('mongoose');
 
 const stockSchema = new mongoose.Schema({
-  transferNumber: { type: String },
+  mainRouteId: { type: String },
+  mainRouteName: { type: String },
+  
+  subRouteId: { type: String },
+  subRouteName: { type: String },
+  
+  warehouseId: { type: String },
+  warehouseName: { type: String },
+  
   date: { type: Date, default: Date.now },
-  mainRoute: { type: String },
-  subRoute: { type: String },
-  warehouse: { type: String },
-  items: [{ 
+  transferNumber: { type: String },
+  
+  stock: [{
+    itemId: { type: String },
     itemName: { type: String },
-    quantity: { type: Number, min: 0 },
-    amount: { type: Number, min: 0 },
-    rate: { type: Number, min: 0 }  
+    quantity: { type: Number },
+    status: { type: String, default: undefined }     
   }],
+
   notes: { type: String },
   termsAndConditions: { type: String }
 });
 
-// Virtual for calculating total stock
-// stockSchema.virtual('calculatedTotalStock').get(function() {
-//   return this.items.reduce((total, item) => total + item.totalQuantity, 0);
-// });
-
-// //Pre-save hook to update totalStock
-// stockSchema.pre('save', function(next) {
-//   this.totalStock = this.calculatedTotalStock;
-//   next();
-// });
 
 module.exports = mongoose.model('Stock', stockSchema);
