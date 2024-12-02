@@ -10,19 +10,21 @@ import plus from "../../assets/circle-plus.svg";
 import eye from "../../assets/images/eye.svg";
 // import dot from "../../assets/ellipsis-vertical.svg";
 import { useNavigate } from "react-router-dom";
-import { deleteRouteAPI, getRoutesAPI } from "../../services/RouteAPI/RouteAPI";
+import { deleteRouteAPI } from "../../services/RouteAPI/RouteAPI";
 import { useEffect, useState ,useRef} from "react";
 import search from "../../assets/images/search.svg"
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css'; 
+import { endpoints } from "../../services/ApiEndpoint";
+import useApi from "../../Hook/UseApi";
 
 
 
 interface Route {
   id: string;
   _id: string;
-  mainRoute: string;
-  routeCode: string;
+  mainRouteName: string;
+  mainRouteCode: string;
   subRoute: string;
   description: string;
 }
@@ -31,35 +33,40 @@ const CreateRoute: React.FC = () => {
 
   const [routesList, setRouteList] = useState<Route[]>([]); // Full route list
   const [filteredRouteList, setFilteredRouteList] = useState<Route[]>([]); // Filtered route list
- 
+  const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState<string>(''); // Search query
+  const { request: getmainroute } = useApi("get", 4000)
   console.log(filteredRouteList);
   
 
-  // Fetch staff data on component mount
-  useEffect(() => {
-    const fetchRoute = async () => {
-      try {
-        const response = await getRoutesAPI();
-        console.log("Full API Response:", response); // Check the response
-        setRouteList(response); // Store full staff list
-        setFilteredRouteList(response) // Initially, display all route
-      } catch (error) {
-        console.error("Error fetching staff data:", error);
+  const getALLMainroute = async () => {
+    try {
+      const url = `${endpoints.GET_ALL_MAINROUTE}`
+      const { response, error } = await getmainroute(url)
+      console.log("API RESPONSE :",response)
+
+      if (!error && response) {
+        setLoading(false)
+        setRouteList(response.data)
+        setFilteredRouteList(response.data); // Initialize sorted items
       }
-    };
-
-    fetchRoute();
-  }, []);
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
-    const filtered = routesList.filter(route => 
-      route.mainRoute.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      route.routeCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      route.description.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredRouteList(filtered);
-  }, [searchQuery, routesList]);
+    getALLMainroute()
+  }, [])
+
+  // useEffect(() => {
+  //   const filtered = routesList.filter(route => 
+  //     route.mainRouteName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     route.mainRouteCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     route.description.toLowerCase().includes(searchQuery.toLowerCase())
+  //   );
+  //   setFilteredRouteList(filtered);
+  // }, [searchQuery, routesList]);
   
   
 
@@ -242,7 +249,7 @@ const CreateRoute: React.FC = () => {
            <table className="print-table w-full text-left">
               <thead className="bg-[#fdf8f0]">
                 <tr className="border-b">
-                <th className="no-print p-2 text-[12px] text-center text-[#303F58] w-16"> <input type="checkbox" /></th>
+                
                   <th className="p-2 text-[12px] text-center text-[#303F58]">
                     Sl No
                   </th>
@@ -267,15 +274,15 @@ const CreateRoute: React.FC = () => {
                 {filteredRouteList.map((route, index) => (
                   <tr className="border-b" key={route.id}>
                     
-                    <td className="no-print p-2 text-[14px] text-center text-[#4B5C79] w-16"> <input type="checkbox" /></td>
+                    
                     <td className="p-2 text-[14px] text-center text-[#4B5C79]">
                       {index + 1}
                     </td>
                     <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                      {route.mainRoute}
+                      {route.mainRouteName}
                     </td>
                     <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                      {route.routeCode}
+                      {route.mainRouteCode}
                     </td>
                     {/* <td className="p-2 text-[14px] text-center text-[#4B5C79]">
                       {route.subRoute}

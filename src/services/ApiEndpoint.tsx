@@ -21,9 +21,13 @@ export const endpoints= {
   // warehouse
  GET_ALL_WAREHOUSE: `warehouse`,
  ADD_WAREHOUSE: `warehouse`,
- DELETE_WAREHOUSE:`warehouse`
+ DELETE_WAREHOUSE:`warehouse`,
 
 
+  // Route
+  ADD_MAINROUTE:`addRoute`,
+  GET_ALL_MAINROUTE:`getAllroutes`,
+  GET_A_MAINROUTE:`getroute/:id`
   
 
 }

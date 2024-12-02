@@ -9,16 +9,16 @@ import { Link, useNavigate } from "react-router-dom"
 import { deleteItemAPI } from "../../../services/StockAPI/StockAPI"
 import useApi from "../../../Hook/UseApi"
 import { endpoints } from "../../../services/ApiEndpoint"
+import SortBy from "../Components/SortByItems"
 
 const CreateItem: React.FC = () => {
   const defaultImage = "https://cdn1.iconfinder.com/data/icons/avatar-3/512/Manager-512.png"
   const navigate = useNavigate()
 
-  const [items, setItems] = useState<any[]>([]) // State to store fetched items
-  const [loading, setLoading] = useState(true) // State to manage loading state
-
- 
-
+  const [items, setItems] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("") // Add search query state
+  const [sortedItems, setSortedItems] = useState<any[]>([]); // Store sorted items
   const { request: getItems } = useApi("get", 4001)
 
   const getAllItems = async () => {
@@ -30,7 +30,7 @@ const CreateItem: React.FC = () => {
       if (!error && response) {
         setLoading(false)
         setItems(response.data)
-        console.log(items)
+        setSortedItems(response.data); // Initialize sorted items
       }
     } catch (error) {
       console.log(error)
@@ -46,29 +46,39 @@ const CreateItem: React.FC = () => {
   }
 
   const handleDelete = async (id: string) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this item?")
-    if (!confirmDelete) return
+    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+    if (!confirmDelete) return;
 
     try {
-      const response = await deleteItemAPI(id)
-      alert(response.message)
-      // Remove the deleted item from the state
-      setItems((prevItems) => prevItems.filter((item) => item._id !== id))
-      console.log("Deleted item with id:", id)
+      const response = await deleteItemAPI(id);
+      alert(response.message);
+      setItems((prevItems) => prevItems.filter((item) => item._id !== id));
+      setSortedItems((prevItems) => prevItems.filter((item) => item._id !== id)); // Update sorted items
     } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error deleting item:", error.message)
-      } else {
-        console.error("Error deleting item:", error)
-      }
+      console.error("Error deleting item:", error);
     }
-  }
-  console.log("items", items)
+  };
+
+  const handleSortChange = (key: string, order: string) => {
+    const sorted = [...items].sort((a, b) => {
+      if (order === "asc") {
+        return a[key] > b[key] ? 1 : -1;
+      } else {
+        return a[key] < b[key] ? 1 : -1;
+      }
+    });
+    setSortedItems(sorted);
+  };
+
+  const filteredItems = sortedItems.filter(
+    (item) =>
+      item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.sku.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="flex min-h-screen w-full">
       <div className="p-2 w-full">
-        {/* Header Section */}
         <div className="flex justify-between items-center mb-4">
           <div>
             <h3 className="text-[#303F58] text-[20px] font-bold">Item</h3>
@@ -84,7 +94,6 @@ const CreateItem: React.FC = () => {
           </div>
         </div>
 
-        {/* Table Section */}
         <div className="bg-white shadow-md rounded-lg p-4">
           <div className="flex justify-between items-center mb-4">
             <div className="relative w-full max-w-[1100px]">
@@ -97,13 +106,12 @@ const CreateItem: React.FC = () => {
                   boxShadow: "none",
                 }}
                 placeholder="Search item"
+                value={searchQuery} // Bind to state
+                onChange={(e) => setSearchQuery(e.target.value)} // Update search query
               />
             </div>
             <div className="flex space-x-4">
-              <button className="flex items-center border text-sm text-[#565148] font-medium border-[#565148] px-4 py-2 rounded-lg">
-                <img className="mr-1" src={split} alt="Sort" />
-                Sort By
-              </button>
+            <SortBy  onSortChange={handleSortChange} />
               <button className="flex items-center border text-sm text-[#565148] font-medium  border-[#565148] px-4 py-2 rounded-lg">
                 <img className="mr-1" src={printer} alt="Print" />
                 Print
@@ -111,39 +119,30 @@ const CreateItem: React.FC = () => {
             </div>
           </div>
 
-          {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-[#fdf8f0]">
                 <tr className="border-b">
-                  <th className="px-4 py-3 text-center">
-                    <input type="checkbox" />
-                  </th>
                   <th className="px-4 py-3 text-center font-medium text-[#303F58]">Photo</th>
                   <th className="px-4 py-3 text-center font-medium text-[#303F58]">Name</th>
                   <th className="px-4 py-3 text-center font-medium text-[#303F58]">SKU</th>
-                  <th className="px-4 py-3 text-center font-medium text-[#303F58]">cost Price</th>
-                  <th className="px-4 py-3 text-center font-medium text-[#303F58]">selling Price</th>
-                  {/* <th className="px-4 py-3 text-center font-medium text-[#303F58]">Purchase Stock</th>
-                  <th className="px-4 py-3 text-center font-medium text-[#303F58]">Status</th> */}
+                  <th className="px-4 py-3 text-center font-medium text-[#303F58]">Cost Price</th>
+                  <th className="px-4 py-3 text-center font-medium text-[#303F58]">Selling Price</th>
                   <th className="px-4 py-3 text-center font-medium text-[#303F58]">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-4">
+                    <td colSpan={6} className="text-center py-4">
                       Loading...
                     </td>
                   </tr>
-                ) : (
-                  items.map((item) => (
+                ) : filteredItems.length > 0 ? (
+                  filteredItems.map((item) => (
                     <tr key={item._id} className="border-b">
                       <td className="px-4 py-3 text-center">
-                        <input type="checkbox" />
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <img className="mx-auto object-cover w-11 h-11 rounded-full" src={item.itemImage ? item.itemImage : defaultImage} alt={`${item.itemName}`} />
+                        <img className="mx-auto object-cover w-11 h-11 rounded-full" src={item.itemImage || defaultImage} alt={`${item.itemName}`} />
                       </td>
                       <td className="px-4 py-3 text-center text-[#4B5C79]">{item.itemName}</td>
                       <td className="px-4 py-3 text-center text-[#4B5C79]">{item.sku}</td>
@@ -159,6 +158,12 @@ const CreateItem: React.FC = () => {
                       </td>
                     </tr>
                   ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="text-center py-4">
+                      No items found.
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>

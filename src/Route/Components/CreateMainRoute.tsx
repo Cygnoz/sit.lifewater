@@ -1,58 +1,71 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
-import back from '../../assets/images/backbutton.svg';
-import { Link } from 'react-router-dom';
-import { addRouteAPI } from '../../services/RouteAPI/RouteAPI'; // Ensure this path is correct
+import React, { useState, ChangeEvent, FormEvent } from "react";
+import back from "../../assets/images/backbutton.svg";
+import { Link, useNavigate } from "react-router-dom";
+
 import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
- 
+import "react-toastify/dist/ReactToastify.css";
+import useApi from "../../Hook/UseApi";
+import { endpoints } from "../../services/ApiEndpoint";
+
 const EditSubRoute: React.FC = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   // State to manage form values
   const [formData, setFormData] = useState({
-    mainRoute: '',
-    routeCode: '',
-    description: ''
+    mainRouteName: "",
+    mainRouteCode: "",
+    description: "",
   });
 
-
   // Handler to update form state
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
   console.log(formData);
-  
 
-  // Handler for form submission
+  const { request: addMainRoute } = useApi("post", 4000);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
-    
+    setLoading(true);
 
-    if (!formData.mainRoute || !formData.routeCode) {
-      toast.warning('Main Route and Route Code are required fields.');
-      return;
-    }
-    
-    console.log('Form submitted:', formData);
     try {
-      const response = await addRouteAPI(formData);  // Send the form data as JSON
-      console.log('API Response:', response);
-      toast.success('Route created successfully!');
-      setFormData({ mainRoute: '', routeCode: '', description: ''})
-      // Handle success
-    } catch (error:any) {
-      console.error('Error submitting form:', error.message);
-      toast.error('Failed to create route. Please try again.');
+      // Prepare the payload
+      const payload = {
+        ...formData,
+      };
+      console.log(payload);
+
+      // Call the API to add the item
+      const url = `${endpoints.ADD_MAINROUTE}`;
+      const { response, error } = await addMainRoute(url, payload);
+
+      if (!error && response) {
+        toast.success("Main Route has been added successfully.");
+        setTimeout(() => {
+          navigate("/route/createroute");
+        }, 3000);
+      } else {
+        // Handle any API errors
+        toast.error(error?.message || "Failed to add mainroute. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error adding mainroute:", err);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
-  
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100 p-8">
+    <div className="min-h-screen flex flex-col bg-gray-100 p-2">
       <ToastContainer
         position="top-center"
         autoClose={3000}
@@ -64,13 +77,17 @@ const EditSubRoute: React.FC = () => {
         draggable
         pauseOnHover
         theme="colored"
-         // optional CSS class for further styling
+        // optional CSS class for further styling
       />
       {/* First Row: Heading and Icon */}
       <div className="flex gap-4 items-center w-full max-w-8xl mb-6">
-        <Link to={'/route/createroute'}>
+        <Link to={"/route/createroute"}>
           <div className="icon-placeholder">
-            <img className='bg-gray-200 rounded-full p-2' src={back} alt="Back" />
+            <img
+              className="bg-gray-200 rounded-full p-2"
+              src={back}
+              alt="Back"
+            />
           </div>
         </Link>
         <h2 className="text-2xl font-bold">Create New Main Route</h2>
@@ -79,7 +96,6 @@ const EditSubRoute: React.FC = () => {
       {/* Second Row: Form Container */}
       <div className="w-full max-w-8xl bg-white rounded-md shadow-md p-8">
         <form onSubmit={handleSubmit}>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block mb-2 font-normal text-[14px] leading-[16.94px] text-[#303F58]">
@@ -87,8 +103,8 @@ const EditSubRoute: React.FC = () => {
               </label>
               <input
                 type="text"
-                name="mainRoute"
-                value={formData.mainRoute}
+                name="mainRouteName"
+                value={formData.mainRouteName}
                 onChange={handleInputChange}
                 placeholder="Enter main route"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -102,8 +118,8 @@ const EditSubRoute: React.FC = () => {
               </label>
               <input
                 type="text"
-                name="routeCode"
-                value={formData.routeCode}
+                name="mainRouteCode"
+                value={formData.mainRouteCode}
                 onChange={handleInputChange}
                 placeholder="Enter route code"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -122,8 +138,8 @@ const EditSubRoute: React.FC = () => {
               onChange={handleInputChange}
               placeholder="Enter description"
               className="w-full h-[36px] px-3 py-2 border border-[#CECECE] rounded-[4px] bg-[#FFFFFF] focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-              style={{ resize: 'none', overflow: 'hidden' }} // Inline styles to remove resize handles
-              required
+              style={{ resize: "none", overflow: "hidden" }} // Inline styles to remove resize handles
+             
             />
           </div>
 
@@ -132,7 +148,9 @@ const EditSubRoute: React.FC = () => {
             <button
               type="button"
               className="px-2 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition"
-              onClick={() => setFormData({ mainRoute: '', routeCode: '', description: '' })} // Optional: reset on cancel
+              onClick={() =>
+                setFormData({ mainRouteName: "", mainRouteCode: "", description: "" })
+              } // Optional: reset on cancel
             >
               Cancel
             </button>

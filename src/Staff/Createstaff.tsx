@@ -194,7 +194,7 @@ const CreateStaff: React.FC = () => {
                 <table className="min-w-full table-fixed">
                   <thead className="bg-[#fdf8f0] sticky top-0">
                     <tr className="border-b">
-                    <th className="p-2 text-[12px] text-center text-[#303F58] w-16"> <input type="checkbox" /></th>
+                   
                       <th className="p-2 text-[12px] text-center text-[#303F58] w-16">Sl No</th>
                       <th className="p-2 text-[12px] text-center text-[#303F58] w-24">Photo</th>
                       <th className="p-2 text-[12px] text-center text-[#303F58] w-36">Name</th>
@@ -213,7 +213,7 @@ const CreateStaff: React.FC = () => {
                     {filteredStaffList.length > 0 ? (
                       filteredStaffList.map((staff: any, index: number) => (
                         <tr className="border-b" key={staff._id}>
-                           <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16"> <input type="checkbox" /></td>
+                         
 
                           <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16">{index + 1}</td>
                           <td className="p-2 text-center w-24">

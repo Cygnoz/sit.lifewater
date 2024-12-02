@@ -157,9 +157,7 @@ const CreateVehicle: React.FC = () => {
            <table className="print-table w-full text-left">
               <thead className="bg-[#fdf8f0]">
                 <tr className="border-b">
-                  <th scope="col" className="no-print p-2">
-                    <input type="checkbox" />
-                  </th>
+                 
                   <th className="p-2 text-[14px] font-medium text-center leading-[18px] text-[#303F58]">Sl No</th>
                   <th className="p-2 text-[14px] font-medium text-center leading-[18px] text-[#303F58]">Photo</th>
                   <th className="p-2 text-[14px] font-medium text-center leading-[18px] text-[#303F58]">Vehicle Number</th>
@@ -172,9 +170,7 @@ const CreateVehicle: React.FC = () => {
               <tbody>
                 {filteredVehicleList.map((vehicle, index) => (
                   <tr key={vehicle._id || index} className="border-b">
-                    <td className="no-print px-8 py-6">
-                      <input type="checkbox" />
-                    </td>
+                    
                     <td className="p-2 text-[14] text-center text-[#4B5C79]">{index + 1}</td>
                     <td className="p-2 text-[14] text-center text-[#4B5C79]">
                       <img className="mx-auto object-cover w-11 h-11 rounded-full" src={vehicle.image} alt="Vehicle" />
