@@ -1,33 +1,35 @@
 const Subroute = require('../../Models/SubrouteSchema'); 
-const Route = require('../../Models/RouteSchema'); 
+const Route = require('../../Models/MainRouteSchema'); 
 
 // Add a new subroute
 exports.addSubroute = async (req, res) => {
     try {
       console.log("Add Sub Route:", req.body);
       const cleanedData = cleanCustomerData(req.body);
-      // Validate the subrouteCode
+
+      
+      if (!cleanedData.subRouteName) {
+        return res.status(400).json({ message: 'Sub Route Name is required' });
+      }
       if (!cleanedData.subrouteCode) {
-        return res.status(400).json({ message: 'Subroute code is required' });
+        return res.status(400).json({ message: 'Sub Route Code is required' });
+      }
+      if (!cleanedData.mainRouteId) {
+        return res.status(400).json({ message: 'Select a Main Route' });
       }
   
       // Check if a subroute with the same subrouteCode already exists
-      const existingSubroute = await Subroute.findOne({ subrouteCode: cleanedData.subrouteCode });
-      if (existingSubroute) {
-        return res.status(400).json({ message: 'Subroute with this code already exists.' });
+      const existingSubrouteCode = await Subroute.findOne({ subrouteCode: cleanedData.subrouteCode });
+      if (existingSubrouteCode) {
+        return res.status(400).json({ message: 'Sub Route with this code already exists.' });
+      }
+      const existingSubrouteName = await Subroute.findOne({ subRouteName: cleanedData.subRouteName });
+      if (existingSubrouteName) {
+        return res.status(400).json({ message: 'Sub Route with this name already exists.' });
       }
   
-      // Create a new subroute\
+      // Create a new subroute
       const newSubroute = new Subroute({ ...cleanedData });
-      // const newSubroute = new Subroute({
-      //   subrouteCode: req.body.subrouteCode,  // ensure correct casing
-      //   subRoute: req.body.subRoute,
-      //   mainRoute: req.body.mainRoute,
-      //   description: req.body.description,
-      //   // Add other fields as needed
-      // });
-  
-      // Save the new subroute in the database
       const savedSubroute = await newSubroute.save();
   
       // Send success response
@@ -35,8 +37,7 @@ exports.addSubroute = async (req, res) => {
     } catch (error) {
       res.status(500).json({ message: 'Error adding subroute', error: error.message });
     }
-  };
-  
+};  
 
 // Edit an existing subroute by ID
 exports.editSubroute = async (req, res) => {
@@ -44,14 +45,31 @@ exports.editSubroute = async (req, res) => {
     console.log("Edit Sub Route:", req.body);
     const { id } = req.params;
     const cleanedData = cleanCustomerData(req.body);
-    const { subRoute, subrouteCode, description, mainRoute } = cleanedData; // Use mainRoute (which is now an ObjectId)
+
+
+    if (!cleanedData.subRouteName) {
+      return res.status(400).json({ message: 'Sub Route Name is required' });
+    }
+    if (!cleanedData.subrouteCode) {
+      return res.status(400).json({ message: 'Sub Route Code is required' });
+    }
+    if (!cleanedData.mainRouteId) {
+      return res.status(400).json({ message: 'Select a Main Route' });
+    }
+
+    // Check if a subroute with the same subrouteCode already exists
+    const existingSubrouteCode = await Subroute.findOne({ subrouteCode: cleanedData.subrouteCode , _id: { $ne: id } });
+    if (existingSubrouteCode) {
+      return res.status(400).json({ message: 'Sub Route with this code already exists.' });
+    }
+    const existingSubrouteName = await Subroute.findOne({ subRouteName: cleanedData.subRouteName, _id: { $ne: id } });
+    if (existingSubrouteName) {
+      return res.status(400).json({ message: 'Sub Route with this name already exists.' });
+    }
+
 
     // Update the subRoute document, including the mainRoute reference
-    const updatedSubroute = await Subroute.findByIdAndUpdate(
-      id,
-      { subRoute, subrouteCode, description, mainRoute }, // Use mainRoute for the reference
-      { new: true} // Return the updated document with validators
-    );
+    const updatedSubroute = await Subroute.findByIdAndUpdate( id, cleanedData, { new: true} );
 
     if (!updatedSubroute) {
       return res.status(404).json({ message: 'Subroute not found' });
@@ -63,14 +81,11 @@ exports.editSubroute = async (req, res) => {
     res.status(500).json({ message: 'Error updating subroute', error });
   }
 }
-  
-
 
 // Delete a subroute by ID
 exports.deleteSubroute = async (req, res) => {
     try {
         const { id } = req.params;
-
         const deletedSubroute = await Subroute.findByIdAndDelete(id);
 
         if (!deletedSubroute) {
@@ -82,6 +97,7 @@ exports.deleteSubroute = async (req, res) => {
         res.status(500).json({ message: 'Error deleting subroute', error });
     }
 };
+
 
 // View a single subroute by ID
 exports.viewSubroute = async (req, res) => {
@@ -100,6 +116,7 @@ exports.viewSubroute = async (req, res) => {
     }
 };
 
+
 // View all subroutes
 exports.viewAllSubroutes = async (req, res) => {
     try {
@@ -114,25 +131,6 @@ exports.viewAllSubroutes = async (req, res) => {
         res.status(500).json({ message: 'Error fetching subroutes', error });
     }
 };
-exports.getSubroutebyID = async (req, res) => {
-    try {
-        const { id } = req.params; // Get the ID from request parameters
-
-        // Find the subroute by ID
-        const subroute = await Subroute.findById(id);
-
-        // If subroute not found, return a 404 response
-        if (!subroute) {
-            return res.status(404).json({ message: 'Subroute not found' });
-        }
-
-        // Return the found subroute
-        res.status(200).json(subroute);
-    } catch (error) {
-        // Handle any errors
-        res.status(500).json({ message: 'Error fetching subroute', error: error.message });
-    }
-};
 
 
 
@@ -148,20 +146,11 @@ exports.getSubroutebyID = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-  //Clean Data 
-  function cleanCustomerData(data) {
+//Clean Data 
+function cleanCustomerData(data) {
     const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
     return Object.keys(data).reduce((acc, key) => {
       acc[key] = cleanData(data[key]);
       return acc;
     }, {});
-  }
+}

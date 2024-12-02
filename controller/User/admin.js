@@ -83,6 +83,8 @@ exports.login = [loginRateLimiter, async (req, res) => {
         );
   
         // Send response with user data (excluding organizationId)
+        console.log(`${username} logged in successfully`);
+        
         res.status(200).json({
           success: true,
           token: `Bearer ${token}`

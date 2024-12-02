@@ -10,7 +10,6 @@ exports.createCustomer = async (req, res) => {
   console.log("Add Customer:", req.body);
   try {
     const cleanedData = cleanCustomerData(req.body);
-    console.log('cleandata:',cleanedData);
     
     const { fullName, whatsappNumber, location, } = cleanedData;
 
@@ -25,9 +24,15 @@ exports.createCustomer = async (req, res) => {
       return res.status(400).json({ message: 'A customer with this WhatsApp number already exists.' });
     }
 
-    const allCustomer = await Customer.find();
-    const nextIdNumber = allCustomer.length + 1;        
-    cleanedData.customerID = `LW${nextIdNumber.toString().padStart(3, '0')}`;
+    // Generate customerID
+    let nextIdNumber = 1; // Default if the collection is empty
+    const lastCustomer = await Customer.findOne().sort({ createdAt: -1 }); // Sort by creation date to find the last one
+    if (lastCustomer) {
+      const lastId = parseInt(lastCustomer.customerID.slice(2)); // Extract the numeric part from the customerID
+      nextIdNumber = lastId + 1; // Increment the last numeric part
+    }
+
+    cleanedData.customerID = `LW${nextIdNumber.toString().padStart(4, '0')}`;
 
     // Handle location: check if it's provided and valid, otherwise set a default location
     let transformedLocation = null;

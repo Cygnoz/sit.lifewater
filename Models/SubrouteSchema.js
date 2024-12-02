@@ -1,25 +1,21 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const MainRoute = require('./RouteSchema'); // Importing the Route schema
+const MainRoute = require('./MainRouteSchema'); 
+
+const stockSchema = new Schema({
+  itemId: { type: String },
+  itemName: { type: String },
+  quantity: { type: Number },
+  status: { type: String, default: undefined },
+}, { _id: false });
 
 const subRouteSchema = new Schema({
-  subRoute: {
-    type: String,
-    required: true
-  },
-  subrouteCode: {
-    type: String,
-    unique: true,
-    sparse: true, // Allows multiple null values
-  },
-  description: {
-    type: String
-  },
-  mainRoute: {
-    type: String,
-    required: true,
-    ref: 'MainRoute'  // Reference to Route schema's routeCode
-  }
+  subRouteName: { type: String },
+  subrouteCode: { type: String },
+  description: { type: String },
+  mainRouteId: { type: Schema.Types.ObjectId, ref: 'MainRoute' },
+  stock:[stockSchema]
+
 });
 
 const SubRoute = mongoose.model('SubRoute', subRouteSchema);

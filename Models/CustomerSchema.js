@@ -51,4 +51,3 @@ customerSchema.index({ 'location.coordinates': '2dsphere' });
 
  
 module.exports = mongoose.model('Customer', customerSchema);
- 

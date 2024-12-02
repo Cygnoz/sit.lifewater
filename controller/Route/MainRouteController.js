@@ -1,4 +1,4 @@
-const MainRoute = require("../../Models/RouteSchema");
+const MainRoute = require("../../Models/MainRouteSchema");
 const mongoose = require('mongoose');
 const SubRoute = require('../../Models/SubrouteSchema');
  
@@ -12,28 +12,32 @@ exports.addRoute = async (req, res) => {
 
 
     // Validate required fields
-    if (!cleanedData.routeCode || !cleanedData.mainRoute) {
-      return res.status(400).json({ message: 'Missing required fields: Route Code or Main Route' });
+    if (!cleanedData.mainRouteCode) {
+      return res.status(400).json({ message: 'Route Code required' });
+    }
+    // Validate required fields
+    if (!cleanedData.mainRouteName) {
+      return res.status(400).json({ message: 'Main Route required' });
     }
 
     // Check if a route with the same routeCode already exists
-    const existingRoute = await MainRoute.findOne({ routeCode: cleanedData.routeCode });
-
-    if (existingRoute) {
+    const existingRouteCode = await MainRoute.findOne({ mainRouteCode: cleanedData.mainRouteCode });
+    if (existingRouteCode) {
       return res.status(400).json({ message: 'Route with this code already exists.' });
     }
 
+    const existingRouteName = await MainRoute.findOne({ mainRouteName: cleanedData.mainRouteName });
+    if (existingRouteName) {
+      return res.status(400).json({ message: 'Route with this name already exists.' });
+    }
+
+
+
     // Create a new route
     const newRoute = new MainRoute({ ...cleanedData });
-
-    // const newRoute = new MainRoute({
-    //   mainRoute: req.body.mainRoute,
-    //   routeCode: req.body.routeCode,
-    //   description: req.body.description,
-    // });
-
-    // Save the new route in the database
     const savedRoute = await newRoute.save();
+    console.log("Main Route added successfully",savedRoute);
+    
 
     // Send success response
     res.status(201).json(savedRoute);
@@ -65,13 +69,31 @@ exports.deleteRoute = async (req, res) => {
 };
  
  
+
 // Update a route by ObjectId
 exports.updateRoute = async (req, res) => {
   try {
     const { id } = req.params;
     const cleanedData = cleanCustomerData(req.body);
 
-    // const updateData = req.body;
+    // Check if routeCode already exists 
+    const existingRouteCode = await MainRoute.findOne({ 
+      mainRouteCode: cleanedData.mainRouteCode, 
+      _id: { $ne: id } 
+    });
+    if (existingRouteCode) {
+      return res.status(400).json({ message: 'Route with this code already exists.' });
+    }
+
+    // Check if mainRoute already exists 
+    const existingRouteName = await MainRoute.findOne({ 
+      mainRouteName: cleanedData.mainRouteName, 
+      _id: { $ne: id } 
+    });
+    if (existingRouteName) {
+      return res.status(400).json({ message: 'Route with this name already exists.' });
+    }
+
 
     const updatedRoute = await MainRoute.findByIdAndUpdate(id, cleanedData, { new: true });
     if (!updatedRoute) {
@@ -85,6 +107,8 @@ exports.updateRoute = async (req, res) => {
   }
 };
  
+
+
 // View all routes
 exports.getAllRoutes = async (req, res) => {
   try {
@@ -94,6 +118,9 @@ exports.getAllRoutes = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
  
 // View a route by ObjectId
 exports.viewRouteById = async (req, res) => {

@@ -6,9 +6,6 @@ exports.addVehicle = async (req, res) => {
     console.log("Add Vechile:", req.body);
     const cleanedData = cleanCustomerData(req.body);
 
-    // Handle the uploaded image
-    // const vehicleImage = req.file ? req.file.filename : null;
-
     // Check if vehicle already exists by vehicle number
     const existingVehicle = await Vehicle.findOne({ vehicleNo: cleanedData.vehicleNo });
     if (existingVehicle) {
@@ -17,19 +14,6 @@ exports.addVehicle = async (req, res) => {
 
     // Create a new vehicle instance
     const vehicle = new Vehicle({ ...cleanedData });
-
-    // const vehicle = new Vehicle({
-    //   vehicleNo,
-    //   image: vehicleImage,
-    //   insuranceValidity,
-    //   insuranceStatus,
-    //   registrationValidity,
-    //   insuranceAmount,
-    //   licenseAmount,
-    //   licenseValidity,
-    //   startingKilometer,
-    //   expenses
-    // });
 
     // Save vehicle to the database
     const savedVehicle = await vehicle.save();
