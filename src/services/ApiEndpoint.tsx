@@ -13,7 +13,10 @@ export const endpoints= {
   // stock
   ADD_W_STOCK:`wstock`,
   GET_ALL_WAREHOUSE:`warehouse`,
-  GET_ALL_ITEMS:`item`
+  GET_ALL_ITEMS:`item`,
+  ADD_AN_ITEM:`item`,
+  GET_AN_ITEM:`getitem`,
+  EDIT_AN_ITEM:`edititem`,
 
 
 
