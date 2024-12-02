@@ -55,6 +55,7 @@ exports.addItem = async (req, res) => {
 exports.updateItem = async (req, res) => {
   console.log("Edit Item:", req.body);
   try {
+      const { id } = req.params;
       const cleanedData = cleanCustomerData(req.body);
       const { sku } = req.body;
 
@@ -74,7 +75,7 @@ exports.updateItem = async (req, res) => {
     
 
     //Sku check
-    const existSku = await Item.findOne({sku});
+    const existSku = await Item.findOne({sku,_id: { $ne: id }});
     if (existSku) {
       return res.status(400).json({ message: 'SKU exists in records' });
     }
