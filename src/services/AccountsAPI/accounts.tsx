@@ -6,7 +6,7 @@ import { BASEURL } from "../Baseurl";
 
 export const createAccountAPI = async (formData: any) => {
   try {
-    const response = await axios.post(`${BASEURL}/api/addaccounts`, formData, {
+    const response = await axios.post(`${BASEURL}/addaccounts`, formData, {
       headers: {
         'Content-Type': 'application/json', // Ensure correct content type
       },
@@ -21,7 +21,7 @@ export const createAccountAPI = async (formData: any) => {
 
 export const getAllAccountsAPI = async () => {
   try {
-    const response = await axios.get(`${BASEURL}/api/getallaccounts`, {
+    const response = await axios.get(`${BASEURL}/getallaccounts`, {
       headers: {
         'Content-Type': 'application/json', // Ensure correct content type
       },
@@ -36,7 +36,7 @@ export const getAllAccountsAPI = async () => {
 
 export const getOneTrialBalanceAPI = async (accountId: string) => {
   try {
-    const response = await axios.get(`${BASEURL}/api/get-one-trial-balance/${accountId}`, {
+    const response = await axios.get(`${BASEURL}/get-one-trial-balance/${accountId}`, {
       headers: {
         'Content-Type': 'application/json', // Ensure the correct content type
       },

@@ -23,7 +23,7 @@ interface ApiResponse {
 // export const addOrderAPI = async (formData: FormData): Promise<ApiResponse> => {
 //     try {
 //       const response = await axios.post(
-//         `${STOCK_BASEURL}/api/orders`,
+//         `${STOCK_BASEURL}/orders`,
 //         formData,
 //         {
 //           headers: {
@@ -84,7 +84,7 @@ export const addOrderAPI = async (data: {
   items: { itemName: string; itemImage: string; quantity: number; price: number; amount: number; }[];
 }): Promise<ApiResponse> => {
   try {
-    const response = await commonApiForOrder('POST', `${STOCK_BASEURL}/api/orders`, data);
+    const response = await commonApiForOrder('POST', `${STOCK_BASEURL}/orders`, data);
     console.log("Response Status:", response.status); // Check the response status
     console.log("Response Data:", response.data); // Check the response data
     return response;
@@ -100,7 +100,7 @@ export const addOrderAPI = async (data: {
 // export const addOrderAPI = async (orderData: Order): Promise<ApiResponse> => {
 
 //   try {
-//     const response = await axios.post(`${STOCK_BASEURL}/api/orders`, orderData);
+//     const response = await axios.post(`${STOCK_BASEURL}/orders`, orderData);
     
 //     console.log("Response Status:", response.status); // Log response status
 //     console.log("Response Data:", response.data); // Log response data
@@ -115,7 +115,7 @@ export const addOrderAPI = async (data: {
 
 // export const getOrderAPI = async (): Promise<ApiResponse> => {
 //     try {
-//         const response = await axios.get(`${STOCK_BASEURL}/api/orders`, {
+//         const response = await axios.get(`${STOCK_BASEURL}/orders`, {
 //             headers: {
 //                 'Accept': 'application/json',
 //             },
@@ -134,7 +134,7 @@ export const addOrderAPI = async (data: {
 
 export const getOrderAPI = async () => {
     try {
-      const response = await axios.get(`${STOCK_BASEURL}/api/orders`);
+      const response = await axios.get(`${STOCK_BASEURL}/orders`);
       return response.data; // Returns the list of orders
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -145,7 +145,7 @@ export const getOrderAPI = async () => {
 
   export const deleteOrderAPI = async (id: string) => {
     try {
-      const response = await axios.delete(`${STOCK_BASEURL}/api/orders/${id}`);
+      const response = await axios.delete(`${STOCK_BASEURL}/orders/${id}`);
       return response.data;
     } catch (error) {
       console.error("Error deleting order:", error);
@@ -155,7 +155,7 @@ export const getOrderAPI = async () => {
 
 //   export const viewOrderAPI = async (id: string) => {
 //     try {
-//       const response = await axios.get(`${STOCK_BASEURL}/api/orders/${id}`);
+//       const response = await axios.get(`${STOCK_BASEURL}/orders/${id}`);
 //       return response.data;
 //     } catch (error) {
 //       console.error("Error fetching order:", error);
@@ -165,7 +165,7 @@ export const getOrderAPI = async () => {
 
 export const viewOrderAPI = async (id: string) => {
     try {
-      const response = await axios.get(`${STOCK_BASEURL}/api/orders/${id}`);
+      const response = await axios.get(`${STOCK_BASEURL}/orders/${id}`);
       return response.data;
     } catch (error: any) {
       console.error("Error fetching order:", error.response?.data || error.message);

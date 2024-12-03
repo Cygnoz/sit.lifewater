@@ -33,7 +33,7 @@ interface ApiResponse {
 // API function to add an unload entry
 export const addUnloadAPI = async (unloadData: UnloadData): Promise<ApiResponse> => {
   try {
-    const { data } = await axios.post<ApiResponse>(`${STOCK_BASEURL}/api/addunload`, unloadData);
+    const { data } = await axios.post<ApiResponse>(`${STOCK_BASEURL}/addunload`, unloadData);
     return { ...data, status: 201 }; // Return the data with status
   } catch (error: any) {
     console.error('Error adding unload:', error);
@@ -48,7 +48,7 @@ export const addUnloadAPI = async (unloadData: UnloadData): Promise<ApiResponse>
   // Create a function to get all unloads
 export const getAllUnloadsAPI = async () => {
   try {
-    const response = await axios.get(`${STOCK_BASEURL}/api/unload`); // Adjust the endpoint as per your backend
+    const response = await axios.get(`${STOCK_BASEURL}/unload`); // Adjust the endpoint as per your backend
     return response.data; // Return the data from the response
   } catch (error) {
     console.error('Error fetching unloads:', error);

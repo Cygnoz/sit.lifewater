@@ -6,7 +6,7 @@ import { BASEURL } from '../Baseurl';
 
 export const addSubRouteAPI = async (formData: any) => {
     try {
-      const response = await axios.post(`${BASEURL}/api/addSRoute`, formData, {
+      const response = await axios.post(`${BASEURL}/addSRoute`, formData, {
         headers: {
           'Content-Type': 'application/json'  // Ensure correct content type
         }
@@ -22,7 +22,7 @@ export const addSubRouteAPI = async (formData: any) => {
   // Function to get all sub routes
 export const getSubRoutesAPI = async () => {
   try {
-    const response = await axios.get(`${BASEURL}/api/viewSRoute`, {
+    const response = await axios.get(`${BASEURL}/viewSRoute`, {
       headers: {
         'Content-Type': 'application/json'  // Ensure correct content type
       }
@@ -40,7 +40,7 @@ export const getSubRoutesAPI = async () => {
 
 export const deleteSubRouteAPI = async (id: string) => {
   try {
-    const response = await fetch(`${BASEURL}/api/delSRoute/${id}`, {
+    const response = await fetch(`${BASEURL}/delSRoute/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ export const deleteSubRouteAPI = async (id: string) => {
 // update an existing subRoute 
 export const editSubRouteAPI = async (id: string,formData:string) => {
   try {
-    const response = await axios.put(`${BASEURL}/api/updateSRoute/${id}`,formData, {
+    const response = await axios.put(`${BASEURL}/updateSRoute/${id}`,formData, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -79,7 +79,7 @@ export const editSubRouteAPI = async (id: string,formData:string) => {
 
 export const getSubRouteByIdAPI = async (id: string) => {
   try {
-    const response = await axios.get(`${BASEURL}/api/viewSRoute/${id}`);
+    const response = await axios.get(`${BASEURL}/viewSRoute/${id}`);
     return response.data; // Assuming your server returns data in this format
   } catch (error:unknown) {
      if (axios.isAxiosError(error)) {
