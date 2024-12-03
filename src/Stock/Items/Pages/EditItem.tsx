@@ -44,14 +44,7 @@ const AddItem: React.FC = () => {
   }
 
  // Define an interface for the item response
-interface ItemResponse {
-    itemName?: string;
-    resaleable?: boolean;
-    sku?: string;
-    sellingPrice?: number;
-    costPrice?: number;
-    description?: string;
-  }
+
   
   const getAnItem = async () => {
     try {
@@ -63,9 +56,7 @@ interface ItemResponse {
       if (!error && response) {
         // Access the actual data from the Axios response
         const itemData = response.data;
-  
         console.log('Item Data:', itemData);
-  
         setFormValues({
           itemName: itemData.itemName || "",
           resaleable: itemData.resaleable ?? true,
@@ -74,6 +65,10 @@ interface ItemResponse {
           costPrice: itemData.costPrice ? itemData.costPrice.toString() : "",
           description: itemData.description || "",
         });
+
+        if (itemData.itemImage) {
+            setItemImage(itemData.itemImage); // Assume setItemImage is a state setter for itemImage
+          }
       }
     } catch (error) {
       console.error("Error fetching item details:", error);
@@ -88,9 +83,9 @@ interface ItemResponse {
   }, [id]);
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-
+    e.preventDefault();
+    setLoading(true);
+  
     try {
       // Prepare the payload for update
       const payload = {
@@ -100,30 +95,44 @@ interface ItemResponse {
         sellingPrice: parseFloat(formValues.sellingPrice),
         description: formValues.description,
         resaleable: formValues.resaleable,
-        // If you want to include image, add it here
-        ...(itemImage && { image: itemImage })
-      }
-
+        ...(itemImage && { itemImage }), // Include image if it exists
+      };
+  
       // Construct the update URL
       const url = `${endpoints.EDIT_AN_ITEM}/${id}`;
-
+  
       // Send the update request
       const { response, error } = await updateItem(url, payload);
-
+  
       if (!error && response) {
         toast.success("Item updated successfully");
         // Navigate back to item list or item details
-        navigate("/item");
+        setTimeout(() => {
+          navigate("/item");
+        }, 500);
+      } else if (error?.response?.data?.message) {
+        // Display the specific error message from the API response
+        toast.error(error.response.data.message);
+      } else if (error?.message) {
+        // Fallback to a generic error message if no detailed message exists
+        toast.error(error.message);
       } else {
         toast.error("Failed to update item");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating item:", error);
-      toast.error("An error occurred while updating the item");
+  
+      // Handle errors from the catch block
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message); // API error message
+      } else {
+        toast.error("An error occurred while updating the item");
+      }
     } finally {
       setLoading(false);
     }
-  }
+  };
+  
 
   return (
     <div className="p-6">
