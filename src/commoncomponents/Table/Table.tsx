@@ -5,8 +5,7 @@ import Eye from "../../assets/icons/Eye";
 import Pen from "../../assets/icons/Pen";
 import Trash2 from "../../assets/icons/Trash2";
 import TableSkelton from "../Skelton/TableSkelton";
-import PrintButton from "../Buttons/PrintButton";
-
+// import PrintButton from "../Buttons/PrintButton";
 
 interface Column {
   id: string;
@@ -18,6 +17,9 @@ interface TableProps {
   columns: Column[];
   data: any[];
   onRowClick?: (id: string) => void;
+  onViewClick?: (id: string) => void; // For view action
+  onEditClick?: (id:string) => void; // For add action
+  onDeleteClick?: (id: string) => void; // For delete action
   renderColumnContent?: (colId: string, item: any) => JSX.Element;
   searchPlaceholder: string;
   loading: boolean;
@@ -28,7 +30,9 @@ interface TableProps {
 const PurchaseTable: React.FC<TableProps> = ({
   columns,
   data,
-  onRowClick,
+  onViewClick,
+  onEditClick,
+  onDeleteClick,
   renderColumnContent,
   searchPlaceholder,
   loading,
@@ -46,8 +50,6 @@ const PurchaseTable: React.FC<TableProps> = ({
       );
   });
 
-
-
   const visibleColumns = columns.filter((col) => col.visible);
   const skeletonColumns = [...visibleColumns, {}, {}, {}];
 
@@ -62,10 +64,10 @@ const PurchaseTable: React.FC<TableProps> = ({
             setCurrentPage(1);
           }}
         />
-        <PrintButton />
+
       </div>
 
-      <div className="overflow-x-auto mt-3  max-h-[25rem] text-">
+      <div className="overflow-x-auto mt-3 max-h-[25rem] text-">
         <table className="min-w-full bg-white mb-5">
           <thead className="text-[12px] text-center text-dropdownText text-Text">
             <tr style={{ backgroundColor: "#F9F7F0" }}>
@@ -83,9 +85,6 @@ const PurchaseTable: React.FC<TableProps> = ({
               )}
               <th className="py-3 px-2 font-medium border-b border-tableBorder">
                 Action
-              </th>
-              <th className="py-3 px-2 font-medium border-b border-tableBorder">
-                {/* <CustomiseColmn columns={columns} setColumns={setColumns} /> */}
               </th>
             </tr>
           </thead>
@@ -120,13 +119,22 @@ const PurchaseTable: React.FC<TableProps> = ({
                       )
                   )}
                   <td className="py-3 px-4 border-b border-tableBorder flex items-center justify-center gap-2">
-                    <Pen color="#0B9C56" size={18} />
-                   <button                   onClick={() => onRowClick && onRowClick(item._id)}
-                   > <Eye color={"#569FBC"} />{" "}</button>
-                    <Trash2 color="#EA1E4F" size={18} />{" "}
+                    {onEditClick && (
+                      <button onClick={() => onEditClick(item._id)}>
+                        <Pen color="#0B9C56" size={18} />
+                      </button>
+                    )}
+                    {onViewClick && (
+                      <button onClick={() => onViewClick(item._id)}>
+                        <Eye color={"#569FBC"} />
+                      </button>
+                    )}
+                    {onDeleteClick && (
+                      <button onClick={() => onDeleteClick(item._id)}>
+                        <Trash2 color="#EA1E4F" size={18} />
+                      </button>
+                    )}
                   </td>
-
-                  <td className="py-3 px-4 border-b border-tableBorder"></td>
                 </tr>
               ))
             ) : (
@@ -135,8 +143,6 @@ const PurchaseTable: React.FC<TableProps> = ({
           </tbody>
         </table>
       </div>
-
-   
     </div>
   );
 };
