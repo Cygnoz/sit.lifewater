@@ -40,7 +40,8 @@ export const endpoints= {
 
 
   //customers
-  GET_ALL_CUSTOMERS:`customer`
+  GET_ALL_CUSTOMERS:`customer`,
+  DELETE_A_CUSTOMER:`customer`
   
 
 }
