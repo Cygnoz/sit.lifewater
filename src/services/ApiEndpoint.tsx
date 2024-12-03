@@ -23,7 +23,7 @@ export const endpoints= {
   EDIT_AN_ITEM:`edititem`,
   DELETE_AN_ITEM:`item`,
 
-  
+
   // warehouse
  GET_ALL_WAREHOUSE: `warehouse`,
  ADD_WAREHOUSE: `warehouse`,
@@ -33,7 +33,14 @@ export const endpoints= {
   // Route
   ADD_MAINROUTE:`addRoute`,
   GET_ALL_MAINROUTE:`getAllroutes`,
-  GET_A_MAINROUTE:`getroute/:id`
+  GET_A_MAINROUTE:`getroute/:id`,
+
+
+
+
+
+  //customers
+  GET_ALL_CUSTOMERS:`customer`
   
 
 }
