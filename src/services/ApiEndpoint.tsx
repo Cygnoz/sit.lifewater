@@ -41,7 +41,14 @@ export const endpoints= {
 
   //customers
   GET_ALL_CUSTOMERS:`customer`,
-  DELETE_A_CUSTOMER:`customer`
+  DELETE_A_CUSTOMER:`customer`,
   
+// ACCOUNTS
+ADD_NEW_ACCOUNT:`addaccounts`,
+GET_ALL_ACCOUNTS:`getallaccounts`,
+GET_ONE_TRIAL_BALANCE:`get-one-trial-balance`,
 
+ADD_NEW_JOURNEL_ENTRY:`add-journal-entry`,
+GET_ALL_JOURNALS:`get-all-journal`,
+GET_ONE_JOURNAL:`get-one-journal`
 }

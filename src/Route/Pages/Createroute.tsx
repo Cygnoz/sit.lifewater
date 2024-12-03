@@ -35,10 +35,10 @@ const CreateRoute: React.FC = () => {
   const [filteredRouteList, setFilteredRouteList] = useState<Route[]>([]); // Filtered route list
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState<string>(''); // Search query
-  const { request: getmainroute } = useApi("get", 4000)
+ 
   console.log(filteredRouteList);
   
-
+  const { request: getmainroute } = useApi("get", 4000)
   const getALLMainroute = async () => {
     try {
       const url = `${endpoints.GET_ALL_MAINROUTE}`

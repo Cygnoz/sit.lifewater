@@ -1,23 +1,29 @@
-import { useState } from "react"
-import Button from "../../Accounts/Components/Button"
+import { useState } from "react";
+import Button from "../../Accounts/Components/Button";
 // import CirclePlus from "../../assets/circle-plus.svg";
-import CashImage from "../../assets/images/CashImage.png"
-import bgImage from "../../assets/images/Frame 6.png"
-import chartOfAcc from "../../assets/constants/chartOfAcc"
-import Modal from "../../Accounts/Components/Modal"
-import CehvronDown from "../../assets/icons/cheveronDown"
-import { createAccountAPI } from "../../services/AccountsAPI/accounts"
-import { ToastContainer, toast } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
+import CashImage from "../../assets/images/CashImage.png";
+import bgImage from "../../assets/images/Frame 6.png";
+import chartOfAcc from "../../assets/constants/chartOfAcc";
+import Modal from "../../Accounts/Components/Modal";
+import CehvronDown from "../../assets/icons/cheveronDown";
+import { createAccountAPI } from "../../services/AccountsAPI/accounts";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { endpoints } from "../../services/ApiEndpoint";
+import { useNavigate } from "react-router-dom";
+import useApi from "../../Hook/UseApi";
 
 interface NewAccountModalProps {
-  fetchAllAccounts: () => void
-  isModalOpen: boolean
-  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+  fetchAllAccounts: () => void;
+  isModalOpen: boolean;
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function NewAccountModal({ isModalOpen, setIsModalOpen }: NewAccountModalProps) {
-  const [openingType, setOpeningType] = useState("Debit")
+function NewAccountModal({
+  isModalOpen,
+  setIsModalOpen,
+}: NewAccountModalProps) {
+  const [openingType, setOpeningType] = useState("Debit");
   const [formValues, setFormValues] = useState({
     accountName: "",
     accountCode: "",
@@ -25,17 +31,17 @@ function NewAccountModal({ isModalOpen, setIsModalOpen }: NewAccountModalProps) 
     description: "",
     debitOpeningBalance: "",
     creditOpeningBalance: "",
-  })
+  });
 
   const closeModal = () => {
-    setIsModalOpen(false)
-  }
+    setIsModalOpen(false);
+  };
 
   // const handleChange = (
   //   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   // ) => {
   //   const { name, value } = e.target;
-  
+
   //   if (name === "openingType") {
   //     setOpeningType(value);
   //   } else {
@@ -45,8 +51,6 @@ function NewAccountModal({ isModalOpen, setIsModalOpen }: NewAccountModalProps) 
   //     }));
   //   }
   // };
-
-
 
   const accountCategories = {
     Asset: {
@@ -89,11 +93,11 @@ function NewAccountModal({ isModalOpen, setIsModalOpen }: NewAccountModalProps) 
 
   const handleChange = (
     e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement 
     >
   ) => {
     const { name, value } = e.target;
-  
+
     if (name === "accountSubhead") {
       const result = headGroup(value);
       if (result) {
@@ -115,8 +119,10 @@ function NewAccountModal({ isModalOpen, setIsModalOpen }: NewAccountModalProps) 
       setOpeningType(value);
       setFormValues((prevFormValues) => ({
         ...prevFormValues,
-        debitOpeningBalance: value === "Debit" ? prevFormValues.debitOpeningBalance : "",
-        creditOpeningBalance: value === "Credit" ? prevFormValues.creditOpeningBalance : "",
+        debitOpeningBalance:
+          value === "Debit" ? prevFormValues.debitOpeningBalance : "",
+        creditOpeningBalance:
+          value === "Credit" ? prevFormValues.creditOpeningBalance : "",
       }));
     } else if (name === "openingBalance") {
       setFormValues((prevFormValues) => ({
@@ -124,7 +130,9 @@ function NewAccountModal({ isModalOpen, setIsModalOpen }: NewAccountModalProps) 
         debitOpeningBalance:
           openingType === "Debit" ? value : prevFormValues.debitOpeningBalance,
         creditOpeningBalance:
-          openingType === "Credit" ? value : prevFormValues.creditOpeningBalance,
+          openingType === "Credit"
+            ? value
+            : prevFormValues.creditOpeningBalance,
       }));
     } else {
       setFormValues((prevFormValues) => ({
@@ -133,56 +141,113 @@ function NewAccountModal({ isModalOpen, setIsModalOpen }: NewAccountModalProps) 
       }));
     }
   };
+
+  // const handleSubmit = async (e: any) => {
+  //   try {
+  //     e.preventDefault(); // Prevent default form submission
+  //     const response = await createAccountAPI(formValues); // Call the API
+
+  //     console.log(response);
+
+  //     // Check response status or success flag
+  //     if (response.status === 200 || response.status === 201) {
+  //       toast.success("Account created successfully!"); // Show success notification
+  //       // fetchAllAccounts(); // Refresh account list after successful creation
+  //       setFormValues({
+  //         accountName: "",
+  //         accountCode: "",
+  //         accountSubhead: "",
+  //         description: "",
+  //         debitOpeningBalance: "",
+  //         creditOpeningBalance: "",
+  //       });
+  //       closeModal(); // Close the modal
+  //     } else {
+  //       // Handle unexpected status codes
+  //       toast.error(
+  //         `Failed to create account: ${
+  //           response.statusText || "Unexpected error"
+  //         }`
+  //       );
+  //       console.error("Unexpected response:", response);
+  //     }
+  //   } catch (error: any) {
+  //     console.error("Failed to create account:", error.message);
+  //     toast.error(`Failed to create account: ${error.message}`); // Show error notification
+  //   }
+  // };
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   
+  const { request: addNewAccount } = useApi("post", 4000);
 
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-  const handleSubmit = async (e:any) => {
     try {
-      e.preventDefault(); // Prevent default form submission
-      const response = await createAccountAPI(formValues); // Call the API
+      // Prepare the payload
+      const payload = {
+        ...formValues,
+      };
+      console.log(payload);
 
-      console.log(response);
-      
-  
-      // Check response status or success flag
-      if (response.status === 200 || response.status === 201) {
-        toast.success("Account created successfully!"); // Show success notification
-        // fetchAllAccounts(); // Refresh account list after successful creation
-        setFormValues({
-          accountName: "",
-          accountCode: "",
-          accountSubhead: "",
-          description: "",
-          debitOpeningBalance: "",
-          creditOpeningBalance: "",
-        })
-        closeModal(); // Close the modal
+      // Call the API to add the item
+      const url = `${endpoints.ADD_NEW_ACCOUNT}`;
+      const { response, error } = await addNewAccount(url, payload);
+
+      if (!error && response) {
+        toast.success("Account added successfully.");
+        setTimeout(() => {
+          navigate("/chartofaccount");
+        }, 3000);
       } else {
-        // Handle unexpected status codes
-        toast.error(`Failed to create account: ${response.statusText || 'Unexpected error'}`);
-        console.error("Unexpected response:", response);
+        // Handle any API errors
+        toast.error(error?.message || "Failed to add Account. Please try again.");
       }
-    } catch (error: any) {
-      console.error("Failed to create account:", error.message);
-      toast.error(`Failed to create account: ${error.message}`); // Show error notification
+    } catch (err) {
+      console.error("Error adding Account:", err);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
-  
-  
 
   return (
     <div>
-            <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop={true} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored" />
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
 
       <Modal open={isModalOpen} onClose={closeModal} className="w-[68%]">
         <div className="p-5 mt-3">
           <div className="mb-5 flex p-4 rounded-xl bg-CreamBg relative overflow-hidden">
-            <div className="absolute top-0 right-16 w-[178px] h-[89px]" style={{ backgroundImage: `url(${bgImage})` }}></div>
+            <div
+              className="absolute top-0 right-16 w-[178px] h-[89px]"
+              style={{ backgroundImage: `url(${bgImage})` }}
+            ></div>
             <div className="relative z-10">
-              <h3 className="text-xl font-bold text-textColor">Create Account</h3>
-              <p className="text-dropdownText font-semibold text-sm mt-2">Start your journey with us—create your account in moments!</p>
+              <h3 className="text-xl font-bold text-textColor">
+                Create Account
+              </h3>
+              <p className="text-dropdownText font-semibold text-sm mt-2">
+                Start your journey with us—create your account in moments!
+              </p>
             </div>
-            <div className="ms-auto text-3xl cursor-pointer relative z-10" onClick={closeModal}>
+            <div
+              className="ms-auto text-3xl cursor-pointer relative z-10"
+              onClick={closeModal}
+            >
               &times;
             </div>
           </div>
@@ -193,15 +258,30 @@ function NewAccountModal({ isModalOpen, setIsModalOpen }: NewAccountModalProps) 
             </div>
             <div className="w-[65%]">
               <div className="mb-4">
-                <label className="block text-sm text-labelColor mb-1">Account Type</label>
-                <select name="accountSubhead" value={formValues.accountSubhead} onChange={handleChange} className="w-full border border-inputBorder rounded p-1.5 pl-2 text-sm">
+                <label className="block text-sm text-labelColor mb-1">
+                  Account Type
+                </label>
+                <select
+                  name="accountSubhead"
+                  value={formValues.accountSubhead}
+                  onChange={handleChange}
+                  className="w-full border border-inputBorder rounded p-1.5 pl-2 text-sm"
+                >
                   <option disabled hidden value="">
                     Select type
                   </option>
                   {chartOfAcc.map((item, index) => (
-                    <optgroup className="text-maroon" key={index} label={item.head}>
+                    <optgroup
+                      className="text-maroon"
+                      key={index}
+                      label={item.head}
+                    >
                       {item.subhead.map((subitem, subindex) => (
-                        <option className="text-black option-spacing" key={subindex} value={subitem}>
+                        <option
+                          className="text-black option-spacing"
+                          key={subindex}
+                          value={subitem}
+                        >
                           {subitem}
                         </option>
                       ))}
@@ -211,12 +291,23 @@ function NewAccountModal({ isModalOpen, setIsModalOpen }: NewAccountModalProps) 
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm mb-1 text-labelColor">Account Name</label>
-                <input type="text" name="accountName" value={formValues.accountName} onChange={handleChange} placeholder="Enter Account Name" className="border-inputBorder w-full text-sm border rounded p-1.5 pl-2" />
+                <label className="block text-sm mb-1 text-labelColor">
+                  Account Name
+                </label>
+                <input
+                  type="text"
+                  name="accountName"
+                  value={formValues.accountName}
+                  onChange={handleChange}
+                  placeholder="Enter Account Name"
+                  className="border-inputBorder w-full text-sm border rounded p-1.5 pl-2"
+                />
               </div>
 
               <div className="mb-4">
-                <label className="block mb-1 text-labelColor text-sm">Opening Balance</label>
+                <label className="block mb-1 text-labelColor text-sm">
+                  Opening Balance
+                </label>
                 <div className="flex">
                   <div className="relative w-20">
                     <select
@@ -234,22 +325,59 @@ function NewAccountModal({ isModalOpen, setIsModalOpen }: NewAccountModalProps) 
                       <CehvronDown color="gray" />
                     </div>
                   </div>
-                  <input type="text" className="text-sm w-[100%] rounded-r-md text-start bg-white border border-slate-300 h-9 p-2" placeholder="Enter Opening Balance" name={openingType === "Debit" ? "debitOpeningBalance" : "creditOpeningBalance"} value={openingType === "Debit" ? formValues.debitOpeningBalance : formValues.creditOpeningBalance} onChange={handleChange} />
+                  <input
+                    type="text"
+                    className="text-sm w-[100%] rounded-r-md text-start bg-white border border-slate-300 h-9 p-2"
+                    placeholder="Enter Opening Balance"
+                    name={
+                      openingType === "Debit"
+                        ? "debitOpeningBalance"
+                        : "creditOpeningBalance"
+                    }
+                    value={
+                      openingType === "Debit"
+                        ? formValues.debitOpeningBalance
+                        : formValues.creditOpeningBalance
+                    }
+                    onChange={handleChange}
+                  />
                 </div>
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm mb-1 text-labelColor">Description</label>
-                <textarea name="description" value={formValues.description} onChange={handleChange} placeholder="Enter Description" className="border-inputBorder w-full text-sm border rounded p-2 pt-5 pl-2" />
+                <label className="block text-sm mb-1 text-labelColor">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  value={formValues.description}
+                  onChange={handleChange}
+                  placeholder="Enter Description"
+                  className="border-inputBorder w-full text-sm border rounded p-2 pt-5 pl-2"
+                />
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm mb-1 text-labelColor">Account Code</label>
-                <input type="text" name="accountCode" value={formValues.accountCode} onChange={handleChange} placeholder="Enter Account Code" className="border-inputBorder w-full text-sm border rounded p-1.5 pl-2" />
+                <label className="block text-sm mb-1 text-labelColor">
+                  Account Code
+                </label>
+                <input
+                  type="text"
+                  name="accountCode"
+                  value={formValues.accountCode}
+                  onChange={handleChange}
+                  placeholder="Enter Account Code"
+                  className="border-inputBorder w-full text-sm border rounded p-1.5 pl-2"
+                />
               </div>
               <br />
               <div className="flex justify-end gap-2">
-                <Button onClick={closeModal} type="button" variant="secondary" className="rounded">
+                <Button
+                  onClick={closeModal}
+                  type="button"
+                  variant="secondary"
+                  className="rounded"
+                >
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" className="rounded">
@@ -261,7 +389,7 @@ function NewAccountModal({ isModalOpen, setIsModalOpen }: NewAccountModalProps) 
         </div>
       </Modal>
     </div>
-  )
+  );
 }
 
-export default NewAccountModal
+export default NewAccountModal;

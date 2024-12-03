@@ -2,6 +2,8 @@ import { Link, useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import CheveronLeftIcon from "../../assets/icons/CheveronLeft"
 import { getOneTrialBalanceAPI } from "../../services/AccountsAPI/accounts"
+import { endpoints } from "../../services/ApiEndpoint"
+import useApi from "../../Hook/UseApi"
 
 interface TrialBalance {
   _id: string
@@ -16,29 +18,29 @@ interface TrialBalance {
 function AccountantViewUI() {
   const { id } = useParams<{ id: string }>() // Extract the `id` parameter from the route
   const [trialBalance, setTrialBalance] = useState<TrialBalance[]>([])
-  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false);
+  const { request: getOneTrialBalance } = useApi("get", 4000)
+  
+  
   const baseCurrency = "AED"
 
-  const fetchTrialBalance = async () => {
+  const fetchAccounts = async () => {
     try {
-      if (id) {
-        const response = await getOneTrialBalanceAPI(id) // Fetch trial balance by account ID
-        console.log(response)
+      const url = `${endpoints.GET_ONE_TRIAL_BALANCE}/${id}`
+      const { response, error } = await getOneTrialBalance(url)
+      console.log("API RESPONSE :",response)
 
-        setTrialBalance(response) // Update state with the fetched data
-        console.log(trialBalance)
-      } else {
-        setError("Invalid account ID.")
-        console.log(error);
-        
+      if (!error && response) {
+        setLoading(false)
+        setTrialBalance(response.data)
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch trial balance.")
+    } catch (error) {
+      console.log(error)
     }
   }
 
   useEffect(() => {
-    fetchTrialBalance()
+    fetchAccounts()
   }, [id])
 
   const totalDebits = trialBalance.reduce((acc, item) => acc + (item.debitAmount || 0), 0);

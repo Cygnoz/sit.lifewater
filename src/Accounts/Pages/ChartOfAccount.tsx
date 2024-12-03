@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import plus from "../../assets/circle-plus.svg";
 import NewAccountModal from "./NewAccountModal";
 import { getAllAccountsAPI } from "../../services/AccountsAPI/accounts";
+import { endpoints } from "../../services/ApiEndpoint";
+import useApi from "../../Hook/UseApi";
 
 const ChartOfAccounts = () => {
   const navigate = useNavigate();
@@ -32,15 +34,27 @@ const ChartOfAccounts = () => {
   }
 
   // Fetch accounts from the API
+  const [loading, setLoading] = useState(false);
+  const { request: getallaccounts } = useApi("get", 4000);
   const fetchAccounts = async () => {
     try {
-      const accountsData = await getAllAccountsAPI(); // Fetch accounts
-      setAccounts(accountsData); // Save accounts to state
-      setFilteredAccounts(accountsData); // Initialize filtered accounts
-    } catch (error: any) {
-      console.error("Failed to fetch accounts:", error.message);
+      const url = `${endpoints.GET_ALL_ACCOUNTS}`;
+      const { response, error } = await getallaccounts(url);
+      console.log("API RESPONSE :", response);
+
+      if (!error && response) {
+        setLoading(false);
+        setAccounts(response.data);
+        setFilteredAccounts(response.data); // Initialize sorted items
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
+
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
 
   // Update filtered accounts when searchQuery changes
   useEffect(() => {
@@ -75,9 +89,12 @@ const ChartOfAccounts = () => {
     <div className="p-2 min-h-screen">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Chart Of Accounts</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            Chart Of Accounts
+          </h1>
           <p className="text-gray-600 mb-4">
-            It serves as a framework for organizing financial data and helps ensure accurate and consistent reporting.
+            It serves as a framework for organizing financial data and helps
+            ensure accurate and consistent reporting.
           </p>
         </div>
         <button
@@ -113,27 +130,33 @@ const ChartOfAccounts = () => {
         {/* Accounts Table */}
         <div className="overflow-auto">
           <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-[#fdf8f0] font-semibold">
-                <th className="py-3 px-6">Sl No</th>
-                <th className="py-3 px-6">Account Name</th>
-                <th className="py-3 px-6">Description</th>
-                <th className="py-3 px-6">Account Type</th>
-                <th className="py-3 px-6">Parent Account Type</th>
+          <thead className="text-[12px] text-center text-dropdownText sticky top-0 z-10">
+
+              <tr className="bg-[#fdf8f0]">
+                <th className="p-3">Sl No</th>
+                <th className="p-3">Account Name</th>
+                <th className="p-3">Description</th>
+                <th className="p-3">Account Type</th>
+                <th className="p-3">Parent Account Type</th>
               </tr>
             </thead>
-            <tbody className="text-gray-600 text-sm font-light">
+            <tbody className="text-dropdownText text-center text-[13px]">
               {currentAccounts.map((account, index) => (
                 <tr
                   key={account._id}
                   className="border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
                   onClick={() => handleRowClick(account._id)} // Navigate to account details
                 >
-                  <td className="py-3 px-6">{(currentPage - 1) * itemsPerPage + index + 1}</td> {/* Generate Sl No */}
-                  <td className="py-3 px-6">{account.accountName}</td>
-                  <td className="py-3 px-6">{account.description || "No description"}</td>
-                  <td className="py-3 px-6">{account.accountHead}</td>
-                  <td className="py-3 px-6">{account.accountSubhead}</td>
+                  <td className="p-3">
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </td>{" "}
+                  {/* Generate Sl No */}
+                  <td className="p-3">{account.accountName}</td>
+                  <td className="p-3 overflow-hidden whitespace-nowrap text-ellipsis">
+                    {account.description || "No description"}
+                  </td>
+                  <td className="p-3">{account.accountHead}</td>
+                  <td className="p-3">{account.accountSubhead}</td>
                 </tr>
               ))}
             </tbody>

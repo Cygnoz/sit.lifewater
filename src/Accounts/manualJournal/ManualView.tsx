@@ -7,28 +7,34 @@ import PrinterIcon from "../../assets/icons/PrinterIcon";
 import Trash2 from "../../assets/icons/Trash2";
 import Button from "../Components/Button";
 import { getOneJournalAPI } from "../../services/AccountsAPI/Journal";
+import { endpoints } from "../../services/ApiEndpoint";
+import useApi from "../../Hook/UseApi";
 
 type Props = {};
 
 function ManualView({}: Props) {
   const { id } = useParams();  // Get the journal ID from the URL
   const [oneJournal, setOneJournal] = useState<any>(null);  // State to hold the fetched journal data
-
+  const { request: getOneJournal } = useApi("get", 4000);
   // Fetch the journal data when the component mounts or when the id changes
-  useEffect(() => {
-    const fetchJournal = async () => {
-      try {
-        const journal = await getOneJournalAPI(id as string);  // Fetch journal data using the API
-        setOneJournal(journal);  // Set the fetched journal data to state
-      } catch (error) {
-        console.error("Error fetching journal:", error);
+  const getOneJournalData = async () => {
+    try {
+      const url = `${endpoints.GET_ONE_JOURNAL}/${id}`;
+      const { response, error } = await getOneJournal(url);
+      if (!error && response) {
+        console.log("response", response.data);
+        setOneJournal(response.data);
       }
-    };
-
-    if (id) {
-      fetchJournal();  // Fetch data only if the ID is available
+    } catch (error) {
+      console.error("Error fetching journal:", error);
     }
-  }, [id]);  // Dependency array ensures the effect runs when the ID changes
+  };
+  
+  useEffect(() => {
+    if (id) {
+      getOneJournalData();
+    }
+  }, [id]);
 
   return (
     <>

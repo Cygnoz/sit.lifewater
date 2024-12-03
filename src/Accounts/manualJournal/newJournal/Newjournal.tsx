@@ -9,10 +9,13 @@ import PlusIcon from "../../Components/PlusIcon";
 import {  toast, ToastContainer } from "react-toastify";
 import { addJournalEntryAPI,  } from "../../../services/AccountsAPI/Journal";
 import { getAllAccountsAPI } from "../../../services/AccountsAPI/accounts";
+import { endpoints } from "../../../services/ApiEndpoint";
+import useApi from "../../../Hook/UseApi";
 type Props = {};
 
 function NewJournal({ }: Props) {
   const navigate = useNavigate();
+  const { request: NewJournalAdd } = useApi("post", 4000);
  
   // Initialize with two non-deletable rows
   const initialTransactions = [
@@ -154,23 +157,28 @@ function NewJournal({ }: Props) {
   //   }
   // };
 
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const response = await getAllAccountsAPI();
-        if (response) {
-          setAccountOptions(response);
-          console.log(response);
-          
-        }
-      } catch (error) {
-        toast.error("Failed to fetch accounts");
-        console.error("Error fetching accounts:", error);
-      }
-    };
+ // Fetch accounts from the API
+ const [loading, setLoading] = useState(false);
+ const { request: getallaccounts } = useApi("get", 4000)
+ const fetchAccounts = async () => {
+   try {
+     const url = `${endpoints.GET_ALL_ACCOUNTS}`
+     const { response, error } = await getallaccounts(url)
+     console.log("API RESPONSE :",response)
 
-    fetchAccounts();
-  }, []);
+     if (!error && response) {
+       setLoading(false)
+       setAccountOptions(response.data)
+     
+     }
+   } catch (error) {
+     console.log(error)
+   }
+ }
+ useEffect(() => {
+   fetchAccounts()
+ }, [])
+
 
   useEffect(() => {
     if (!Array.isArray(newJournalDatas.transaction)) {
@@ -276,31 +284,33 @@ if (errors.length > 0) {
 }
  else {
   try {
-    const apiResponse = await addJournalEntryAPI(newJournalDatas);
-    console.log("API response", apiResponse);  // Log the full response
-    const { response, error } = apiResponse;
-    if (!error && response) {
-      toast.error("Error creating Journal ", {
-        position: "top-right",
-        autoClose: 5000,
-      });
-    } else {
-      toast.success("Journal Created Successfully", {
-        position: "top-right",
-        autoClose: 6000,
-      });
-      setTimeout(() => {
-        navigate('/journals')
-      }, 2000);
-    
-    }
-  } catch (error) {
-    toast.error("Error during API call", {
-      position: "top-right",
-      autoClose: 6000,
-    });
-    console.log("Error during API call", error);
-  }
+        const url = `${endpoints.ADD_NEW_JOURNEL_ENTRY}`;
+        const apiResponse = await NewJournalAdd(url, newJournalDatas);
+        console.log("api response", apiResponse);
+        const { response, error } = apiResponse;
+        if (!error && response) {
+          toast.success(response.data.message);
+          setNewJournelDatas({
+            journalId: "",
+            date: "",
+            reference: "",
+            note: "",
+            cashBasedJournal: false,
+            currency: "INR",
+            transaction: initialTransactions,
+            totalDebitAmount: 0,
+            totalCreditAmount: 0,
+          });
+          setTimeout(() => {
+            navigate("/journals");
+          }, 2000);
+        } else {
+          toast.error(error?.response.data.message);
+          console.log("error", error);
+        }
+      } catch (error) {
+        console.log("Error during API call", error);
+      }
  }  
   }
 
