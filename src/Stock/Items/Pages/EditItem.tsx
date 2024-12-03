@@ -8,7 +8,7 @@ import useApi from "../../../Hook/UseApi"
 
 const AddItem: React.FC = () => {
   const navigate = useNavigate()
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>()
   const [formValues, setFormValues] = useState({
     itemName: "",
     resaleable: true,
@@ -16,13 +16,12 @@ const AddItem: React.FC = () => {
     sellingPrice: "",
     costPrice: "",
     description: "",
-    
   })
   const [itemImage, setItemImage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const { request: getItems } = useApi('get', 4001);
-  const { request: updateItem } = useApi('put', 4001);
+  const { request: getItems } = useApi("get", 4001)
+  const { request: updateItem } = useApi("put", 4001)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -32,31 +31,30 @@ const AddItem: React.FC = () => {
     }))
   }
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {    
-    const file = event.target.files?.[0];    
-    if (file) {      
-      const reader = new FileReader();       
-      reader.onloadend = () => {        
-        setItemImage(reader.result as string);
-      }; 
-      reader.readAsDataURL(file);
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setItemImage(reader.result as string)
+      }
+      reader.readAsDataURL(file)
     }
   }
 
- // Define an interface for the item response
+  // Define an interface for the item response
 
-  
   const getAnItem = async () => {
     try {
-      const url = `${endpoints.GET_AN_ITEM}/${id}`;
-      const { response, error } = await getItems(url);
-  
-      console.log('Full response:', response);
-  
+      const url = `${endpoints.GET_AN_ITEM}/${id}`
+      const { response, error } = await getItems(url)
+
+      console.log("Full response:", response)
+
       if (!error && response) {
         // Access the actual data from the Axios response
-        const itemData = response.data;
-        console.log('Item Data:', itemData);
+        const itemData = response.data
+        console.log("Item Data:", itemData)
         setFormValues({
           itemName: itemData.itemName || "",
           resaleable: itemData.resaleable ?? true,
@@ -64,28 +62,28 @@ const AddItem: React.FC = () => {
           sellingPrice: itemData.sellingPrice ? itemData.sellingPrice.toString() : "",
           costPrice: itemData.costPrice ? itemData.costPrice.toString() : "",
           description: itemData.description || "",
-        });
+        })
 
         if (itemData.itemImage) {
-            setItemImage(itemData.itemImage); // Assume setItemImage is a state setter for itemImage
-          }
+          setItemImage(itemData.itemImage) // Assume setItemImage is a state setter for itemImage
+        }
       }
     } catch (error) {
-      console.error("Error fetching item details:", error);
-      toast.error("Failed to fetch item details");
+      console.error("Error fetching item details:", error)
+      toast.error("Failed to fetch item details")
     }
-  };
+  }
 
   useEffect(() => {
     if (id) {
-      getAnItem();
+      getAnItem()
     }
-  }, [id]);
+  }, [id])
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-  
+    e.preventDefault()
+    setLoading(true)
+
     try {
       // Prepare the payload for update
       const payload = {
@@ -96,42 +94,42 @@ const AddItem: React.FC = () => {
         description: formValues.description,
         resaleable: formValues.resaleable,
         ...(itemImage && { itemImage }), // Include image if it exists
-      };
-  
+      }
+
       // Construct the update URL
-      const url = `${endpoints.EDIT_AN_ITEM}/${id}`;
-  
+      const url = `${endpoints.EDIT_AN_ITEM}/${id}`
+
       // Send the update request
-      const { response, error } = await updateItem(url, payload);
-  
+      const { response, error } = await updateItem(url, payload)
+
       if (!error && response) {
-        toast.success("Item updated successfully");
+        toast.success("Item updated successfully")
         // Navigate back to item list or item details
         setTimeout(() => {
-          navigate("/item");
-        }, 500);
+          navigate("/item")
+        }, 500)
       } else if (error?.response?.data?.message) {
         // Display the specific error message from the API response
-        toast.error(error.response.data.message);
+        toast.error(error.response.data.message)
       } else if (error?.message) {
         // Fallback to a generic error message if no detailed message exists
-        toast.error(error.message);
+        toast.error(error.message)
       } else {
-        toast.error("Failed to update item");
+        toast.error("Failed to update item")
       }
     } catch (error: any) {
-      console.error("Error updating item:", error);
-  
+      console.error("Error updating item:", error)
+
       // Handle errors from the catch block
       if (error.response?.data?.message) {
-        toast.error(error.response.data.message); // API error message
+        toast.error(error.response.data.message) // API error message
       } else {
-        toast.error("An error occurred while updating the item");
+        toast.error("An error occurred while updating the item")
       }
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
   
 
   return (
@@ -153,11 +151,7 @@ const AddItem: React.FC = () => {
               <div className="flex flex-col items-center border-2 border-dashed border-gray-300 rounded-lg p-4 w-52">
                 <label className="cursor-pointer">
                   <div className="flex flex-col items-center bg-orange-50 rounded-lg py-4 px-6">
-                    {itemImage ? (
-                      <img src={itemImage} alt="Uploaded Logo" className="object-cover w-20 h-20 rounded-md" />
-                    ) : (
-                      <div>+</div>
-                    )}
+                    {itemImage ? <img src={itemImage} alt="Uploaded Logo" className="object-cover w-20 h-20 rounded-md" /> : <div>+</div>}
                     <span className="text-gray-700 font-semibold text-base">{itemImage ? "Change Image" : "Add Image"}</span>
                   </div>
                   <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
@@ -169,13 +163,7 @@ const AddItem: React.FC = () => {
               <div className="flex-1 grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-[#303F58] mb-2">Item Name</label>
-                  <input 
-                    name="itemName" 
-                    value={formValues.itemName} 
-                    onChange={handleInputChange} 
-                    className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500 bg-white" 
-                    placeholder="Enter item name"
-                  />
+                  <input name="itemName" value={formValues.itemName} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500 bg-white" placeholder="Enter item name" />
                 </div>
 
                 <div className="flex items-center mt-3 gap-1 text-textColor">
@@ -199,26 +187,12 @@ const AddItem: React.FC = () => {
 
                 <div>
                   <label className="block text-sm text-[#303F58] mb-2">SKU</label>
-                  <input 
-                    type="text" 
-                    name="sku" 
-                    value={formValues.sku} 
-                    onChange={handleInputChange} 
-                    placeholder="Enter SKU" 
-                    className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500" 
-                  />
+                  <input type="text" name="sku" value={formValues.sku} onChange={handleInputChange} placeholder="Enter SKU" className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500" />
                 </div>
 
                 <div>
                   <label className="block text-sm text-[#303F58] mb-2">Selling Price</label>
-                  <input 
-                    type="text" 
-                    name="sellingPrice" 
-                    value={formValues.sellingPrice} 
-                    onChange={handleInputChange} 
-                    placeholder="Enter selling Price" 
-                    className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500" 
-                  />
+                  <input type="text" name="sellingPrice" value={formValues.sellingPrice} onChange={handleInputChange} placeholder="Enter selling Price" className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500" />
                 </div>
               </div>
             </div>
@@ -226,26 +200,12 @@ const AddItem: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-[#303F58] mb-2">Cost Price</label>
-                <input 
-                  type="text" 
-                  name="costPrice" 
-                  value={formValues.costPrice} 
-                  onChange={handleInputChange} 
-                  placeholder="Enter cost price" 
-                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500" 
-                />
+                <input type="text" name="costPrice" value={formValues.costPrice} onChange={handleInputChange} placeholder="Enter cost price" className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500" />
               </div>
 
               <div>
                 <label className="block text-sm text-[#303F58] mb-2">Description</label>
-                <input 
-                  type="text" 
-                  name="description" 
-                  value={formValues.description} 
-                  onChange={handleInputChange} 
-                  placeholder="Enter Description" 
-                  className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500" 
-                />
+                <input type="text" name="description" value={formValues.description} onChange={handleInputChange} placeholder="Enter Description" className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500" />
               </div>
             </div>
 
@@ -255,11 +215,7 @@ const AddItem: React.FC = () => {
                   Cancel
                 </button>
               </Link>
-              <button 
-                type="submit" 
-                disabled={loading} 
-                className="px-4 py-2 bg-[#820000] text-white rounded-md"
-              >
+              <button type="submit" disabled={loading} className="px-4 py-2 bg-[#820000] text-white rounded-md">
                 {loading ? "Saving..." : "Save"}
               </button>
             </div>

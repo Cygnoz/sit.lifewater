@@ -23,6 +23,7 @@ export const endpoints= {
   EDIT_AN_ITEM:`edititem`,
   DELETE_AN_ITEM:`item`,
 
+  
   // warehouse
  GET_ALL_WAREHOUSE: `warehouse`,
  ADD_WAREHOUSE: `warehouse`,
