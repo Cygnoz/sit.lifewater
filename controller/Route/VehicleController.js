@@ -1,10 +1,19 @@
-const Vehicle = require('../../Models/VehicleSchema'); // Assuming Vehicle schema is in the Model folder
+const Vehicle = require('../../Models/VehicleSchema'); 
+
 
 // Add a new vehicle
 exports.addVehicle = async (req, res) => {
   try {
     console.log("Add Vechile:", req.body);
     const cleanedData = cleanCustomerData(req.body);
+
+     // Validate required fields
+    if (!cleanedData.vehicleNo) {
+     return res.status(400).json({ message: 'Vehicle Number required' });
+    }
+    if (!cleanedData.startingKilometer) {
+      return res.status(400).json({ message: 'Starting Kilometer required' });
+     }
 
     // Check if vehicle already exists by vehicle number
     const existingVehicle = await Vehicle.findOne({ vehicleNo: cleanedData.vehicleNo });
@@ -42,15 +51,20 @@ exports.updateVehicle = async (req, res) => {
     const { id } = req.params;
     const cleanedData = cleanCustomerData(req.body);
 
-    cleanedData.image=cleanedData.image[0];
+    // cleanedData.image=cleanedData.image[0];
     
+     // Validate required fields
+    if (!cleanedData.vehicleNo) {
+      return res.status(400).json({ message: 'Vehicle Number required' });
+    }
+    if (!cleanedData.startingKilometer) {
+     return res.status(400).json({ message: 'Starting Kilometer required' });
+    }
 
-    // const updateData = { ...req.body }; // Spread the request body
-
-    // Handle image update if provided
-    // if (req.file) {
-    //   updateData.image = req.file.filename; // Store the image filename
-    // }
+    const existingVehicle = await Vehicle.findOne({ vehicleNo: cleanedData.vehicleNo, _id: { $ne: id }  });
+    if (existingVehicle) {
+      return res.status(400).json({ message: 'Vehicle number already exists' });
+    }
 
     // Update vehicle by Object ID
     const updatedVehicle = await Vehicle.findByIdAndUpdate(id, cleanedData, { new: true });

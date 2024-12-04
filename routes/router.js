@@ -22,11 +22,11 @@ const { verifyToken } = require('../middleware/auth');
 
 // STAFF
 router.post("/addstaff", verifyToken, staffController.addStaff) // add staff
-router.get("/getallstaffs", verifyToken, staffController.getAllStaff) // get all staff
+router.get("/getallstaffs", staffController.getAllStaff) // get all staff
 router.get("/staff/:id", verifyToken, staffController.getStaffById) // get staff by ID
 router.put("/staff/:id", verifyToken,  staffController.editStaff) // edit staff
 router.delete("/staff/:id", verifyToken, staffController.deleteStaff) // delete staff
-router.post("/staff/login", verifyToken, staffController.loginSalesStaff) // login staff(sales)
+router.post("/staff/login", staffController.loginSalesStaff) // login staff(sales)
 
 
 // VEHICLE

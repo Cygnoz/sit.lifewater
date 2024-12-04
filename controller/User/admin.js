@@ -70,6 +70,12 @@ exports.login = [loginRateLimiter, async (req, res) => {
         return res.status(401).json({ success: false, message: 'User not found!' });
       }
 
+      // Match the password
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ success: false, message: 'Invalid Password!' });
+      }
+
 
       else {
         const token = jwt.sign(

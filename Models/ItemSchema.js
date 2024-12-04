@@ -1,32 +1,19 @@
+// v1.0
 const mongoose = require('mongoose');
 
 const itemSchema = new mongoose.Schema({
-  itemName: {
-    type: String,
-    required: true
-  },
-  SKU: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  price: {
-    type: Number,
-    required: true
-  },
-  purchasePrice: {
-    type: Number,
-    required: true
-  },
-  description: {
-    type: String,
-    required: false
-  },
-  itemImage: {
-    type: String,  // Store image URL or path
-    required: false
-  }
-}, { timestamps: true } );
+  itemName: { type: String },
+  sku: { type: String },
+
+  costPrice: { type: Number },
+  sellingPrice: { type: Number },
+
+  resaleable: { type: Boolean, default: false },
+  description: {  type: String },
+  itemImage: { type: String },
+  createdAt: { type: Date, default: Date.now },
+
+});
 
 const Item = mongoose.model('Item', itemSchema);
 

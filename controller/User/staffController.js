@@ -35,7 +35,20 @@ exports.addStaff = async (req, res) => {
 
     const cleanedData = cleanCustomerData(req.body);
 
-    const { mobileNumber, designation, username, password,  } = cleanedData;
+    const { mobileNumber, designation, username, password  } = cleanedData;
+
+    if (!cleanedData.firstname) {
+      return res.status(400).json({ message: 'First Name is required' });
+    }
+    if (!cleanedData.mobileNumber) {
+      return res.status(400).json({ message: 'Mobile Number is required' });
+    }
+    if (!cleanedData.firstname) {
+      return res.status(400).json({ message: 'WhatsApp Number is required' });
+    }
+    if (!cleanedData.designation) {
+      return res.status(400).json({ message: 'Designation is required' });
+    }
 
     // Check for existing staff with the same mobile number
     const existingStaff = await Staff.findOne({ mobileNumber });
@@ -54,71 +67,17 @@ exports.addStaff = async (req, res) => {
         return res.status(400).json({ message: 'User with this username already exists.' });
       }
 
-      cleanedData.hashedPassword = await bcrypt.hash(password.trim(),10);
+      cleanedData.password = await bcrypt.hash(password.trim(),10);
     }
-
-    // Handle logic specific to "Admin"
-    if (designation === 'Admin') {
-      if (!username || !password) {
-        return res.status(400).json({ message: 'Username and password are required for Sales staff.' });
-      }
-      // Check if username already exists
-      const existingSalesStaff = await Staff.findOne({ username });
-      if (existingSalesStaff) {
-        return res.status(400).json({ message: 'User with this username already exists.' });
-      }
-
-      cleanedData.hashedPassword = await bcrypt.hash(password.trim(),10);
-    }
-
-      
 
       
       
       // Create the new staff record for "Sales"
       const newStaff = new Staff({ ...cleanedData });
-
-      // const newStaff = new Staff({
-      //   firstname,
-      //   lastname,
-      //   username: username.trim(),
-      //   password: hashedPassword,
-      //   address: req.body.address,
-      //   visaStatus: req.body.visaStatus,
-      //   visaValidity: req.body.visaValidity,
-      //   mobileNumber,
-      //   whatsAppNumber: req.body.whatsAppNumber,
-      //   visaNumber: req.body.visaNumber,
-      //   dateofBirth: req.body.dateofBirth,
-      //   nationality: req.body.nationality,
-      //   designation,
-      //   emiratesId,
-      // });
-
-      // Save the staff record
       const savedStaff = await newStaff.save();
+      console.log("Staff Saved Successfully",savedStaff);
       return res.status(201).json(savedStaff);
     
-
-    // For other designations (Driver, Helper)
-    // const newStaff = new Staff({
-    //   firstname,
-    //   lastname,
-    //   profile: req.file ? normalizeFilePath(req.file.path) : null,
-    //   address: req.body.address,
-    //   visaStatus: req.body.visaStatus,
-    //   visaValidity: req.body.visaValidity,
-    //   mobileNumber,
-    //   whatsAppNumber: req.body.whatsAppNumber,
-    //   visaNumber: req.body.visaNumber,
-    //   dateofBirth: req.body.dateofBirth,
-    //   nationality: req.body.nationality,
-    //   designation,
-    //   emiratesId,
-    // });
-
-    // const savedStaff = await newStaff.save();
-    // res.status(201).json(savedStaff);
 
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -209,38 +168,44 @@ exports.loginSalesStaff = async (req, res) => {
       return res.status(400).json({ message: 'Username and password are required.' });
     }
 
-    // Trim the username and password to avoid accidental spaces
-    const trimmedUsername = username.trim();
-    const trimmedPassword = password.trim();
-
     // Find the staff member with the provided username (case-sensitive match)
-    const staff = await Staff.findOne({ username: trimmedUsername });
+    const staff = await Staff.findOne({ username, designation: 'Sales' });
 
     // If staff not found
     if (!staff) {
       return res.status(404).json({ message: 'Staff not found.' });
     }
 
-    // Only allow login if the staff's designation is 'Sales'
-    if (staff.designation !== 'Sales') {
-      return res.status(403).json({ message: 'Unauthorized. Only Sales staff can log in here.' });
+    // Match the password
+    const isMatch = await bcrypt.compare(password, staff.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid Password!' });
     }
 
-    // Compare the provided password with the stored hashed password
-    const isPasswordValid = await bcrypt.compare(trimmedPassword, staff.password);
+    else {
+      const token = jwt.sign(
+        {
+          id: staff._id,
+          userName: staff.username,
 
-    // Debugging logs for verification (can be removed in production)
-    console.log('Plain Password:', trimmedPassword); 
-    console.log('Hashed Password:', staff.password); 
-    console.log('Is Password Valid:', isPasswordValid);
+        },
+        process.env.JWT_SECRET, 
+        { expiresIn: '12h' }
+      );
 
-    // If the password is invalid
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Invalid credentials.' });
+      // Send response with user data (excluding organizationId)
+      console.log(`${staff.username} logged in successfully`);
+      
+      res.status(200).json({
+        success: true,
+        token: `Bearer ${token}`
+      });
     }
+
+    
 
     // At this point, the login is successful
-    res.status(200).json({ message: 'Login successful', staff, status: 200 });
+    // res.status(200).json({ message: 'Login successful', staff, status: 200 });
 
   } catch (error) {
     res.status(500).json({ message: error.message });
