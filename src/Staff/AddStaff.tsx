@@ -60,14 +60,10 @@ function AddStaff({ }: Props) {
   const { id } = useParams();
   const isEditing = Boolean(id);
   console.log(id, "id");
-
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
   const toggleConfirmPasswordVisibility = () => setShowConfirmPassword((prev) => !prev);
-
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -85,12 +81,7 @@ function AddStaff({ }: Props) {
         updatedPassword !== updatedConfirmPassword ? "Passwords do not match" : ""
       );
     }
-
-
   };
-
-
-
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {

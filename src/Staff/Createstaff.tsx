@@ -48,7 +48,6 @@ const CreateStaff: React.FC = () => {
     } catch (error) {
       console.log(error);
       setLoading({ ...loading, skeleton: false, noDataFound: true })
-
     }
   }
 

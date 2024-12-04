@@ -114,7 +114,6 @@ const App: React.FC = () => {
     );
   }
   
-
   return (
     <>
       <div className="flex h-[1200px] bg-[#f6f6f6]">

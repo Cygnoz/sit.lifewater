@@ -12,12 +12,10 @@ export const endpoints= {
   DELETE_AN_STAFF:`staff`,
   EDIT_STAFF:`staff`,
   GET_AN_STAFF:`staff`,
-  
+
   // stock
   ADD_W_STOCK:`wstock`,
   GET_W_STOCK:`wstock`,
-
-
 
   //item
   GET_ALL_ITEMS:`item`,
