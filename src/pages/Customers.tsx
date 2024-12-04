@@ -1,9 +1,10 @@
-import rupee from '../assets/images/receipt-indian-rupee.svg';
-import dollar from '../assets/images/circle-dollar.svg';
+// import rupee from '../assets/images/receipt-indian-rupee.svg';
+// import dollar from '../assets/images/circle-dollar.svg';
 import { Link } from 'react-router-dom';
 import Button from '../CommonComponents/Button';
-import Circle_dollar_sign from '../assets/images/Icons/circle_dollar_sign';
-import Receipt_ndian_rupee from '../assets/images/Icons/receipt_ndian_rupee';
+import Circle_dollar_sign from '../assets/images/Icons/Circle_dollar_sign';
+// import Receipt_ndian_rupee from '../assets/images/Icons/receipt_ndian_rupee';
+import Receipt_ndian_rupee from '../assets/images/Icons/Receipt_ndian_rupee';
 
 
 const card = [
@@ -73,4 +74,6 @@ const Customers: React.FC = () => {
   );
 }
 
+
 export default Customers;
+
