@@ -114,8 +114,8 @@ const CustomerHome = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center">
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop={true} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored" />
+      <div className="flex justify-between items-center">
 
         <div>
           <h3 className="text-[#303F58] text-[20px] font-bold">Create Customer</h3>

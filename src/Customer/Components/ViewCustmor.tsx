@@ -12,38 +12,41 @@ import mail from "../../assets/images/mail-check.svg"
 import dot from "../../assets/images/threedot.svg"
 import profile from "../../assets/images/profile.svg"
 import bottle from "../../assets/images/bottle.svg"
-import { getACustomerAPI } from "../../services/CustomerAPI/Customer"
-import { BASEURL } from "../../services/Baseurl"
+import { endpoints } from "../../services/ApiEndpoint"
+import useApi from "../../Hook/UseApi"
+
 
 const ViewCustmor: React.FC = () => {
   const [activeTab, setActiveTab] = useState("information")
   const { id } = useParams() // Get the vehicle ID from the URL
   const [customer, setCustomer] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchCustomer = async () => {
-      try {
-        const response = await getACustomerAPI(id as string) // Await the promise
-        console.log(response) // Log the response
-        setCustomer(response) // Set the customer state
-      } catch (error) {
-        console.error("Error fetching customer:", error) // Add error handling
+
+
+  const { request: getACustomer } = useApi("get", 4000)
+
+  const getAllItems = async () => {
+    try {
+      const url = `${endpoints.GET_A_CUSTOMER}/${id}`
+      const { response, error } = await getACustomer(url)
+      console.log(response)
+
+      if (!error && response) {
+        setLoading(false)
+        setCustomer(response.data)
+        // setSortedItems(response.data); // Initialize sorted items
       }
+    } catch (error) {
+      console.log(error)
     }
+  }
 
-    if (id) {
-      fetchCustomer()
-    }
-  }, [id])
-
-  // Log customer when it updates
   useEffect(() => {
-    if (customer) {
-      console.log(customer) // This will now log the updated customer state
-    }
-  }, [customer])
+    getAllItems()
+  }, [])
 
-  if (!customer) {
+  if (loading) {
     return <div>Loading customer details...</div> // Display a loading state while customer is being fetched
   }
 
@@ -81,7 +84,7 @@ const ViewCustmor: React.FC = () => {
           {/* <img className="mx-5 object-cover w-11 h-11 rounded-full" src={staff.profile ? `${BASEURL}/uploads/${staff.profile}` : defaultImage} alt={`${staff.firstname} ${staff.lastname}`} /> */}
           <img src={customer.customerType === "Business" ? (customer.logo ? `${customer.logo}` : defaultImage) : defaultImage} alt={customer.fullName} className="w-[45px] h-[45px] rounded-full object-cover" />
 
-          <span className="text-[18px] font-bold text-gray-700">{customer?.customerType === "Business" ? customer.companyName || "N/A" : `${customer?.fullName || "N/A"}`}</span>
+          <span className="text-[18px] font-bold text-gray-700">{customer?.customerType === "Business" ? customer.fullName || "N/A" : `${customer?.fullName || "N/A"}`}</span>
         </div>
 
         {/* Right Side: Placeholder for Icons */}
@@ -192,7 +195,7 @@ const ViewCustmor: React.FC = () => {
                   <p className="text-gray-700">{customer.mobileNo || "N/A"}</p>
 
                   <p className="font-bold text-gray-500 text-lg text-[14px]">WhatsApp Number</p>
-                  <p className="text-gray-700">{customer.whatsappNo || "N/A"}</p>
+                  <p className="text-gray-700">{customer.whatsappNumber || "N/A"}</p>
 
                   <p className="font-bold text-gray-500 text-lg text-[14px]">Salesman</p>
                   <p className="text-gray-700">{customer.salesman || "N/A"}</p>
@@ -240,14 +243,14 @@ const ViewCustmor: React.FC = () => {
             <div className="grid grid-cols-2 gap-6">
               {/* Billing Address */}
               <div className="p-4">
-                <h3 className="font-semibold text-lg text-gray-700 mb-4">Billing Address</h3>
-                <p className="text-gray-700">{customer.billingAddress}</p>
+                <h3 className="font-semibold text-lg text-gray-700 mb-4">Addressline 1</h3>
+                <p className="text-gray-700">{customer.addressLine1}</p>
               </div>
 
               {/* Delivery Address */}
               <div className="p-4">
-                <h3 className="font-semibold text-lg text-gray-700 mb-4">Building  Number</h3>
-                <p className="text-gray-700">{customer.buildingNo}</p>
+                <h3 className="font-semibold text-lg text-gray-700 mb-4">Addressline 2</h3>
+                <p className="text-gray-700">{customer.addressLine2}</p>
               </div>
             </div>
           </div>
