@@ -1,11 +1,11 @@
-type Props = { color: string };
+type Props = { color: string,size?:number };
 
-const Eye = ({ color }: Props) => {
+const Eye = ({ color,size }: Props) => {
   return (
     <div>
       <svg
-        width="22"
-        height="22"
+        width={size || "22"}
+        height={size || "22"}
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

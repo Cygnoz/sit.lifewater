@@ -78,7 +78,6 @@ import CustomerHome from '../Modules/Customer/CustomerHome.tsx/CustomerHome';
 import Login from '../Settings/Login/Login';
 import CreateStaff from '../Staff/Createstaff';
 import AddStaff from '../Staff/AddStaff';
-import EditStaff from '../Staff/EditStaff';
 
 const App: React.FC = () => {
   const [selectedNav, setSelectedNav] = useState<string>(() => localStorage.getItem('selectedNav') || '');
@@ -135,7 +134,7 @@ const App: React.FC = () => {
               {/* STAFF */}
               <Route path='/staff' element={<CreateStaff />} />
               <Route path='/addstaff' element={<AddStaff />} />
-              <Route path='/editstaff/:id' element={<EditStaff />} />
+              <Route path='/editstaff/:id' element={<AddStaff />} />
               <Route path="/viewstaff/:id" element={<StaffOverview />} />
 
               {/* ROUTE */}

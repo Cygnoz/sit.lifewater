@@ -1,14 +1,14 @@
-import { ChangeEvent, FormEvent, useContext, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import back from "../assets/images/backbutton.svg";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import { StaffResponseContext } from "../Context/ContextShare";
 import useApi from "../Hook/UseApi";
 import { endpoints } from "../services/ApiEndpoint";
 import upload from "../assets/images/addStaffFrame.jpg"
-type Props = {};
-
+import Button from "../commoncomponents/Buttons/Button";
+import Eye from "../assets/icons/Eye"
+import EyeOffIcon from "../assets/icons/EyeOffIcon"
 interface StaffData {
   mobileNumber: string;
   whatsAppNumber: string;
@@ -28,11 +28,12 @@ interface StaffData {
   confirmPassword: string;
   visaValidity: string;
 }
+type Props = {};
 
 function AddStaff({ }: Props) {
+
   const { request: addStaff } = useApi("post", 4000);
   const [isSameAsPhone, setIsSameAsPhone] = useState(false);
-  const { staffResponse } = useContext(StaffResponseContext)!;
   const [initialStaffData, setInitialStaffData] = useState<StaffData>(
     {
       address: "",
@@ -54,7 +55,18 @@ function AddStaff({ }: Props) {
       whatsAppNumber: "",
     }
   );
+  const [errorMessage, setErrorMessage] = useState("");
   console.log(initialStaffData);
+  const { id } = useParams();
+  const isEditing = Boolean(id);
+  console.log(id, "id");
+
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
+  const toggleConfirmPasswordVisibility = () => setShowConfirmPassword((prev) => !prev);
 
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -62,7 +74,21 @@ function AddStaff({ }: Props) {
     const { name, value, } = event.target;
 
     setInitialStaffData({ ...initialStaffData, [name]: value })
+
+    // Check if passwords match
+    if (name === "confirmPassword" || name === "password") {
+      const updatedPassword = name === "password" ? value : initialStaffData.password;
+      const updatedConfirmPassword =
+        name === "confirmPassword" ? value : initialStaffData.confirmPassword;
+
+      setErrorMessage(
+        updatedPassword !== updatedConfirmPassword ? "Passwords do not match" : ""
+      );
+    }
+
+
   };
+
 
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -82,6 +108,7 @@ function AddStaff({ }: Props) {
     }
   };
 
+
   const handleWhatsAppCheckbox = () => {
     setIsSameAsPhone((prevState) => {
       const newState = !prevState;
@@ -94,26 +121,76 @@ function AddStaff({ }: Props) {
       return newState;
     });
   };
+  const { request: getStaff } = useApi("get", 4000);
+  const [staffData, SetStaffData] = useState()
 
-
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-
-    const url = `${endpoints.ADD_STAFF}`;
+  // Fetch staff data for editing
+  const getAnStaff = async () => {
+    const url = `${endpoints.GET_AN_STAFF}/${id}`;
     try {
-      const { response, error } = await addStaff(url, initialStaffData);
+      const { response, error } = await getStaff(url);
       if (!error && response) {
-        toast.success(response?.data.message);
+        SetStaffData(response.data);
+        console.log(staffData);
+        setInitialStaffData({
+          ...initialStaffData,
+          ...response.data,
+          password: "", // Leave the password blank for editing
+          confirmPassword: "",
+          visaValidity: response.data.visaValidity?.slice(0, 10), // Format date for input field
+        });
       }
-      // setStaffData(initialStaffDataState); // Reset form
-      console.log(response);
-
+      console.log(response?.data, "staffData");
     } catch (error) {
-      toast.error("Failed to save staff.");
-      console.log(error);
+      console.error("Error fetching staff data:", error);
     }
   };
 
+  // Initialize data if editing
+  useEffect(() => {
+    if (isEditing) {
+      getAnStaff();
+    }
+  }, [id]);
+
+
+  const { request: editStaff } = useApi("put", 4000);
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    // Validate passwords before saving or submitting
+    if (initialStaffData.password !== initialStaffData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return; // Stop submission if passwords don't match
+    }
+    const url = isEditing
+      ? `${endpoints.EDIT_STAFF}/${id}`
+      : `${endpoints.ADD_STAFF}`;
+
+    try {
+      const { response, error } = isEditing
+        ? await editStaff(url, initialStaffData)
+        : await addStaff(url, initialStaffData);
+
+      if (!error && response) {
+        toast.success(
+          isEditing
+            ? "Staff updated successfully."
+            : "Staff added successfully."
+        );
+        if (!isEditing) {
+          setInitialStaffData(initialStaffData); // Reset form after adding
+        }
+        console.log(response);
+
+      } else {
+        toast.error("Failed to save staff data.");
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred.");
+      console.error("Error submitting staff data:", error);
+    }
+  };
 
 
   return (
@@ -137,11 +214,9 @@ function AddStaff({ }: Props) {
               <img className="bg-gray-200 rounded-full p-2" src={back} alt="" />
             </div>
           </Link>
-          <h2 className="text-2xl font-bold">Create New Staff</h2>
+          <h2 className="text-2xl font-bold">{isEditing ? "Edit Staff" : "Create New Staff"} </h2>
         </div>
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-8xl w-full mx-1">
-
-
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column */}
@@ -216,7 +291,6 @@ function AddStaff({ }: Props) {
                   <div className="mt-1 flex items-center">
                     <input
                       type="checkbox"
-
                       checked={isSameAsPhone}
                       onChange={handleWhatsAppCheckbox}
                       className="form-checkbox h-4 w-4 text-red-600"
@@ -359,7 +433,7 @@ function AddStaff({ }: Props) {
                 </div>
 
                 {/* designation */}
-                <div>
+                <div >
                   <label className="block text-sm font-medium text-gray-700">
                     Designation *
                   </label>
@@ -405,50 +479,82 @@ function AddStaff({ }: Props) {
                   {/* Conditionally render input fields based on the selected designation */}
                   {initialStaffData.designation === "Sales" && (
                     <div className="mt-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        Username
-                      </label>
-                      <input
-                        required
-                        type="text"
-                        name="username"
-                        className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
-                        placeholder="Username"
-                        value={initialStaffData.username}
-                        onChange={handleInputChange}
-                      />
-                      <div className="grid grid-cols-2 gap-1">
-                        <div className="mt-1">
-                          <label className="block text-sm font-medium text-gray-700">
-                            Password
-                          </label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Username
+                    </label>
+                    <input
+                      required
+                      type="text"
+                      name="username"
+                      className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
+                      placeholder="Username"
+                      value={initialStaffData.username}
+                      onChange={handleInputChange}
+                    />
+                    <div className="grid grid-cols-2 gap-1">
+                      {/* Password Field */}
+                      <div className="mt-1 relative">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Password
+                        </label>
+                        <div className="relative h-[48px]"> {/* Add fixed height */}
                           <input
                             required
-                            type="password"
+                            type={showPassword ? "text" : "password"} // Toggle input type
                             name="password"
-                            className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
+                            className="h-[36px] p-2 border border-gray-300 rounded-lg w-full pr-10"
                             placeholder="Password"
                             value={initialStaffData.password}
                             onChange={handleInputChange}
                           />
+                          <div
+                            className="absolute inset-y-0 right-3 flex mt-[-10px] items-center cursor-pointer"
+                            onClick={togglePasswordVisibility}
+                          >
+                            {showPassword ? (
+                              <Eye color="#4B5C79" size={18} />
+                            ) : (
+                              <EyeOffIcon color="#4B5C79" size={18} />
+                            )}
+                          </div>
                         </div>
-
-                        <div className="mt-1">
-                          <label className="block text-sm font-medium text-gray-700">
-                            Confirm Password
-                          </label>
+                      </div>
+                  
+                      {/* Confirm Password Field */}
+                      <div className="mt-1 relative">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Confirm Password
+                        </label>
+                        <div className="relative h-[48px]"> {/* Add fixed height */}
                           <input
                             required
-                            type="password"
+                            type={showConfirmPassword ? "text" : "password"} // Toggle input type
                             name="confirmPassword"
-                            className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
+                            className="h-[36px] p-2 border border-gray-300 rounded-lg w-full pr-10"
                             placeholder="Confirm Password"
                             value={initialStaffData.confirmPassword}
                             onChange={handleInputChange}
                           />
+                          <div
+                            className="absolute inset-y-0 right-3 mt-[-10px] flex items-center cursor-pointer"
+                            onClick={toggleConfirmPasswordVisibility}
+                          >
+                            {showConfirmPassword ? (
+                              <Eye color="#4B5C79" size={18} />
+                            ) : (
+                              <EyeOffIcon color="#4B5C79" size={18} />
+                            )}
+                          </div>
+                          {errorMessage && (
+                            <p className="text-red-500 text-sm pt-1 absolute -bottom-5">
+                              {errorMessage}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
+                  </div>
+                  
                   )}
                 </div>
 
@@ -483,23 +589,16 @@ function AddStaff({ }: Props) {
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end">
-              <button
-                type="button"
-                className="me-4 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-              // onClick={clearForm}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-[#820000] rounded-lg text-white"
-              >
-                Submit
-              </button>
-              <Link to={"/staff"}>
+            <div className="mt-6 flex justify-end gap-2">
 
+              <Link to={"/staff"}>
+                <Button variant="fourthiary">
+                  Cancel
+                </Button>
               </Link>
+              <Button type="submit" variant="primary">
+                Submit
+              </Button>
             </div>
           </form>
         </div>
