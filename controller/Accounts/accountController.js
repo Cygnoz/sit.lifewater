@@ -55,7 +55,7 @@ exports.addAccount = async (req, res) => {
       await trialEntry.save();
   
       
-      res.status(201).json({ message: "Account created successfully." });
+      res.status(201).json({ message: "Account created successfully.", newAccount });
       console.log("Account created successfully",newAccount,trialEntry);
     } catch (error) {
       console.error("Error creating Account:", error);

@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const staffSchema = new mongoose.Schema({
   firstname: { type: String },
   lastname: { type: String },
-  username: { type: String },
-  password: {type: String },
+  username: { type: String, default:undefined },
+  password: {type: String, default:undefined  },
   profile: { type: String },
   address: { type: String },
   visaStatus: { type: String, enum: ['Valid', 'Expired', 'In Process'] },
