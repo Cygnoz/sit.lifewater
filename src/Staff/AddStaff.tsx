@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import back from "../assets/images/backbutton.svg";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import useApi from "../Hook/UseApi";
@@ -60,10 +60,12 @@ function AddStaff({ }: Props) {
   const { id } = useParams();
   const isEditing = Boolean(id);
   console.log(id, "id");
+  const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
   const toggleConfirmPasswordVisibility = () => setShowConfirmPassword((prev) => !prev);
+  
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -148,32 +150,37 @@ function AddStaff({ }: Props) {
   const { request: editStaff } = useApi("put", 4000);
 
   const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
+    event.preventDefault();  
     // Validate passwords before saving or submitting
     if (initialStaffData.password !== initialStaffData.confirmPassword) {
       toast.error("Passwords do not match");
       return; // Stop submission if passwords don't match
     }
+  
     const url = isEditing
       ? `${endpoints.EDIT_STAFF}/${id}`
       : `${endpoints.ADD_STAFF}`;
-
+  
     try {
       const { response, error } = isEditing
         ? await editStaff(url, initialStaffData)
-        : await addStaff(url, initialStaffData);
-
+        : await addStaff(url, initialStaffData); 
       if (!error && response) {
         toast.success(
           isEditing
             ? "Staff updated successfully."
             : "Staff added successfully."
         );
+  
         if (!isEditing) {
           setInitialStaffData(initialStaffData); // Reset form after adding
         }
         console.log(response);
-
+        if (isEditing) {
+          setTimeout(() => {
+            navigate("/staff"); // Navigate to home after 2 seconds
+          }, 2000);
+        }
       } else {
         toast.error("Failed to save staff data.");
       }
@@ -214,7 +221,7 @@ function AddStaff({ }: Props) {
               <div className="space-y-6">
                 {/* Profile Picture */}
                 <div className="col-span-2">
-                  <div className="    rounded-lg items-center  flex text-center">
+                  <div className="rounded-lg items-center  flex text-center">
                     <label htmlFor="image">
                       <div className="flex">
                         <div

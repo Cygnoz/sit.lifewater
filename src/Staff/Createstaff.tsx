@@ -82,39 +82,40 @@ const CreateStaff: React.FC = () => {
   }
 
   // Count designations
-  const designationCounts = staffData.reduce(
-    (acc, item) => {
-      acc[item.designation] = (acc[item.designation] || 0) + 1;
-      return acc;
-    },
-    {}
-  );
+  const designationCounts = (staffData || []).reduce((acc, item) => {
+    const designation = item.designation?.toLowerCase(); // Normalize to lowercase
+    if (designation) {
+      acc[designation] = (acc[designation] || 0) + 1;
+    }
+    return acc;
+  }, {});
+  // Cards with consistent designation keys
   const Card = [
     {
-      icon: (shopping),
+      icon: shopping,
       title: "Total Staff",
       subtitle: "All staff members counted",
-      count: (staffData?.length || "N/A")
+      count: staffData?.length || "N/A",
     },
     {
-      icon: (salesmen),
+      icon: salesmen,
       title: "Salesman",
       subtitle: "Manages sales and clients",
-      count: (designationCounts["Salesmen"] || "NA")
+      count: designationCounts["sales"] || "NA", // Ensure key matches normalized casing
     },
     {
-      icon: (packing),
+      icon: packing,
       title: "Helpers",
       subtitle: "Assists with various tasks",
-      count: (designationCounts["Helper"] || "NA")
+      count: designationCounts["helper"] || "NA", // Ensure key matches normalized casing
     },
     {
-      icon: (seatbelt),
+      icon: seatbelt,
       title: "Drivers",
       subtitle: "Responsible for deliveries",
-      count: (designationCounts["Driver"] || "NA")
+      count: designationCounts["driver"] || "NA", // Ensure key matches normalized casing
     },
-  ]
+  ];
 
   return (
     <div className="flex min-h-screen w-full">

@@ -17,7 +17,6 @@ import AddVehicle from '../Vehicle/Components/AddVehicle';
 import CreateVehicle from '../Vehicle/Pages/CreateVehicle';
 import EditVehicles from '../Vehicle/Pages/EditVehicles';
 import ViewVehicle from '../Vehicle/Components/ViewVehicle';
-import StaffOverview from '../components/Staffoverview';
 import AddCustomer from '../Customer/Components/AddCustomer';
 import EditCustomer from '../Customer/Pages/EditCustomer';
 import ViewCustmor from '../Customer/Components/ViewCustmor';
@@ -78,6 +77,7 @@ import CustomerHome from '../Modules/Customer/CustomerHome.tsx/CustomerHome';
 import Login from '../Settings/Login/Login';
 import CreateStaff from '../Staff/Createstaff';
 import AddStaff from '../Staff/AddStaff';
+import StaffView from '../Staff/VieStaff/StaffView';
 
 const App: React.FC = () => {
   const [selectedNav, setSelectedNav] = useState<string>(() => localStorage.getItem('selectedNav') || '');
@@ -134,7 +134,7 @@ const App: React.FC = () => {
               <Route path='/staff' element={<CreateStaff />} />
               <Route path='/addstaff' element={<AddStaff />} />
               <Route path='/editstaff/:id' element={<AddStaff />} />
-              <Route path="/viewstaff/:id" element={<StaffOverview />} />
+              <Route path="/viewstaff/:id" element={<StaffView />} />
 
               {/* ROUTE */}
               <Route path='/route/createroute' element={<CreateRoute />} />

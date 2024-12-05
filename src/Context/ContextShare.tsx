@@ -1,7 +1,7 @@
 
 import React, { createContext, useState, ReactNode } from "react";
 
-interface StaffResponseContextType {
+interface AnStaffResponseContextType {
     staffResponse: any;
     setStaffResponse: React.Dispatch<React.SetStateAction<any>>;
 }
@@ -10,7 +10,7 @@ interface WarehouseResponseContextType {
     setWarehouseResponse: React.Dispatch<React.SetStateAction<any>>;
 }
 
-export const StaffResponseContext = createContext<StaffResponseContextType | undefined>(undefined);
+export const AnStaffResponseContext = createContext<AnStaffResponseContextType | undefined>(undefined);
 export const WarehouseResponseContext = createContext<WarehouseResponseContextType | undefined>(undefined);
 
 interface ContextShareProps {
@@ -23,9 +23,9 @@ const ContextShare: React.FC<ContextShareProps> = ({ children }) => {
 
     return (
         <WarehouseResponseContext.Provider value={{warehouseResponse,setWarehouseResponse}}>
-            <StaffResponseContext.Provider value={{ staffResponse, setStaffResponse }}>
+            <AnStaffResponseContext.Provider value={{ staffResponse, setStaffResponse }}>
                 {children}
-            </StaffResponseContext.Provider>
+            </AnStaffResponseContext.Provider>
         </WarehouseResponseContext.Provider>
 
     );
