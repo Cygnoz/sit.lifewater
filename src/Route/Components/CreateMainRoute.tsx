@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import useApi from "../../Hook/UseApi";
 import { endpoints } from "../../services/ApiEndpoint";
 
-const EditSubRoute: React.FC = () => {
+const AddMainRoute: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   // State to manage form values
@@ -167,4 +167,4 @@ const EditSubRoute: React.FC = () => {
   );
 };
 
-export default EditSubRoute;
+export default AddMainRoute;

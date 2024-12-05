@@ -61,6 +61,14 @@ const AddItem: React.FC = () => {
       
       if (!error && response) {
         toast.success("Item has been added successfully.")
+        setFormValues({
+          itemName: "",
+          resaleable: true,
+          sku: "",
+          sellingPrice: "",
+          costPrice: "",
+          description: "", 
+        })
         setTimeout(() => {
           navigate("/item")
         }, 3000)
@@ -75,6 +83,7 @@ const AddItem: React.FC = () => {
       setLoading(false)
     }
   }
+  
 
   return (
     <div className="p-6">

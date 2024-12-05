@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react"
 import printer from "../../../assets/images/printer.svg"
 import vector from "../../../assets/images/Vector.svg"
 import trash from "../../../assets/images/trash.svg"
-import split from "../../../assets/images/list-filter.svg"
+// import split from "../../../assets/images/list-filter.svg"
 import plus from "../../../assets/circle-plus.svg"
 import search from "../../../assets/images/search.svg"
 import { Link, useNavigate } from "react-router-dom"
-import { deleteItemAPI } from "../../../services/StockAPI/StockAPI"
 import useApi from "../../../Hook/UseApi"
 import { endpoints } from "../../../services/ApiEndpoint"
 import SortBy from "../Components/SortByItems"
+import { toast } from "react-toastify"
 
 const CreateItem: React.FC = () => {
   const defaultImage = "https://cdn1.iconfinder.com/data/icons/avatar-3/512/Manager-512.png"
@@ -45,19 +45,22 @@ const CreateItem: React.FC = () => {
     navigate(`/edititem/${id}`)
   }
 
-  const handleDelete = async (id: string) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
-    if (!confirmDelete) return;
+  const { request: deleteItem } = useApi("delete", 4001);
 
-    try {
-      const response = await deleteItemAPI(id);
-      alert(response.message);
-      setItems((prevItems) => prevItems.filter((item) => item._id !== id));
-      setSortedItems((prevItems) => prevItems.filter((item) => item._id !== id)); // Update sorted items
-    } catch (error) {
-      console.error("Error deleting item:", error);
+  const handleDelete = async (_id: string)=>{
+    try{
+      const url =`${endpoints.DELETE_AN_ITEM}/${_id}`;
+      const { response, error } = await deleteItem(url);
+      getAllItems()
+      if(!error && response){
+        toast.success(response?.data.message);
+      }
+      console.log(response);
+     
+    }catch (error) {
+      toast.error("Error occurred while deleting brand.");
     }
-  };
+  }
 
   const handleSortChange = (key: string, order: string) => {
     const sorted = [...items].sort((a, b) => {
@@ -173,5 +176,6 @@ const CreateItem: React.FC = () => {
     </div>
   )
 }
+
 
 export default CreateItem

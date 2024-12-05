@@ -1,7 +1,6 @@
 import { createContext, useState ,ReactNode} from "react";
 
 
-
 interface TableLoadingContextType {
   loading: any;
   setLoading: React.Dispatch<React.SetStateAction<any>>;
@@ -24,7 +23,9 @@ const ContextShare: React.FC<ContextShareProps> = ({ children }) => {
 
   return (
     <TableResponseContext.Provider value={{ loading, setLoading }}>
+       <TableResponseContext.Provider value={{loading,setLoading}}>
       {children}
+      </TableResponseContext.Provider>
     </TableResponseContext.Provider>
   );
 };

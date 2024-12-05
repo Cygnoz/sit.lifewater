@@ -4,17 +4,19 @@ import SearchIcon from "../../assets/icons/SearchIcon";
 type Props = {
   searchValue: string;
   onSearchChange: (value: string) => void;
-  placeholder?: string | "search";
+  placeholder?: string;
 };
 
-const SearchBar = ({ searchValue, onSearchChange, placeholder }: Props) => {
+const SearchBar = ({ searchValue, onSearchChange, placeholder = "Search" }: Props) => {
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     onSearchChange(e.target.value);
   };
 
   return (
     <div className="relative w-full flex items-center">
+      {/* Icon */}
       <SearchIcon />
+      {/* Search Input */}
       <input
         className="pl-9 text-sm w-full rounded-md text-start text-gray-800 h-10 p-2 border-0 focus:ring-1 focus:ring-gray-400"
         style={{
@@ -23,6 +25,7 @@ const SearchBar = ({ searchValue, onSearchChange, placeholder }: Props) => {
           boxShadow: "none",
         }}
         placeholder={placeholder}
+        aria-label="Search input"
         onChange={handleSearch}
         value={searchValue}
       />
