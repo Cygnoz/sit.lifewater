@@ -164,9 +164,9 @@ exports.viewAllSubroutes = async (req, res) => {
 
 //Clean Data 
 function cleanCustomerData(data) {
-    const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
-    return Object.keys(data).reduce((acc, key) => {
-      acc[key] = cleanData(data[key]);
-      return acc;
-    }, {});
+  const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+  return Object.keys(data).reduce((acc, key) => {
+    acc[key] = cleanData(data[key]);
+    return acc;
+  }, {});
 }

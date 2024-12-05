@@ -63,7 +63,7 @@ exports.addStaff = async (req, res) => {
         return res.status(400).json({ message: 'User with this username already exists.' });
       }
 
-      cleanedData.password = await bcrypt.hash(password.trim(),10);
+      cleanedData.password = encrypt(cleanedData.password);
     }
 
       
@@ -92,7 +92,12 @@ exports.editStaff = async (req, res) => {
 
     const cleanedData = cleanCustomerData(req.body);
 
-    const { designation, username, password } = req.body;
+    const existingStaff = await Staff.findById(req.params.id);
+    if (!existingStaff) {
+      return res.status(404).json({ message: 'Staff not found' });
+    }
+
+    const { designation, username, password, mobileNumber } = req.body;
 
     if (!cleanedData.firstname) {
       return res.status(400).json({ message: 'First Name is required' });
@@ -126,28 +131,36 @@ exports.editStaff = async (req, res) => {
         return res.status(400).json({ message: 'Username and password are required for Sales staff.' });
       }
 
-      // Check if the username already exists for another staff (excluding the current one)
-      const existingSalesStaff = await Staff.findOne({
-        username: trimmedUsername,
-        _id: { $ne: req.params.id } // Exclude the current staff from the check
-      });
+      if(cleanedData.password && existingStaff.password ){
+        const isMatch = await bcrypt.compare(password, existingStaff.password);
+        if (!isMatch) {
+          cleanedData.password = await bcrypt.hash(password.trim(),10);        
+      }}
 
-      if (existingSalesStaff) {
-        return res.status(400).json({ message: 'Username already taken by another user.' });
-      }
+   
+
+      // Check if the username already exists for another staff (excluding the current one)
+      // const existingSalesStaff = await Staff.findOne({
+      //   username: username,
+      //   _id: { $ne: req.params.id } // Exclude the current staff from the check
+      // });
+
+      // if (existingSalesStaff) {
+      //   return res.status(400).json({ message: 'Username already taken by another user.' });
+      // }
 
       // If the password is updated, hash the new password
-      if (trimmedPassword) {
-        const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
-        updatedData.password = hashedPassword;
-      }
+      // if (trimmedPassword) {
+      //   const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
+      //   updatedData.password = hashedPassword;
+      // }
 
       // Ensure the updatedData includes the trimmed username
-      updatedData.username = trimmedUsername;
+      // updatedData.username = trimmedUsername;
     }
 
     // Proceed with updating the staff record
-    const updatedStaff = await Staff.findByIdAndUpdate(req.params.id, updatedData, { new: true });
+    const updatedStaff = await Staff.findByIdAndUpdate(req.params.id, cleanedData, { new: true });
     
     // If staff not found
     if (!updatedStaff) {
@@ -158,6 +171,8 @@ exports.editStaff = async (req, res) => {
       data: updatedStaff,
     });    
   } catch (error) {
+    console.log(error);
+    
     res.status(500).json({ message: "Internal server error." });
   }
 };
@@ -235,4 +250,66 @@ function cleanCustomerData(data) {
     acc[key] = cleanData(data[key]);
     return acc;
   }, {});
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Encrpytion 
+function encrypt(text) {
+  try {
+      const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+      let encrypted = cipher.update(text, 'utf8', 'hex');
+      encrypted += cipher.final('hex');
+
+      const authTag = cipher.getAuthTag().toString('hex'); // Get authentication tag
+
+      return `${iv.toString('hex')}:${encrypted}:${authTag}`; // Return IV, encrypted text, and tag
+  } catch (error) {
+      console.error("Encryption error:", error);
+      throw error;
+  }
+}
+
+
+//Decrpytion
+function decrypt(encryptedText) {
+  try {
+      // Split the encrypted text to get the IV, encrypted data, and authentication tag
+      const [ivHex, encryptedData, authTagHex] = encryptedText.split(':');
+      const iv = Buffer.from(ivHex, 'hex');
+      const authTag = Buffer.from(authTagHex, 'hex');
+
+      // Create the decipher with the algorithm, key, and IV
+      const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+      decipher.setAuthTag(authTag); // Set the authentication tag
+
+      let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+      decrypted += decipher.final('utf8');
+      return decrypted;
+  } catch (error) {
+      console.error("Decryption error:", error);
+      throw error;
+  }
 }

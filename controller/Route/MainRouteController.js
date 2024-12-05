@@ -57,7 +57,12 @@ exports.addRoute = async (req, res) => {
 exports.deleteRoute = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("ID received for deletion:", id);  // Log the ID to verify it's being passed correctly
+    console.log("ID received for deletion:", id); 
+    
+    const subRoute = await SubRoute.findOne({mainRouteId:id});
+    if (!subRoute) {
+      return res.status(404).json({ message: 'Cannot delete the route as it is associated with a subroute.' });
+    }
  
     const deletedRoute = await MainRoute.findByIdAndDelete(id);
     if (!deletedRoute) {
@@ -197,10 +202,10 @@ exports.viewRouteById = async (req, res) => {
 
 
   //Clean Data 
-  function cleanCustomerData(data) {
-    const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
-    return Object.keys(data).reduce((acc, key) => {
-      acc[key] = cleanData(data[key]);
-      return acc;
-    }, {});
-  }
+function cleanCustomerData(data) {
+  const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
+  return Object.keys(data).reduce((acc, key) => {
+    acc[key] = cleanData(data[key]);
+    return acc;
+  }, {});
+}
