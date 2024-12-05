@@ -198,7 +198,7 @@ exports.loginSalesStaff = async (req, res) => {
       return res.status(404).json({ message: 'Staff not found.' });
     }
 
-    const oldpasword = decrypt(existingStaff.password);
+    const oldpasword = decrypt(staff.password);
     const isMatch = password === oldpasword;
     
     // Match the password
