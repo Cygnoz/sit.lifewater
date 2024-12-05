@@ -50,7 +50,7 @@ router.get('/getroute/:id',verifyToken,  mainRouteController.viewRouteById);    
 router.post('/addSRoute',verifyToken,  subrouteController.addSubroute); // add subroute
 router.put('/updateSRoute/:id',verifyToken,  subrouteController.editSubroute); // edit subroute
 router.delete('/delSRoute/:id',verifyToken,  subrouteController.deleteSubroute); // delete subroute
-router.get('/viewSRoute',verifyToken,  subrouteController.viewAllSubroutes); // view all subroutes
+router.get('/viewSRoute',  subrouteController.viewAllSubroutes); // view all subroutes
 router.get('/viewSRoute/:id',verifyToken,  subrouteController.viewSubroute); // view subroute by ID
 
 // MainRoute routes

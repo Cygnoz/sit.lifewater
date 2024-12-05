@@ -1,5 +1,5 @@
 const Subroute = require('../../Models/SubrouteSchema'); 
-const Route = require('../../Models/MainRouteSchema'); 
+const MainRoute = require('../../Models/MainRouteSchema'); 
 
 // Add a new subroute
 exports.addSubroute = async (req, res) => {
@@ -126,17 +126,26 @@ exports.viewSubroute = async (req, res) => {
 
 // View all subroutes
 exports.viewAllSubroutes = async (req, res) => {
-    try {
-        const subroutes = await Subroute.find();
+  try {
+      const subRoutes = await Subroute.find();
+      const mainRoutes = await MainRoute.find();
 
-        if (subroutes.length === 0) {
-            return res.status(404).json({ message: 'No subroutes found' });
-        }
+      if (subRoutes.length === 0) {
+          return res.status(404).json({ message: 'No subroutes found' });
+      }
 
-        res.status(200).json(subroutes);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching subroutes', error });
-    }
+      const enrichedSubRoutes = subRoutes.map(subRoute => {
+        const mainRoute = mainRoutes.find(route => String(route._id) === String(subRoute.mainRouteId));
+        return {
+          ...subRoute.toObject(), // Convert Mongoose Document to plain object
+          mainRouteName: mainRoute ? mainRoute.mainRouteName : undefined, 
+        };
+      });
+
+      res.status(200).json(enrichedSubRoutes);
+  } catch (error) {
+      res.status(500).json({ message: 'Error fetching subroutes', error });
+  }
 };
 
 
