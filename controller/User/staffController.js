@@ -23,11 +23,7 @@ exports.getStaffById = async (req, res) => {
   }
 };
 
-// Edit (Update) staff
-// Utility function to normalize file paths
-// const normalizeFilePath = (filePath) => {
-//   return filePath.replace(/\\/g, "/").replace(/^uploads\//, ""); // remove "uploads/" prefix if it exists
-// };
+
 
 exports.addStaff = async (req, res) => {
   try {
@@ -76,9 +72,8 @@ exports.addStaff = async (req, res) => {
       const newStaff = new Staff({ ...cleanedData });
       const savedStaff = await newStaff.save();
       console.log("Staff Saved Successfully",savedStaff);
-      return res.status(201).json(savedStaff);
+      res.status(200).json({ message: "Staff created successfully.", savedStaff });
     
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -89,13 +84,37 @@ exports.addStaff = async (req, res) => {
 
 exports.editStaff = async (req, res) => {
   try {
-    const { designation, username, password } = req.body;
-    const updatedData = { ...req.body };
+    console.log("Edit Staff:", req.body);
+    const { id } = req.params;
 
-    // Check if a new profile image is uploaded
-    // if (req.file) {
-    //   updatedData.profile = normalizeFilePath(req.file.path); // Normalize path on update
-    // }
+    const cleanedData = cleanCustomerData(req.body);
+
+    const { designation, username, password } = req.body;
+
+    if (!cleanedData.firstname) {
+      return res.status(400).json({ message: 'First Name is required' });
+    }
+    if (!cleanedData.mobileNumber) {
+      return res.status(400).json({ message: 'Mobile Number is required' });
+    }
+    if (!cleanedData.firstname) {
+      return res.status(400).json({ message: 'WhatsApp Number is required' });
+    }
+    if (!cleanedData.designation) {
+      return res.status(400).json({ message: 'Designation is required' });
+    }
+
+    // Check for existing staff with the same mobile number
+    const existingStaffMobileNumber = await Staff.findOne({ mobileNumber, _id: { $ne: id } });
+    if (existingStaffMobileNumber) {
+      return res.status(400).json({ message: 'Staff member with this mobile number already exists.' });
+    }
+
+    // Check for existing staff with the same mobile number
+    const existingStaffUsername = await Staff.findOne({ username, _id: { $ne: id } });
+    if (existingStaffUsername) {
+      return res.status(400).json({ message: 'Staff member with this username already exists.' });
+    }
 
     // If the designation is "Sales", handle username and password logic
     if (designation === 'Sales') {
@@ -103,10 +122,6 @@ exports.editStaff = async (req, res) => {
       if (!username || !password) {
         return res.status(400).json({ message: 'Username and password are required for Sales staff.' });
       }
-
-      // Trim username and password to avoid accidental spaces
-      const trimmedUsername = username.trim();
-      const trimmedPassword = password.trim();
 
       // Check if the username already exists for another staff (excluding the current one)
       const existingSalesStaff = await Staff.findOne({
@@ -135,8 +150,8 @@ exports.editStaff = async (req, res) => {
     if (!updatedStaff) {
       return res.status(404).json({ message: 'Staff not found' });
     }
-
-    res.status(200).json(updatedStaff);
+    res.status(200).json({ message: "Staff edited successfully.", updatedStaff });
+    
     
   } catch (error) {
     res.status(400).json({ message: error.message });

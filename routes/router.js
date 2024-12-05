@@ -21,12 +21,13 @@ const { verifyToken } = require('../middleware/auth');
 
 
 // STAFF
+router.post("/staff/login", staffController.loginSalesStaff) // login staff(sales)
+
 router.post("/addstaff", verifyToken, staffController.addStaff) // add staff
-router.get("/getallstaffs", staffController.getAllStaff) // get all staff
+router.get("/getallstaffs", verifyToken, staffController.getAllStaff) // get all staff
 router.get("/staff/:id", verifyToken, staffController.getStaffById) // get staff by ID
 router.put("/staff/:id", verifyToken,  staffController.editStaff) // edit staff
 router.delete("/staff/:id", verifyToken, staffController.deleteStaff) // delete staff
-router.post("/staff/login", staffController.loginSalesStaff) // login staff(sales)
 
 
 // VEHICLE
@@ -38,19 +39,19 @@ router.delete("/deletevehicle/:id", verifyToken, vehicleController.deleteVehicle
 
 
 // ROUTE
-router.post('/addRoute',  mainRouteController.addRoute);
-router.delete('/delRoute/:id',  mainRouteController.deleteRoute);    // Delete route by ObjectId
-router.put('/updateRoute/:id',  mainRouteController.updateRoute);       // Update route by ObjectId
-router.get('/getAllRoutes' , mainRouteController.getAllRoutes)        // View all routes
-router.get('/getroute/:id',  mainRouteController.viewRouteById);     // View route by ObjectId
+router.post('/addRoute', verifyToken, mainRouteController.addRoute);
+router.delete('/delRoute/:id',verifyToken,  mainRouteController.deleteRoute);    // Delete route by ObjectId
+router.put('/updateRoute/:id',verifyToken,  mainRouteController.updateRoute);       // Update route by ObjectId
+router.get('/getAllRoutes' ,verifyToken, mainRouteController.getAllRoutes)        // View all routes
+router.get('/getroute/:id', verifyToken, mainRouteController.viewRouteById);     // View route by ObjectId
 
 
 // subroute
-router.post('/addSRoute',  subrouteController.addSubroute); // add subroute
-router.put('/updateSRoute/:id',  subrouteController.editSubroute); // edit subroute
-router.delete('/delSRoute/:id',  subrouteController.deleteSubroute); // delete subroute
-router.get('/viewSRoute',  subrouteController.viewAllSubroutes); // view all subroutes
-router.get('/viewSRoute/:id',  subrouteController.viewSubroute); // view subroute by ID
+router.post('/addSRoute',  verifyToken, subrouteController.addSubroute); // add subroute
+router.put('/updateSRoute/:id', verifyToken, subrouteController.editSubroute); // edit subroute
+router.delete('/delSRoute/:id', verifyToken, subrouteController.deleteSubroute); // delete subroute
+router.get('/viewSRoute', verifyToken, subrouteController.viewAllSubroutes); // view all subroutes
+router.get('/viewSRoute/:id', verifyToken, subrouteController.viewSubroute); // view subroute by ID
 
 // MainRoute routes
 // router.post("/main-route", verifyToken, mainRouteController.addRoute)
@@ -63,7 +64,7 @@ router.get('/viewSRoute/:id',  subrouteController.viewSubroute); // view subrout
 // router.post("/main-route/:mainRouteId/sub-route", verifyToken, mainRouteController.addSubRoute)
 
 //customer
-router.post("/addcustomer", CustomerController.createCustomer) // add customer
+router.post("/addcustomer", verifyToken, CustomerController.createCustomer) // add customer
 router.get("/customer", verifyToken, CustomerController.getAllCustomers) // get all customers
 router.put("/editcustomer/:id", verifyToken,CustomerController.updateCustomerById) // edit customer
 router.get("/customer/:id", verifyToken, CustomerController.getCustomerById) // get customer by ID
@@ -104,8 +105,9 @@ router.get('/get-one-trial-balance/:accountId', verifyToken,AccountsController.g
 
 
 //Admin
-router.post('/add-admin', verifyToken, AdminController.addAdmin); // add admin
 router.post('/login', AdminController.login) // login admin
+
+router.post('/add-admin', verifyToken, AdminController.addAdmin); // add admin
 
 
 
