@@ -1,4 +1,3 @@
-// const bcrypt = require('bcrypt');
 const Staff = require("../../Models/StaffSchema");
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
@@ -199,8 +198,10 @@ exports.loginSalesStaff = async (req, res) => {
       return res.status(404).json({ message: 'Staff not found.' });
     }
 
+    const oldpasword = decrypt(existingStaff.password);
+    const isMatch = password === oldpasword;
+    
     // Match the password
-    const isMatch = await bcrypt.compare(password, staff.password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid Password!' });
     }
