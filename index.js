@@ -16,7 +16,7 @@ app.use(orderRoutes);
 
 // Test route
 app.get('/', (req, res) => {
-  res.status(200).json('Life Water server started - Order');
+  res.status(200).json('Life Water server started - Order(v 1.0)');
 });
 
 // Server listen
