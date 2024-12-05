@@ -37,13 +37,16 @@ exports.addItem = async (req, res) => {
 
     const savedItem = await newItem.save();
     console.log("Item Saved Successfully",savedItem);
+
+    res.status(200).json({ 
+      message: 'Item added successfully',
+      data: savedItem,
+    });
     
-    res.status(201).json(savedItem);
   } catch (error) {
     console.error('Error adding item:', error);
     res.status(500).json({ 
-      message: 'Error adding item', 
-      error: error.message 
+      message: "Internal server error."
     });
   }
 };
@@ -91,10 +94,10 @@ exports.updateItem = async (req, res) => {
           return res.status(404).json({ message: 'Item not found' });
       }
 
-      return res.status(200).json({ message: 'Item updated successfully', item: updatedItem });
+      res.status(200).json({ message: 'Item updated successfully', data: updatedItem });
   } catch (error) {
       console.error("Error updating item:", error);
-      return res.status(500).json({ message: error.message || 'An unexpected error occurred.' });
+      res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -109,7 +112,7 @@ exports.deleteItem = async (req, res) => {
 
     res.status(200).json({ message: 'Item deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to delete item', error: error.message });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -122,7 +125,7 @@ exports.getItems = async (req, res) => {
     res.status(200).json(items);
     
   } catch (error) {
-    res.status(500).json({ message: 'Failed to retrieve items', error: error.message });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -136,7 +139,7 @@ exports.getItemById = async (req, res) => {
 
     res.status(200).json(item); // Return the found item
   } catch (error) {
-    res.status(500).json({ message: 'Failed to retrieve item', error: error.message });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 

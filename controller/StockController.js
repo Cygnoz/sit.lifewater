@@ -3,98 +3,9 @@ const Transfer = require('../Models/TransferSchema');
 const WStock = require('../Models/WStockSchema');
 
 
-
-
-exports.getAllStock = async (req, res) => {
-  try {
-    const stocks = await LoadedStock.find().sort({ date: -1 });
-    res.json(stocks);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-
-
+//Load Stock from warehouse to subroute 
 exports.addStock = async (req, res) => {
-  console.log("Add Stock:", req.body);
-
-  // try {
-  //   const {mainRoute, subRoute,  warehouse, date, transferNumber, items, autoNotes, termsAndConditions} = req.body;
-
-  //   // Check if warehouse exists
-  //   const warehouseExists = await WarehouseStock.findOne({ warehouse: warehouse });
-  //   if (!warehouseExists) {
-  //     return res.status(404).json({ 
-  //       success: false,
-  //       message: `Warehouse '${warehouse}' not found` 
-  //     });
-  //   }
-  //   else{
-  //     // await updateWarehouseStock({ warehouseName: warehouse, items });
-  //     const updateResult = await updateWarehouseStock({ warehouseName: warehouse, items });
-  //     if (!updateResult.success) {
-  //       return res.status(400).json({
-  //       success: false,
-  //       message: updateResult.message
-  //       });
-  //     }
-  //     console.log(items);
-      
-  //     const stock = new LoadedStock({
-  //       transferNumber,
-  //       date,
-  //       mainRoute,
-  //       subRoute,
-  //       warehouse,
-  //       items,
-  //       autoNotes,
-  //       termsAndConditions
-  //     });
-  //     const newStock = await stock.save();
-  //     res.status(201).json({
-  //       success: true,
-  //       data: newStock
-  //     });
-  //   }
-
-  //   // // Check and update stock for each item
-  //   // for (const itemName of items) {
-  //   //   const warehouseItem = warehouseExists.inventory.find(
-  //   //     inv => inv.itemId.toString() === itemName.itemId.toString()
-  //   //   );
-
-  //   //   if (!warehouseItem) {
-  //   //     return res.status(400).json({
-  //   //       success: false,
-  //   //       message: `Item ${item.itemName} not found in warehouse inventory`
-  //   //     });
-  //   //   }
-
-  //   //   if (warehouseItem.quantity < item.quantity) {
-  //   //     return res.status(400).json({
-  //   //       success: false,
-  //   //       message: `Insufficient stock for ${item.itemName}. Available: ${warehouseItem.quantity}, Requested: ${item.quantity}`
-  //   //     });
-  //   //   }
-
-  //   //   // Reduce stock quantity
-  //   //   warehouseItem.quantity -= item.quantity;
-  //   // }
-
-  //   // // Save updated warehouse inventory
-  //   // await warehouseExists.save();
-
-  //   // Create new stock entry
-
-
-  // } catch (error) {
-  //   console.error('Error adding stock:', error);
-  //   res.status(400).json({ 
-  //     success: false,
-  //     message: error.message 
-  //   });
-  // }
+  console.log("Add Stock Load:", req.body);
   try {
     const cleanedData = cleanCustomerData(req.body);
     const {mainRoute, subRoute,  warehouse, date, transferNumber, items, autoNotes, termsAndConditions} = cleanedData;
@@ -108,7 +19,6 @@ exports.addStock = async (req, res) => {
     }
     const warehouseExists = await WStock.findOne({ warehouseName: warehouse });
     if (!warehouseExists) {
-            // Create new stock entry
     const stock = new LoadedStock({
         transferNumber,
         date,
@@ -141,7 +51,14 @@ exports.addStock = async (req, res) => {
   }
 };
 
-
+exports.getAllStock = async (req, res) => {
+  try {
+    const stocks = await LoadedStock.find().sort({ date: -1 });
+    res.json(stocks);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 
 

@@ -2,11 +2,6 @@ const WStock = require('../Models/WStockSchema');
 const Warehouse = require('../Models/WarehouseSchema');
 
 
- 
-
-
-
-
 // Function to add a new warehouse
 exports.addWarehouse = async (req, res) => {
   console.log("Add Warehouse:", req.body);
@@ -66,7 +61,6 @@ exports.addWarehouse = async (req, res) => {
     await warehouse.save();
     console.log("Warehouse Addded Successfully",warehouse);
     res.status(201).json({
-      success: true,
       message: 'Warehouse created successfully',
       data: warehouse
     });
@@ -75,8 +69,7 @@ exports.addWarehouse = async (req, res) => {
     console.error('Error adding warehouse:', error);
 
     res.status(500).json({
-      success: false,
-      message: 'An error occurred while creating the warehouse. Please try again.'
+      message: "Internal server error."
     });
   }
 };
@@ -101,11 +94,11 @@ exports.deleteWarehouse = async (req, res) => {
   try {
     const deleteWarehouse = await Warehouse.findByIdAndDelete(req.params.id);
     if (!deleteWarehouse) {
-      return res.status(404).json({ message: 'warehouse not found' });
+      return res.status(404).json({ message: 'Warehouse not found' });
     }
-    res.status(200).json({ message: 'warehouse deleted successfully' });
+    res.status(200).json({ message: 'Warehouse deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting warehouse', error });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 

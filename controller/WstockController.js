@@ -3,9 +3,9 @@ const Warehouse = require('../Models/WarehouseSchema');
 
 
 
-// Create new stock entry
+// Add stock to warehouse
 exports.createStock = async (req, res) => {
-    console.log("Create Stock:", req.body);
+    console.log("Add Warehouse Stock:", req.body);
     try {
       const cleanedData = cleanCustomerData(req.body);
       cleanedData.items = (cleanedData.items || [])
@@ -96,18 +96,16 @@ exports.createStock = async (req, res) => {
       console.log("Stock record created:", wStock);
   
       res.status(201).json({
-        success: true,
         message: 'Stock added to warehouse successfully',
-        warehouse: warehouseExists,
+        data: warehouseExists
       });
     } catch (error) {
       console.error("Error creating stock:", error.message);
       res.status(500).json({
-        success: false,
-        message: error.message,
+        message: "Internal server error."
       });
     }
-  };
+};
   
   
   
@@ -115,7 +113,7 @@ exports.createStock = async (req, res) => {
   
   
   // Get all stock entries
-  exports.getAllStock = async (req, res) => {
+exports.getAllStock = async (req, res) => {
     try {
       const stocks = await WStock.find().sort({ createdAt: -1 });
   
@@ -129,7 +127,7 @@ exports.createStock = async (req, res) => {
         message: error.message
       });
     }
-  };
+};
 
 
 
@@ -158,4 +156,4 @@ function cleanCustomerData(data) {
       acc[key] = cleanData(data[key]);
       return acc;
     }, {});
-  }
+}

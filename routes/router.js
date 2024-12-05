@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+
 const stockController = require('../controller/StockController');
 const itemController = require('../controller/ItemController');
 const warehouseController = require('../controller/WarehouseController');
@@ -10,36 +11,36 @@ const unloadController = require('../controller/UnloadController');
 const { verifyToken } = require('../middleware/auth');
 
 //Stock
-router.post('/stock', stockController.addStock);
-router.get('/stock', stockController.getAllStock);
-router.get('/stockstats', stockController.getStockStats);
-router.put('/internaltransfer', stockController.internalTransfer);
+router.post('/stock',verifyToken, stockController.addStock);
+router.get('/stock', verifyToken, stockController.getAllStock);
+router.get('/stockstats', verifyToken, stockController.getStockStats);
+router.put('/internaltransfer', verifyToken, stockController.internalTransfer);
 
 //Item
-router.post('/item', itemController.addItem);
-router.get('/item', itemController.getItems);
-router.put('/edititem/:id',  itemController.updateItem); 
-router.get('/getitem/:id', itemController.getItemById);
-router.delete('/item/:id', itemController.deleteItem);
+router.post('/item', verifyToken, itemController.addItem);
+router.get('/item', verifyToken, itemController.getItems);
+router.put('/edititem/:id', verifyToken,  itemController.updateItem); 
+router.get('/getitem/:id', verifyToken, itemController.getItemById);
+router.delete('/item/:id', verifyToken, itemController.deleteItem);
 
 //Wstock
-router.post('/wstock', wStockController.createStock);
-router.get('/wstock', wStockController.getAllStock);
+router.post('/wstock', verifyToken, wStockController.createStock);
+router.get('/wstock', verifyToken, wStockController.getAllStock);
 
 //Warehouse
-router.post('/warehouse', warehouseController.addWarehouse);
-router.get('/warehouse', warehouseController.getWarehouses);
-router.delete('/warehouse/:id', warehouseController.deleteWarehouse);
+router.post('/warehouse', verifyToken, warehouseController.addWarehouse);
+router.get('/warehouse', verifyToken, warehouseController.getWarehouses);
+router.delete('/warehouse/:id', verifyToken, warehouseController.deleteWarehouse);
 
 
 //Orders
-router.post('/orders', orderController.createOrder);
-router.get('/orders/:id', orderController.viewOrder);
-router.get('/orders', orderController.viewAllOrders);
-router.delete('/orders/:id', orderController.deleteOrder);
+router.post('/orders', verifyToken, orderController.createOrder);
+router.get('/orders/:id', verifyToken, orderController.viewOrder);
+router.get('/orders', verifyToken, orderController.viewAllOrders);
+router.delete('/orders/:id', verifyToken, orderController.deleteOrder);
 
 //Unloading
-router.post('/addunload', unloadController.addUnload);
-router.get('/unload', unloadController.getAllUnloads);
+router.post('/addunload', verifyToken, unloadController.addUnload);
+router.get('/unload', verifyToken, unloadController.getAllUnloads);
 
 module.exports = router;

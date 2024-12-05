@@ -22,7 +22,8 @@ function verifyToken(req, res, next) {
             }
         });
     } else {
-        res.sendStatus(403);  // Forbidden if token is not provided
+        console.log("No Token");        
+        res.sendStatus(403);  
     }
 }
 
