@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
 const Staff = require("../../Models/StaffSchema");
+const jwt = require('jsonwebtoken');
+
 
 
 // Get all staff members
@@ -237,6 +239,7 @@ exports.loginSalesStaff = async (req, res) => {
     }
 
   } catch (error) {
+    console.log(error);    
     res.status(500).json({ message: "Internal server error." });
   }
 };
