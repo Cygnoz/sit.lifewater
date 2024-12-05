@@ -44,7 +44,7 @@ app.use(Routes);
 
 // Test route
 app.get('/', (req, res) => {
-  res.status(200).json('Life Water server started - Backend');
+  res.status(200).json('Life Water server started - Backend(v 1.0)');
 });
 
 // Server listen
