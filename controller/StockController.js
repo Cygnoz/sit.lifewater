@@ -1,7 +1,8 @@
-const LoadedStock = require('../Models/StockloadedSchema');
+const StockLoad = require('../Models/StockloadedSchema');
 const Transfer = require('../Models/TransferSchema');
 const WStock = require('../Models/WStockSchema');
-
+const subRoute = require('../Models/SubrouteSchema');
+const MainRoute = require('../Models/MainRouteSchema');
 
 //Load Stock from warehouse to subroute 
 exports.addStock = async (req, res) => {
@@ -19,7 +20,7 @@ exports.addStock = async (req, res) => {
     }
     const warehouseExists = await WStock.findOne({ warehouseName: warehouse });
     if (!warehouseExists) {
-    const stock = new LoadedStock({
+    const stock = new StockLoad({
         transferNumber,
         date,
         mainRoute,
@@ -53,7 +54,7 @@ exports.addStock = async (req, res) => {
 
 exports.getAllStock = async (req, res) => {
   try {
-    const stocks = await LoadedStock.find().sort({ date: -1 });
+    const stocks = await StockLoad.find().sort({ date: -1 });
     res.json(stocks);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -64,7 +65,7 @@ exports.getAllStock = async (req, res) => {
 
 exports.getStockStats = async (req, res) => {
   try {
-    const totalStockLoad = await LoadedStock.aggregate([
+    const totalStockLoad = await StockLoad.aggregate([
       {
         $group: {
           _id: {
@@ -103,7 +104,7 @@ exports.internalTransfer = async (req, res) => {
   const { fromTransferNumber, toTransferNumber, filledBottles } = req.body;
 
   try {
-    const fromStock = await LoadedStock.findOne({ transferNumber: fromTransferNumber });
+    const fromStock = await StockLoad.findOne({ transferNumber: fromTransferNumber });
     if (!fromStock) {
       return res.status(404).json({ 
         success: false,
@@ -111,7 +112,7 @@ exports.internalTransfer = async (req, res) => {
       });
     }
 
-    const toStock = await LoadedStock.findOne({ transferNumber: toTransferNumber });
+    const toStock = await StockLoad.findOne({ transferNumber: toTransferNumber });
     if (!toStock) {
       return res.status(404).json({ 
         success: false,

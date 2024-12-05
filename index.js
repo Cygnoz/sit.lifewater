@@ -21,7 +21,7 @@ app.use(stockRoutes);
 
 // Test route
 app.get('/', (req, res) => {
-  res.status(200).json('Life Water server started - Stock');
+  res.status(200).json('Life Water server started - Stock(v 1.0)');
 });
 
 // Server listen
