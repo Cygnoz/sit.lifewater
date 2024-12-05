@@ -88,10 +88,7 @@ const Bottles: React.FC = () => {
               <table className="w-full text-left">
                 <thead className=" bg-[#fdf8f0]">
                   <tr className="border-b">
-                    <th className="p-2 text-[12px] text-center  text-[#303F58] w-16">
-                      {" "}
-                      <input type="checkbox" />
-                    </th>
+                   
                     <th className="p-2 text-[12px] text-center text-[#303F58]">
                       Sl No
                     </th>
@@ -120,10 +117,7 @@ const Bottles: React.FC = () => {
                 </thead>
                 <tbody>
                   <tr className="border-b">
-                    <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16">
-                      {" "}
-                      <input type="checkbox" />
-                    </td>
+                    
                     <td className="p-2 text-[14] text-center text-[#4B5C79]">
                       1
                     </td>
@@ -151,10 +145,7 @@ const Bottles: React.FC = () => {
                   </tr>
 
                   <tr className="border-b">
-                    <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16">
-                      {" "}
-                      <input type="checkbox" />
-                    </td>
+                  
                     <td className="p-2 text-[14] text-center text-[#4B5C79]">
                       1
                     </td>
@@ -178,68 +169,6 @@ const Bottles: React.FC = () => {
                     </td>
                     <td className="p-2 text-[14] text-center text-[#66F633]">
                   Returned
-                    </td>
-                  </tr>
-
-                  <tr className="border-b">
-                    <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16">
-                      {" "}
-                      <input type="checkbox" />
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                      1
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                      15 May 2023
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                      John Doe
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                      ALN089
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                     ALN099
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                      4
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                     Anam
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#F33910]">
-                    Purchased
-                    </td>
-                  </tr>
-
-                  <tr className="border-b">
-                    <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16">
-                      {" "}
-                      <input type="checkbox" />
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                      1
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                      15 May 2023
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                      John Doe
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                      ALN089
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                     ALN099
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                      4
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                     Anam
-                    </td>
-                    <td className="p-2 text-[14] text-center text-[#66F633]">
-                    Returned
                     </td>
                   </tr>
                 </tbody>

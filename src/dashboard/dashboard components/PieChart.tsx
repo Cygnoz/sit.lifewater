@@ -6,7 +6,12 @@ import CardContent from '@mui/material/CardContent';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import { useEffect, useState } from 'react';
-import { getAllCustomersAPI } from '../../services/CustomerAPI/Customer';
+import useApi from '../../Hook/UseApi';
+import { endpoints } from '../../services/ApiEndpoint';
+// import { getAllCustomersAPI } from '../../services/CustomerAPI/Customer';
+
+
+
 
 export default function CustomerTypeChart() {
   const [customers, setCustomers] = useState<any[]>([]);
@@ -14,6 +19,41 @@ export default function CustomerTypeChart() {
     { label: 'Cash Customer', value: 0 },
     { label: 'Credit Customer', value: 0 },
   ]);
+
+  const { request: getCustomers } = useApi("get", 4000);
+
+  const getAllCustomers = async () => {
+    try {
+      const url = `${endpoints.GET_ALL_CUSTOMERS}`;
+      const {response , error} =await getCustomers(url)
+      console.log(response);
+      
+      if(!error && response){
+        setCustomers(response.data);
+        console.log(customers);
+        
+
+        const totalCustomers = response.data.length;
+        const cashCount = response.data.filter((customer: { paymentMode: string; }) => customer.paymentMode === 'Cash').length;
+        const creditCount = response.data.filter((customer: { paymentMode: string; }) => customer.paymentMode === 'Credit').length;
+
+        const cashPercentage = totalCustomers ? Math.round((cashCount / totalCustomers) * 100) : 0;
+        const creditPercentage = totalCustomers ? Math.round((creditCount / totalCustomers) * 100) : 0;
+
+        setData([
+          { label: 'Cash Customer', value: cashPercentage },
+          { label: 'Credit Customer', value: creditPercentage }
+        ]);
+      }
+    } catch (error) {
+      console.log(error);
+      
+    }
+  }
+  
+  useEffect(() => {
+    getAllCustomers();
+  }, []);
 
   const colors = ['hsl(210, 20%, 20%)', 'hsl(340, 20%, 80%)'];
 
@@ -31,33 +71,6 @@ export default function CustomerTypeChart() {
     );
   };
 
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        const response = await getAllCustomersAPI();
-        setCustomers(response.data);
-        console.log(customers);
-        
-
-        const totalCustomers = response.data.length;
-        const cashCount = response.data.filter((customer: { paymentMode: string; }) => customer.paymentMode === 'Cash').length;
-        const creditCount = response.data.filter((customer: { paymentMode: string; }) => customer.paymentMode === 'Credit').length;
-
-        const cashPercentage = totalCustomers ? Math.round((cashCount / totalCustomers) * 100) : 0;
-        const creditPercentage = totalCustomers ? Math.round((creditCount / totalCustomers) * 100) : 0;
-
-        setData([
-          { label: 'Cash Customer', value: cashPercentage },
-          { label: 'Credit Customer', value: creditPercentage }
-        ]);
-
-      } catch (error) {
-        console.error("Error fetching customers:", error);
-      }
-    };
-
-    fetchCustomers();
-  }, []);
 
   return (
     <Card

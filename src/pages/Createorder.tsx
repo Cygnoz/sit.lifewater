@@ -210,7 +210,7 @@ const CreateOrder: React.FC = () => {
             <table className="w-full text-left">
               <thead className=' bg-[#fdf8f0]'>
                 <tr className="border-b">
-                <th className="p-2 text-[12px] text-center text-[#303F58] w-16"> <input type="checkbox" /></th>
+               
                   <th className="p-2 text-[12px] text-center text-[#303F58]">Sl No</th>
                   <th className="p-2 text-[12px] text-center text-[#303F58]">Date</th>
                   <th className="p-2 text-[12px] text-center text-[#303F58]">Order No</th>
@@ -224,7 +224,7 @@ const CreateOrder: React.FC = () => {
               <tbody>
                 {orders.map((order,index)=>(
                                   <tr className="border-b">
-                                  <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16"> <input type="checkbox" /></td>
+                                 
                                     <td className="p-2 text-[14] text-center text-[#4B5C79]">{index + 1}</td>
                                     <td className="p-2 text-[14] text-center text-[#4B5C79]">{order.date.split('T')[0]}</td>
                                     <td className="p-2 text-[14] text-center text-[#4B5C79]">{order.orderNumber}</td>

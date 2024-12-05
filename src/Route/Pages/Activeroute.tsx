@@ -93,9 +93,7 @@ const ActiveRoute: React.FC = () => {
         <table className="w-full text-left">
           <thead className="bg-[#fdf8f0]">
             <tr className="border-b">
-              <th scope="col" className="px-6 py-3">
-                <input type="checkbox" />
-              </th>
+             
               <th className="p-2 text-[12px] text-center text-[#303F58]">
                 Sl No
               </th>
@@ -129,9 +127,7 @@ const ActiveRoute: React.FC = () => {
             {filteredRoutes.length > 0 ? (
               filteredRoutes.map((route, index) => (
                 <tr className="border-b" key={route.id}>
-                  <td className="px-6 py-4">
-                    <input type="checkbox" />
-                  </td>
+                
                   <td className="p-2 text-[14px] text-center text-[#4B5C79]">
                     {index + 1}
                   </td>

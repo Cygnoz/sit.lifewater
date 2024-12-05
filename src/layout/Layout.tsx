@@ -1,19 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import SubHeader from './SubHeader';
 import CreateOrder from '../pages/Createorder';
 import ViewOrder from '../components/ViewOrder';
-import CreateStaff from '../pages/Createstaff';
 import NewOrder from '../pages/NewOrder';
-import EditStaff from '../pages/EditStaff';
 import ActiveRoute from '../Route/Pages/Activeroute';
 import SubRoute from '../Route/Pages/SubRoute';
 import EditSubRoute from '../Route/Pages/EditSubRoute';
 import CreateSubRoute from '../Route/Components/CreateSubRoute';
 import CreateRoute from '../Route/Pages/Createroute';
-import AddStaff from '../pages/AddStaff';
 import CreateMainRoute from '../Route/Components/CreateMainRoute';
 import ViewRoute from '../Route/Components/ViewRoute';
 import AddVehicle from '../Vehicle/Components/AddVehicle';
@@ -44,14 +41,14 @@ import ReturnStock from '../Reportss/Pages/ReturnStock';
 import StockSold from '../Reportss/Pages/StockSold';
 import TotalSale from '../Reportss/Pages/TotalSale';
 import TrailBalance from '../Reportss/Pages/Trailbalance';
-import AddNewVendors from '../Purchase/Components/AddNewVendors';
-import AddPaymentReceipt from '../Purchase/Components/AddPaymentReceipt';
-import AddPurchase from '../Purchase/Components/AddPurchase';
-import AddPurchaseOrder from '../Purchase/Components/AddPurchaseOrder';
-import CreatePaymentReceipts from '../Purchase/Pages/CreatePaymentReceipts';
-import Purchase from '../Purchase/Pages/Purchase';
-import PurchaseOrder from '../Purchase/Pages/PurchaseOrder';
-import Suppliers from '../Purchase/Pages/Suppliers';
+// import AddNewVendors from '../Purchase/Components/AddNewVendors';
+// import AddPaymentReceipt from '../Purchase/Components/AddPaymentReceipt';
+// import AddPurchase from '../Purchase/Components/AddPurchase';
+// import AddPurchaseOrder from '../Purchase/Components/AddPurchaseOrder';
+// import CreatePaymentReceipts from '../Purchase/Pages/CreatePaymentReceipts';
+// import Purchase from '../Purchase/Pages/Purchase';
+// import PurchaseOrder from '../Purchase/Pages/PurchaseOrder';
+// import Suppliers from '../Purchase/Pages/Suppliers';
 import AddCollection from '../Sales/Components/AddCollection';
 import AddCoupon from '../Sales/Components/AddCoupon';
 import AddCreditNote from '../Sales/Components/AddCreditNote';
@@ -79,17 +76,35 @@ import ManualHome from '../Accounts/manualJournal/ManualHome';
 import ManualView from '../Accounts/manualJournal/ManualView';
 import CustomerHome from '../Modules/Customer/CustomerHome.tsx/CustomerHome';
 import Login from '../Settings/Login/Login';
+import CreateStaff from '../Staff/Createstaff';
+import AddStaff from '../Staff/AddStaff';
+import EditStaff from '../Staff/EditStaff';
 
 const App: React.FC = () => {
-  const [selectedNav, setSelectedNav] = useState<string>('');
-  const [subhead, setSubhead] = useState<{ headName: string; subRoute: string }[]>([]);
+  const [selectedNav, setSelectedNav] = useState<string>(() => localStorage.getItem('selectedNav') || '');
+  const [subhead, setSubhead] = useState<{ headName: string; subRoute: string }[]>(() => {
+    const savedSubhead = localStorage.getItem('subhead');
+    return savedSubhead ? JSON.parse(savedSubhead) : [];
+  });
   const location = useLocation();
 
-  const handleNavSelect = (nav: string, subhead: any[]) => {
+  const handleNavSelect = (nav: string, subhead: { headName: string; subRoute: string }[]) => {
     setSelectedNav(nav);
     setSubhead(subhead);
+    localStorage.setItem('selectedNav', nav); // Save to localStorage
+    localStorage.setItem('subhead', JSON.stringify(subhead)); // Save to localStorage
   };
-
+  useEffect(() => {
+    // Check if the route matches any subhead on component mount
+    const currentRoute = location.pathname;
+    const matchedNav = JSON.parse(localStorage.getItem('subhead') || '[]').find(
+      (item: { subRoute: string }) => item.subRoute === currentRoute
+    );
+    if (matchedNav) {
+      setSelectedNav(localStorage.getItem('selectedNav') || '');
+      setSubhead(JSON.parse(localStorage.getItem('subhead') || '[]'));
+    }
+  }, [location]);
   const isLoginPage = location.pathname === '/';
 
   if (isLoginPage) {
@@ -187,14 +202,15 @@ const App: React.FC = () => {
               <Route path='/trailbalance' element={<TrailBalance/>}/>
 
               {/* PURCHASE */}
-              <Route path='/addvendors' element={<AddNewVendors/>}/>
+
+              {/* <Route path='/addvendors' element={<AddNewVendors/>}/>
               <Route path='/addpaymentreciept' element={<AddPaymentReceipt/>}/>
               <Route path='/addpurchase' element={<AddPurchase/>}/>
               <Route path='/addpurchaseorder' element={<AddPurchaseOrder/>}/>
               <Route path='/paymentreciept' element={<CreatePaymentReceipts/>}/>
               <Route path='/purchase' element={<Purchase/>}/>
               <Route path='/purchaseorder' element={<PurchaseOrder/>}/>
-              <Route path='/suppliers' element={<Suppliers/>}/>
+              <Route path='/suppliers' element={<Suppliers/>}/> */}
 
               {/* SALES */}
               <Route path='/addcollection' element={<AddCollection/>}/>

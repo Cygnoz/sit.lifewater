@@ -11,23 +11,26 @@ import eye from "../assets/images/eye.svg"
 import search from "../assets/images/search.svg"
 
 import { useNavigate } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { deleteStaffByIdAPI, getAllStaffsAPI } from "../services/AllApi"
-
+import { endpoints } from "../services/ApiEndpoint"
+import useApi from "../Hook/UseApi"
+import { StaffResponseContext } from "../Context/ContextShare"
+interface Staff {
+  firstname: string
+  lastname: string
+  designation: string // Add other fields as per your staff object structure
+}
 
 const CreateStaff: React.FC = () => {
-  interface Staff {
-    firstname: string
-    lastname: string
-    designation: string // Add other fields as per your staff object structure
-  }
-
   const navigate = useNavigate()
   // const [staffList, setStaffList] = useState([]) // Full staff list
   const [staffList, setStaffList] = useState<Staff[]>([])
-
   const [filteredStaffList, setFilteredStaffList] = useState<Staff[]>([]) // Fix here
   const [searchQuery, setSearchQuery] = useState("") // Search query state
+  const { request: getAllStaffData } = useApi("get", 4000);
+  const [staffData, setStaffData] = useState<any[]>([]);
+  const { setStaffResponse } = useContext(StaffResponseContext)!;
 
 
   const handleCreate = (): void => {
@@ -43,19 +46,32 @@ const CreateStaff: React.FC = () => {
   }
 
   // Fetch staff data on component mount
-  useEffect(() => {
-    const fetchStaff = async () => {
-      try {
-        const response = await getAllStaffsAPI()
-        console.log("Full API Response:", response) // Check the response
-        setStaffList(response as any) // Store full staff list
-        setFilteredStaffList(response as any) // Initially, display all staff
-      } catch (error) {
-        console.error("Error fetching staff data:", error)
-      }
-    }
 
-    fetchStaff()
+  const getAllStaff = async ()=>{
+    try{
+      const url = `${endpoints.GET_ALL_STAFF}`;
+      const { response, error } = await getAllStaffData(url);
+      if(!error && response){
+        setStaffData(response.data)
+        console.log(response.data);
+        setStaffResponse(response.data)
+        
+      } else{
+        console.log(error);
+        
+      }
+
+
+    }catch(error){
+      console.log(error);
+      
+    }
+  }
+
+  useEffect(() => {
+   
+
+    getAllStaff()
   }, [])
 
   useEffect(() => {
@@ -63,35 +79,35 @@ const CreateStaff: React.FC = () => {
   }, [staffList])
 
   // Handle search input change and filter staff list
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value.toLowerCase()
-    setSearchQuery(query)
+  // const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const query = e.target.value.toLowerCase()
+  //   setSearchQuery(query)
 
-    // Filter staff list based on search query
-    const filteredList = staffList.filter((staff: any) => {
-      return staff.firstname.toLowerCase().includes(query) || staff.lastname.toLowerCase().includes(query) || staff.address.toLowerCase().includes(query) || staff.mobileNumber.toLowerCase().includes(query) || staff.designation.toLowerCase().includes(query)
-    })
+  //   // Filter staff list based on search query
+  //   const filteredList = staffList.filter((staff: any) => {
+  //     return staff.firstname.toLowerCase().includes(query) || staff.lastname.toLowerCase().includes(query) || staff.address.toLowerCase().includes(query) || staff.mobileNumber.toLowerCase().includes(query) || staff.designation.toLowerCase().includes(query)
+  //   })
 
-    setFilteredStaffList(filteredList) // Update the filtered staff list
-  }
+  //   setFilteredStaffList(filteredList) // Update the filtered staff list
+  // }
 
   ///delete
-  const handleDelete = async (id: string) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this staff?")
-    if (!confirmDelete) return
+  // const handleDelete = async (id: string) => {
+  //   const confirmDelete = window.confirm("Are you sure you want to delete this staff?")
+  //   if (!confirmDelete) return
 
-    try {
-      const response = await deleteStaffByIdAPI(id)
-      alert(response.message) // Show success message
+  //   try {
+  //     const response = await deleteStaffByIdAPI(id)
+  //     alert(response.message) // Show success message
 
-      // Remove the deleted staff from the list
-      setStaffList(staffList.filter((staff: any) => staff._id !== id))
-      setFilteredStaffList(filteredStaffList.filter((staff: any) => staff._id !== id))
-    } catch (error) {
-      console.error("Error deleting staff:", error)
-      alert("An error occurred while deleting staff.")
-    }
-  }
+  //     // Remove the deleted staff from the list
+  //     setStaffList(staffList.filter((staff: any) => staff._id !== id))
+  //     setFilteredStaffList(filteredStaffList.filter((staff: any) => staff._id !== id))
+  //   } catch (error) {
+  //     console.error("Error deleting staff:", error)
+  //     alert("An error occurred while deleting staff.")
+  //   }
+  // }
 
   return (
     <div className="flex min-h-screen w-full">
@@ -158,7 +174,7 @@ const CreateStaff: React.FC = () => {
                 }}
                 placeholder="Search Staff"
                  value={searchQuery}
-                  onChange={handleSearch}
+                  // onChange={handleSearch}
               />
               <div className="flex w-[60%] justify-end">
                 <button className="flex border text-[14] w-[500] text-[#565148] border-[#565148] px-4 py-2 me-2 rounded-lg">
@@ -178,7 +194,7 @@ const CreateStaff: React.FC = () => {
                 <table className="min-w-full table-fixed">
                   <thead className="bg-[#fdf8f0] sticky top-0">
                     <tr className="border-b">
-                    <th className="p-2 text-[12px] text-center text-[#303F58] w-16"> <input type="checkbox" /></th>
+                   
                       <th className="p-2 text-[12px] text-center text-[#303F58] w-16">Sl No</th>
                       <th className="p-2 text-[12px] text-center text-[#303F58] w-24">Photo</th>
                       <th className="p-2 text-[12px] text-center text-[#303F58] w-36">Name</th>
@@ -193,11 +209,11 @@ const CreateStaff: React.FC = () => {
 
               <div className="min-w-full h-[400px] overflow-y-auto">
                 <table className="min-w-full table-fixed">
-                  <tbody>
+                  {/* <tbody>
                     {filteredStaffList.length > 0 ? (
                       filteredStaffList.map((staff: any, index: number) => (
                         <tr className="border-b" key={staff._id}>
-                           <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16"> <input type="checkbox" /></td>
+                         
 
                           <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16">{index + 1}</td>
                           <td className="p-2 text-center w-24">
@@ -228,7 +244,7 @@ const CreateStaff: React.FC = () => {
                         </td>
                       </tr>
                     )}
-                  </tbody>
+                  </tbody> */}
                 </table>
               </div>
             </div>

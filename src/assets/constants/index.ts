@@ -5,7 +5,7 @@ import staff from '../images/staff.svg'
 import supply from '../images/supply.svg';
 import customer from '../images/customer.svg';
 import sale from '../images/sale.svg';
-import purchase from '../images/purchase.svg';
+// import purchase from '../images/purchase.svg';
 import reports from '../images/reports.svg';
 import accountant from '../images/sale.svg';
 import vehicle from '../images/vehicle.svg';
@@ -46,7 +46,7 @@ const navlist = [
   {
     nav: "Route",
     icon:supply,
-    route: "/route/createroute",
+    route: "/route/activeroute",
     subhead: [
       {
         headName: "Active Route",
@@ -151,19 +151,19 @@ const navlist = [
      
     ],
   },
-  {
-    nav: "Purchase",
-    icon:purchase,
-    route: "/suppliers",
-    subhead: [
-      { headName: "Dashboard", subRoute: "/" },
-      { headName: "Supplier", subRoute: "/suppliers" },
-      { headName: "Purchase Order", subRoute: "/purchaseorder" },
-      { headName: "Purchase", subRoute: "/purchase" },
-      { headName: "Payment Reciept", subRoute: "/paymentreciept" },
+  // {
+  //   nav: "Purchase",
+  //   icon:purchase,
+  //   route: "/suppliers",
+  //   subhead: [
+  //     { headName: "Dashboard", subRoute: "/" },
+  //     { headName: "Supplier", subRoute: "/suppliers" },
+  //     { headName: "Purchase Order", subRoute: "/purchaseorder" },
+  //     { headName: "Purchase", subRoute: "/purchase" },
+  //     { headName: "Payment Reciept", subRoute: "/paymentreciept" },
      
-    ],
-  },
+  //   ],
+  // },
   {
     nav: "Accountant",
     icon:accountant,

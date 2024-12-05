@@ -20,11 +20,14 @@ const createInstance = (
   };
 
   if (useAuth) {
-    const authToken: string | null = localStorage.getItem("authToken");
-    if (authToken) {
-      headers = { ...headers, Authorization: `${authToken}`};
-    }
+  const authToken = localStorage.getItem("authToken");
+  if (authToken) {
+    headers = { ...headers, Authorization: `Bearer ${authToken}` };
+  } else {
+    console.warn("No auth token found in local storage.");
   }
+}
+
 // console.log(headers,"headers");
 
   return axios.create({

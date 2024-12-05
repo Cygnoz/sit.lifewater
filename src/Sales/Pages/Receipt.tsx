@@ -61,7 +61,7 @@ const Receipt: React.FC = () => {
             <table className="w-full text-left">
               <thead className=' bg-[#fdf8f0]'>
                 <tr className="border-b">
-                <th className="p-2 text-[12px] text-center text-[#303F58] w-16"> <input type="checkbox" /></th>
+              
 
                   <th className="p-2 text-[12px] text-center text-[#303F58]">Date</th>
                   <th className="p-2 text-[12px] text-center text-[#303F58]">Number</th>
@@ -74,7 +74,7 @@ const Receipt: React.FC = () => {
               </thead>
               <tbody>
                 <tr className="border-b">
-                <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16"> <input type="checkbox" /></td>
+              
 
                   <td className="p-2 text-[14] text-center text-[#4B5C79]">12sep2024</td>
                   <td className="p-2 text-[14] text-center text-[#4B5C79]">PAY001</td>
@@ -99,11 +99,11 @@ const Receipt: React.FC = () => {
                 
               </tbody>
             </table>
-          </div>
+</div>
 
 
 </div>
   );
 };
  
-export default Receipt;
+export default Receipt;

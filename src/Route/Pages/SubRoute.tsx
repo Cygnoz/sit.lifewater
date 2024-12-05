@@ -181,9 +181,7 @@ function SubRoute({}: Props) {
           <table className="print-table w-full text-left">
             <thead className="bg-[#fdf8f0]">
               <tr className="border-b">
-                <th scope="col" className="no-print px-6 py-3">
-                  <input type="checkbox" />
-                </th>
+               
                 <th className="p-2 text-[12px] text-center text-[#303F58]">
                   Sl No
                 </th>
@@ -207,9 +205,7 @@ function SubRoute({}: Props) {
             <tbody>
               {filteredRouteList.map((route, index) => (
                 <tr className="border-b" key={route._id}>
-                  <td className="no-print px-6 py-4">
-                    <input type="checkbox" />
-                  </td>
+                
                   <td className="p-2 text-[14] text-center text-[#4B5C79]">
                     {index + 1}
                   </td>
