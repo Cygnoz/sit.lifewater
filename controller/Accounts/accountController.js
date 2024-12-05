@@ -55,7 +55,7 @@ exports.addAccount = async (req, res) => {
       await trialEntry.save();
   
       
-      res.status(201).json({ message: "Account created successfully.", newAccount });
+      res.status(201).json({ message: "Account created successfully.", data: newAccount });
       console.log("Account created successfully",newAccount,trialEntry);
     } catch (error) {
       console.error("Error creating Account:", error);
@@ -111,9 +111,7 @@ exports.editAccount = async (req, res) => {
     // Save updated account
     await account.save();
 
-    res.status(200).json({
-      message: "Account updated successfully.",
-    });
+    res.status(200).json({ message: "Account updated successfully.", data: account });
     console.log("Account updated successfully:");
   } catch (error) {
     console.error("Error updating Account:", error);

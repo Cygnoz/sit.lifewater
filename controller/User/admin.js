@@ -26,11 +26,13 @@ exports.addAdmin = async (req, res) => {
       // Save the staff record
       const savedAdmin = await newAdmin.save();
       console.log("Admin Saved Successfully",savedAdmin);
-      return res.status(201).json(savedAdmin);    
-        
-  
+
+      res.status(200).json({ 
+        message: 'Admin added successfully',
+        data: savedAdmin,
+      }); 
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ message: "Internal server error." });
     }
   };
 

@@ -5,38 +5,20 @@ exports.createActiveRoute = async (req, res) => {
   try {
     console.log("Create Active Route:", req.body);
     const cleanedData = cleanCustomerData(req.body);
-    // const { mainRoute, subRoute, helper, driver, vehicleNo, openingStock, loadedStock, totalStock, startingKm ,Salesman } = req.body;
 
     // Create a new ActiveRoute instance
     const newActiveRoute = new ActiveRoute({ ...cleanedData });
 
-    // const newActiveRoute = new ActiveRoute({
-    //   mainRoute,
-    //   subRoute,
-    //   helper,
-    //   driver,
-    //   vehicleNo,
-    //   openingStock,
-    //   loadedStock,
-    //   totalStock,
-    //   startingKm,
-    //   Salesman
-    // });
+   
 
     // Save the new ActiveRoute to the database
     await newActiveRoute.save();
 
     // Send a success response
-    res.status(201).json({
-      message: 'Active Route created successfully',
-      data: newActiveRoute,
-    });
+    res.status(201).json({ message: 'Active Route created successfully', data: newActiveRoute });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      message: 'An error occurred while creating the ActiveRoute',
-      error: error.message,
-    });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -75,15 +57,14 @@ exports.deleteActiveRoute = async (req, res) => {
     }
 
     // Send a success response if deletion was successful
-    res.status(200).json({
+    res.status(200).json({ 
       message: 'ActiveRoute deleted successfully',
       data: deletedActiveRoute,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: 'An error occurred while deleting the ActiveRoute',
-      error: error.message,
+      message: "Internal server error."
     });
   }
 };

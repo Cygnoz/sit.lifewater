@@ -87,9 +87,7 @@ exports.addJournalEntry = async (req, res) => {
             
         }
 
-        res.status(201).json({
-            message: "Journal entry created successfully."
-        });
+        res.status(201).json({ message: "Journal entry created successfully.", entry });
         console.log("Journal entry created successfully:", newJournalEntry);
     } catch (error) {
         console.error("Error creating journal entry:", error);

@@ -40,10 +40,13 @@ exports.addRoute = async (req, res) => {
     
 
     // Send success response
-    res.status(201).json(savedRoute);
+    res.status(200).json({ 
+      message: 'Main Route added successfully',
+      data: savedRoute,
+    });
   } catch (error) {
     console.error('Error creating route:', error.message);
-    res.status(500).json({ message: 'Error creating route', error: error.message });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -64,7 +67,7 @@ exports.deleteRoute = async (req, res) => {
     return res.status(200).json({ message: 'Route deleted successfully' });
   } catch (error) {
     console.error('Error deleting route:', error.message);
-    return res.status(500).json({ message: 'Error deleting route', error: error.message });
+    return res.status(500).json({ message: "Internal server error." });
   }
 };
  
@@ -99,11 +102,20 @@ exports.updateRoute = async (req, res) => {
     if (!updatedRoute) {
       return res.status(404).json({ message: 'Route not found' });
     }
+    
+    console.log('Main Route Edited successfully',updatedRoute);
+
+    res.status(200).json({ 
+      message: 'Main Route Edited successfully',
+      data: updatedRoute
+    });
  
     return res.status(200).json({  route: updatedRoute });
   } catch (error) {
     console.error('Error updating route:', error.message);
-    return res.status(500).json({  error: error.message });
+    return res.status(500).json({
+      message: "Internal server error."
+    });
   }
 };
  

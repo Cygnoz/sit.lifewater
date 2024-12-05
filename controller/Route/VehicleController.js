@@ -26,10 +26,13 @@ exports.addVehicle = async (req, res) => {
 
     // Save vehicle to the database
     const savedVehicle = await vehicle.save();
-    return res.status(201).json({status:201, data: savedVehicle });
+    res.status(200).json({ 
+      message: 'Vechile added successfully',
+      data: savedVehicle,
+    });
   } catch (error) {
     console.error('Error adding vehicle:', error.message);
-    return res.status(500).json({ message: 'Error adding vehicle', error: error.message });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -73,10 +76,14 @@ exports.updateVehicle = async (req, res) => {
       return res.status(404).json({ message: 'Vehicle not found' });
     }
 
-    return res.status(200).json(updatedVehicle);
+    res.status(200).json({ 
+      message: 'Main Route Edited successfully',
+      data: updatedVehicle,
+    });
+
   } catch (error) {
     console.error('Error updating vehicle:', error.message);
-    return res.status(500).json({ message: 'Error updating vehicle', error: error.message });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -95,7 +102,7 @@ exports.deleteVehicle = async (req, res) => {
     return res.status(200).json({ message: 'Vehicle deleted successfully' });
   } catch (error) {
     console.error('Error deleting vehicle:', error.message);
-    return res.status(500).json({ message: 'Error deleting vehicle', error: error.message });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -112,7 +119,7 @@ exports.viewVehicleById = async (req, res) => {
     return res.status(200).json({ vehicle });
   } catch (error) {
     console.error('Error fetching vehicle:', error.message);
-    return res.status(500).json({ message: 'Error fetching vehicle', error: error.message });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 

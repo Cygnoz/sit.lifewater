@@ -89,13 +89,11 @@ exports.createCustomer = async (req, res) => {
 
     return res.status(201).json({
       message: 'Customer created successfully!',
-      data: savedCustomer,
-      status: 201
+      data: savedCustomer
     });
   } catch (error) {
     console.error('Error creating customer:', error);
-
-    return res.status(500).json({ message: 'Error creating customer', error });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -244,11 +242,13 @@ exports.updateCustomerById = async (req, res) => {
       return res.status(404).json({ message: "Customer not found" });
     }
 
-    // Return the updated customer
-    return res.status(200).json(updatedCustomer);
+    res.status(200).json({ 
+      message: 'Customer Edited successfully',
+      data: updatedCustomer,
+    });    
   } catch (error) {
     console.error("Error updating customer:", error);
-    return res.status(500).json({ message: "Error updating customer", error });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 

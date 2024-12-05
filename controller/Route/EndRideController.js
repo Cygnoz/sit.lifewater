@@ -18,18 +18,7 @@ exports.endRide = async (req, res) => {
     // Create a new EndRide entry
     const endRideEntry = new EndRide({ ...cleanedData });
 
-    // const endRideEntry = new EndRide({
-    //   endingKM,
-    //   travelledKM,
-    //   expenses,
-    //   activeRouteId,
-    //   salesMan,
-    //   driver,
-    //   vehicleNo,
-    //   mainRoute,
-    //   stock,
-    //   subRoute,
-    // });
+   
 
     // Save the new EndRide entry and log success
     await endRideEntry.save();
@@ -44,14 +33,14 @@ exports.endRide = async (req, res) => {
 
     // Successful response
     res.status(200).json({
-      message: 'Ride ended and active route deleted.',
-      endRideEntry,
+      message: 'Ride Ended',
+      data: endRideEntry,
     });
+
   } catch (error) {
     console.error("Error during endRide processing:", error);  // Log detailed error
     res.status(500).json({
-      message: 'Failed to end ride. Please try again later.',
-      error: error.message,
+      message: "Internal server error."
     });
   }
 };

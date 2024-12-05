@@ -33,9 +33,12 @@ exports.addSubroute = async (req, res) => {
       const savedSubroute = await newSubroute.save();
   
       // Send success response
-      res.status(201).json(savedSubroute);
+      res.status(200).json({ 
+        message: 'Sub Route added successfully',
+        data: savedSubroute,
+      });
     } catch (error) {
-      res.status(500).json({ message: 'Error adding subroute', error: error.message });
+      res.status(500).json({ message: "Internal server error." });
     }
 };  
 
@@ -75,10 +78,14 @@ exports.editSubroute = async (req, res) => {
       return res.status(404).json({ message: 'Subroute not found' });
     }
 
-    res.status(200).json(updatedSubroute);
+    res.status(200).json({ 
+      message: 'Sub Route Edited successfully',
+      data: updatedSubroute,
+    });
+
   } catch (error) {
-    console.error(error); // Log the error for debugging
-    res.status(500).json({ message: 'Error updating subroute', error });
+    console.error(error); 
+    res.status(500).json({ message: "Internal server error." });
   }
 }
 
@@ -94,7 +101,7 @@ exports.deleteSubroute = async (req, res) => {
 
         res.status(200).json({ message: 'Subroute deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting subroute', error });
+        res.status(500).json({ message: "Internal server error." });
     }
 };
 

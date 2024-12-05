@@ -72,10 +72,13 @@ exports.addStaff = async (req, res) => {
       const newStaff = new Staff({ ...cleanedData });
       const savedStaff = await newStaff.save();
       console.log("Staff Saved Successfully",savedStaff);
-      res.status(200).json({ message: "Staff created successfully.", savedStaff });
+      res.status(200).json({ 
+        message: "Staff created successfully.",
+        data: savedStaff,
+      });
     
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -150,11 +153,12 @@ exports.editStaff = async (req, res) => {
     if (!updatedStaff) {
       return res.status(404).json({ message: 'Staff not found' });
     }
-    res.status(200).json({ message: "Staff edited successfully.", updatedStaff });
-    
-    
+    res.status(200).json({ 
+      message: "Staff edited successfully.",
+      data: updatedStaff,
+    });    
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -217,13 +221,8 @@ exports.loginSalesStaff = async (req, res) => {
       });
     }
 
-    
-
-    // At this point, the login is successful
-    // res.status(200).json({ message: 'Login successful', staff, status: 200 });
-
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
