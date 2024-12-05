@@ -15,6 +15,7 @@ exports.addAdmin = async (req, res) => {
       const { username, password  } = cleanedData;
   
       const existingAdmin = await Admin.findOne({ username });
+      
       if (existingAdmin) {
         return res.status(400).json({ message: 'Admin username already exists.' });
       }

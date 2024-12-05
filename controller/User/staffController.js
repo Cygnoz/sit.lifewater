@@ -1,6 +1,9 @@
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 const Staff = require("../../Models/StaffSchema");
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const key = Buffer.from(process.env.ENCRYPTION_KEY, 'utf8'); 
+const iv = Buffer.from(process.env.ENCRYPTION_IV, 'utf8'); 
 
 
 
@@ -18,7 +21,12 @@ exports.getAllStaff = async (req, res) => {
 exports.getStaffById = async (req, res) => {
   try {
     const staff = await Staff.findById(req.params.id);
-    if (!staff) return res.status(404).json({ message: 'Staff not found' });
+    if (!staff) {
+      return res.status(404).json({ message: 'Staff not found' });
+    }
+    if(staff.password){
+      staff.password = decrypt(staff.password);
+    }
     res.status(200).json(staff);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -64,11 +72,8 @@ exports.addStaff = async (req, res) => {
       if (existingSalesStaff) {
         return res.status(400).json({ message: 'User with this username already exists.' });
       }
-
       cleanedData.password = encrypt(cleanedData.password);
-    }
-
-      
+    }      
       
       // Create the new staff record for "Sales"
       const newStaff = new Staff({ ...cleanedData });
@@ -134,31 +139,13 @@ exports.editStaff = async (req, res) => {
       }
 
       if(cleanedData.password && existingStaff.password ){
-        const isMatch = await bcrypt.compare(password, existingStaff.password);
+
+        const oldpasword = decrypt(existingStaff.password);
+        const isMatch = password === oldpasword;
         if (!isMatch) {
-          cleanedData.password = await bcrypt.hash(password.trim(),10);        
+          cleanedData.password = encrypt(cleanedData.password);      
       }}
 
-   
-
-      // Check if the username already exists for another staff (excluding the current one)
-      // const existingSalesStaff = await Staff.findOne({
-      //   username: username,
-      //   _id: { $ne: req.params.id } // Exclude the current staff from the check
-      // });
-
-      // if (existingSalesStaff) {
-      //   return res.status(400).json({ message: 'Username already taken by another user.' });
-      // }
-
-      // If the password is updated, hash the new password
-      // if (trimmedPassword) {
-      //   const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
-      //   updatedData.password = hashedPassword;
-      // }
-
-      // Ensure the updatedData includes the trimmed username
-      // updatedData.username = trimmedUsername;
     }
 
     // Proceed with updating the staff record
