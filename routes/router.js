@@ -64,11 +64,11 @@ router.get('/viewSRoute/:id',verifyToken,  subrouteController.viewSubroute); // 
 // router.post("/main-route/:mainRouteId/sub-route", verifyToken, mainRouteController.addSubRoute)
 
 //customer
-router.post("/addcustomer", CustomerController.createCustomer) // add customer
-router.get("/customer", CustomerController.getAllCustomers) // get all customers
-router.put("/editcustomer/:id", CustomerController.updateCustomerById) // edit customer
-router.get("/customer/:id",  CustomerController.getCustomerById) // get customer by ID
-router.delete("/customer/:id", CustomerController.deleteCustomerById) // delete customer
+router.post("/addcustomer", verifyToken, CustomerController.createCustomer) // add customer
+router.get("/customer", verifyToken, CustomerController.getAllCustomers) // get all customers
+router.put("/editcustomer/:id", verifyToken, CustomerController.updateCustomerById) // edit customer
+router.get("/customer/:id",  verifyToken, CustomerController.getCustomerById) // get customer by ID
+router.delete("/customer/:id", verifyToken, CustomerController.deleteCustomerById) // delete customer
 
 // Active Route
 router.post("/activroutes", verifyToken, ActiveRouteController.createActiveRoute) // add active route
