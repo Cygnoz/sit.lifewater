@@ -12,7 +12,8 @@ exports.createCustomer = async (req, res) => {
     const cleanedData = cleanCustomerData(req.body);
     
     const { fullName, whatsappNumber, location, email } = cleanedData;
-
+    
+    
     // Validate required fields
     if (!cleanedData.fullName) {
       return res.status(400).json({ message: 'Name is required.' });
@@ -22,16 +23,19 @@ exports.createCustomer = async (req, res) => {
     }
     
 
-    // Check for existing customer by WhatsApp number (unique identifier)
+    if(cleanedData.whatsappNumber){
     const existingWhatsappNumber = await Customer.findOne({ whatsappNumber });
     if (existingWhatsappNumber) {
       return res.status(400).json({ message: 'A customer with this WhatsApp number already exists.' });
-    }
-    const existingEmail = await Customer.findOne({ email });
-    if (existingEmail) {
-      return res.status(400).json({ message: 'A customer with this email already exists.' });
+      }
     }
 
+    if(cleanedData.email){
+      const existingEmail = await Customer.findOne({ email : cleanedData.email });
+      if (existingEmail) {      
+        return res.status(400).json({ message: 'A customer with this email already exists.' });
+      }
+    }
     // Generate customerID
     let nextIdNumber = 1; // Default if the collection is empty
     const lastCustomer = await Customer.findOne().sort({ createdAt: -1 }); // Sort by creation date to find the last one

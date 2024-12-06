@@ -8,7 +8,7 @@ const customerSchema = new mongoose.Schema({
 
   mobileNo: { type: Number, trim: true },
   whatsappNumber: { type: Number, trim: true },
-  email: { type: String, unique: true, lowercase: true, trim: true },
+  email: { type: String, lowercase: true, trim: true },
 
   addressLine1: { type: String },
   addressLine2: { type: String },
