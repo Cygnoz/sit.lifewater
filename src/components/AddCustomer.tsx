@@ -12,6 +12,8 @@ interface FormData {
   fullName: string;
   addressLine1: string;
   addressLine2: string;
+  city:string;
+  street:string;
   email: string;
   numberOfBottles: string;
   ratePerBottle: string;
@@ -49,6 +51,8 @@ export default function Component() {
     fullName: "",
     addressLine1: "",
     addressLine2: "",
+    city: "",
+    street: "",
     email: "",
     numberOfBottles: "",
     ratePerBottle: "",
@@ -391,7 +395,7 @@ export default function Component() {
             )}
           </div>
 
-          {/* <div>
+          <div>
             <label className="block text-gray-700">email</label>
             <input
               type="text"
@@ -402,7 +406,7 @@ export default function Component() {
               placeholder="Enter email"
             />
 
-          </div> */}
+          </div>
           <div>
             <label className="block text-gray-700">addressLine 1</label>
             <input
@@ -426,6 +430,34 @@ export default function Component() {
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter address 2"
+            />
+            {/* {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )} */}
+          </div>
+          <div>
+            <label className="block text-gray-700">city</label>
+            <input
+              type="text"
+              name="city"
+              value={formData.city}
+              onChange={handleInputChange}
+              className="w-full p-2 mt-1 border rounded-md"
+              placeholder="Enter city"
+            />
+            {/* {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )} */}
+          </div>
+          <div>
+            <label className="block text-gray-700">street</label>
+            <input
+              type="text"
+              name="street"
+              value={formData.street}
+              onChange={handleInputChange}
+              className="w-full p-2 mt-1 border rounded-md"
+              placeholder="Enter street"
             />
             {/* {errors.email && (
               <p className="text-red-500 text-sm">{errors.email}</p>
