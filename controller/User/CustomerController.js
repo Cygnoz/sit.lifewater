@@ -14,14 +14,22 @@ exports.createCustomer = async (req, res) => {
     const { fullName, whatsappNumber, location, } = cleanedData;
 
     // Validate required fields
-    if (!fullName) {
+    if (!cleanedData.fullName) {
       return res.status(400).json({ message: 'Name is required.' });
     }
+    if (!cleanedData.customerType) {
+      return res.status(400).json({ message: 'Select Customer Type.' });
+    }
+    
 
     // Check for existing customer by WhatsApp number (unique identifier)
-    const existingCustomer = await Customer.findOne({ whatsappNumber });
-    if (existingCustomer) {
+    const existingWhatsappNumber = await Customer.findOne({ whatsappNumber });
+    if (existingWhatsappNumber) {
       return res.status(400).json({ message: 'A customer with this WhatsApp number already exists.' });
+    }
+    const existingEmail = await Customer.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: 'A customer with this email already exists.' });
     }
 
     // Generate customerID
@@ -192,6 +200,7 @@ exports.getCustomerById = async (req, res) => {
 exports.updateCustomerById = async (req, res) => {
   try {
     console.log("Incoming Update Request:", req.body);
+    const { id } = req.params;
 
     // Check and handle location
     if (req.body.location) {
@@ -223,24 +232,65 @@ exports.updateCustomerById = async (req, res) => {
         delete req.body.location; // Ensure location is not updated in this case
       }
     }
+    const existingCustonmer = await Staff.findById(id);
+    if (!staff) {
+      return res.status(404).json({ message: 'Customer not found' });
+    }
 
     // Clean the customer data (ensure you have a cleanCustomerData function if needed)
     const cleanedData = cleanCustomerData(req.body);
     console.log("Cleaned Data:", cleanedData);
 
     cleanedData.logo=cleanedData.logo[1]
+
+    // Validate required fields
+    if (!cleanedData.fullName) {
+      return res.status(400).json({ message: 'Name is required.' });
+    }
+    if (!cleanedData.customerType) {
+      return res.status(400).json({ message: 'Select Customer Type.' });
+    }
     
+
+    // Check for existing customer by WhatsApp number (unique identifier)
+    const existingWhatsappNumber = await Customer.findOne({ whatsappNumber, _id: { $ne: id } });
+    if (existingWhatsappNumber) {
+      return res.status(400).json({ message: 'A customer with this WhatsApp number already exists.' });
+    }
+    const existingEmail = await Customer.findOne({ email, _id: { $ne: id } });
+    if (existingEmail) {
+      return res.status(400).json({ message: 'A customer with this email already exists.' });
+    }
+
+    
+
+
     // Update the customer in the database
     const updatedCustomer = await Customer.findByIdAndUpdate(
       req.params.id,
       cleanedData,
-      { new: true } // Return the updated document
+      { new: true } 
     );
 
     // Check if the customer was found and updated
     if (!updatedCustomer) {
       return res.status(404).json({ message: "Customer not found" });
     }
+
+    // Update customerDisplayName in associated Account documents
+    if ( cleanedData.fullName !== existingCustonmer.fullName) {
+      const updatedAccount = await Account.updateMany(
+        {
+          accountName: existingCustonmer.fullName,
+          organizationId: organizationId,
+        },
+        { $set: { accountName: cleanedData.fullName } }
+      );
+      console.log(
+        `${updatedAccount.modifiedCount} account(s) associated with the accountName have been updated with the new customerDisplayName.`
+      );
+    }
+
 
     res.status(200).json({ 
       message: 'Customer Edited successfully',
