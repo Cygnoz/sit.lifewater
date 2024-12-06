@@ -66,3 +66,4 @@ export const endpoints = {
   GET_ALL_JOURNALS: `get-all-journal`,
   GET_ONE_JOURNAL: `get-one-journal`
 }
+
