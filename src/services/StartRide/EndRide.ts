@@ -7,7 +7,7 @@ interface ApiResponse {
 }
 export const getActiveRouteAPI = async () => {
     try {
-      const response = await axios.get(`${BASEURL}/api/getActiveRoutes`, {
+      const response = await axios.get(`${BASEURL}/getActiveRoutes`, {
         headers: {
           'Content-Type': 'application/json'  // Ensure correct content type
         }
@@ -21,7 +21,7 @@ export const getActiveRouteAPI = async () => {
 
   export const deleteActiveRouteAPI = async (id: string): Promise<ApiResponse> => {
     try {
-      const response = await axios.delete(`${BASEURL}/api/deleteRoutes/${id}`, {
+      const response = await axios.delete(`${BASEURL}/deleteRoutes/${id}`, {
         headers: {
           'Content-Type': 'application/json', // Ensure correct content type
         },

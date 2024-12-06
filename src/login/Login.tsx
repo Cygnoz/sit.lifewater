@@ -6,48 +6,56 @@ import { loginStaffAPI } from "../services/login/loginApi"
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { useNavigate } from "react-router-dom"
+import useApi from "../Hook/UseApi"
+import { endpoints } from "../services/ApiEndpoint"
+import axios from "axios"
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const navigate = useNavigate()
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { request: CheckStaffLogin } = useApi("post", 4000);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!username || !password) {
-      toast.error("Please enter both username and password");
+    setIsLoading(true);
+    setError("");
+  
+    if (!username.trim() || !password.trim()) {
+      toast.error("Please enter username and password");
       return;
     }
-
+  
     try {
-      const response = await loginStaffAPI({ username, password });
-      
-      // The server returns a 200 status in the response body
-      if (response && response.staff) {
-        const { firstname, _id, profile } = response.staff;
-        
-        // Store user data
-        localStorage.setItem("username", username);
-        localStorage.setItem("firstname", firstname);
-        localStorage.setItem("profile", profile);
-        localStorage.setItem("_id", _id);
-
-        // Show success message
-        toast.success(response.message || "Login successful!");
-        
-        // Navigate after a brief delay
+      const response = await CheckStaffLogin("/staff/login", { username, password });
+      console.log("Login response:", response.response?.data.success);
+  
+      if (response.response?.data.success) {
+        toast.success(response.response?.data.message || "Login successful! Redirecting...");
+        const token = response.response?.data.token.split(" ")[1];
+        localStorage.setItem("authToken", token);
         setTimeout(() => {
           navigate("/start");
         }, 2000);
       } else {
-        toast.error("Invalid credentials");
+        const errorMessage = response.response?.data.message || "Invalid username or password";
+        setError(errorMessage);
+        toast.error(errorMessage);
       }
     } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Login failed. Please try again.");
+      const errorMessage = axios.isAxiosError(error)
+        ? error.response?.data?.message || "Login failed. Please try again."
+        : "Login failed. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
+  
   
 
   return (
@@ -73,7 +81,7 @@ const Login: React.FC = () => {
           <h1 className="text-[#820000] text-[32px] pt-3 font-bold">Welcome Back</h1>
         </div>
         <div className="flex flex-col justify-center items-center bg-gray-50">
-          <form onSubmit={handleSubmit} className="bg-white px-7 pt-3 pb-10 shadow-md w-full">
+          <form  className="bg-white px-7 pt-3 pb-10 shadow-md w-full">
             <div className="mb-4">
               <label className="block text-[#313131] text-sm font-bold mb-2" htmlFor="username">
                 Username
@@ -113,10 +121,8 @@ const Login: React.FC = () => {
               </label>
             </div>
 
-            <button className="w-full bg-gradient-to-r from-[#2A2B2F] to-[#28292D] text-[#FFFFFF] py-3 rounded-lg text-lg shadow-lg hover:bg-gray-900 transition duration-300">Login</button>
-
-
-
+            <button onClick={handleSubmit} className="w-full bg-gradient-to-r from-[#2A2B2F] to-[#28292D] text-[#FFFFFF] py-3 rounded-lg text-lg shadow-lg hover:bg-gray-900 transition duration-300">
+            {isLoading ? "Logging in..." : "Login"}              </button>
             <p className="text-xs text-gray-500 mt-4 text-center">For security purposes: "We take your security seriously. Your login information is encrypted for your protection."</p>
           </form>
         </div>
