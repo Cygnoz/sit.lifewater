@@ -49,8 +49,9 @@ function SubRoute({}: Props) {
     { id: "subRouteName", label: "Sub Route", visible: true },
     { id: "subrouteCode", label: "Subroute Code", visible: true },
     { id: "description", label: "Description", visible: true },
-    // { id: "mainRouteName", label: "Main Route", visible: true },
+    { id: "mainRouteName", label: "Main Route", visible: true },
   ]);
+
   
 
 

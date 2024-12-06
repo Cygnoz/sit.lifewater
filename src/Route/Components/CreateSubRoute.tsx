@@ -89,7 +89,7 @@ const CreateSubRoute: React.FC = () => {
       const { response, error } = await addSRoute(url, payload)
       
       if (!error && response) {
-        toast.success("sunroute has been added successfully.")
+        toast.success("subroute has been added successfully.")
         setFormData({
           subRouteName: '',
           subrouteCode: '', // Updated to match the form input name

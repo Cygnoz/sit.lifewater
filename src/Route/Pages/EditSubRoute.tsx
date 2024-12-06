@@ -23,6 +23,8 @@ const EditSubRoute: React.FC = () => {
     _id: string // Assuming the ID field is _id
     mainRouteName: string
   }
+  console.log(loading);
+  
 
   // interface Route {
   //   id: string;
@@ -114,6 +116,7 @@ const EditSubRoute: React.FC = () => {
         toast.error("Invalid ID");
         return;
       }
+
   
       // Construct the API URL
       const url = `${endpoints.UPDATE_A_SUBROUTE}/${id}`;
