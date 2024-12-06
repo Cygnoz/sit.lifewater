@@ -40,7 +40,6 @@ function SubRoute({}: Props) {
       console.log(error)
     }
   }
-  
 
   useEffect(() => {
     getALLSubroute()
