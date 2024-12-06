@@ -67,7 +67,6 @@ const CreateSubRoute: React.FC = () => {
 
   const { request: addSRoute } = useApi("post", 4000);
 
-
    const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     console.log(formData);
