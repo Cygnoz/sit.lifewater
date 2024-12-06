@@ -36,7 +36,7 @@ interface ApiResponse {
 
 export const addCustomerAPI = async (customerData: CustomerFormData): Promise<ApiResponse> => {
   try {
-    const response = await axios.post(`${BASEURL}/api/addcustomer`, customerData);
+    const response = await axios.post(`${BASEURL}/addcustomer`, customerData);
 
     console.log("Response Status:", response.status); // Check the response status
     console.log("Response Data:", response.data); // Check the response data
@@ -53,7 +53,7 @@ export const addCustomerAPI = async (customerData: CustomerFormData): Promise<Ap
 export const getACustomerAPI = async (id: string): Promise<ApiResponse> => {
   try {
     // Use `id` to fetch the customer by their ID
-    const response = await commonAPI('GET', `${BASEURL}/api/customer/${id}`, null, {
+    const response = await commonAPI('GET', `${BASEURL}/customer/${id}`, null, {
       // No need to specify headers for GET requests
     });
 
@@ -73,7 +73,7 @@ export const updateCustomerAPI = async (id: string, formData: FormData) => {
       console.log(pair[0] + ": " + pair[1]);
     }
 
-    const response = await axios.put(`${BASEURL}/api/editcustomer/${id}`, formData, {
+    const response = await axios.put(`${BASEURL}/editcustomer/${id}`, formData, {
       headers: {
         'Content-Type': 'application/json',  // Set the correct content type for form data
       },

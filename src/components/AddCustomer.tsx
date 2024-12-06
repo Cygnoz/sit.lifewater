@@ -1,45 +1,45 @@
-
-
-import React, { useEffect, useState } from "react"
-import { addCustomerAPI } from "../services/customer/customerAPI"
-import { ToastContainer, toast } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
-import { getSubRoutesAPI } from "../services/StartRide/StartRide"
-import { Link } from "react-router-dom"
-import backbutton from "../assets/images/nav-item.png"
+import React, { useEffect, useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Link, useNavigate } from "react-router-dom";
+import backbutton from "../assets/images/nav-item.png";
+import useApi from "../Hook/UseApi";
+import { endpoints } from "../services/ApiEndpoint";
 
 interface FormData {
-  customerType: "Business" | "Individual"
-  companyName: string
-  fullName: string
-  addressLine1:string
-  addressLine2:string
-  email: string
-  numberOfBottles: string
-  ratePerBottle: string
-  paymentMode: "Cash" | "Credit" | "Coupon"
-  mobileNo: string
-  whatsappNumber: string
-  depositAmount: string
-  subRoute: string
-  mainRoute: string
+  customerType: "Business" | "Individual";
+  companyName: string;
+  fullName: string;
+  addressLine1: string;
+  addressLine2: string;
+  email: string;
+  numberOfBottles: string;
+  ratePerBottle: string;
+  paymentMode: "Cash" | "Credit" | "Coupon";
+  mobileNo: string;
+  whatsappNumber: string;
+  depositAmount: string;
+  subRoute: string;
+  mainRoute: string;
   location: {
-    address: string
+    address: string;
     coordinates: {
-      latitude: number | null
-      longitude: number | null
-    }
-  }
+      latitude: number | null;
+      longitude: number | null;
+    };
+  };
 }
 
 interface Route {
-  _id: string
-  subRoute: string
-  mainRoute: string
+  _id: string;
+  subRoute: string;
+  mainRouteId: string;
+  mainRouteName: string;
+  subRouteName: string;
 }
 
 interface FormErrors {
-  [key: string]: string
+  [key: string]: string;
 }
 
 export default function Component() {
@@ -65,21 +65,25 @@ export default function Component() {
         longitude: null,
       },
     },
-  })
+  });
 
-  const [errors, setErrors] = useState<FormErrors>({})
-  const [isGettingLocation, setIsGettingLocation] = useState(false)
-  const [selectedMainRoute, setSelectedMainRoute] = useState<string>("")
-  const [selectedSubRoute, setSelectedSubRoute] = useState<string>("")
-  const [filteredSubRoutes, setFilteredSubRoutes] = useState<Route[]>([])
-  const [routesList, setRouteList] = useState<Route[]>([])
-  const [mainRouteList, setMainRouteList] = useState<string[]>([])
-  const [isLocationSaved, setIsLocationSaved] = useState(false)
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [selectedMainRoute, setSelectedMainRoute] = useState<string>("");
+  const [selectedSubRoute, setSelectedSubRoute] = useState<string>("");
+  const [filteredSubRoutes, setFilteredSubRoutes] = useState<Route[]>([]);
+  const [routesList, setRouteList] = useState<Route[]>([]);
+  const [mainRouteList, setMainRouteList] = useState<string[]>([]);
+  const [isLocationSaved, setIsLocationSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { request: addCustomer } = useApi("post", 4000);
+  const { request: getSubRoute } = useApi("get", 4000);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     if (name === "location") {
       setFormData((prevData) => ({
         ...prevData,
@@ -87,64 +91,86 @@ export default function Component() {
           ...prevData.location,
           address: value,
         },
-      }))
+      }));
     } else {
       setFormData((prevData) => ({
         ...prevData,
         [name]: value,
-      }))
+      }));
     }
-  }
+  };
 
   const handleMainRouteChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    const mainRoute = event.target.value
-    setSelectedMainRoute(mainRoute)
-    setFilteredSubRoutes(
-      routesList.filter((route) => route.mainRoute === mainRoute)
-    )
-    setSelectedSubRoute("")
-  }
+    const mainRouteName = event.target.value;
+    setSelectedMainRoute(mainRouteName);
+
+    // Filter subroutes based on the selected main route
+    const filtered = routesList.filter(
+      (route) => route.mainRouteName === mainRouteName
+    );
+
+    setFilteredSubRoutes(filtered);
+
+    // Reset the selected subroute when the main route changes
+    setSelectedSubRoute("");
+  };
 
   const handleSubRouteChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setSelectedSubRoute(event.target.value)
-  }
+    // Update the selected subroute state
+    setSelectedSubRoute(event.target.value);
+  };
 
   useEffect(() => {
+    // Fetch the routes list
     const fetchSubRoutes = async () => {
       try {
-        const response = await getSubRoutesAPI()
-        setRouteList(response)
+        const url = `${endpoints.GET_ALL_SUBROUTE}`;
+        const { response, error } = await getSubRoute(url);
 
-        const uniqueMainRoutes = Array.from(
-          new Set(response.map((route: Route) => route.mainRoute))
-        )
-        setMainRouteList(uniqueMainRoutes as string[])
-      } catch (error) {
-        console.error("Error fetching sub-route data:", error)
-        toast.error("Failed to fetch route data. Please try again.")
+        if (error) {
+          console.error("Error fetching sub-route data:", error);
+          toast.error("Failed to fetch route data. Please try again.");
+          return;
+        }
+
+        const routes = Array.isArray(response) ? response : response?.data;
+
+        if (routes && Array.isArray(routes)) {
+          // Set the routes list for filtering
+          setRouteList(routes);
+
+          // Extract unique main routes
+          const uniqueMainRoutes = Array.from(
+            new Set(routes.map((route: Route) => route.mainRouteName))
+          );
+          setMainRouteList(uniqueMainRoutes as string[]);
+        }
+      } catch (err) {
+        console.error("Error fetching sub-route data:", err);
+        toast.error("An unexpected error occurred. Please try again.");
       }
-    }
+    };
 
-    fetchSubRoutes()
-  }, [])
+    fetchSubRoutes();
+  }, []);
 
   const getCurrentLocation = (): Promise<GeolocationCoordinates> => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(new Error("Geolocation is not supported by your browser"))
-        return
+        reject(new Error("Geolocation is not supported by your browser"));
+        return;
       }
 
       navigator.geolocation.getCurrentPosition(
         (position) => resolve(position.coords),
         (error) => reject(error)
-      )
-    })
-  }
+      );
+    });
+  };
 
   const handleLocationFetch = async () => {
     if (isLocationSaved) {
@@ -157,13 +183,13 @@ export default function Component() {
             longitude: null,
           },
         },
-      }))
-      setIsLocationSaved(false)
-      toast.info("Location cleared.")
+      }));
+      setIsLocationSaved(false);
+      toast.info("Location cleared.");
     } else {
       try {
-        setIsGettingLocation(true)
-        const coords = await getCurrentLocation()
+        setIsGettingLocation(true);
+        const coords = await getCurrentLocation();
         setFormData((prevData) => ({
           ...prevData,
           location: {
@@ -173,113 +199,102 @@ export default function Component() {
               longitude: coords.longitude,
             },
           },
-        }))
-        setIsLocationSaved(true)
-        toast.success("Location fetched successfully")
+        }));
+        setIsLocationSaved(true);
+        toast.success("Location fetched successfully");
       } catch (error) {
-        console.error("Error fetching location:", error)
-        toast.error("Error fetching location. Please try again.")
+        console.error("Error fetching location:", error);
+        toast.error("Error fetching location. Please try again.");
       } finally {
-        setIsGettingLocation(false)
+        setIsGettingLocation(false);
       }
     }
-  }
+  };
 
   const validateForm = (): boolean => {
-    const newErrors: FormErrors = {}
+    const newErrors: FormErrors = {};
 
     if (formData.customerType === "Business" && !formData.companyName) {
-      newErrors.companyName = "Company name is required for business customers"
+      newErrors.companyName = "Company name is required for business customers";
     }
-    if (!formData.fullName) newErrors.fullName = "Full name is required"
+    if (!formData.fullName) newErrors.fullName = "Full name is required";
     if (
       isNaN(Number(formData.numberOfBottles)) ||
       Number(formData.numberOfBottles) <= 0
     ) {
-      newErrors.numberOfBottles = "Number of bottles must be a positive number"
+      newErrors.numberOfBottles = "Number of bottles must be a positive number";
     }
-    if (isNaN(Number(formData.ratePerBottle)) || Number(formData.ratePerBottle) <= 0) {
-      newErrors.ratePerBottle = "Rate must be a positive number"
+    if (
+      isNaN(Number(formData.ratePerBottle)) ||
+      Number(formData.ratePerBottle) <= 0
+    ) {
+      newErrors.ratePerBottle = "Rate must be a positive number";
     }
     if (formData.mobileNo.length < 10)
-      newErrors.mobileNo = "Mobile number must be at least 10 digits"
+      newErrors.mobileNo = "Mobile number must be at least 10 digits";
     if (formData.whatsappNumber.length < 10)
-      newErrors.whatsappNumber = "WhatsApp number must be at least 10 digits"
+      newErrors.whatsappNumber = "WhatsApp number must be at least 10 digits";
     if (
       isNaN(Number(formData.depositAmount)) ||
       Number(formData.depositAmount) < 0
     ) {
-      newErrors.depositAmount = "Deposit amount must be a non-negative number"
+      newErrors.depositAmount = "Deposit amount must be a non-negative number";
     }
-    if (!selectedMainRoute) newErrors.mainRoute = "Main route is required"
-    if (!selectedSubRoute) newErrors.subRoute = "Sub route is required"
+    if (!selectedMainRoute) newErrors.mainRoute = "Main route is required";
+    if (!selectedSubRoute) newErrors.subRoute = "Sub route is required";
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  console.log(loading);
 
-    if (validateForm()) {
-      try {
-        const updatedFormData = {
-          ...formData,
-          mainRoute: selectedMainRoute,
-          subRoute: selectedSubRoute,
-        }
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
 
-        if (isLocationSaved) {
-          updatedFormData.location = formData.location
-        }
+    // Step 1: Validate the form
+    const isValid = validateForm(); // Ensure you have the validateForm function implemented
+    if (!isValid) {
+      toast.error("Please fix the form errors.");
+      return; // Stop the submission if validation fails
+    }
 
-        console.log("Submitting form data:", updatedFormData)
+    setLoading(true); // Show loading spinner or message
 
-        const response = await addCustomerAPI(updatedFormData)
-        console.log("API response:", response)
+    try {
+      // Step 2: Prepare the payload
+      const payload = {
+        ...formData,
+        mainRoute: selectedMainRoute, // Ensure you're adding the selected main route
+        subRoute: selectedSubRoute, // And the selected subroute
+      };
+      console.log("Payload:", payload);
 
-        if (response?.status === 201) {
-          toast.success("Customer added successfully")
-          // Reset form
-          setFormData({
-            customerType: "Individual",
-            companyName: "",
-            fullName: "",
-            addressLine1:"",
-            addressLine2:"",
-            email: "",
-            numberOfBottles: "",
-            ratePerBottle: "",
-            paymentMode: "Cash",
-            mobileNo: "",
-            whatsappNumber: "",
-            depositAmount: "",
-            mainRoute: "",
-            subRoute: "",
-            location: {
-              address: "",
-              coordinates: {
-                latitude: null,
-                longitude: null,
-              },
-            },
-          })
-          setSelectedMainRoute("")
-          setSelectedSubRoute("")
-          setIsLocationSaved(false)
-        } else {
-          toast.error("Something went wrong")
-        }
+      // Step 3: Call the API to add the customer
+      const url = `${endpoints.ADD_CUSTOMER}`;
+      const { response, error } = await addCustomer(url, payload); // Assuming addCustomer is correctly hooked up
+      console.log(response);
 
-        setErrors({})
-      } catch (error) {
-        console.error("Error submitting form:", error)
-        toast.error("Error: Unable to submit form. Please try again.")
+      if (error) {
+        // Step 4: Handle API errors
+        toast.error(
+          error.message || "Failed to add customer. Please try again."
+        );
+      } else {
+        // Step 5: Success - Show success message and navigate
+        toast.success("Customer added successfully.");
+        setTimeout(() => {
+          navigate("/viewcustomers"); // Navigate after success
+        }, 2000);
       }
-    } else {
-      toast.error("Please correct the errors in the form")
+    } catch (err) {
+      // Handle unexpected errors
+      console.error("Error adding customer:", err);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false); // Hide loading spinner
     }
-  }
+  };
 
   return (
     <div className="m-3 bg-[#F5F6FA]">
@@ -521,14 +536,14 @@ export default function Component() {
               onChange={handleMainRouteChange}
             >
               <option value="">Select Main Route</option>
-              {mainRouteList.map((mainRoute) => (
-                <option key={mainRoute} value={mainRoute}>
-                  {mainRoute}
+              {mainRouteList.map((mainRouteName) => (
+                <option key={mainRouteName} value={mainRouteName}>
+                  {mainRouteName}
                 </option>
               ))}
             </select>
-            {errors.mainRoute && (
-              <p className="text-red-500 text-sm">{errors.mainRoute}</p>
+            {errors.mainRouteName && (
+              <p className="text-red-500 text-sm">{errors.mainRouteName}</p>
             )}
           </div>
 
@@ -548,13 +563,13 @@ export default function Component() {
             >
               <option value="">Select Sub Route</option>
               {filteredSubRoutes.map((route) => (
-                <option key={route._id} value={route.subRoute}>
-                  {route.subRoute}
+                <option key={route._id} value={route.subRouteName}>
+                  {route.subRouteName}
                 </option>
               ))}
             </select>
             {errors.subRoute && (
-              <p className="text-red-500 text-sm">{errors.subRoute}</p>
+              <p className="text-red-500 text-sm">{errors.subRouteName}</p>
             )}
           </div>
 
@@ -593,5 +608,5 @@ export default function Component() {
         </form>
       </div>
     </div>
-  )
+  );
 }

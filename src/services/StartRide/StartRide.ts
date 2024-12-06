@@ -11,7 +11,7 @@ interface ApiResponse {
 
 export const getSubRoutesAPI = async () => {
     try {
-      const response = await axios.get(`${BASEURL}/api/viewSRoute`, {
+      const response = await axios.get(`${BASEURL}/viewSRoute`, {
         headers: {
           'Content-Type': 'application/json'  // Ensure correct content type
         }
@@ -25,7 +25,7 @@ export const getSubRoutesAPI = async () => {
 
   export const getRoutesAPI = async () => {
     try {
-      const response = await axios.get(`${BASEURL}/api/getAllRoutes`, {
+      const response = await axios.get(`${BASEURL}/getAllRoutes`, {
         headers: {
           'Content-Type': 'application/json'  // Ensure correct content type
         }
@@ -39,7 +39,7 @@ export const getSubRoutesAPI = async () => {
 
   export const getAllStaffsAPI = async (): Promise<ApiResponse> => {
     try {
-      const response = await commonAPI('GET', `${BASEURL}/api/getallstaffs`, null, {
+      const response = await commonAPI('GET', `${BASEURL}/getallstaffs`, null, {
         // No need to specify any headers for GET requests
       });
   
@@ -52,7 +52,7 @@ export const getSubRoutesAPI = async () => {
 
   export const getVehicleAPI = async (): Promise<ApiResponse> => {
     try {
-        const response = await commonAPI('GET', `${BASEURL}/api/viewVehicles`, null);
+        const response = await commonAPI('GET', `${BASEURL}/viewVehicles`, null);
         return response; // Ensure the response matches the expected ApiResponse structure
     } catch (error: any) {
         console.error("Error fetching vehicle data:", error);
@@ -62,7 +62,7 @@ export const getSubRoutesAPI = async () => {
 
 export const addActiveRouteAPI = async (formData: any) => {
     try {
-      const response = await axios.post(`${BASEURL}/api/activroutes`, formData, {
+      const response = await axios.post(`${BASEURL}/activroutes`, formData, {
         headers: {
           'Content-Type': 'application/json',  // Ensure correct content type
         },
