@@ -11,7 +11,7 @@ exports.createCustomer = async (req, res) => {
   try {
     const cleanedData = cleanCustomerData(req.body);
     
-    const { fullName, whatsappNumber, location, } = cleanedData;
+    const { fullName, whatsappNumber, location, email } = cleanedData;
 
     // Validate required fields
     if (!cleanedData.fullName) {
