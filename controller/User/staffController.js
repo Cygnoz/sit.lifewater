@@ -182,7 +182,7 @@ exports.deleteStaff = async (req, res) => {
 
 // Login for Sales staff
 exports.loginSalesStaff = async (req, res) => {
-  try {
+  try {    
     const { username, password } = req.body;
 
     // Ensure both username and password are provided
@@ -196,7 +196,7 @@ exports.loginSalesStaff = async (req, res) => {
     // If staff not found
     if (!staff) {
       return res.status(404).json({ message: 'Staff not found.' });
-    }
+    }    
 
     const oldpasword = decrypt(staff.password);
     const isMatch = password === oldpasword;
