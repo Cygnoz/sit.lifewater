@@ -63,9 +63,9 @@ const CreateSubRoute: React.FC = () => {
     });
   };
 
-  
   const navigate = useNavigate(); // Initialize navigate here
 
+  
   const { request: addSRoute } = useApi("post", 4000);
 
    const handleSubmit = async (e: FormEvent) => {
