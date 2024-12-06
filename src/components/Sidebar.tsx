@@ -140,7 +140,7 @@ const Sidebar: React.FC<{ isSidebarOpen: boolean; handleToggleSidebar: () => voi
           <li >
             <div className="mx-[5%] my-2">
               <Button size="xl" variant="primary" onClick={() => setOpen(true)}>
-                Logout
+                Log out
               </Button>
             </div>
           </li>
@@ -156,7 +156,7 @@ const Sidebar: React.FC<{ isSidebarOpen: boolean; handleToggleSidebar: () => voi
               Cancel
             </Button>
             <Button variant="primary" onClick={handleLogout}>
-              Logout
+              Log out
             </Button>
           </div>
         </Box>
