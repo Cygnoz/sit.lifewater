@@ -1,8 +1,7 @@
-// Login.tsx
+
 import React, { useState } from "react"
 import gmail from "../assets/images/Gmail.svg"
 import lock from "../assets/images/lock.svg"
-import { loginStaffAPI } from "../services/login/loginApi"
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { useNavigate } from "react-router-dom"
@@ -16,30 +15,32 @@ const Login: React.FC = () => {
   const navigate = useNavigate()
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { request: CheckStaffLogin } = useApi("post", 4000);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-  
+
     if (!username.trim() || !password.trim()) {
       toast.error("Please enter username and password");
       return;
     }
-  
+
     try {
-      const response = await CheckStaffLogin("/staff/login", { username, password });
-      console.log("Login response:", response.response?.data.success);
-  
+      const response = await CheckStaffLogin(`${endpoints.LOGIN}`, { username, password });
+      console.log("Login response:", response.response?.data);
+
       if (response.response?.data.success) {
-        toast.success(response.response?.data.message || "Login successful! Redirecting...");
+        toast.success(response.response?.data.message || "Login successful...");
         const token = response.response?.data.token.split(" ")[1];
         localStorage.setItem("authToken", token);
+        localStorage.setItem("userName", username);
+
         setTimeout(() => {
-          navigate("/start");
-        }, 2000);
+          navigate("/customers");
+        }, 1000);
       } else {
         const errorMessage = response.response?.data.message || "Invalid username or password";
         setError(errorMessage);
@@ -55,8 +56,8 @@ const Login: React.FC = () => {
       setIsLoading(false);
     }
   };
-  
-  
+
+
 
   return (
     <div className="bg-[#F6F4F4] w-full">
@@ -71,7 +72,7 @@ const Login: React.FC = () => {
         draggable
         pauseOnHover
         theme="colored"
-        // optional CSS class for further styling
+      // optional CSS class for further styling
       />
       <div className="mx-3 mb-60">
         <h1 className="text-[#820000] text-[32px] font-[800]">Life Water</h1>
@@ -81,7 +82,7 @@ const Login: React.FC = () => {
           <h1 className="text-[#820000] text-[32px] pt-3 font-bold">Welcome Back</h1>
         </div>
         <div className="flex flex-col justify-center items-center bg-gray-50">
-          <form  className="bg-white px-7 pt-3 pb-10 shadow-md w-full">
+          <form className="bg-white px-7 pt-3 pb-10 shadow-md w-full">
             <div className="mb-4">
               <label className="block text-[#313131] text-sm font-bold mb-2" htmlFor="username">
                 Username
@@ -120,10 +121,13 @@ const Login: React.FC = () => {
                 <span className="ml-2 text-[#CBCBCB]">Remember me</span>
               </label>
             </div>
-
+              {error && <p className="text-red-500 text-sm">{error}</p>}
+            <div>
             <button onClick={handleSubmit} className="w-full bg-gradient-to-r from-[#2A2B2F] to-[#28292D] text-[#FFFFFF] py-3 rounded-lg text-lg shadow-lg hover:bg-gray-900 transition duration-300">
-            {isLoading ? "Logging in..." : "Login"}              </button>
+              {isLoading ? "Logging in..." : "Login"}
+            </button>
             <p className="text-xs text-gray-500 mt-4 text-center">For security purposes: "We take your security seriously. Your login information is encrypted for your protection."</p>
+            </div>
           </form>
         </div>
       </div>

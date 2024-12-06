@@ -21,6 +21,7 @@ import EndRide from './pages/EndRide';
 import Dashboard from './pages/Dashboard';
 import Maps from './pages/Map';
 import EditCustomer from './pages/EditCustomer';
+import Orders from './pages/Orders';
 // import Routed from './pages/Route';
 
 const App: React.FC = () => {
@@ -60,7 +61,8 @@ const App: React.FC = () => {
           <Route path="/creditcollection" element={<CreditCollection />} />
           <Route path="/endride" element={<EndRide />} />
           <Route path="/route" element={<Maps />} />
-        
+          <Route path="/orders" element={<Orders />} />
+
         </Routes>
       </div>
     </div>
