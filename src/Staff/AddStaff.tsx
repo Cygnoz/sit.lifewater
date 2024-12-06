@@ -128,8 +128,7 @@ function AddStaff({ }: Props) {
         setInitialStaffData({
           ...initialStaffData,
           ...response.data,
-          password: "", // Leave the password blank for editing
-          confirmPassword: "",
+          confirmPassword: response.data.password,
           visaValidity: response.data.visaValidity?.slice(0, 10), // Format date for input field
         });
       }
@@ -169,21 +168,22 @@ function AddStaff({ }: Props) {
         toast.success(
           isEditing
             ? "Staff updated successfully."
-            : "Staff added successfully."
+            : `${response.data.message}`
         );
   
         if (!isEditing) {
           setInitialStaffData(initialStaffData); // Reset form after adding
         }
-        console.log(response);
+        console.log(response);        
         if (isEditing) {
           setTimeout(() => {
             navigate("/staff"); // Navigate to home after 2 seconds
           }, 2000);
         }
       } else {
-        toast.error("Failed to save staff data.");
+        toast.error(error?.data.message);
       }
+      toast.error(error?.response.data.message);
     } catch (error) {
       toast.error("An unexpected error occurred.");
       console.error("Error submitting staff data:", error);
