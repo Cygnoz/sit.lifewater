@@ -203,7 +203,7 @@ exports.getCustomerById = async (req, res) => {
 // Update a customer by ID
 exports.updateCustomerById = async (req, res) => {
   try {
-    console.log("Incoming Update Request:", req.body);
+    console.log("Update Customer:", req.body);
     const { id } = req.params;
 
     // Check and handle location
@@ -247,7 +247,8 @@ exports.updateCustomerById = async (req, res) => {
 
     const { fullName, whatsappNumber, location, email } = cleanedData;
 
-    cleanedData.logo=cleanedData.logo[1]
+    // cleanedData.logo=cleanedData.logo[1]
+    cleanedData.location=req.body.location
 
     // Validate required fields
     if (!cleanedData.fullName) {
