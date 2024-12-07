@@ -259,13 +259,18 @@ exports.updateCustomerById = async (req, res) => {
     
 
     // Check for existing customer by WhatsApp number (unique identifier)
-    const existingWhatsappNumber = await Customer.findOne({ whatsappNumber, _id: { $ne: id } });
-    if (existingWhatsappNumber) {
-      return res.status(400).json({ message: 'A customer with this WhatsApp number already exists.' });
+    if(cleanedData.whatsappNumber){
+      const existingWhatsappNumber = await Customer.findOne({ whatsappNumber, _id: { $ne: id } });
+      if (existingWhatsappNumber) {
+        return res.status(400).json({ message: 'A customer with this WhatsApp number already exists.' });
+      }
     }
-    const existingEmail = await Customer.findOne({ email, _id: { $ne: id } });
-    if (existingEmail) {
-      return res.status(400).json({ message: 'A customer with this email already exists.' });
+
+    if(cleanedData.email){
+      const existingEmail = await Customer.findOne({ email, _id: { $ne: id } });
+      if (existingEmail) {
+        return res.status(400).json({ message: 'A customer with this email already exists.' });
+      }
     }
 
     
