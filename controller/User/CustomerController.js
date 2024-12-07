@@ -236,14 +236,16 @@ exports.updateCustomerById = async (req, res) => {
         delete req.body.location; // Ensure location is not updated in this case
       }
     }
-    const existingCustonmer = await Staff.findById(id);
-    if (!staff) {
+    const existingCustonmer = await Customer.findById(id);
+    if (!existingCustonmer) {
       return res.status(404).json({ message: 'Customer not found' });
     }
 
     // Clean the customer data (ensure you have a cleanCustomerData function if needed)
     const cleanedData = cleanCustomerData(req.body);
     console.log("Cleaned Data:", cleanedData);
+
+    const { fullName, whatsappNumber, location, email } = cleanedData;
 
     cleanedData.logo=cleanedData.logo[1]
 
@@ -286,7 +288,6 @@ exports.updateCustomerById = async (req, res) => {
       const updatedAccount = await Account.updateMany(
         {
           accountName: existingCustonmer.fullName,
-          organizationId: organizationId,
         },
         { $set: { accountName: cleanedData.fullName } }
       );
