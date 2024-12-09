@@ -212,7 +212,7 @@ export default function Component() {
         toast.success("Location fetched successfully");
       } catch (error) {
         console.error("Error fetching location:", error);
-        toast.error("Error fetching location. Please try again.");
+        toast.error(`Error fetching location. Please try again.${error}`);
       } finally {
         setIsGettingLocation(false);
       }
