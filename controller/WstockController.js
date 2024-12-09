@@ -8,11 +8,11 @@ exports.createStock = async (req, res) => {
     console.log("Add Warehouse Stock:", req.body);
     try {
       const cleanedData = cleanCustomerData(req.body);
-      cleanedData.items = (cleanedData.items || [])
+      cleanedData.stock = (cleanedData.stock || [])
         .map(item => cleanCustomerData(item)) 
         .filter(item => item.itemName && item.itemName.trim() !== "");
   
-      const { warehouse, transferNumber, date, items, notes, termsAndConditions } = cleanedData;
+      const { warehouse, transferNumber, date, stock, notes, termsAndConditions } = cleanedData;
     //   console.log("cleanedData",cleanedData);
       
   
@@ -23,7 +23,7 @@ exports.createStock = async (req, res) => {
           message: 'Transfer Number required',
         });
       }
-      if (!items || !items.length) {
+      if (!stock || !stock.length) {
         return res.status(400).json({
           success: false,
           message: 'Select an item',
@@ -37,7 +37,7 @@ exports.createStock = async (req, res) => {
       }
 
       // Check for invalid item quantities
-      const invalidItem = items.find(item => item.quantity < 1);
+      const invalidItem = stock.find(item => item.quantity < 1);
       if (invalidItem) {
           return res.status(400).json({
               success: false,
@@ -68,7 +68,7 @@ exports.createStock = async (req, res) => {
       // console.log("Warehouse exists:", warehouseExists);
   
       // Add stock items to the warehouse's existing stock
-      items.forEach(item => {
+      stock.forEach(item => {
         const existingItemIndex = warehouseExists.stock.findIndex(stockItem => stockItem.itemId === item.itemId);
   
         if (existingItemIndex > -1) {
