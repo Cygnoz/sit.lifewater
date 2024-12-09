@@ -1,94 +1,140 @@
-import React, {  useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import upload from '../../assets/images/upload image.svg'
-import { Link } from 'react-router-dom';
-import back from '../../assets/images/backbutton.svg';
-import { addVehicleAPI } from '../../services/VehicleAPI/Vehicle';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css'; 
+import 'react-toastify/dist/ReactToastify.css';
+import BackIcon from '../../assets/icons/BackIcon';
+import Button from '../../commoncomponents/Buttons/Button';
+import useApi from '../../Hook/UseApi';
+import { endpoints } from '../../services/ApiEndpoint';
 
 type Props = {};
 
-const AddVehicle: React.FC<Props> = () => {
-  const [vehicleNo, setVehicleNo] = useState('');
-  const [insuranceValidity, setInsuranceValidity] = useState('');
-  const [insuranceStatus, setInsuranceStatus] = useState('');
-  const [registrationValidity, setRegistrationValidity] = useState('');
-  const [insuranceAmount, setInsuranceAmount] = useState('');
-  const [licenseAmount, setLicenseAmount] = useState('');
-  const [licenseValidity, setLicenseValidity] = useState('');
-  const [startingKilometer, setStartingKilometer] = useState('');
-  const [expenses, setExpenses] = useState('');
-  const [image, setImage] = useState<string | null>(null); // Accepts string or null
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+interface VehicleData {
+  vehicleNo: string;
+  insuranceValidity: string;
+  insuranceStatus: string;
+  registrationValidity: string;
+  insuranceAmount: number;
+  licenseAmount: number;
+  licenseValidity: string;
+  startingKilometer: number;
+  expenses: number;
+  image: string;
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {    
-    const file = event.target.files?.[0];    
-    if (file) {      
-      const reader = new FileReader();       
-      reader.onloadend = () => {        
-        setImage(reader.result as string); // Cast to string
-      }; 
-      reader.readAsDataURL(file); // Read the file as a Data URL (Base64)
+}
+const AddVehicle: React.FC<Props> = () => {
+  const [initialVehicleData, SetInitialVehicleData] = useState<VehicleData>(
+    {
+      expenses: 0,
+      image: "",
+      insuranceAmount: 0,
+      insuranceStatus: "",
+      insuranceValidity: "",
+      licenseAmount: 0,
+      licenseValidity: "",
+      registrationValidity: "",
+      startingKilometer: 0,
+      vehicleNo: "",
+    }
+  );
+  console.log(initialVehicleData);
+  const { id } = useParams();
+  const isEditing = Boolean(id);
+  console.log(id, "id");
+
+  const navigate = useNavigate()
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        SetInitialVehicleData((prev) => ({ ...prev, image: base64String }));
+      };
+      reader.readAsDataURL(file);
     }
   };
+  const { request: getVehicle } = useApi("get", 4000);
+
+  // Fetch  data for editing
+  const getAnVehicle = async () => {
+    const url = `${endpoints.VIEW_AN_VEHICLE}/${id}`;
+    try {
+      const { response, error } = await getVehicle(url);
+      if (!error && response) {
+        SetInitialVehicleData({
+          ...initialVehicleData,
+          ...response.data.vehicle,
+          insuranceValidity: response.data.vehicle.insuranceValidity?.slice(0, 10) || "",
+          licenseValidity: response.data.vehicle.licenseValidity?.slice(0, 10) || "",
+          registrationValidity: response.data.vehicle.registrationValidity?.slice(0, 10) || "",
+        });
+      }
+      console.log(response?.data.vehicle, "An Vehicle Data");
+    } catch (error) {
+      console.error("Unexpected error fetching vehicle data:", error);
+    }
+  };
+
+  // Initialize data if editing
+  useEffect(() => {
+    if (isEditing && id) {
+      getAnVehicle();
+    }
+  }, [isEditing, id]);
+
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target;
+    SetInitialVehicleData({ ...initialVehicleData, [name]: value });
+  };
+  const { request: editVehicle } = useApi("put", 4000);
+  const { request: addVehicle } = useApi("post", 4000);
 
   const handleAddVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
 
-    const formData = new FormData();
-    formData.append('vehicleNo', vehicleNo);
-    formData.append('insuranceValidity', insuranceValidity);
-    formData.append('insuranceStatus', insuranceStatus);
-    formData.append('registrationValidity', registrationValidity);
-    formData.append('insuranceAmount', insuranceAmount);
-    formData.append('licenseAmount', licenseAmount);
-    formData.append('licenseValidity', licenseValidity);
-    formData.append('startingKilometer', startingKilometer);
-    formData.append('expenses', expenses);
-    if (image) formData.append('image', image); // Add Base64 string to FormData if exists
+    const url = isEditing
+      ? `${endpoints.EDIT_VEHICLE}/${id}`
+      : `${endpoints.ADD_VEHICLE}`;
 
     try {
-      const response = await addVehicleAPI(formData);
-      if (response.message) {
-        toast.error(response.message);
+      const { response, error } = isEditing
+        ? await editVehicle(url, initialVehicleData)
+        : await addVehicle(url, initialVehicleData);
+
+      if (!error && response) {
+        toast.success(
+          isEditing
+            ? "Vehicle edited successfully!"
+            : "Vehicle added successfully!"
+        );
+        console.log(response);
+
+        if (!isEditing) {
+          SetInitialVehicleData(initialVehicleData); // Reset form
+        }
+
+        if (isEditing) {
+          setTimeout(() => {
+            navigate("/vehicle"); // Navigate after 2 seconds
+          }, 2000);
+        }
       } else {
-        toast.success('Vehicle added successfully');
-        console.log('Vehicle added successfully:', response.data);
-
-        // Reset form fields
-        setVehicleNo('');
-        setInsuranceValidity('');
-        setInsuranceStatus('');
-        setRegistrationValidity('');
-        setInsuranceAmount('');
-        setLicenseAmount('');
-        setLicenseValidity('');
-        setStartingKilometer('');
-        setExpenses('');
-        setImage(null); // Reset to null
-
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-          setSuccess(null);
-        }, 3000);
+        toast.error("Failed to save vehicle data.");
       }
-    } catch (error: any) {
-      setError(error.message || 'An unexpected error occurred.');
-      console.error('Error adding vehicle:', error);
+    } catch (error) {
+      toast.error("An unexpected error occurred.");
+      console.error("Error submitting vehicle data:", error);
     }
   };
 
-console.log(error)
-  console.log(success);
-  
-
   return (
     <div className='p-1'>
-
-<ToastContainer
+      <ToastContainer
         position="top-center"
         autoClose={3000}
         hideProgressBar={false}
@@ -99,111 +145,96 @@ console.log(error)
         draggable
         pauseOnHover
         theme="colored"
-         // optional CSS class for further styling
+      // optional CSS class for further styling
       />
       <div className="flex gap-3 items-center w-full max-w-8xl mb-3 ms-1">
         <Link to={'/vehicle'}>
-          <div className="icon-placeholder">
-            <img className='bg-gray-200 rounded-full p-2' src={back} alt="Back" />
-          </div>
+          <BackIcon />
         </Link>
-        <h2 className="text-[20px] text-[#303F58] font-bold">Create New Vehicle</h2>
+        <h2 className="text-[20px] text-[#303F58] font-bold"> {isEditing ? "Edit Vehicle" : "Create New Vehicle"}</h2>
       </div>
-
       <div className="w-full mx-auto p-8 bg-white rounded-lg shadow-md">
         {/* <h2 className="text-[20px] text-[#303F58] font-semibold mb-6">Add vehicle</h2> */}
         <form onSubmit={handleAddVehicle} className="grid grid-cols-1 md:grid-cols-2 gap-2 gap-x-5 space-y-1">
-
-
           {/* Vehicle Number */}
           <div>
-  <label className="block text-[#303F58] font-[14px] mb-2">
-    Vehicle Number <span className="text-red-500">*</span>
-  </label>
-  <input
-    type="text"
-     placeholder="Enter Vehicle Number (e.g., KL07AB1234)"
-    value={vehicleNo}
-    onChange={(e) => {
-      const inputValue = e.target.value.toUpperCase(); // Convert to uppercase
-      
-      // Remove any spaces and only allow alphanumeric characters
-      const formattedValue = inputValue.replace(/[^A-Z0-9]/g, '');
-
-      setVehicleNo(formattedValue); // Update state with the formatted value
-    }}
-    className={`w-full px-3 py-2 border rounded-md 
-                ${vehicleNo && !/^[A-Z0-9]+$/.test(vehicleNo) ? 'border-red-500' : 'border-gray-300'} 
-                focus:outline-none focus:ring-2 focus:ring-blue-500`}
-    required
-  />
-  <p className="text-red-500 mt-1">
-    {vehicleNo && !/^[A-Z0-9]+$/.test(vehicleNo) && "Only uppercase letters and numbers are allowed"}
-  </p>
-</div>
-
-
-          {/* Uploaded Vehicle Image */}
-          <div className="flex">
-            <label className="mt-4 border text-[#8F99A9] text-base font-[14px] rounded-lg cursor-pointer">
-              <div className="w-[80px] h-[80px] bg-[#F7E7CE] rounded-lg overflow-hidden">
-                <img
-                  src={image? image : upload}
-                  alt=""
-                  className="object-cover w-20 h-20 rounded-md"
-                />
-              </div>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
+            <label className="block text-[#303F58] font-[14px] mb-2">
+              Vehicle Number <span className="text-red-500">*</span>
             </label>
-            <h2 className="font-bold mt-10 ms-3 text-[#303F58]">
-              Upload Item Image
-            </h2>
+            <input
+              type="text"
+              placeholder="Enter Vehicle Number (e.g., KL07AB1234)"
+              value={initialVehicleData.vehicleNo}
+              name="vehicleNo"
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
           </div>
-
-
-{/* <div className="flex">
-<div>
-      <input type="file" onChange={handleImageUpload} />
-      
-      {image && (
-        <div>
-          <p>Uploaded Image:</p>
-          <img src={image} alt="Uploaded" style={{ width: "200px" }} />
-        </div>
-      )}
-    </div>
-    </div> */}
-
-    
+          {/* Uploaded Vehicle Image */}
+          <div className="">
+            <div className="rounded-lg items-center  flex text-center">
+              <label htmlFor="image">
+                <div className="flex">
+                  <div
+                    className={`bg-[#F7E7CE] flex items-center justify-center h-16 w-24 rounded-lg 
+                      `}
+                  >
+                    {initialVehicleData.image ? (
+                      <img
+                        src={initialVehicleData.image}
+                        alt="Item"
+                        className="max-h-16 max-w-20"
+                      />
+                    ) : (
+                      <img
+                        src={upload}
+                        alt=""
+                        className="object-cover cursor-pointer rounded-md "
+                      />
+                    )}
+                  </div>
+                  <div className=" mt-2 ms-5">
+                    <div className="text-[#565148] cursor-pointer border border-[#565148] text-[12px] w-40 rounded-lg px-3 py-1.5 h-8 " >
+                      Upload Vehicle Image
+                    </div>
+                    <p className="text-[#4B5C79] text-[12px] pt-1">At least 800 x 800 px Recommended. JPG or PNG is Allowed</p>
+                  </div>
+                </div>
+                <input
+                  type="file"
+                  id="image"
+                  className="hidden"
+                  name="image"
+                  onChange={handleFileChange}
+                  accept="image/*"
+                />
+              </label>
+            </div>
+          </div>
           {/* Insurance Status */}
           <div>
-  <label className="block text-[#303F58] font-[14px] mb-2">Insurance Status <span className="text-red-500">*</span></label>
-  <select
-    value={insuranceStatus}
-    onChange={(e) => setInsuranceStatus(e.target.value)}
-    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-    required
-  >
-    <option value="" disabled>Select Insurance Status</option> {/* Placeholder option */}
-    <option value="Valid">Valid</option>
-    <option value="Expired">Expired</option>
-  </select>
-</div>
-
+            <label className="block text-[#303F58] font-[14px] mb-2">Insurance Status <span className="text-red-500">*</span></label>
+            <select
+              value={initialVehicleData.insuranceStatus}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              name='insuranceStatus'
+            >
+              <option value="" disabled>Select Insurance Status</option> {/* Placeholder option */}
+              <option value="Valid">Valid</option>
+              <option value="Expired">Expired</option>
+            </select>
+          </div>
           {/* Registration Validity */}
           <div>
             <label className="block text-[#303F58] font-[14px] mb-1">Registration Validity</label>
             <input
               type="date"
-              value={registrationValidity}
-              onChange={(e) => setRegistrationValidity(e.target.value)}
+              value={initialVehicleData.registrationValidity}
+              onChange={handleInputChange}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              
+              name='registrationValidity'
             />
           </div>
           {/* Insurance Validity */}
@@ -211,10 +242,10 @@ console.log(error)
             <label className="block text-[#303F58] font-[14px] mb-1">Insurance Validity</label>
             <input
               type="date"
-              value={insuranceValidity}
-              onChange={(e) => setInsuranceValidity(e.target.value)}
+              value={initialVehicleData.insuranceValidity}
+              onChange={handleInputChange}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              
+              name='insuranceValidity'
             />
           </div>
           {/* Starting Kilometer */}
@@ -223,10 +254,11 @@ console.log(error)
             <input
               type="number"
               placeholder="Enter Starting Kilometers"
-              value={startingKilometer}
-              onChange={(e) => setStartingKilometer(e.target.value)}
+              value={initialVehicleData.startingKilometer}
+              onChange={handleInputChange}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              name='startingKilometer'
             />
           </div>
           {/* Insurance Amount */}
@@ -235,10 +267,10 @@ console.log(error)
             <input
               type="number"
               placeholder="Enter Insurance Amount"
-              value={insuranceAmount}
-              onChange={(e) => setInsuranceAmount(e.target.value)}
+              value={initialVehicleData.insuranceAmount}
+              onChange={handleInputChange}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              
+              name='insuranceAmount'
             />
           </div>
           {/* Expenses */}
@@ -247,10 +279,10 @@ console.log(error)
             <input
               type="number"
               placeholder="Enter Expenses"
-              value={expenses}
-              onChange={(e) => setExpenses(e.target.value)}
+              value={initialVehicleData.expenses}
+              onChange={handleInputChange}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              
+              name='expenses'
             />
           </div>
           {/* License Amount */}
@@ -259,10 +291,10 @@ console.log(error)
             <input
               type="number"
               placeholder="Enter License Amount"
-              value={licenseAmount}
-              onChange={(e) => setLicenseAmount(e.target.value)}
+              value={initialVehicleData.licenseAmount}
+              onChange={handleInputChange}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              
+              name='licenseAmount'
             />
           </div>
           {/* License Validity */}
@@ -270,26 +302,22 @@ console.log(error)
             <label className="block text-[#303F58] font-[14px] mb-1">License Validity</label>
             <input
               type="date"
-              value={licenseValidity}
-              onChange={(e) => setLicenseValidity(e.target.value)}
+              value={initialVehicleData.licenseValidity}
+              onChange={handleInputChange}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              
+              name='licenseValidity'
             />
           </div>
           {/* Buttons */}
-          <div className="col-span-2 flex justify-end">
-            <button
-              className="px-3 py-1 bg-[#FEFDFA] text-[#565148] font-[14px] rounded-md mr-2 border-2 border-[#565148] w-[74px] h-[38px]"
-              type="button"
-            >
-              Cancel
-            </button>
-            <button
-              className="px-3 py-1 bg-[#820000] text-[#FEFDF9] font-[14px] rounded-md w-[142px] h-[38px]"
-              type="submit"
-            >
+          <div className="col-span-2 gap-2 flex justify-end pt-2">
+            <Link to={"/vehicle"}>
+              <Button variant='fourthiary'>
+                Cancel
+              </Button>
+            </Link>
+            <Button type='submit' variant='primary'>
               Save
-            </button>
+            </Button>
           </div>
         </form>
       </div>

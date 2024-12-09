@@ -15,8 +15,7 @@ import CreateMainRoute from '../Route/Components/CreateMainRoute';
 import ViewRoute from '../Route/Components/ViewRoute';
 import AddVehicle from '../Vehicle/Components/AddVehicle';
 import CreateVehicle from '../Vehicle/Pages/CreateVehicle';
-import EditVehicles from '../Vehicle/Pages/EditVehicles';
-import ViewVehicle from '../Vehicle/Components/ViewVehicle';
+import ViewVehicle from '../Vehicle/ViewVehicle/ViewVehicle';
 import AddCustomer from '../Customer/Components/AddCustomer';
 import EditCustomer from '../Customer/Pages/EditCustomer';
 import ViewCustmor from '../Customer/Components/ViewCustmor';
@@ -151,7 +150,7 @@ const App: React.FC = () => {
               {/* VEHICLE */}
               <Route path='/vehicle' element={<CreateVehicle />} />
               <Route path='/vehicle/addvehicle' element={<AddVehicle />} />
-              <Route path='/vehicle/editvehicle/:id' element={<EditVehicles />} />
+              <Route path='/vehicle/editvehicle/:id' element={<AddVehicle />} />
               <Route path='/viewvehicle/:id' element={<ViewVehicle />} />
 
               {/* CUSTOMER */}
