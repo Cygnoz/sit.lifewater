@@ -10,5 +10,8 @@ export const endpoints = {
 
     // Customer
     ADD_CUSTOMER:`addcustomer`,
-    GET_ALL_CUSTOMERS:`customer`
+    GET_ALL_CUSTOMERS:`customer`,
+    GET_A_CUSTOMER: `customer`,
+    UPDATE_CUSTOMER: `editcustomer`,
+
 }
