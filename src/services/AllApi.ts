@@ -8,7 +8,7 @@ interface ApiResponse {
 
 export const addStaffAPI = async (staffData: FormData): Promise<ApiResponse> => {
   try {
-    const response = await axios.post(`${BASEURL}/api/addstaff`, staffData, {
+    const response = await axios.post(`${BASEURL}/addstaff`, staffData, {
       headers: {
         'Content-Type': 'application/json'  // Ensure correct content type
       }
@@ -22,23 +22,25 @@ export const addStaffAPI = async (staffData: FormData): Promise<ApiResponse> => 
 };
 
 
-export const getAllStaffsAPI = async (): Promise<ApiResponse> => {
+export const getAllStaffsAPI = async (): Promise<any[]> => {
   try {
-    const response = await commonAPI('GET', `${BASEURL}/api/getallstaffs`, null, {
-      // No need to specify any headers for GET requests
-    });
-
-    return response; // Ensure the response matches the expected ApiResponse structure
+    const response = await axios.get(`${BASEURL}/getallstaffs`);
+    console.log("API Full Response:", response); // Log the entire response for debugging
+    console.log("API Data:", response.data); // Log the extracted data
+    
+    return response.data; // Extract and return the actual data
   } catch (error: any) {
-    console.error("Error fetching staff data:", error); // Log the full error for debugging
-    return { message: error.message || "An unexpected error occurred." }; // Fallback error message
+    console.error("Error fetching staff data:", error.response || error); // Log detailed error info
+    throw new Error(error.response?.data?.message || "An unexpected error occurred.");
   }
 };
+
+
 
 export const getStaffByIdAPI = async (id: string): Promise<ApiResponse> => {
   try {
     // Use `id` instead of `_id`
-    const response = await commonAPI('GET', `${BASEURL}/api/staff/${id}`, null, {
+    const response = await commonAPI('GET', `${BASEURL}/staff/${id}`, null, {
       // No need to specify any headers for GET requests
     });
 
@@ -51,7 +53,7 @@ export const getStaffByIdAPI = async (id: string): Promise<ApiResponse> => {
 
 export const deleteStaffByIdAPI = async (id: string) => {
   try {
-    const response = await fetch(`${BASEURL}/api/staff/${id}`, {
+    const response = await fetch(`${BASEURL}/staff/${id}`, {
       method: 'DELETE',
     });
 

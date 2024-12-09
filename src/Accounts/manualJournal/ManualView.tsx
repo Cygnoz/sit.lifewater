@@ -6,7 +6,7 @@ import Pen from "../../assets/icons/Pen";
 import PrinterIcon from "../../assets/icons/PrinterIcon";
 import Trash2 from "../../assets/icons/Trash2";
 import Button from "../Components/Button";
-import { getOneJournalAPI } from "../../services/AccountsAPI/Journal";
+// import { getOneJournalAPI } from "../../services/AccountsAPI/Journal";
 import { endpoints } from "../../services/ApiEndpoint";
 import useApi from "../../Hook/UseApi";
 

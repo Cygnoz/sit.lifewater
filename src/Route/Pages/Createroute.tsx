@@ -47,6 +47,8 @@ const CreateRoute: React.FC = () => {
 
       if (!error && response) {
         setLoading(false)
+        console.log(loading);
+        
         setRouteList(response.data)
         setFilteredRouteList(response.data); // Initialize sorted items
       }

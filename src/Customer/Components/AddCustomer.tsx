@@ -139,32 +139,41 @@ export default function AddCustomer() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+  
+    // Prepare customer data
     const customerData = {
       ...formData,
       mainRoute: selectedMainRoute,
       subRoute: selectedSubRoute,
-      logo:logo
-    }
+      logo: logo, // Assuming logo is a File object or can be converted into one
+    };
+  
+    console.log(customerData);
+  
+    // Create FormData for handling file uploads
+    const formDataWithLogo = new FormData();
     if (logo) {
-      const formDataWithLogo = new FormData()
-      formDataWithLogo.append('logo', logo)
-      
-      Object.entries(customerData).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== "") {
-          formDataWithLogo.append(key, value?.toString())
-        }
-      })
-      try {
-        const response = await addCustomerAPI(customerData)
-        handleApiResponse(response)
-      } catch (error: any) {
-        handleApiError(error)
-      }
+      formDataWithLogo.append("logo", logo); // Add the file
     }
-  }
+  
+    // Add other fields to FormData
+    Object.entries(customerData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== "") {
+        formDataWithLogo.append(key, value.toString());
+      }
+    });
+  
+    try {
+      // Send formDataWithLogo if there’s a file upload
+      const response = await addCustomerAPI(formDataWithLogo);
+      handleApiResponse(response); // Handle successful response
+    } catch (error: any) {
+      handleApiError(error); // Handle API error
+    }
+  };
+  
 
   const handleApiResponse = (response: any) => {
     console.log("Response:", response)
@@ -194,7 +203,7 @@ export default function AddCustomer() {
       </div>
 
       <div className="w-full mx-auto px-10 py-5 bg-white rounded-lg shadow-md">
-        <form onSubmit={handleSubmit}>
+        <form >
           <div className="flex gap-6">
             <div className="flex flex-col items-center border-2 border-dashed border-gray-300 rounded-lg p-4 w-52">
               <label className="cursor-pointer">
@@ -387,7 +396,7 @@ export default function AddCustomer() {
             <button className="px-3 py-1 mt-8 bg-[#FEFDFA] text-[#565148] font-[14px] rounded-md mr-2 border-2 border-[#565148] w-[74px] h-[38px]" type="button" onClick={clearForm}>
               Cancel
             </button>
-            <button className="px-3 py-1 mt-8 bg-[#820000] text-[#FEFDF9] font-[14px] rounded-md w-[142px] h-[38px]" type="submit">
+            <button onClick={handleSubmit} className="px-3 py-1 mt-8 bg-[#820000] text-[#FEFDF9] font-[14px] rounded-md w-[142px] h-[38px]" type="submit">
               Save
             </button>
           </div>

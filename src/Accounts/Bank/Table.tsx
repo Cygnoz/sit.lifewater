@@ -33,6 +33,8 @@ const Table = () => {
     },
     
   ]);
+  console.log(setAccountData);
+  
 
   const tableHeaders = [
     "Account Name",

@@ -146,10 +146,14 @@ const AddStockloaded: React.FC = () => {
         const response = await getItemsAPI();
         setItems(response);
         console.log(response);
+        console.log(items);
+        
       } catch (error) {
         console.error("Failed to fetch items:", error);
       } finally {
         setLoading(false);
+        console.log(loading);
+        
       }
     };
     fetchItems();
@@ -182,6 +186,9 @@ const AddStockloaded: React.FC = () => {
     setOpenDropdownId(null);
     setOpenDropdownType(null);
   };
+
+  console.log(handleItemSelect);
+  
 
   // Update order details
   const updateOrder = (

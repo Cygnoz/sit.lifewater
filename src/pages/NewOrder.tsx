@@ -145,8 +145,7 @@ const NewOrder: React.FC = () => {
 
   interface Customer {
     companyName: string
-    firstName: string
-    lastName: string
+    fullName: string
     logo: string
     mobileNo: string
   }
@@ -168,7 +167,7 @@ const NewOrder: React.FC = () => {
   }
 
   // Filter customers based on search term
-  const filteredCustomers = customers.filter((customer) => `${customer.firstName} ${customer.lastName} ${customer.companyName}`.toLowerCase().includes(customerSearchTerm.toLowerCase()))
+  const filteredCustomers = customers.filter((customer) => `${customer.fullName} ${customer.companyName}`.toLowerCase().includes(customerSearchTerm.toLowerCase()))
 
   // Step 3: Update the search term
   const handleCustomerSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,7 +176,7 @@ const NewOrder: React.FC = () => {
   // Customer selection function
   const handleCustomerSelection = (customer: Customer) => {
     setSelectedCustomer(customer)
-    setOrderDetails({ ...orderDetails, customer: `${customer.firstName} ${customer.lastName}` })
+    setOrderDetails({ ...orderDetails, customer: `${customer.fullName}` })
     setOpenDropdownType(null) // Close dropdown on selection
   }
   // Fetch customers on component mount
@@ -380,7 +379,7 @@ const NewOrder: React.FC = () => {
                     <label className="block mb-2 font-normal text-[#303F58] text-[14px]">Customer</label>
                     <div className="relative w-full" onClick={toggleCustomerDropdown}>
                       <div className="items-center flex appearance-none w-full h-9  bg-white border border-inputBorder text-sm pl-2 pr-8 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
-                        <span className="font-normal">{selectedCustomer ? `${selectedCustomer.firstName} ${selectedCustomer.lastName}` : "Select Customer"}</span>
+                        <span className="font-normal">{selectedCustomer ? `${selectedCustomer.fullName} ` : "Select Customer"}</span>
                       </div>
                       <img className="ms-[435px] -mt-6 w-[11px] h-[11px] text-[#495160]" src={icondown} alt="" />
                     </div>
@@ -401,13 +400,13 @@ const NewOrder: React.FC = () => {
                             className="grid grid-cols-12 gap-1 p-2 bg-[#FDF8F0] cursor-pointer border border-slate-400 rounded-lg bg-lightPink"
                           >
                             <div className="col-span-2 flex items-center justify-center">
-                              <img src={customer.logo ? `${BASEURL}/uploads/${customer.logo}` : defaultImage} alt={`${customer.firstName} ${customer.lastName}`} />
+                              <img src={customer.logo ? `${BASEURL}/uploads/${customer.logo}` : defaultImage} alt={`${customer.fullName}`} />
                             </div>
                             <div className="col-span-10 flex">
                               <div>
                                 <p className="font-semibold text-[14px] text-[#0B1320]">
                                   {" "}
-                                  {customer.firstName} {customer.lastName}
+                                  {customer.fullName} 
                                 </p>
                                 <p className="text-[12px] font-normal text-[#495160]">Phone: {customer.workPhone}</p>
                               </div>

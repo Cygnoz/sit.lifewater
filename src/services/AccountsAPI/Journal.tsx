@@ -26,7 +26,7 @@ export const addJournalEntryAPI = async (formData: any) => {
         },
       });
       return response.data;
-    } catch (error) {
+    } catch (error:any) {
       console.error("Error fetching journals:", error.response?.data?.message || error.message);
       throw new Error(error.response?.data?.message || "Error fetching journals.");
     }
@@ -41,7 +41,7 @@ export const addJournalEntryAPI = async (formData: any) => {
         },
       });
       return response.data;
-    } catch (error) {
+    } catch (error:any) {
       console.error("Error fetching journal:", error.response?.data?.message || error.message);
       throw new Error(error.response?.data?.message || "Error fetching journal.");
     }

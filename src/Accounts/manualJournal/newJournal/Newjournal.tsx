@@ -7,8 +7,8 @@ import TrashCan from "../../Components/Trashcan";
 import Button from "../../Components/Button";
 import PlusIcon from "../../Components/PlusIcon";
 import {  toast, ToastContainer } from "react-toastify";
-import { addJournalEntryAPI,  } from "../../../services/AccountsAPI/Journal";
-import { getAllAccountsAPI } from "../../../services/AccountsAPI/accounts";
+// import { addJournalEntryAPI,  } from "../../../services/AccountsAPI/Journal";
+// import { getAllAccountsAPI } from "../../../services/AccountsAPI/accounts";
 import { endpoints } from "../../../services/ApiEndpoint";
 import useApi from "../../../Hook/UseApi";
 type Props = {};
@@ -168,6 +168,8 @@ function NewJournal({ }: Props) {
 
      if (!error && response) {
        setLoading(false)
+       console.log(loading);
+       
        setAccountOptions(response.data)
      
      }

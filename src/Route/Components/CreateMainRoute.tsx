@@ -35,6 +35,8 @@ const AddMainRoute: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    console.log(loading);
+    
 
     try {
       // Prepare the payload

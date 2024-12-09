@@ -26,7 +26,7 @@ const ViewCustmor: React.FC = () => {
 
   const { request: getACustomer } = useApi("get", 4000)
 
-  const getAllItems = async () => {
+  const getOneCustomer = async () => {
     try {
       const url = `${endpoints.GET_A_CUSTOMER}/${id}`
       const { response, error } = await getACustomer(url)
@@ -43,7 +43,7 @@ const ViewCustmor: React.FC = () => {
   }
 
   useEffect(() => {
-    getAllItems()
+    getOneCustomer()
   }, [])
 
   if (loading) {

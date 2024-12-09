@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import CheveronLeftIcon from "../../assets/icons/CheveronLeft"
-import { getOneTrialBalanceAPI } from "../../services/AccountsAPI/accounts"
+// import { getOneTrialBalanceAPI } from "../../services/AccountsAPI/accounts"
 import { endpoints } from "../../services/ApiEndpoint"
 import useApi from "../../Hook/UseApi"
 
@@ -32,6 +32,8 @@ function AccountantViewUI() {
 
       if (!error && response) {
         setLoading(false)
+        console.log(loading);
+        
         setTrialBalance(response.data)
       }
     } catch (error) {
