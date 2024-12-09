@@ -39,6 +39,7 @@ export const endpoints = {
   ADD_MAINROUTE: `addRoute`,
   GET_ALL_MAINROUTE: `getAllroutes`,
   GET_A_MAINROUTE: `getroute/:id`,
+  DELETE_A_MAINROUTE:`delRoute`,
 
 
   //subroute
@@ -48,6 +49,9 @@ export const endpoints = {
   view_A_SUBROUTE:`viewSRoute`,
   UPDATE_A_SUBROUTE:`updateSRoute`,
 
+  // Active routes
+
+  GET_ALL_ACTIVE_ROUTE:`getActiveRoutes`,
 
 
 

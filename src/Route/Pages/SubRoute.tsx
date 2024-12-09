@@ -55,25 +55,6 @@ function SubRoute({}: Props) {
     { id: "mainRouteName", label: "Main Route", visible: true },
   ]);
 
-  
-
-
-  // const handleDelete = async (id: string) => {
-  //   const confirmDelete = window.confirm(
-  //     "Are you sure you want to delete this subroute?"
-  //   );
-  //   if (!confirmDelete) return;
-
-  //   try {
-  //     const response = await deleteSubRouteAPI(id); // Pass the _id to the API function
-  //     toast.success(response.message); // Show success message
-  //     setRouteList(routesList.filter((route) => route._id !== id)); // Update the UI
-  //   } catch (error) {
-  //     console.error("Error deleting route:", error);
-  //     alert("An error occurred while deleting the route.");
-  //   }
-  // };
-
   const { request: deleteRoute } = useApi("delete", 4000);
 
   const handleDelete =async (id:string) => {

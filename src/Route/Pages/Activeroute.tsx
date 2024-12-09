@@ -1,62 +1,82 @@
 import React, { useEffect, useState } from "react";
 import printer from "../../assets/images/printer.svg";
-import split from "../../assets/images/list-filter.svg";
 import search from "../../assets/images/search.svg";
 import eye from "../../assets/images/eye.svg";
-
-import {  useNavigate } from "react-router-dom";
-import { getActiveRouteAPI } from "../../services/RouteAPI/ActiveRoute";
+import { useNavigate } from "react-router-dom";
+import useApi from "../../Hook/UseApi";
+import { endpoints } from "../../services/ApiEndpoint";
+import SortByActivRoute from "../Components/SortByActivRoute";
 
 const ActiveRoute: React.FC = () => {
-  const [activeRoutes, setActiveRoutes] = useState<any[]>([]); // Add a type assertion for clarity
-  const [searchTerm, setSearchTerm] = useState<string>(""); // Search term state
+  const [activeRoutes, setActiveRoutes] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(5); // Number of items per page
+  const [sortKey, setSortKey] = useState<string>(""); // Current sort key
+  const [sortOrder, setSortOrder] = useState<string>("asc"); // Current sort order
 
   const navigate = useNavigate();
-  useEffect(() => {
-    const fetchActiveRoutes = async () => {
-      try {
-        const response = await getActiveRouteAPI();
+  const { request: getAllActiveRoute } = useApi("get", 4000);
 
-        // Ensure the data is an array, or handle it accordingly
-        const routes = Array.isArray(response.data) ? response.data : [];
-        setActiveRoutes(routes); // Store the fetched data in state
-        console.log(routes);
-      } catch (error) {
-        console.error("Failed to fetch active routes:", error);
+  const getALLActiveroute = async () => {
+    try {
+      const url = `${endpoints.GET_ALL_ACTIVE_ROUTE}`;
+      const { response, error } = await getAllActiveRoute(url);
+
+      if (!error && response) {
+        const routesArray = Array.isArray(response.data.data) ? response.data.data : [];
+        setActiveRoutes(routesArray);
+      } else {
+        setActiveRoutes([]);
       }
-    };
+    } catch (error) {
+      console.error(error);
+      setActiveRoutes([]);
+    }
+  };
 
-    fetchActiveRoutes();
+  useEffect(() => {
+    getALLActiveroute();
   }, []);
-
-  
 
   const handleView = (routeId: string): void => {
     navigate(`/route/viewactiveroute/${routeId}`);
   };
 
 
-   // Filter activeRoutes based on searchTerm
-   const filteredRoutes = activeRoutes.filter((route) => {
-    const searchText = searchTerm.toLowerCase();
-    return (
-      route?.Salesman?.toLowerCase().includes(searchText) ||
-      route?.helper?.toLowerCase().includes(searchText)
-    );
-  });
+   // Sort and filter data
+   const sortedRoutes = [...activeRoutes]
+   .filter((route) =>
+     route?.driver?.toLowerCase().includes(searchTerm.toLowerCase())
+   )
+   .sort((a, b) => {
+     if (!sortKey) return 0; // Skip sorting if no key
+     const aValue = a[sortKey]?.toString().toLowerCase();
+     const bValue = b[sortKey]?.toString().toLowerCase();
+     if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+     if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+     return 0;
+   });
+   
+ // Pagination logic
+ const indexOfLastItem = currentPage * itemsPerPage;
+ const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+ const currentRoutes = sortedRoutes.slice(indexOfFirstItem, indexOfLastItem);
+ const totalPages = Math.ceil(sortedRoutes.length / itemsPerPage);
+
+
+
+ const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
+ const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+
+
   return (
     <div className="">
-      
-      <div className=" my-2 mx-2">
-              <h3 className="text-[#303F58] text-[20px] font-bold">
-              Active Route
-              </h3>
-              <p className="text-[#4B5C79]">
-                Lorem ipsum dolor sit amet consectetur{" "}
-              </p>
-            </div>
+      <div className="my-2 mx-2">
+        <h3 className="text-[#303F58] text-[20px] font-bold">Active Route</h3>
+        <p className="text-[#4B5C79]">Lorem ipsum dolor sit amet consectetur.</p>
+      </div>
 
-      {/* Table Section */}
       <div className="bg-white shadow-md rounded-lg p-4">
         <div className="flex justify-between items-center mb-4">
           <div className="relative w-full flex items-center">
@@ -71,16 +91,17 @@ const ActiveRoute: React.FC = () => {
                 boxShadow: "none",
               }}
               placeholder="Search Route"
-              value={searchTerm} // Bind search input to state
-              onChange={(e) => setSearchTerm(e.target.value)} // Update searchTerm on input change
-           
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex w-[60%] justify-end">
-            <button className="flex border text-[14px] text-[#565148] border-[#565148] px-4 py-2 me-2 rounded-lg">
-              <img src={split} className="mt-1 me-1" alt="" />
-              Sort By
-            </button>
+          <div className="flex w-[60%] justify-end gap-4">
+          <SortByActivRoute
+            onSortChange={(key, order) => {
+              setSortKey(key);
+              setSortOrder(order);
+            }}
+          />
             <button className="flex border text-[14px] text-[#565148] border-[#565148] px-4 py-2 rounded-lg">
               <img src={printer} className="mt-1 me-1" alt="" />
               Print
@@ -88,75 +109,34 @@ const ActiveRoute: React.FC = () => {
           </div>
         </div>
 
-        {/* Loading and Error Handling */}
-
         <table className="w-full text-left">
           <thead className="bg-[#fdf8f0]">
             <tr className="border-b">
-             
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Sl No
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Main Route
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Sub Route
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Sales Man
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Helper
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Vehicle Number
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Total Stock
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Sold Stock
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Actions
-              </th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Sl No</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Main Route</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Sub Route</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Driver</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Helper</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Vehicle No</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Opening Stock</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Loaded Stock</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredRoutes.length > 0 ? (
-              filteredRoutes.map((route, index) => (
+            {currentRoutes.length > 0 ? (
+              currentRoutes.map((route, index) => (
                 <tr className="border-b" key={route.id}>
-                
+                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">{indexOfFirstItem + index + 1}</td>
+                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">{route.mainRoute}</td>
+                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">{route.subRoute}</td>
+                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">{route.driver}</td>
+                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">{route.helper}</td>
+                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">{route.vehicleNo}</td>
+                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">{route.openingStock}</td>
+                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">{route.loadedStock}</td>
                   <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                    {index + 1}
-                  </td>
-                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                    {route.mainRoute}
-                  </td>
-                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                    {route.subRoute}
-                  </td>
-                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                    {route.Salesman}
-                  </td>
-                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                    {route.helper}
-                  </td>
-                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                    {route.vehicleNo}
-                  </td>
-                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                    {route.totalStock}
-                  </td>
-                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                    {route.soldStock}
-                  </td>
-                  <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                    <button
-                      onClick={() => handleView(route._id)}
-                      className="text-blue-500"
-                    >
+                    <button onClick={() => handleView(route._id)} className="text-blue-500">
                       <img src={eye} alt="View" />
                     </button>
                   </td>
@@ -171,6 +151,27 @@ const ActiveRoute: React.FC = () => {
             )}
           </tbody>
         </table>
+
+        {/* Pagination Controls */}
+        <div className="flex justify-between items-center mt-4">
+          <button
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-red-800 text-white rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <p>
+            Page {currentPage} of {totalPages}
+          </p>
+          <button
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-red-800 text-white rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );
