@@ -400,7 +400,7 @@ export default function Component() {
           </div>
 
           <div>
-            <label className="block text-gray-700">email</label>
+            <label className="block text-gray-700">Email</label>
             <input
               type="text"
               name="email"
@@ -412,7 +412,7 @@ export default function Component() {
 
           </div>
           <div>
-            <label className="block text-gray-700">addressLine 1</label>
+            <label className="block text-gray-700">AddressLine 1</label>
             <input
               type="text"
               name="addressLine1"
@@ -426,7 +426,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">addressLine 2</label>
+            <label className="block text-gray-700">AddressLine 2</label>
             <input
               type="text"
               name="addressLine2"
@@ -440,7 +440,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">city</label>
+            <label className="block text-gray-700">City</label>
             <input
               type="text"
               name="city"
@@ -454,7 +454,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">street</label>
+            <label className="block text-gray-700">Street</label>
             <input
               type="text"
               name="street"
@@ -468,7 +468,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">zip postal code</label>
+            <label className="block text-gray-700">Zip Postal Code</label>
             <input
               type="number"
               name="zipPostalCode"
@@ -482,7 +482,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">flat number</label>
+            <label className="block text-gray-700">Flat Number</label>
             <input
               type="text"
               name="flatNumber"
@@ -498,7 +498,7 @@ export default function Component() {
 
           <div className="flex space-x-2">
             <div className="w-1/2">
-              <label className="block text-gray-700">Number of Bottles</label>
+              <label className="block text-gray-700">Number Of Bottles</label>
               <input
                 type="text"
                 name="numberOfBottles"
@@ -512,7 +512,7 @@ export default function Component() {
               )}
             </div>
             <div className="w-1/2">
-              <label className="block text-gray-700">Rate per bottle</label>
+              <label className="block text-gray-700">Rate Per Bottle</label>
               <input
                 type="text"
                 name="ratePerBottle"
