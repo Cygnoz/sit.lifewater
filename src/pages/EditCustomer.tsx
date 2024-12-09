@@ -176,6 +176,8 @@ const EditCustomer: React.FC = () => {
 
       if (!error && response) {
         setLoading(false)
+        console.log(loading);
+        
         setCustomerData(response.data)
         console.log(customerData);
         
@@ -206,6 +208,9 @@ const EditCustomer: React.FC = () => {
         return;
       }
 
+      console.log(getCurrentLocation);
+      
+
       navigator.geolocation.getCurrentPosition(
         (position) => resolve(position.coords),
         (error) => reject(error)
@@ -233,6 +238,7 @@ const EditCustomer: React.FC = () => {
       });
     } else {
       // Save Location
+      setIsGettingLocation(true)
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
@@ -249,6 +255,7 @@ const EditCustomer: React.FC = () => {
               },
             };
           });
+          setIsGettingLocation(false)
         },
         (error) => {
           console.error("Error fetching location:", error);
