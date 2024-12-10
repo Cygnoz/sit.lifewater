@@ -4,7 +4,8 @@ import back from '../../assets/images/backbutton.svg';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { getRouteByIdAPI, updateRouteAPI } from '../../services/RouteAPI/RouteAPI';
+import { endpoints } from '../../services/ApiEndpoint';
+import useApi from '../../Hook/UseApi';
 
 
 const EditMainRoute: React.FC = () => {
@@ -13,36 +14,38 @@ const EditMainRoute: React.FC = () => {
 
   // State to store form data
   const [formData, setFormData] = useState({
-    mainRoute: '',
-    routeCode: '',
+    mainRouteName: '',
+    mainRouteCode: '',
     description: ''
   });
 
-  
-  const [isLoading, setIsLoading] = useState(true);  // Add loading state
+ 
 
-  // Fetch existing route data (if editing)
- useEffect(() => {
-  const fetchRouteData = async () => {
+  const { request: getAmainroute } = useApi("get", 4000)
+
+  const getAamainroute = async () => {
     try {
-      if (!id) {
-        console.warn("Route ID is undefined");
-        return;
+      const url = `${endpoints.GET_A_MAINROUTE}/${id}`;
+      const { response, error } = await getAmainroute(url);
+      console.log("API RESPONSE :", response);
+  
+      if (!error && response) {
+        const mainRoute = response.data.data.mainRoute; // Access the nested mainRoute data
+        setFormData({
+          mainRouteName: mainRoute.mainRouteName || "",
+          mainRouteCode: mainRoute.mainRouteCode || "",
+          description: mainRoute.description || "",
+        });
       }
-      
-      const response = await getRouteByIdAPI(id); // Now `id` is safely a string
-      setFormData(response.data.mainRoute); // Populate the form with fetched data
-      setIsLoading(false); // Set loading to false after data is fetched
-    
     } catch (error) {
-      console.error('Error fetching route data:', (error as Error).message);
-      toast.error('Error fetching route data');
-      setIsLoading(false);
+      console.error("Error fetching main route:", error);
     }
   };
+  
 
-  fetchRouteData();
-}, [id]);
+  useEffect(() => {
+    getAamainroute()
+  }, [])
 
 
   // Handle input change
@@ -54,27 +57,48 @@ const EditMainRoute: React.FC = () => {
     });
   };
 
-  // Handle form submission to update the route
-  const handleSubmit = async (e: React.FormEvent) => {
+  const { request: editMainroute } = useApi("put", 4000)
+
+  // Handle form submission to update the subRoute
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
+  
     try {
-      await updateRouteAPI(id, formData); // Call the API method to update
-      toast.success('Route updated successfully!');
-      navigate('/route/createroute'); // Redirect after update
+      if (!id) {
+        toast.error("Invalid ID");
+        return;
+      }
+
+  
+      // Construct the API URL
+      const url = `${endpoints.UPDATE_A_MAINROUTE}/${id}`;
+  
+      console.log("Submitting updated mainroute data:", formData);
+  
+      // Call the API using the useApi `editSubRoute` request
+      const { response, error } = await editMainroute(url, formData);
+  
+      if (!error && response) {
+        console.log("API Response:", response);
+        toast.success("Mainroute updated successfully!");
+        setTimeout(()=>{
+          navigate("/route/createroute"); // Redirect after successful edit
+        },1000)
+      } else {
+        toast.error("Failed to update mainroute. Please check the data.");
+      }
     } catch (error) {
-      console.error('Error updating route:', error);
-      toast.error('Route code already exist. Try another one !');
+      console.error("Error while updating mainroute:", error);
+      toast.error("An error occurred while updating the mainroute.");
     }
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>; // Show a loading message until data is fetched
-  }
+
   console.log("this",formData);
   
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100 p-8">
+    <div className="min-h-screen flex flex-col bg-gray-100 p-2">
       <ToastContainer
         position="top-center"
         autoClose={2000}
@@ -109,8 +133,8 @@ const EditMainRoute: React.FC = () => {
               </label>
               <input
                 type="text"
-                name="mainRoute"
-                value={formData.mainRoute || ''}  // Ensure it's not undefined
+                name="mainRouteName"
+                value={formData.mainRouteName || ''}  // Ensure it's not undefined
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
@@ -122,8 +146,8 @@ const EditMainRoute: React.FC = () => {
               </label>
               <input
                 type="text"
-                name="routeCode"
-                value={formData.routeCode || ''}  // Ensure it's not undefined
+                name="mainRouteCode"
+                value={formData.mainRouteCode || ''}  // Ensure it's not undefined
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />

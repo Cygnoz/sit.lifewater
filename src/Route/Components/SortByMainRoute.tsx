@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-
+import { Route } from "../Pages/Createroute";
 interface SortByProps {
-  onSortChange: (key: string, order: string) => void; // Callback to notify parent
+  onSortChange: (key: keyof Route, order: 'asc' | 'desc') => void;
 }
+
+
+
 
 const SortByMainRoute: React.FC<SortByProps> = ({ onSortChange }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -22,11 +25,11 @@ const SortByMainRoute: React.FC<SortByProps> = ({ onSortChange }) => {
     };
   }, []);
 
-  const handleSort = (key: string, order: string) => {
-    onSortChange(key, order); // Notify parent of the selected sort method
-    setIsDropdownOpen(false); // Close dropdown after selection
+  const handleSort = (key: keyof Route, order: 'asc' | 'desc') => {
+    onSortChange(key, order); // Notify parent
+    setIsDropdownOpen(false); // Close dropdown
   };
-
+  
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Sort Button */}

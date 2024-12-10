@@ -38,8 +38,9 @@ export const endpoints = {
   // Route
   ADD_MAINROUTE: `addRoute`,
   GET_ALL_MAINROUTE: `getAllroutes`,
-  GET_A_MAINROUTE: `getroute/:id`,
+  GET_A_MAINROUTE: `getroute`,
   DELETE_A_MAINROUTE:`delRoute`,
+  UPDATE_A_MAINROUTE:`updateRoute`,
 
 
   //subroute

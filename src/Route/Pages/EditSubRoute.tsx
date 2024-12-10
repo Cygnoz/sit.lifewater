@@ -152,7 +152,7 @@ const EditSubRoute: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100 p-8">
+    <div className="min-h-screen flex flex-col bg-gray-100 p-2">
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop={true} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored" />
       <div className="flex gap-4 items-center w-full max-w-8xl mb-6">
         <Link to={"/route/subroute"}>

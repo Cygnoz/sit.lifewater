@@ -5,12 +5,10 @@ import publicc from "../../assets/images/public-service route.svg";
 import printer from "../../assets/images/printer.svg";
 import vector from "../../assets/images/Vector.svg";
 import trash from "../../assets/images/trash.svg";
-import split from "../../assets/images/list-filter.svg";
 import plus from "../../assets/circle-plus.svg";
 import eye from "../../assets/images/eye.svg";
 // import dot from "../../assets/ellipsis-vertical.svg";
 import { useNavigate } from "react-router-dom";
-import { deleteRouteAPI } from "../../services/RouteAPI/RouteAPI";
 import { useEffect, useState, useRef } from "react";
 import search from "../../assets/images/search.svg";
 import { ToastContainer, toast } from "react-toastify";
@@ -19,13 +17,15 @@ import { endpoints } from "../../services/ApiEndpoint";
 import useApi from "../../Hook/UseApi";
 import SortByMainRoute from "../Components/SortByMainRoute";
 
-interface Route {
+export interface Route {
   id: string;
   _id: string;
   mainRouteName: string;
   mainRouteCode: string;
   subRoute: string;
   description: string;
+  key:string;
+  order:any
 }
 
 const CreateRoute: React.FC = () => {
@@ -105,7 +105,7 @@ const CreateRoute: React.FC = () => {
     }
   };
 
-  const handleSortChange = (key: string, order: string) => {
+  const handleSortChange = (key: keyof Route, order: 'asc' | 'desc') => {
     const sortedRoutes = [...filteredRouteList].sort((a, b) => {
       if (order === "asc") {
         return a[key].localeCompare(b[key]);
@@ -115,6 +115,7 @@ const CreateRoute: React.FC = () => {
     });
     setFilteredRouteList(sortedRoutes);
   };
+  
 
   return (
     <>
@@ -229,8 +230,8 @@ const CreateRoute: React.FC = () => {
                   onChange={(e) => setSearchQuery(e.target.value)} // Update search query
                 />
                 <div className="flex w-[60%] justify-end gap-4">
-                  <SortByMainRoute onSortChange={handleSortChange} />{" "}
-                  {/* Sorting dropdown */}
+                <SortByMainRoute onSortChange={handleSortChange} />
+                {/* Sorting dropdown */}
                   <button
                     onClick={handlePrint}
                     className="flex border text-[14] w-[500] text-[#565148] border-[#565148] px-4 py-2 rounded-lg"
