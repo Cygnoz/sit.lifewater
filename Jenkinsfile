@@ -40,6 +40,13 @@ pipeline {
                 }
             }
         }
+
+         stage('TRIVY FS SCAN') {
+            steps {
+                sh "trivy fs . > trivyfs.txt"
+                archiveArtifacts artifacts: 'trivyfs.txt', fingerprint: true
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 script {
@@ -48,6 +55,13 @@ pipeline {
                 }
             }
         }
+        stage('TRIVY Image Scan') {
+            steps {
+                sh "trivy image ${IMAGE_NAME}:latest > trivyimage.txt"
+                archiveArtifacts artifacts: 'trivyimage.txt', fingerprint: true
+            }
+        }
+
 
         stage('Login to ECR') {
             steps {
