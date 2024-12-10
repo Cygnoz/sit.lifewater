@@ -14,6 +14,8 @@ pipeline {
         ECS_SERVICE_NAME = 'lifewater-stock' // Replace with your ECS service name
         ECS_TASK_DEFINITION_NAME = 'lifewater-stock' // Replace with your ECS task definition name
     }
+
+    
     stages {
         stage('SonarQube Analysis') {
             steps {
