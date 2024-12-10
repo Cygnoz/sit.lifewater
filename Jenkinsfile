@@ -7,13 +7,46 @@ pipeline {
         ECR_REPOSITORY = 'lifewater/stock'
         IMAGE_NAME = 'lifewater/stockt'
         AWS_CREDENTIALS_ID = '2157424a-b8a7-45c0-90c2-bc0d407f6cea'
-        AWS_ACCOUNT_ID = '654654462146' // Add your AWS account ID here
+        AWS_ACCOUNT_ID = '654654462146' // Add your AWS account ID here 
+        SONARQUBE_PROJECT_KEY = 'lifewater-sto'
+        SONARQUBE_SCANNER_CREDENTIALS_ID = 'beea61fa-5a16-4767-855b-1b4e4ed4665a' // Jenkins credentials ID for SonarQube token
         ECS_CLUSTER_NAME = 'lifewater-services' // Replace with your ECS cluster name
         ECS_SERVICE_NAME = 'lifewater-stock' // Replace with your ECS service name
         ECS_TASK_DEFINITION_NAME = 'lifewater-stock' // Replace with your ECS task definition name
     }
 
     stages {
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    // Set up SonarQube Scanner
+                    scannerHome = tool 'sonarqube' // Replace with your SonarQube Scanner tool name
+                }
+                withSonarQubeEnv('APIND_Sonarqube') { // Replace with your SonarQube server name
+                    // Use the SonarQube Scanner
+                    withCredentials([string(credentialsId: "${SONARQUBE_SCANNER_CREDENTIALS_ID}", variable: 'SONAR_TOKEN')]) {
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} -Dsonar.sources=. -Dsonar.login=${SONAR_TOKEN}"
+                    }
+                }
+            }
+        }
+        stage('Dependency-Check Analysis') {
+    steps {
+        script {
+            dependencyCheck additionalArguments: '-f HTML', 
+                            odcInstallation: 'Dependency-Check', // Ensure this name matches the configuration in Global Tool Configuration
+                            outdir: 'dependency-check-report', 
+                              scanpath: '.'
+                }
+            }
+        }
+
+         stage('TRIVY FS SCAN') {
+            steps {
+                sh "trivy fs . > trivyfs.txt"
+                archiveArtifacts artifacts: 'trivyfs.txt', fingerprint: true
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 script {
@@ -22,6 +55,13 @@ pipeline {
                 }
             }
         }
+        stage('TRIVY Image Scan') {
+            steps {
+                sh "trivy image ${IMAGE_NAME}:latest > trivyimage.txt"
+                archiveArtifacts artifacts: 'trivyimage.txt', fingerprint: true
+            }
+        }
+
 
         stage('Login to ECR') {
             steps {
@@ -57,13 +97,13 @@ pipeline {
                                 --task-definition ${ECS_TASK_DEFINITION_NAME} \
                                 --query 'taskDefinition.taskDefinitionArn' \
                                 --output text)
- 
+
                             # Check if the task definition was fetched successfully
                             if [ -z "$LATEST_TASK_DEFINITION" ]; then
                                 echo "Error: Could not fetch the task definition ARN."
                                 exit 1
                             fi
- 
+
                             # Update ECS Service to use the latest task definition
                             aws ecs update-service \
                                 --region ${AWS_REGION} \
