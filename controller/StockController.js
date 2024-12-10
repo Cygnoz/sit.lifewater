@@ -243,7 +243,6 @@ const Warehouse = require('../Models/WarehouseSchema');
 // };
 
 
-
 exports.addStock = async (req, res) => {
   console.log("Add Stock Load:", req.body);
 

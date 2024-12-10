@@ -15,7 +15,6 @@ exports.createStock = async (req, res) => {
     const { warehouse, transferNumber, date, items, notes, termsAndConditions } = cleanedData;
   //   console.log("cleanedData",cleanedData);
    
-
     // Validate required fields
     if (!transferNumber) {
       return res.status(400).json({

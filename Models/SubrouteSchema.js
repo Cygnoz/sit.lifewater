@@ -9,6 +9,7 @@ const stockSchema = new Schema({
   status: { type: String, default: undefined },
 }, { _id: false });
 
+
 const subRouteSchema = new Schema({
   subRouteName: { type: String },
   subrouteCode: { type: String },
