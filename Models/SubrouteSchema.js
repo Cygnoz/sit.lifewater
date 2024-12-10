@@ -14,8 +14,7 @@ const subRouteSchema = new Schema({
   subrouteCode: { type: String },
   description: { type: String },
   mainRouteId: { type: Schema.Types.ObjectId, ref: 'MainRoute' },
-  stock: { type: [stockSchema], default: undefined }
-
+  stock: { type: [stockSchema] }
 });
 
 const SubRoute = mongoose.model('SubRoute', subRouteSchema);

@@ -37,7 +37,7 @@ exports.addWarehouse = async (req, res) => {
     }
 
     // Check if the warehouse exists
-    const warehouseExists = await Warehouse.findOne({ warehouseName: warehouse });
+    const warehouseExists = await Warehouse.findOne({ warehouseName });
     if (warehouseExists) {
       return res.status(400).json({
         success: false,
