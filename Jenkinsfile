@@ -7,15 +7,14 @@ pipeline {
         ECR_REPOSITORY = 'lifewater/stock'
         IMAGE_NAME = 'lifewater/stockt'
         AWS_CREDENTIALS_ID = '2157424a-b8a7-45c0-90c2-bc0d407f6cea'
-        AWS_ACCOUNT_ID = '654654462146' // Add your AWS account ID here
+        AWS_ACCOUNT_ID = '654654462146' // Add your AWS account ID here 
         SONARQUBE_PROJECT_KEY = 'lifewater-staff'
-        SONARQUBE_SCANNER_CREDENTIALS_ID = '5f5dc69b-af44-446a-b797-f5244fd39181' // Jenkins credentials ID for SonarQube token        
+        SONARQUBE_SCANNER_CREDENTIALS_ID = '5f5dc69b-af44-446a-b797-f5244fd39181' // Jenkins credentials ID for SonarQube token
         ECS_CLUSTER_NAME = 'lifewater-services' // Replace with your ECS cluster name
         ECS_SERVICE_NAME = 'lifewater-stock' // Replace with your ECS service name
         ECS_TASK_DEFINITION_NAME = 'lifewater-stock' // Replace with your ECS task definition name
     }
 
-    
     stages {
         stage('SonarQube Analysis') {
             steps {
@@ -31,7 +30,7 @@ pipeline {
                 }
             }
         }
-         stage('Dependency-Check Analysis') {
+        stage('Dependency-Check Analysis') {
     steps {
         script {
             dependencyCheck additionalArguments: '-f HTML', 
@@ -56,13 +55,14 @@ pipeline {
                 }
             }
         }
-
         stage('TRIVY Image Scan') {
             steps {
                 sh "trivy image ${IMAGE_NAME}:latest > trivyimage.txt"
                 archiveArtifacts artifacts: 'trivyimage.txt', fingerprint: true
             }
         }
+
+
         stage('Login to ECR') {
             steps {
                 script {
@@ -75,6 +75,7 @@ pipeline {
                 }
             }
         }
+
         stage('Push Docker Image') {
             steps {
                 script {
@@ -84,6 +85,7 @@ pipeline {
                 }
             }
         }
+
         stage('Update ECS Service') {
             steps {
                 script {
@@ -95,11 +97,13 @@ pipeline {
                                 --task-definition ${ECS_TASK_DEFINITION_NAME} \
                                 --query 'taskDefinition.taskDefinitionArn' \
                                 --output text)
+
                             # Check if the task definition was fetched successfully
                             if [ -z "$LATEST_TASK_DEFINITION" ]; then
                                 echo "Error: Could not fetch the task definition ARN."
                                 exit 1
                             fi
+
                             # Update ECS Service to use the latest task definition
                             aws ecs update-service \
                                 --region ${AWS_REGION} \
@@ -113,6 +117,7 @@ pipeline {
             }
         }
     }
+
     post {
         success {
             echo 'Pipeline completed successfully!'
@@ -122,6 +127,3 @@ pipeline {
         }
     }
 }
-
-
-           
