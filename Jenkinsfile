@@ -13,8 +13,10 @@ pipeline {
         ECS_CLUSTER_NAME = 'lifewater-services'
         ECS_SERVICE_NAME = 'lifewater-order'
         ECS_TASK_DEFINITION_NAME = 'lifewater-order'
-    }
-stages {
+    } 
+
+    
+     stages {
         stage('SonarQube Analysis') {
             steps {
                 script {
