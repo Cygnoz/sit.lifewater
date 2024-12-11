@@ -31,12 +31,17 @@ pipeline {
         }
 
         stage('Dependency-Check Analysis') {
-            steps {
-                script {
-                    // Run Dependency-Check scan
-                    // Ensure the tool is installed and available
-                    sh '/usr/local/bin/dependency-check --scan . --format HTML -o dependency-check-report'
-                    archiveArtifacts artifacts: 'dependency-check-report/**/*.html', fingerprint: true
+    steps {
+        script {
+            // Run Dependency-Check and capture the output
+            def dependencyCheckOutput = sh(script: "dependency-check --scan . --format XML", returnStdout: true).trim()
+
+            // Output the results in a format similar to a Trivy scan
+            echo "Dependency-Check Analysis Results:\n${dependencyCheckOutput}"
+
+            // Archive the output as an artifact
+            writeFile file: 'dependency-check-results.xml', text: dependencyCheckOutput
+            archiveArtifacts artifacts: 'dependency-check-results.xml', fingerprint: true
                 
                 }
             }
