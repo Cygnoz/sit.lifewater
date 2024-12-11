@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Define environment variables for AWS ECR and ECS
+        // AWS and ECS related environment variables
         AWS_REGION = 'ap-south-1'
         ECR_REPOSITORY = 'lifewater/order'
         IMAGE_NAME = 'lifewater/order'
@@ -31,13 +31,13 @@ pipeline {
         }
 
         stage('Dependency-Check Analysis') {
-    steps {
-        script {
-            // Run Dependency-Check scan
-            sh 'dependency-check --scan . --format HTML -o dependency-check-report'
+            steps {
+                script {
+                    // Run Dependency-Check scan
+                    sh 'dependency-check --scan . --format HTML -o dependency-check-report'
 
-            // Archive the output as an artifact
-            archiveArtifacts artifacts: 'dependency-check-report/**/*.html', fingerprint: true
+                    // Archive the output as an artifact
+                    archiveArtifacts artifacts: 'dependency-check-report/**/*.html', fingerprint: true
                 }
             }
         }
