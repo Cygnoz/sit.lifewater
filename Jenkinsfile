@@ -15,7 +15,8 @@ pipeline {
         ECS_TASK_DEFINITION_NAME = 'lifewater-order'
     }
 
-   stages {
+
+    stages {
         stage('SonarQube Analysis') {
             steps {
                 script {
@@ -30,43 +31,29 @@ pipeline {
                 }
             }
         }
-
-        stage('Dependency-Check Analysis') {
-            steps {
-                script {
-                    // Run Dependency-Check scan
-                    // Ensure the tool is installed and available
-                    sh '/usr/local/bin/dependency-check --scan . --format HTML -o dependency-check-report'
-                    archiveArtifacts artifacts: 'dependency-check-report/**/*.html', fingerprint: true
+           stage('Dependency-Check Analysis') {
+    steps {
+        script {
+            dependencyCheck additionalArguments: '-f HTML', 
+                            odcInstallation: 'Dependency-Check', // Ensure this name matches the configuration in Global Tool Configuration
+                            outdir: 'dependency-check-report', 
+                              scanpath: '.'
                 }
             }
         }
-
-        stage('TRIVY FS SCAN') {
-            steps {
-                sh "trivy fs . > trivyfs.txt"
-                archiveArtifacts artifacts: 'trivyfs.txt', fingerprint: true
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 script {
+                    // Build Docker image
                     sh 'docker build -t $IMAGE_NAME .'
                 }
-            }
-        }
-
-        stage('TRIVY Image Scan') {
-            steps {
-                sh "trivy image ${IMAGE_NAME}:latest > trivyimage.txt"
-                archiveArtifacts artifacts: 'trivyimage.txt', fingerprint: true
             }
         }
 
         stage('Login to ECR') {
             steps {
                 script {
+                    // Authenticate Docker to the AWS ECR
                     withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
                         sh '''
                             aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
@@ -79,6 +66,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
+                    // Tag and push Docker image to ECR
                     sh 'docker tag $IMAGE_NAME:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:latest'
                     sh 'docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:latest'
                 }
