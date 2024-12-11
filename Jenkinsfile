@@ -34,11 +34,26 @@ pipeline {
            stage('Dependency-Check Analysis') {
     steps {
         script {
-           def result = sh(script: "dependency-check --scan . --format XML -o dependency-check-report/dependency-check-report.xml", returnStdout: true)
-            echo "Dependency-Check Results:\n${result}"
-                }
-            }
-        }
+            try {
+                // Run the dependency check and capture its output
+                def output = dependencyCheck(
+                    additionalArguments: '-f HTML',
+                    odcInstallation: 'Dependency-Check', // Ensure this matches the configuration in Global Tool Configuration
+                    outdir: 'dependency-check-report',
+                    scanpath: '.'
+                )
+                echo "Dependency-Check Output:\n${output}"
+            } catch (Exception e) {
+                echo "Error running dependency-check: ${e.getMessage()}"
+                currentBuild.result = 'FAILURE'
+                        }
+                     }
+                  }
+             } 
+
+                
+            
+        
         stage('Build Docker Image') {
             steps {
                 script {
