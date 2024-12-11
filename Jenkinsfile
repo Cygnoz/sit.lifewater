@@ -122,7 +122,4 @@ pipeline {
         }
     }
 }
-            echo 'Pipeline failed.'
-        }
-    }
-}
+    
