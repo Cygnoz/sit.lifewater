@@ -30,20 +30,13 @@ pipeline {
                     }
                 }
             }
-        stage('Dependency-Check Analysis') {
+        }
+           stage('Dependency-Check Analysis') {
     steps {
         script {
-            def result = sh(script: "dependency-check --scan . --format XML -o dependency-check-report/dependency-check-report.xml", returnStdout: true)
+           def result = sh(script: "dependency-check --scan . --format XML -o dependency-check-report/dependency-check-report.xml", returnStdout: true)
             echo "Dependency-Check Results:\n${result}"
-    
                 }
-            }
-        }
-
-         stage('TRIVY FS SCAN') {
-            steps {
-                sh "trivy fs . > trivyfs.txt"
-                archiveArtifacts artifacts: 'trivyfs.txt', fingerprint: true
             }
         }
         stage('Build Docker Image') {
@@ -55,12 +48,6 @@ pipeline {
             }
         }
 
-        stage('TRIVY Image Scan') {
-            steps {
-                sh "trivy image ${IMAGE_NAME}:latest > trivyimage.txt"
-                archiveArtifacts artifacts: 'trivyimage.txt', fingerprint: true
-            }
-        }
         stage('Login to ECR') {
             steps {
                 script {
@@ -73,6 +60,7 @@ pipeline {
                 }
             }
         }
+
         stage('Push Docker Image') {
             steps {
                 script {
@@ -82,6 +70,7 @@ pipeline {
                 }
             }
         }
+
         stage('Update ECS Service') {
             steps {
                 script {
@@ -93,11 +82,13 @@ pipeline {
                                 --task-definition ${ECS_TASK_DEFINITION_NAME} \
                                 --query 'taskDefinition.taskDefinitionArn' \
                                 --output text)
+
                             # Check if the task definition was fetched successfully
                             if [ -z "$LATEST_TASK_DEFINITION" ]; then
                                 echo "Error: Could not fetch the task definition ARN."
                                 exit 1
                             fi
+
                             # Update ECS Service to use the latest task definition
                             aws ecs update-service \
                                 --region ${AWS_REGION} \
@@ -111,6 +102,7 @@ pipeline {
             }
         }
     }
+
     post {
         success {
             echo 'Pipeline completed successfully!'
@@ -120,4 +112,3 @@ pipeline {
         }
     }
 }
-    
