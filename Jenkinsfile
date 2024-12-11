@@ -9,7 +9,7 @@ pipeline {
         AWS_CREDENTIALS_ID = '2157424a-b8a7-45c0-90c2-bc0d407f6cea'
         AWS_ACCOUNT_ID = '654654462146'
         SONARQUBE_PROJECT_KEY = 'life-order'
-        SONARQUBE_SCANNER_CREDENTIALS_ID = 'e22d4ac6-bf4a-4a55-b2f9-631ac2e1be6c'
+        SONARQUBE_SCANNER_CREDENTIALS_ID = 'e22d4ac6-b4a4-4a55-b2f9-631ac2e1be6c'
         ECS_CLUSTER_NAME = 'lifewater-services'
         ECS_SERVICE_NAME = 'lifewater-order'
         ECS_TASK_DEFINITION_NAME = 'lifewater-order'
@@ -34,9 +34,8 @@ pipeline {
             steps {
                 script {
                     // Run Dependency-Check scan
-                    sh 'dependency-check --scan . --format HTML -o dependency-check-report'
-
-                    // Archive the output as an artifact
+                    // Ensure the tool is installed in the Jenkins environment
+                    sh '/usr/local/bin/dependency-check --scan . --format HTML -o dependency-check-report'
                     archiveArtifacts artifacts: 'dependency-check-report/**/*.html', fingerprint: true
                 }
             }
