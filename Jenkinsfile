@@ -33,10 +33,11 @@ pipeline {
         stage('Dependency-Check Analysis') {
             steps {
                 script {
-                    dependencyCheck additionalArguments: '-f HTML',
-                        odcInstallation: 'Dependency-Check',
-                        outdir: 'dependency-check-report',
-                        scanpath: '.'
+                    // Run Dependency-Check scan
+                    // Ensure the tool is installed and available
+                    sh '/usr/local/bin/dependency-check --scan . --format HTML -o dependency-check-report'
+                    archiveArtifacts artifacts: 'dependency-check-report/**/*.html', fingerprint: true
+                
                 }
             }
         }
