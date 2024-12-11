@@ -27,7 +27,7 @@ pipeline {
         withSonarQubeEnv('APIND_Sonarqube') { // Replace with your SonarQube server name
             // Use the SonarQube Scanner with exclusions for the specified file
             withCredentials([string(credentialsId: "${SONARQUBE_SCANNER_CREDENTIALS_ID}", variable: 'SONAR_TOKEN')]) {
-                sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} -Dsonar.sources=. -Dsonar.exclusions=**/dependency-check-report.html -Dsonar.login=${SONAR_TOKEN}""
+                sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} -Dsonar.sources=. -Dsonar.exclusions=**/dependency-check-report.html -Dsonar.login=${SONAR_TOKEN}"
                     }
                 }
             }
