@@ -40,12 +40,27 @@ pipeline {
                 }
             }
         }
+        
+        stage('TRIVY FS SCAN') {
+            steps {
+                sh "trivy fs . > trivyfs.txt"
+                archiveArtifacts artifacts: 'trivyfs.txt', fingerprint: true
+            }
+        }
+        
         stage('Build Docker Image') {
             steps {
                 script {
                     // Build Docker image
                     sh 'docker build -t $IMAGE_NAME .'
                 }
+            }
+        }
+
+        stage('TRIVY Image Scan') {
+            steps {
+                sh "trivy image ${IMAGE_NAME}:latest > trivyimage.txt"
+                archiveArtifacts artifacts: 'trivyimage.txt', fingerprint: true
             }
         }
  
