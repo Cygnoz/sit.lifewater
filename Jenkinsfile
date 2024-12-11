@@ -31,12 +31,13 @@ pipeline {
         }
 
         stage('Dependency-Check Analysis') {
-            steps {
-                script {
-                    dependencyCheck additionalArguments: '-f HTML',
-                        odcInstallation: 'Dependency-Check',
-                        outdir: 'dependency-check-report',
-                        scanpath: '.'
+    steps {
+        script {
+            // Run Dependency-Check scan
+            sh 'dependency-check --scan . --format HTML -o dependency-check-report'
+
+            // Archive the output as an artifact
+            archiveArtifacts artifacts: 'dependency-check-report/**/*.html', fingerprint: true
                 }
             }
         }
