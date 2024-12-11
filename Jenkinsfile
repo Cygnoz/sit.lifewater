@@ -15,7 +15,7 @@ pipeline {
         ECS_TASK_DEFINITION_NAME = 'lifewater-order'
     }
 
-    stages {
+   tages {
         stage('SonarQube Analysis') {
             steps {
                 script {
@@ -23,6 +23,7 @@ pipeline {
                     scannerHome = tool 'sonarqube' // Replace with your SonarQube Scanner tool name
                 }
                 withSonarQubeEnv('APIND_Sonarqube') { // Replace with your SonarQube server name
+                    // Use the SonarQube Scanner
                     withCredentials([string(credentialsId: "${SONARQUBE_SCANNER_CREDENTIALS_ID}", variable: 'SONAR_TOKEN')]) {
                         sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} -Dsonar.sources=. -Dsonar.login=${SONAR_TOKEN}"
                     }
