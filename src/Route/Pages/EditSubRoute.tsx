@@ -168,7 +168,7 @@ const EditSubRoute: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div>
               <label className="block mb-2 font-normal text-[14px] leading-[16.94px] text-[#303F58]">Sub Route</label>
-              <input type="text" name="subRoute" value={formData.subRouteName} onChange={handleInputChange} placeholder="Enter subroute" className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <input type="text" name="subRouteName" value={formData.subRouteName} onChange={handleInputChange} placeholder="Enter subroute" className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             </div>
 
             <div>
