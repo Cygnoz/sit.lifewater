@@ -34,10 +34,12 @@ pipeline {
          stage('Dependency-Check Analysis') {
     steps {
         script {
-            dependencyCheck additionalArguments: '-f HTML', 
-                            odcInstallation: 'Dependency-Check', // Ensure this name matches the configuration in Global Tool Configuration
-                            outdir: 'dependency-check-report', 
-                              scanpath: '.'
+            // Run Dependency-Check scan
+            sh 'dependency-check --scan . --format HTML -o dependency-check-report/dependency-check-report.html'
+
+            // Archive the Dependency-Check HTML report
+            archiveArtifacts artifacts: 'dependency-check-report/dependency-check-report.html', allowEmptyArchive: true
+        
                 }
             }
         }
