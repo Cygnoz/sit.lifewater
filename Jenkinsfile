@@ -30,16 +30,12 @@ pipeline {
                     }
                 }
             }
-        }
-         stage('Dependency-Check Analysis') {
+        stage('Dependency-Check Analysis') {
     steps {
         script {
-            // Run Dependency-Check scan
-            sh 'dependency-check --scan . --format HTML -o dependency-check-report/dependency-check-report.html'
-
-            // Archive the Dependency-Check HTML report
-            archiveArtifacts artifacts: 'dependency-check-report/dependency-check-report.html', allowEmptyArchive: true
-        
+            def result = sh(script: "dependency-check --scan . --format XML -o dependency-check-report/dependency-check-report.xml", returnStdout: true)
+            echo "Dependency-Check Results:\n${result}"
+    
                 }
             }
         }
