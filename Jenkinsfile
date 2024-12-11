@@ -30,7 +30,7 @@ pipeline {
             }
         }
 
-       tage('Dependency-Check Analysis') {
+       stage('Dependency-Check Analysis') {
             steps {
                 script {
                     // Run Dependency-Check scan
