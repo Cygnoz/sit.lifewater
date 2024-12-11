@@ -17,11 +17,7 @@ pipeline {
 
     
      stages {
-          stage('Clean Workspace') {
-            steps {
-                cleanWs() // Clean workspace at the start
-            }
-        }
+         
         stage('SonarQube Analysis') {
             steps {
                 script {
