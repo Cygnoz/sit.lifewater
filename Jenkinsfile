@@ -34,7 +34,7 @@ pipeline {
             steps {
                 script {
                     // Run Dependency-Check scan
-                    // Ensure the tool is installed in the Jenkins environment
+                    // Ensure the tool is installed and available
                     sh '/usr/local/bin/dependency-check --scan . --format HTML -o dependency-check-report'
                     archiveArtifacts artifacts: 'dependency-check-report/**/*.html', fingerprint: true
                 }
