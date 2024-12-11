@@ -15,7 +15,7 @@ pipeline {
         ECS_TASK_DEFINITION_NAME = 'lifewater-order'
     }
 
-   tages {
+   stages {
         stage('SonarQube Analysis') {
             steps {
                 script {
