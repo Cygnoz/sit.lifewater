@@ -30,18 +30,21 @@ pipeline {
             }
         }
 
-        stage('Dependency-Check Analysis') {
-    steps {
-        script {
-            // Run Dependency-Check and capture the output
-            def dependencyCheckOutput = sh(script: "dependency-check --scan . --format XML", returnStdout: true).trim()
+       tage('Dependency-Check Analysis') {
+            steps {
+                script {
+                    // Run Dependency-Check scan
+                    def dependencyCheckResult = sh(
+                        script: "dependency-check --scan . --format XML", 
+                        returnStdout: true
+                    ).trim()
 
-            // Output the results in a format similar to a Trivy scan
-            echo "Dependency-Check Analysis Results:\n${dependencyCheckOutput}"
+                    // Output the results in a similar format to Trivy
+                    echo "Dependency-Check Analysis Results:\n${dependencyCheckResult}"
 
-            // Archive the output as an artifact
-            writeFile file: 'dependency-check-results.xml', text: dependencyCheckOutput
-            archiveArtifacts artifacts: 'dependency-check-results.xml', fingerprint: true
+                    // Archive the output as an artifact
+                    writeFile file: 'dependency-check-results.xml', text: dependencyCheckResult
+                    archiveArtifacts artifacts: 'dependency-check-results.xml', fingerprint: true
                 
                 }
             }
