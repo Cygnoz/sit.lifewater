@@ -24,7 +24,7 @@ import CreateInternalTransfer from '../Stock/Internal transfer/Pages/CreateInter
 import AddItem from '../Stock/Items/Components/AddItem';
 import CreateItem from '../Stock/Items/Pages/CreateItem';
 import EditItem from '../Stock/Items/Pages/EditItem';
-import StockLoaded from '../Modules/Stock/StockLoaded/Stock_loaded';
+import StockLoaded from '../Stock/Stock loaded/pages/Stock_loaded';
 import UnloadedAdd from '../Stock/Unload stock/Pages/UnloadAdd';
 import AddWStock from '../Stock/W stock/Components/AddWStock';
 import CreateWStock from '../Stock/W stock/Pages/CreateWstock';
@@ -116,11 +116,16 @@ const App: React.FC = () => {
   return (
     <>
       <div className="flex h-[1200px] bg-[#f6f6f6]">
-        <Sidebar onSelect={handleNavSelect} className="w-1/4" />
-        <div className="flex-1 p-4">
+      <div className="fixed h-full">
+      <Sidebar onSelect={handleNavSelect} className="w-1/4" /></div>
+       
+        <div className="ml-[65px] flex-1 p-4">
           <Header />
-          <SubHeader selectedNav={selectedNav} subhead={subhead} />
-          <div className='h-screen bg-[#f6f6f6]'>
+       
+          <SubHeader selectedNav={selectedNav} subhead={subhead}/>
+          
+          
+          <div className='h-screen bg-[#f6f6f6] z-10'>
             <Routes>
               <Route path='/dashboard' element={<MyComponent />} />
               
