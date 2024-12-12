@@ -390,7 +390,7 @@ const EditCustomer: React.FC = () => {
   
       if (error) {
         console.error("Error updating customer:", error);
-        toast.error("Failed to update customer. Please try again.");
+        toast.error(error.response?.data?.message || error.message || "Failed to update");
         return;
       }
   
@@ -640,6 +640,7 @@ const EditCustomer: React.FC = () => {
           className="w-full p-2 border border-gray-300 rounded-lg"
           value={customerData.mainRoute}
           onChange={handleInputChange}
+          required
         >
           <option value="">Select Main Route</option>
           {mainRouteList.map((mainRoute) => (
@@ -665,6 +666,7 @@ const EditCustomer: React.FC = () => {
           value={customerData.subRoute}
           onChange={handleInputChange}
           disabled={!customerData.mainRoute}
+          required
         >
           <option value="">Select Sub Route</option>
           {routesList

@@ -226,6 +226,7 @@ export default function Component() {
       newErrors.companyName = "Company name is required for business customers";
     }
     if (!formData.fullName) newErrors.fullName = "Full name is required";
+    if (!formData.addressLine1) newErrors.addressLine1 = "addressLine1 is required"; 
     if (
       isNaN(Number(formData.numberOfBottles)) ||
       Number(formData.numberOfBottles) <= 0
@@ -263,7 +264,7 @@ export default function Component() {
     // Step 1: Validate the form
     const isValid = validateForm(); // Ensure you have the validateForm function implemented
     if (!isValid) {
-      toast.error("Please fix the form errors.");
+      // toast.error("Please fix the form errors.");
       return; // Stop the submission if validation fails
     }
 
@@ -420,9 +421,9 @@ export default function Component() {
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter address 1"
             />
-            {/* {errors.email && (
-              <p className="text-red-500 text-sm">{errors.email}</p>
-            )} */}
+            {errors.addressLine1 && (
+              <p className="text-red-500 text-sm">{errors.addressLine1}</p>
+            )}
           </div>
           <div>
             <label className="block text-gray-700">addressLine 2</label>
@@ -475,6 +476,8 @@ export default function Component() {
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter zipcode"
+              inputMode="numeric"
+              pattern="[0-9]*"
             />
             {/* {errors.email && (
               <p className="text-red-500 text-sm">{errors.email}</p>
@@ -487,8 +490,8 @@ export default function Component() {
               name="flatNumber"
               value={formData.flatNumber}
               onChange={handleInputChange}
-              className="w-full p-2 mt-1 border rounded-md"
-              placeholder="Enter zipcode"
+              className="w-full p-2 mt-1 border rounded-md uppercase"
+              placeholder="Enter flat number"
             />
             {/* {errors.email && (
               <p className="text-red-500 text-sm">{errors.email}</p>
@@ -549,6 +552,7 @@ export default function Component() {
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter Mobile Number"
+              maxLength={15}
             />
             {errors.mobileNumber && (
               <p className="text-red-500 text-sm">{errors.mobileNumber}</p>
