@@ -3,9 +3,9 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import SubHeader from './SubHeader';
-import CreateOrder from '../pages/Createorder';
-import ViewOrder from '../components/ViewOrder';
-import NewOrder from '../pages/NewOrder';
+import CreateOrder from '../Orders/pages/Createorder';
+
+// import NewOrder from '../Orders/components/NewOrder';
 import ActiveRoute from '../Route/Pages/Activeroute';
 import SubRoute from '../Route/Pages/SubRoute';
 import EditSubRoute from '../Route/Pages/EditSubRoute';
@@ -77,6 +77,7 @@ import Login from '../Settings/Login/Login';
 import CreateStaff from '../Staff/Createstaff';
 import AddStaff from '../Staff/AddStaff';
 import StaffView from '../Staff/VieStaff/StaffView';
+import ViewOrder from '../Orders/components/ViewOrder';
 
 const App: React.FC = () => {
   const [selectedNav, setSelectedNav] = useState<string>(() => localStorage.getItem('selectedNav') || '');
@@ -131,7 +132,7 @@ const App: React.FC = () => {
               
               {/* ORDERS */}
               <Route path='/orders' element={<CreateOrder />} />
-              <Route path='/addneworder' element={<NewOrder />} />
+              {/* <Route path='/addneworder' element={<NewOrder />} /> */}
               <Route path='/vieworder/:id' element={<ViewOrder />} />
 
               {/* STAFF */}

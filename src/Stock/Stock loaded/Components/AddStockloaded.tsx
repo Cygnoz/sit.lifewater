@@ -1,5 +1,11 @@
-import React, { useState, ChangeEvent, useEffect, useRef, useContext } from "react";
-import printer from "../../../assets/images/printer.svg";
+import React, {
+  useState,
+  ChangeEvent,
+  useEffect,
+  useRef,
+  useContext,
+} from "react";
+
 import downarrow from "../../../assets/images/Vector.png";
 import circleplus from "../../../assets/images/Icon.svg";
 import trash from "../../../assets/images/trash.svg";
@@ -13,8 +19,7 @@ import useApi from "../../../Hook/UseApi";
 interface Item {
   itemName: string;
   quantity: number;
-  itemId?: string; 
-
+  itemId?: string;
 }
 
 interface WarehouseItem {
@@ -22,7 +27,7 @@ interface WarehouseItem {
   warehouseName: string;
   contactNo: string;
   address: string;
-  stock:[]
+  stock: [];
 }
 interface OrderDetails {
   mainRouteId: string;
@@ -34,35 +39,35 @@ interface OrderDetails {
   transferNumber: string;
   stock: Item[]; // Array of items
   notes?: string; // Optional notes
-  date?:string;
+  date?: string;
   termsAndConditions?: string; // Optional terms and conditions
 }
 interface Route {
   _id: string;
   subRouteName: string;
   mainRouteName: string;
-  mainRouteId:string;
-  subRouteId:string;
+  mainRouteId: string;
+  subRouteId: string;
 }
 
 const AddStockloaded: React.FC = () => {
   const [orderDetails, setOrderDetails] = useState<OrderDetails>({
     mainRouteId: "",
-  mainRouteName: "",
-  subRouteId: "",
-  subRouteName: "",
-  warehouseId: "",
-  warehouseName: "",
-  transferNumber: "",
-  stock: [
-    {
-      itemId:"",
-      itemName: "",
-      quantity: 0
-    }
-  ],
-  notes: "",
-  termsAndConditions: ""
+    mainRouteName: "",
+    subRouteId: "",
+    subRouteName: "",
+    warehouseId: "",
+    warehouseName: "",
+    transferNumber: "",
+    stock: [
+      {
+        itemId: "",
+        itemName: "",
+        quantity: 0,
+      },
+    ],
+    notes: "",
+    termsAndConditions: "",
   });
   console.log(orderDetails);
 
@@ -85,59 +90,53 @@ const AddStockloaded: React.FC = () => {
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const mainRouteName = event.target.value;
-  
+
     // Find the selected route object to get mainRouteId
     const selectedRoute = routesList.find(
       (route) => route.mainRouteName === mainRouteName
     );
-  
+
     const mainRouteId = selectedRoute ? selectedRoute.mainRouteId : "";
-  
+
     setSelectedMainRoute(mainRouteName);
-  
+
     // Filter subroutes based on the selected main route
     const filtered = routesList.filter(
       (route) => route.mainRouteName === mainRouteName
     );
-  
+
     setFilteredSubRoutes(filtered);
-  
+
     // Update the orderDetails with the selected mainRouteName and mainRouteId
     setOrderDetails((prev) => ({
       ...prev,
       mainRouteName, // Update the main route name
-      mainRouteId,   // Update the main route ID
+      mainRouteId, // Update the main route ID
       subRouteName: "", // Clear subroute when main route changes
     }));
   };
-  
-  
+
   const handleSubRouteChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const subRouteName = event.target.value;
-  
+
     // Find the selected sub-route object to get subRouteId
     const selectedSubRoute = filteredSubRoutes.find(
       (route) => route.subRouteName === subRouteName
     );
-  
+
     const subRouteId = selectedSubRoute ? selectedSubRoute._id : "";
-  
+
     setSelectedSubRoute(subRouteName);
-  
+
     // Update the orderDetails with the selected subRouteName and subRouteId
     setOrderDetails((prev) => ({
       ...prev,
       subRouteName, // Update the sub-route name
-      subRouteId,   // Update the sub-route ID
+      subRouteId, // Update the sub-route ID
     }));
   };
-  
-
- 
-  
-  
 
   useEffect(() => {
     // Fetch the routes list
@@ -174,35 +173,28 @@ const AddStockloaded: React.FC = () => {
   }, []);
 
   // warehouses
-  const [selectedWarehouse, setSelectedWarehouse] = useState<WarehouseItem | null>(null)
-
+  const [selectedWarehouse, setSelectedWarehouse] =
+    useState<WarehouseItem | null>(null);
   // Handle warehouse selection
-  const handleWarehouseChange = (event : any) => {
+  const handleWarehouseChange = (event: any) => {
     const warehouseId = event.target.value;
-  
     // Find the selected warehouse object
     const selectedWarehouse = warehouses.find((w) => w._id === warehouseId);
-  
-    const warehouseName = selectedWarehouse ? selectedWarehouse.warehouseName : "";
-  
+    const warehouseName = selectedWarehouse
+      ? selectedWarehouse.warehouseName
+      : "";
     setSelectedWarehouse(selectedWarehouse || null);
-  
     // Update the orderDetails with the selected warehouseName and warehouseId
     setOrderDetails((prev) => ({
       ...prev,
-      warehouseId,   // Store the warehouse ID
+      warehouseId, // Store the warehouse ID
       warehouseName, // Store the warehouse name
     }));
   };
-  
-
 
   const filteredItems = selectedWarehouse ? selectedWarehouse.stock : [];
 
-  
-
   const { setWarehouseResponse } = useContext(WarehouseResponseContext)!;
-
 
   const getAllWarehouse = async () => {
     try {
@@ -236,21 +228,17 @@ const AddStockloaded: React.FC = () => {
     });
     setOpenDropdownId(null); // Close the dropdown
   };
-  
-  
 
   const updateOrder = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-  
+
     setOrderDetails((prev) => ({
       ...prev,
       [name]: value, // Dynamically updating the orderDetails based on the field name
     }));
   };
-  
-  
 
   const handleItemChange = (
     index: number,
@@ -263,16 +251,16 @@ const AddStockloaded: React.FC = () => {
         ...newItems[index],
         [field]: value,
       };
-  
+
       // If the field is 'quantity', convert to a number
       if (field === "quantity") {
         newItems[index].quantity = Number(value) || 0;
       }
-  
+
       return { ...prev, stock: newItems };
     });
   };
-  
+
   const removeItem = (index: number) => {
     setOrderDetails((prev) => ({
       ...prev,
@@ -282,7 +270,6 @@ const AddStockloaded: React.FC = () => {
           : [{ itemId: "", itemName: "", quantity: 0 }], // Keep only itemId, itemName, and quantity
     }));
   };
-  
 
   const addItem = () => {
     setOrderDetails((prev) => ({
@@ -293,27 +280,24 @@ const AddStockloaded: React.FC = () => {
       ],
     }));
   };
-  
-  
 
   const toggleDropdown = (index: number, type: string) => {
     setOpenDropdownId(index === openDropdownId ? null : index);
     setOpenDropdownType(type);
   };
   const { request: AddStockLoad } = useApi("post", 4001);
-  const navigate=useNavigate()
+  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     try {
       const url = `${endpoints.ADD_STOCK_LOAD}`;
-      const { response, error } = await AddStockLoad(url, orderDetails)
+      const { response, error } = await AddStockLoad(url, orderDetails);
       if (!error && response) {
-        console.log('Stock :', response);
+        console.log("Stock :", response);
         toast.success(response.data.message);
         setTimeout(() => {
-          navigate('/stockloaded')
-        }, 1000)
-
+          navigate("/stockloaded");
+        }, 1000);
       }
       console.log(error);
       toast.error(error.response.data.message);
@@ -322,12 +306,11 @@ const AddStockloaded: React.FC = () => {
       toast.error(error.data.message);
     }
   };
-  console.log("Loading stock details : ",orderDetails);
-  
+  console.log("Loading stock details : ", orderDetails);
 
   return (
     <div>
-         <ToastContainer
+      <ToastContainer
         position="top-center"
         autoClose={3000}
         hideProgressBar={false}
@@ -357,8 +340,7 @@ const AddStockloaded: React.FC = () => {
             </div>
             <div className="container mx-auto p-4">
               <div className="bg-white p-4 -mt-1 -ms-2 rounded-lg shadow-md">
-                
-              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block mb-2 font-[400px] text-[#303F58] text-[14px]">
                       Main Route
@@ -367,7 +349,7 @@ const AddStockloaded: React.FC = () => {
                       name="mainRouteName"
                       value={selectedMainRoute}
                       onChange={handleMainRouteChange} // Updated to handle main route change
-                      className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px] font-normal"
+                      className="w-full p-2 border rounded-md  text-[#000000] text-[14px] font-normal"
                     >
                       <option value="" className="font-normal">
                         Select Main Route
@@ -387,19 +369,17 @@ const AddStockloaded: React.FC = () => {
                       name="subRouteName"
                       value={selectedSubRoute}
                       onChange={handleSubRouteChange} // Updated to handle sub route change
-                      className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px] font-normal"
+                      className="w-full p-2 border rounded-md  text-[#000000] text-[14px] font-normal"
                     >
-                    <option value="">Select Sub Route</option>
-              {filteredSubRoutes.map((route) => (
-                <option key={route._id} value={route.subRouteName}>
-                  {route.subRouteName}
-                </option>
+                      <option value="">Select Sub Route</option>
+                      {filteredSubRoutes.map((route) => (
+                        <option key={route._id} value={route.subRouteName}>
+                          {route.subRouteName}
+                        </option>
                       ))}
                     </select>
                   </div>
-
                 </div>
-
 
                 {/* Date and Order Number */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
@@ -407,15 +387,17 @@ const AddStockloaded: React.FC = () => {
                     <label className="block mb-2 font-[400px] text-[#303F58] text-[14px]">
                       Warehouse
                     </label>
-                    <select onChange={handleWarehouseChange} className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px] font-normal">
-                          <option value="">Select Warehouse</option>
-                          {warehouses.map((warehouse) => (
-                            <option key={warehouse._id} value={warehouse._id}>
-                              {warehouse.warehouseName}
-                            </option>
-                          ))}
-                        </select>
-
+                    <select
+                      onChange={handleWarehouseChange}
+                      className="w-full p-2 border rounded-md  text-[#000000] text-[14px] font-normal"
+                    >
+                      <option value="">Select Warehouse</option>
+                      {warehouses.map((warehouse) => (
+                        <option key={warehouse._id} value={warehouse._id}>
+                          {warehouse.warehouseName}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="block mb-2 font-[400px] text-[#303F58] text-[14px]">
@@ -426,7 +408,7 @@ const AddStockloaded: React.FC = () => {
                       name="date"
                       value={orderDetails.date}
                       onChange={updateOrder}
-                      className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px] font-normal"
+                      className="w-full p-2 border rounded-md  text-[#000000] text-[14px] font-normal"
                     />
                   </div>
                   <div>
@@ -438,8 +420,8 @@ const AddStockloaded: React.FC = () => {
                       name="transferNumber"
                       value={orderDetails.transferNumber}
                       onChange={updateOrder}
-                      className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px] font-normal"
-                      placeholder="123"
+                      className="w-full p-2 border rounded-md  text-[#000000] text-[14px] font-normal"
+                      placeholder=""
                     />
                   </div>
                 </div>
@@ -449,19 +431,16 @@ const AddStockloaded: React.FC = () => {
                   <table className="min-w-full bg-white rounded-lg relative pb-4 border-dropdownText">
                     <thead className="text-[12px] text-center bg-[#FDF8F0] text-dropdownText">
                       <tr className="bg-lightPink">
-                        {[
-                          "Product",
-                          "Quantity",
-                         
-                          "Actions",
-                        ].map((item, index) => (
-                          <th
-                            key={index}
-                            className="py-2 px-4 font-medium border-b border-tableBorder relative"
-                          >
-                            {item}
-                          </th>
-                        ))}
+                        {["Product", "Quantity", "Actions"].map(
+                          (item, index) => (
+                            <th
+                              key={index}
+                              className="py-2 px-4 font-medium border-b border-tableBorder relative"
+                            >
+                              {item}
+                            </th>
+                          )
+                        )}
                       </tr>
                     </thead>
                     <tbody className="text-dropdownText text-center text-[13px]">
@@ -474,24 +453,27 @@ const AddStockloaded: React.FC = () => {
                                 toggleDropdown(index, "searchProduct")
                               }
                             >
-                          {item.itemName ? (
-                                  <div className="cursor-pointer gap-2 grid grid-cols-12 appearance-none items-center justify-center h-9 text-zinc-400 bg-white text-sm">                             
-                                    <div className="col-span-8 text-start">
-                                      <p className="text-textColor">{item.itemName}</p>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div
-                                    className="cursor-pointer flex appearance-none items-center justify-center h-9 text-zinc-400 bg-white text-sm gap-2"
-                                    onClick={() => toggleDropdown(index, "searchProduct")} // Show dropdown when clicked
-                                  >
-                                    <p>Type or click</p>
-                                    <p>
-                                      <img src={downarrow} alt="" width={12} />
+                              {item.itemName ? (
+                                <div className="cursor-pointer gap-2 grid grid-cols-12 appearance-none items-center justify-center h-9 text-zinc-400 bg-white text-sm">
+                                  <div className="col-span-8 text-start">
+                                    <p className="text-textColor">
+                                      {item.itemName}
                                     </p>
                                   </div>
-                                )}
-
+                                </div>
+                              ) : (
+                                <div
+                                  className="cursor-pointer flex appearance-none items-center justify-center h-9 text-zinc-400 bg-white text-sm gap-2"
+                                  onClick={() =>
+                                    toggleDropdown(index, "searchProduct")
+                                  } // Show dropdown when clicked
+                                >
+                                  <p>Type or click</p>
+                                  <p>
+                                    <img src={downarrow} alt="" width={12} />
+                                  </p>
+                                </div>
+                              )}
                             </div>
                             {openDropdownId === index &&
                               openDropdownType === "searchProduct" && (
@@ -508,28 +490,35 @@ const AddStockloaded: React.FC = () => {
                                     placeholder="Select Item"
                                     className="w-full p-2 border rounded-lg h-12 bg-[#F9F7F5]"
                                   />
-                                  
+
                                   {filteredItems.length > 0 ? (
-                                      filteredItems.map((item: any, idx: number) => (
+                                    filteredItems.map(
+                                      (item: any, idx: number) => (
                                         <div
                                           key={idx}
-                                          onClick={() => handleItemSelect(item, idx)} // Handle item selection
+                                          onClick={() =>
+                                            handleItemSelect(item, idx)
+                                          } // Handle item selection
                                           className="grid bg-[#FDF8F0] grid-cols-12 gap-1 p-2 hover:bg-gray-100 cursor-pointer border border-slate-400 rounded-lg"
                                         >
                                           <div className="col-span-10 flex">
                                             <div className="text-start">
-                                              <p className="font-bold text-sm text-black">{item.itemName}</p>
+                                              <p className="font-bold text-sm text-black">
+                                                {item.itemName}
+                                              </p>
                                             </div>
                                           </div>
                                         </div>
-                                      ))
-                                    ) : (
-                                      <div className="text-center border-slate-400 border rounded-lg">
-                                        <p className="text-red-500 text-sm py-4">Items Not Found!</p>
-                                      </div>
-                                    )}
+                                      )
+                                    )
+                                  ) : (
+                                    <div className="text-center border-slate-400 border rounded-lg">
+                                      <p className="text-red-500 text-sm py-4">
+                                        Items Not Found!
+                                      </p>
+                                    </div>
+                                  )}
 
-                                  
                                   <Link to="/additem">
                                     <button className="bg-darkGreen text-[#820000] mt-1 rounded-lg py-4 px-6 flex items-center text-sm font-bold border-slate-400 border gap-2 w-full hover:bg-lightRed">
                                       <img src={circleplus} alt="" />{" "}
@@ -554,7 +543,7 @@ const AddStockloaded: React.FC = () => {
                               placeholder="0"
                             />
                           </td>
-                         
+
                           <td className="py-2.5 px-4 border-y border-tableBorder text-center">
                             <button
                               onClick={() => removeItem(index)}
@@ -585,7 +574,7 @@ const AddStockloaded: React.FC = () => {
                     name="notes"
                     value={orderDetails.notes}
                     onChange={updateOrder}
-                    className="w-full p-2 border rounded-md text-[#8F99A9] text-[14px] font-normal"
+                    className="w-full p-2 border rounded-md text-[#000000] text-[14px] font-normal"
                     placeholder="Add a Note"
                   ></textarea>
                 </div>
@@ -598,40 +587,33 @@ const AddStockloaded: React.FC = () => {
                     name="termsAndConditions"
                     value={orderDetails.termsAndConditions}
                     onChange={updateOrder}
-                    className="w-full p-2 border rounded-md text-[#8F99A9] text-[14px] font-normal"
+                    className="w-full p-2 border rounded-md text-[#000000] text-[14px] font-normal"
                     placeholder="Add Terms and Condition of Your Business"
                   ></textarea>
-                   <div className="flex ms-24 mt-5">
-              <div>
-                <button className="bg-[#FEFDFA] rounded-lg text-[#565148] text-[14px] py-2 px-4 mx-1 mt-2 w-[74px] h-[38px] border border-[#565148]">
-                  Cancel
-                </button>
-              </div>
-              <div>
-                <button className="bg-[#FEFDFA] rounded-lg text-[#565148] text-[14px] py-2 px-4 mx-1 mt-2 flex items-center w-[74px] h-[38px] border border-[#565148]">
-                  <img src={printer} className="me-1 mt-1 -ms-2" alt="" />
-                  Print
-                </button>
-              </div>
-              <div>
-                <button onClick={handleSubmit} className="bg-[#820000] rounded-lg text-[#FEFDF9] text-[14px] py-2 px-5 mx-1 mt-2 w-[108px] h-[38px]">
-                  Save
-                </button>
-              </div>
-            </div>
+                  <div className="flex justify-end gap-10 mt-5">
+                    <div>
+                     <Link to={'/stockloaded'}>
+                     <button className="bg-[#FEFDFA] rounded-lg text-[#565148] text-[14px] py-2 px-4 mx-1 mt-2 w-[74px] h-[38px] border border-[#565148]">
+                        Cancel
+                      </button>
+                     </Link>
+                    </div>
+                    <div>
+                      <button
+                        onClick={handleSubmit}
+                        className="bg-[#820000] rounded-lg text-[#FEFDF9] text-[14px] py-2 px-5 mx-1 mt-2 w-[108px] h-[38px]"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
                 </div>
-
-                {/* Total and Actions */}
               </div>
             </div>
           </div>
         </div>
-
-        
-           
-          </div>
-        </div>
-    
+      </div>
+    </div>
   );
 };
 

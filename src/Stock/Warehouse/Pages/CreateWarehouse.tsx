@@ -23,7 +23,6 @@ const CreateWarehouse: React.FC = () => {
 
   const { setWarehouseResponse } = useContext(WarehouseResponseContext)!;
 
-
   const getAllWarehouse = async () => {
     try {
       const url = `${endpoints.GET_ALL_WAREHOUSE}`;
