@@ -12,6 +12,9 @@ exports.createCustomer = async (req, res) => {
     const cleanedData = cleanCustomerData(req.body);
     
     const { fullName, whatsappNumber, location, email } = cleanedData;
+
+    console.log('cleaned data:',cleanedData);
+    
     
     
     // Validate required fields
@@ -94,15 +97,18 @@ exports.createCustomer = async (req, res) => {
       accountId: savedAccount._id,
       accountName: savedAccount.accountName,
       action: "Opening Balance",
-      debitAmount: savedCustomer.depositAmount,
+      debitAmount: savedCustomer.depositAmount || 0,
       creditAmount: 0,
     });
     await trialEntry.save();
 
+    console.log(data);
+    
     return res.status(201).json({
       message: 'Customer created successfully!',
       data: savedCustomer
     });
+    
   } catch (error) {
     console.error('Error creating customer:', error);
     res.status(500).json({ message: "Internal server error." });
@@ -244,6 +250,10 @@ exports.updateCustomerById = async (req, res) => {
     // Clean the customer data (ensure you have a cleanCustomerData function if needed)
     const cleanedData = cleanCustomerData(req.body);
     console.log("Cleaned Data:", cleanedData);
+
+    if (cleanedData.depositAmount === "NaN") {
+      cleanedData.depositAmount = null; // or 0, depending on your requirements
+    }
 
     const { fullName, whatsappNumber, location, email } = cleanedData;
 

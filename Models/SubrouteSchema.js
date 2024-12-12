@@ -6,7 +6,7 @@ const stockSchema = new Schema({
   itemId: { type: String },
   itemName: { type: String },
   quantity: { type: Number },
-  status: { type: String, default: undefined },
+  status: { type: String },
 }, { _id: false });
 
 const subRouteSchema = new Schema({
@@ -15,7 +15,6 @@ const subRouteSchema = new Schema({
   description: { type: String },
   mainRouteId: { type: Schema.Types.ObjectId, ref: 'MainRoute' },
   stock: { type: [stockSchema], default: undefined }
-
 });
 
 const SubRoute = mongoose.model('SubRoute', subRouteSchema);
