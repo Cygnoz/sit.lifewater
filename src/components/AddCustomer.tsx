@@ -212,7 +212,7 @@ export default function Component() {
         toast.success("Location fetched successfully");
       } catch (error) {
         console.error("Error fetching location:", error);
-        toast.error(`Error fetching location. Please try again.${error}`);
+        toast.error("Error fetching location. Please try again.");
       } finally {
         setIsGettingLocation(false);
       }
@@ -285,9 +285,8 @@ export default function Component() {
 
       if (error) {
         // Step 4: Handle API errors
-        toast.error(
-          error.message || "Failed to add customer. Please try again."
-        );
+        toast.error(error.response?.data?.message || error.message || "Failed to save");
+
       } else {
         // Step 5: Success - Show success message and navigate
         toast.success("Customer added successfully.");
@@ -295,10 +294,10 @@ export default function Component() {
           navigate("/viewcustomers"); // Navigate after success
         }, 2000);
       }
-    } catch (err) {
+    } catch (err:any) {
       // Handle unexpected errors
-      console.error("Error adding customer:", err);
-      toast.error("An unexpected error occurred. Please try again.");
+      console.log("Error adding customer:", err);
+      // toast.error(err.response?.data?.message || err.message || "Failed to save");
     } finally {
       setLoading(false); // Hide loading spinner
     }
@@ -400,7 +399,7 @@ export default function Component() {
           </div>
 
           <div>
-            <label className="block text-gray-700">Email</label>
+            <label className="block text-gray-700">email</label>
             <input
               type="text"
               name="email"
@@ -412,7 +411,7 @@ export default function Component() {
 
           </div>
           <div>
-            <label className="block text-gray-700">AddressLine 1</label>
+            <label className="block text-gray-700">addressLine 1</label>
             <input
               type="text"
               name="addressLine1"
@@ -426,7 +425,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">AddressLine 2</label>
+            <label className="block text-gray-700">addressLine 2</label>
             <input
               type="text"
               name="addressLine2"
@@ -440,7 +439,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">City</label>
+            <label className="block text-gray-700">city</label>
             <input
               type="text"
               name="city"
@@ -454,7 +453,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">Street</label>
+            <label className="block text-gray-700">street</label>
             <input
               type="text"
               name="street"
@@ -468,7 +467,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">Zip Postal Code</label>
+            <label className="block text-gray-700">zip postal code</label>
             <input
               type="number"
               name="zipPostalCode"
@@ -482,7 +481,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">Flat Number</label>
+            <label className="block text-gray-700">flat number</label>
             <input
               type="text"
               name="flatNumber"
@@ -498,7 +497,7 @@ export default function Component() {
 
           <div className="flex space-x-2">
             <div className="w-1/2">
-              <label className="block text-gray-700">Number Of Bottles</label>
+              <label className="block text-gray-700">Number of Bottles</label>
               <input
                 type="text"
                 name="numberOfBottles"
@@ -512,7 +511,7 @@ export default function Component() {
               )}
             </div>
             <div className="w-1/2">
-              <label className="block text-gray-700">Rate Per Bottle</label>
+              <label className="block text-gray-700">Rate per bottle</label>
               <input
                 type="text"
                 name="ratePerBottle"

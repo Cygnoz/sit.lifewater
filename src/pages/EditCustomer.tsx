@@ -28,6 +28,7 @@ interface Location {
 interface CustomerData {
   _id: string;
   customerType: string;
+  companyName:string;
   fullName: string;
   email: string;
   addressLine1: string;
@@ -462,7 +463,7 @@ const EditCustomer: React.FC = () => {
           </div>
 
           {/* Company Name (for Business customers) */}
-          {/* {customerData.customerType === "Business" && (
+          {customerData.customerType === "Business" && (
             <div>
               <label className="block text-[#303F58] font-[14px] mb-2">
                 Company Name
@@ -476,7 +477,7 @@ const EditCustomer: React.FC = () => {
                 placeholder="Enter Company Name"
               />
             </div>
-          )} */}
+          )}
 
           {/* First Name */}
           <div>
