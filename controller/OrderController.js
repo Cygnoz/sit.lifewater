@@ -149,12 +149,25 @@ exports.createOrder = async (req, res) => {
 exports.viewOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
+    
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
-    res.status(200).json(order);
+    
+    const customer = await Customer.findById(order.customerId).select('fullName mobileNo');
+    
+    const orderWithCustomerInfo = {
+      ...order.toObject(),
+      customerName: customer ? customer.fullName : 'Unknown',
+      customerMobile: customer ? customer.mobileNo : 'N/A'
+    };
+
+    res.status(200).json(orderWithCustomerInfo);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching order', error });
+    res.status(500).json({ 
+      message: 'Error fetching order', 
+      error: error.message 
+    });
   }
 };
 
