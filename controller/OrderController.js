@@ -162,11 +162,25 @@ exports.viewOrder = async (req, res) => {
 exports.viewAllOrders = async (req, res) => {
   try {
     const orders = await Order.find();
-    res.status(200).json(orders);
+    
+    const ordersWithCustomerInfo = await Promise.all(orders.map(async (order) => {
+      const customer = await Customer.findById(order.customerId).select('fullName');
+      
+      return {
+        ...order.toObject(),
+        customerName: customer ? customer.fullName : 'Unknown'
+      };
+    }));
+
+    res.status(200).json(ordersWithCustomerInfo);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching orders', error });
+    res.status(500).json({ 
+      message: 'Error fetching orders', 
+      error: error.message 
+    });
   }
 };
+
 
 // Function to delete an order by ID
 exports.deleteOrder = async (req, res) => {
