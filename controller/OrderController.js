@@ -93,7 +93,7 @@ exports.createOrder = async (req, res) => {
           itemId: item.itemId,
           itemName: item.itemName,
           quantity: item.quantity,
-          status: "Owned", // Or another status you need
+          status: "Filled", // Or another status you need
         });
       }
     }
