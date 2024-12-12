@@ -1,31 +1,38 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+
+const stockSchema = new Schema({
+  itemId: { type: String },
+  itemName: { type: String },
+  quantity: { type: Number },
+  status: { type: String },
+}, { _id: false });
+
 const orderSchema = new mongoose.Schema({
   // Order identification
   orderNumber: {
     type: String,
-    // required: true,
-    // unique: true,
     trim: true
   },
-  
-  // References
-  customer: {
+  mainRouteName:{
     type:String,
-    // type: Schema.Types.ObjectId,
-    // required: true
+  },
+  mainRouteId:{
+    type:String,
+  },
+  subRouteName:{
+    type:String,
+  },
+  subRouteId:{
+    type:String,
+  },
+  customerId: {
+    type:String,
   },
   salesman: {
     type:String,
-    // type: Schema.Types.ObjectId,
-    // required: true
   },
-  warehouse:{
-    type: String,
-    // required: true
-  },
-
   // Order details
   date: {
     type: Date,
@@ -37,35 +44,6 @@ const orderSchema = new mongoose.Schema({
     // required: true,
     enum: ['Cash', 'Credit', 'FOC']
   },
-
-  // Items/Products in order
-  items: [{
-    itemName: {
-      type: String,
-    //   required: true
-    },
-    itemImage: {
-      type: String, // URL or path to the image
-    },
-    quantity: {
-      type: Number,
-    //   required: true,
-      min: 0,
-      default: 1
-    },
-    price: {
-      type: Number,
-    //   required: true,
-    //   min: 0
-    },
-    amount: {
-      type: Number,
-    //   required: true,
-    //   min: 0
-    },
- 
-  }],
-
   // Additional information
   notes: {
     type: String,
@@ -81,29 +59,8 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     // required: true,
   },
-
+  stock: { type: [stockSchema], default: undefined }
 });
-
-// // Calculate total amount before saving
-// orderSchema.pre('save', function(next) {
-//   // Calculate total from items
-//   this.totalAmount = this.items.reduce((sum, item) => {
-//     return sum + (item.quantity * item.price);
-//   }, 0);
-  
-//   // Round to 2 decimal places
-//   this.totalAmount = Number(this.totalAmount.toFixed(2));
-  
-//   next();
-// });
-
-// // Calculate item amount before saving
-// orderSchema.pre('save', function(next) {
-//   this.items.forEach(item => {
-//     item.amount = Number((item.quantity * item.price).toFixed(2));
-//   });
-//   next();
-// });
 
 const Order = mongoose.model('Order', orderSchema);
 
