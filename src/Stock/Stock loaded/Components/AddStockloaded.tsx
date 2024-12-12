@@ -156,13 +156,13 @@ const AddStockloaded: React.FC = () => {
   }, []);
 
   // Filtered items excluding already selected ones
-  const filteredItems = items.filter(
-    (item) =>
-      item.itemName.toLowerCase().includes(searchValue.toLowerCase()) &&
-      !orderDetails.items.some(
-        (orderItem) => orderItem.itemName === item.itemName
-      )
-  );
+  // const filteredItems = items.filter(
+  //   (item) =>
+  //     item.itemName.toLowerCase().includes(searchValue.toLowerCase()) &&
+  //     !orderDetails.items.some(
+  //       (orderItem) => orderItem.itemName === item.itemName
+  //     )
+  // );
 
   const handleItemSelect = (item: Item, index: number) => {
     const quantity = item.quantity || 1;
@@ -439,54 +439,54 @@ const AddStockloaded: React.FC = () => {
                                     placeholder="Select Item"
                                     className="w-full p-2 border rounded-lg h-12 bg-[#F9F7F5]"
                                   />
-                                  {loading ? (
+                                  {/* {loading ? (
                                     <p>Loading...</p>
-                                  ) : filteredItems.length > 0 ? (
-                                    filteredItems.map((filteredItem, idx) => (
-                                      <div
-                                        key={idx}
-                                        onClick={() =>
-                                          handleItemSelect(filteredItem, index)
-                                        }
-                                        className="grid bg-[#FDF8F0] grid-cols-12 gap-1 p-2 hover:bg-gray-100 cursor-pointer border border-slate-400 rounded-lg"
-                                      >
-                                        <div className="col-span-2 flex justify-center">
-                                          <img
-                                            className="rounded-full h-10"
-                                            src={
-                                              filteredItem.itemImage
-                                                ? `${STOCK_BASEURL}/${filteredItem.itemImage.replace(
-                                                    /\\/g,
-                                                    "/"
-                                                  )}`
-                                                : defaultImage
-                                            }
-                                            alt={
-                                              filteredItem.itemImage ||
-                                              "default image"
-                                            }
-                                          />
-                                        </div>
-                                        <div className="col-span-10 flex">
-                                          <div className="text-start">
-                                            <p className="font-bold text-sm text-black">
-                                              {filteredItem.itemName}
-                                            </p>
-                                            <p className="text-xs text-gray-500">
-                                              Rate: RS.
-                                              {filteredItem.purchasePrice}
-                                            </p>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))
-                                  ) : (
+                                  // ) : filteredItems.length > 0 ? (
+                                  //   filteredItems.map((filteredItem, idx) => (
+                                  //     <div
+                                  //       key={idx}
+                                  //       onClick={() =>
+                                  //         handleItemSelect(filteredItem, index)
+                                  //       }
+                                  //       className="grid bg-[#FDF8F0] grid-cols-12 gap-1 p-2 hover:bg-gray-100 cursor-pointer border border-slate-400 rounded-lg"
+                                  //     >
+                                  //       <div className="col-span-2 flex justify-center">
+                                  //         <img
+                                  //           className="rounded-full h-10"
+                                  //           src={
+                                  //             filteredItem.itemImage
+                                  //               ? `${STOCK_BASEURL}/${filteredItem.itemImage.replace(
+                                  //                   /\\/g,
+                                  //                   "/"
+                                  //                 )}`
+                                  //               : defaultImage
+                                  //           }
+                                  //           alt={
+                                  //             filteredItem.itemImage ||
+                                  //             "default image"
+                                  //           }
+                                  //         />
+                                  //       </div>
+                                  //       <div className="col-span-10 flex">
+                                  //         <div className="text-start">
+                                  //           <p className="font-bold text-sm text-black">
+                                  //             {filteredItem.itemName}
+                                  //           </p>
+                                  //           <p className="text-xs text-gray-500">
+                                  //             Rate: RS.
+                                  //             {filteredItem.purchasePrice}
+                                  //           </p>
+                                  //         </div>
+                                  //       </div>
+                                  //     </div>
+                                  //   ))
+                                  // ) : (
                                     <div className="text-center border-slate-400 border rounded-lg">
                                       <p className="text-red-500 text-sm py-4">
                                         Items Not Found!
                                       </p>
                                     </div>
-                                  )}
+                                  )} */}
                                   <Link to="/additem">
                                     <button className="bg-darkGreen text-[#820000] mt-1 rounded-lg py-4 px-6 flex items-center text-sm font-bold border-slate-400 border gap-2 w-full hover:bg-lightRed">
                                       <img src={circleplus} alt="" />{" "}
