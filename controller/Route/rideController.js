@@ -5,13 +5,12 @@ const Staff = require('../../Models/StaffSchema');
 
 
 //Add Customer
-exports.createCustomer = async (req, res) => {
+exports.startRide = async (req, res) => {
     console.log("Add Ride:", req.body);
     try {
       const cleanedData = cleanCustomerData(req.body);
         
-      console.log('cleaned data:',cleanedData);
-      
+      console.log('Cleaned data:',cleanedData);     
       
       
       // Validate required fields

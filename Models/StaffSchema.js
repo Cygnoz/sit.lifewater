@@ -18,7 +18,6 @@ const staffSchema = new mongoose.Schema({
   emiratesId: { type: String }
 });
 
-// Pre-save hook to hash the password before saving
 
 const Staff = mongoose.model('Staff', staffSchema);
 

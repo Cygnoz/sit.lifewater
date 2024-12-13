@@ -1,6 +1,7 @@
 const Staff = require("../../Models/StaffSchema");
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { log } = require("console");
 const key = Buffer.from(process.env.ENCRYPTION_KEY, 'utf8'); 
 const iv = Buffer.from(process.env.ENCRYPTION_IV, 'utf8'); 
 
@@ -55,6 +56,7 @@ exports.addStaff = async (req, res) => {
       return res.status(400).json({ message: 'Designation is required' });
     }
 
+
     // Check for existing staff with the same mobile number
     const existingStaff = await Staff.findOne({ mobileNumber });
     if (existingStaff) {
@@ -84,6 +86,7 @@ exports.addStaff = async (req, res) => {
       });
     
   } catch (error) {
+    console.log(error);    
     res.status(500).json({ message: "Internal server error." });
   }
 };
@@ -115,17 +118,20 @@ exports.editStaff = async (req, res) => {
       return res.status(400).json({ message: 'Designation is required' });
     }
 
+
     // Check for existing staff with the same mobile number
+    
     const existingStaffMobileNumber = await Staff.findOne({ mobileNumber, _id: { $ne: id } });
     if (existingStaffMobileNumber) {
       return res.status(400).json({ message: 'Staff member with this mobile number already exists.' });
     }
 
     // Check for existing staff with the same username
+    if(existingStaff.username){
     const existingStaffUsername = await Staff.findOne({ username, _id: { $ne: id } });
     if (existingStaffUsername) {
       return res.status(400).json({ message: 'Staff member with this username already exists.' });
-    }
+    }}
 
     // If the designation is "Sales", handle username and password logic
     if (designation === 'Sales') {
@@ -140,6 +146,8 @@ exports.editStaff = async (req, res) => {
         if (!isMatch) {
           cleanedData.password = encrypt(cleanedData.password);
         }
+      }else{
+        cleanedData.password = encrypt(cleanedData.password);
       }
     } else if (existingStaff.designation === 'Sales' && (designation === 'Driver' || designation === 'Helper')) {
       // If changing from Sales to Driver or Helper, remove username and password
