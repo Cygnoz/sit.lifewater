@@ -25,7 +25,7 @@ const RideSchema = new Schema({
     salesmanId:{ type:String },
     salesmanName:{ type:String },
     
-    vehicleNo:{ type:String },
+    vehicleNumber:{ type:String },
     startingKm:{ type:String },
 
     stock: { type: [stockSchema], default: undefined },

@@ -147,8 +147,11 @@ exports.editStaff = async (req, res) => {
 
     }
 
+    Object.assign(existingStaff, cleanedData);
+    const updatedStaff = await existingStaff.save();
+
     // Proceed with updating the staff record
-    const updatedStaff = await Staff.findByIdAndUpdate(req.params.id, cleanedData, { new: true });
+    // const updatedStaff = await Staff.findByIdAndUpdate(req.params.id, cleanedData, { new: true });
     
     // If staff not found
     if (!updatedStaff) {
