@@ -101,8 +101,6 @@ exports.createCustomer = async (req, res) => {
       creditAmount: 0,
     });
     await trialEntry.save();
-
-    console.log(data);
     
     return res.status(201).json({
       message: 'Customer created successfully!',
