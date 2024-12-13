@@ -4,7 +4,6 @@ import searchIcon from "../assets/images/search (2).svg";
 import plusIcon from "../assets/images/pluscircle.svg";
 import phone from "../assets/images/phone.png";
 import close from "../assets/images/x-mark.svg";
-import { BASEURL } from "../services/BaseURL";
 import { Box, Modal, Typography } from "@mui/material";
 import { endpoints } from "../services/ApiEndpoint";
 import useApi from "../Hook/UseApi";
@@ -45,8 +44,7 @@ const ViewCustomers: React.FC = () => {
   const { request: getAllCustomers } = useApi("get", 4000);
   const [loading, setLoading] = useState(false);
 
-
-  // Get All customer 
+  // Get All customer
   const getALLCustomers = async () => {
     try {
       const url = `${endpoints.GET_ALL_CUSTOMERS}`;
@@ -111,10 +109,6 @@ const ViewCustomers: React.FC = () => {
         {/* Customer List */}
         <div>
           {filteredCustomers.map((customer) => {
-            const dueAmount =
-              customer.depositAmount -
-              customer.ratePerBottle * customer.numberOfBottles;
-
             return (
               <div
                 onClick={() => handleOpen(customer)}
@@ -124,19 +118,15 @@ const ViewCustomers: React.FC = () => {
                 <div className="flex-1 flex gap-4">
                   <img
                     className="object-cover w-11 h-11 rounded-full"
-                    src={
-                      customer.logo
-                        ? `${BASEURL}/uploads/${customer.logo}`
-                        : defaultImage
-                    }
+                    src={customer.logo ? `${customer.logo}` : defaultImage}
                     alt={`${customer.fullName}`}
                   />
                   <div>
                     <div className="font-bold mb-1">{customer.fullName}</div>
                     <div className="text-sm mb-1">
-                      Due Amount:{" "}
+                      Customer ID:{" "}
                       <span className="text-red-700 font-bold">
-                        {dueAmount}
+                        {customer.customerID}
                       </span>
                     </div>
                     <div className="text-sm">
@@ -161,8 +151,6 @@ const ViewCustomers: React.FC = () => {
       </div>
 
       {/* Modal */}
-
-      {/* Modal */}
       <Modal
         open={!!selectedCustomer}
         onClose={handleClose}
@@ -185,28 +173,30 @@ const ViewCustomers: React.FC = () => {
           <div className="flex justify-end mb-5">
             <button
               onClick={handleClose}
-              className="bg-red-200 text-red p-2 rounded-full"
+              className="bg-rose-500 text-red p-2 rounded-full"
             >
               <img src={close} alt="Close" />
             </button>
           </div>
-          <Typography
-            id="modal-title"
-            variant="h6"
-            component="h2"
-            fontWeight="bold"
-          >
-            <span className="text-red-700">
-              {selectedCustomer ? `${selectedCustomer.fullName}` : ""}
-            </span>
-          </Typography>
-          <Typography id="modal-title" variant="h6" component="h2">
-            Customer ID :{" "}
-            <span className="text-green-500">
-              {" "}
-              {selectedCustomer?.customerID}
-            </span>
-          </Typography>
+          <div className="bg-slate-100 p-2">
+            <Typography
+              id="modal-title"
+              variant="h6"
+              component="h2"
+              fontWeight="bold"
+            >
+              <span className="text-red-700">
+                {selectedCustomer ? `${selectedCustomer.fullName}` : ""}
+              </span>
+            </Typography>
+            <Typography id="modal-title" variant="h6" component="h2">
+              Customer ID :{" "}
+              <span className="text-red-500">
+                {" "}
+                {selectedCustomer?.customerID}
+              </span>
+            </Typography>
+          </div>
 
           <Typography id="modal-description" sx={{ mt: 2 }}>
             {selectedCustomer && (
@@ -229,12 +219,12 @@ const ViewCustomers: React.FC = () => {
                   {selectedCustomer.ratePerBottle}
                 </p>
                 <p className="mb-2">
-                  <strong>No of Bottles:</strong> {selectedCustomer.numberOfBottles}
+                  <strong>No of Bottles:</strong>{" "}
+                  {selectedCustomer.numberOfBottles}
                 </p>
               </>
             )}
           </Typography>
-
           {/* Conditional Rendering of Google Maps Iframe */}
           {showLocation && selectedCustomer?.location?.coordinates && (
             <div className="mt-4">
