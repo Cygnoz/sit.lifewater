@@ -67,24 +67,31 @@ exports.createStock = async (req, res) => {
     // console.log("Warehouse exists:", warehouseExists);
 
     // Add stock items to the warehouse's existing stock
-    items.forEach(item => {
-      const existingItemIndex = warehouseExists.stock.findIndex(stockItem => stockItem.itemId === item.itemId);
-
+    items.forEach((item) => {
+      const existingItemIndex = warehouseExists.stock.findIndex(
+        (stockItem) => stockItem.itemId === item.itemId
+      );
+    
       if (existingItemIndex > -1) {
-        // If the item already exists in the stock, update its quantity
+        // If the item already exists in the stock, update its quantity and other fields
         warehouseExists.stock[existingItemIndex].quantity += item.quantity;
+        warehouseExists.stock[existingItemIndex].costPrice = item.costPrice;
+        warehouseExists.stock[existingItemIndex].amount =
+          warehouseExists.stock[existingItemIndex].quantity * item.costPrice;
+        warehouseExists.stock[existingItemIndex].status = item.resaleable ? "Filled" : undefined;
       } else {
         // If the item does not exist in the stock, add it as a new stock entry
         warehouseExists.stock.push({
           itemId: item.itemId,
           itemName: item.itemName,
           quantity: item.quantity,
-          costPrice:item.costPrice,
-          amount:item.amount,
+          costPrice: item.costPrice,
+          amount: item.quantity * item.costPrice,
           status: item.resaleable ? "Filled" : undefined,
         });
       }
     });
+    
 
     // Save the updated warehouse document
     await warehouseExists.save();
