@@ -12,7 +12,6 @@ import EyeOffIcon from "../assets/icons/EyeOffIcon"
 interface StaffData {
   mobileNumber: string;
   whatsAppNumber: string;
-  isSameAsPhone: string;
   visaStatus: string;
   visaNumber: string;
   emiratesId: string;
@@ -42,7 +41,6 @@ function AddStaff({ }: Props) {
       designation: "",
       emiratesId: "",
       firstname: "",
-      isSameAsPhone: "",
       lastname: "",
       mobileNumber: "",
       nationality: "",
@@ -151,7 +149,10 @@ function AddStaff({ }: Props) {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();  
     // Validate passwords before saving or submitting
-    if (initialStaffData.password !== initialStaffData.confirmPassword) {
+    if (
+      initialStaffData.designation === "Sales" &&
+      initialStaffData.password !== initialStaffData.confirmPassword
+    ) {
       toast.error("Passwords do not match");
       return; // Stop submission if passwords don't match
     }
