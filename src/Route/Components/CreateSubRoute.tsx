@@ -3,8 +3,8 @@ import back from '../../assets/images/backbutton.svg';
 import { Link, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { getRoutesAPI } from '../../services/RouteAPI/RouteAPI';
-import { addSubRouteAPI } from '../../services/RouteAPI/subRouteAPI';
+import useApi from '../../Hook/UseApi';
+import { endpoints } from '../../services/ApiEndpoint';
 
 
 const CreateSubRoute: React.FC = () => {
@@ -12,36 +12,47 @@ const CreateSubRoute: React.FC = () => {
     _id: string;
     subRoute: string;
     subrouteCode: string;
-    mainRoute: string;
+    mainRouteName: string;
     description: string;
   }
 
   const [routesList, setRouteList] = useState<Route[]>([]); // Full route list
   const [filteredRouteList, setFilteredRouteList] = useState<Route[]>([]); // Filtered route list
+  const [loading,setLoading] = useState(false)
   console.log(filteredRouteList);
   
 
   // State to manage form values
   const [formData, setFormData] = useState({
-    subRoute: '',
+    subRouteName: '',
     subrouteCode: '', // Updated to match the form input name
-    mainRoute: '',
+    mainRouteId: '',
     description: '',
   });
+  
+  const { request: getMainRoute } = useApi("get", 4000);
+
+  const getAllMainRoutes = async () => {
+    try {
+      const url = `${endpoints.GET_ALL_MAINROUTE}`
+      const { response, error } = await getMainRoute(url)
+      console.log(response)
+
+      if (!error && response) {
+        setRouteList(response.data)
+        setFilteredRouteList(response.data)
+        // setSortedItems(response.data); // Initialize sorted items
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
-    const fetchRoutes = async () => {
-      try {
-        const response = await getRoutesAPI();
-        setRouteList(response);
-        setFilteredRouteList(response); // Initially, display all routes
-      } catch (error) {
-        console.error('Error fetching routes:', error);
-      }
-    };
+    getAllMainRoutes()
+  }, [])
 
-    fetchRoutes();
-  }, []);
+ 
 
   // Handler to update form state
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -52,51 +63,53 @@ const CreateSubRoute: React.FC = () => {
     });
   };
 
-  // Handler for form submission
-  // const handleSubmit = async (e: FormEvent) => {
-  //   e.preventDefault();
-  //   if (!formData.mainRoute || !formData.subrouteCode) {
-  //     toast.warning('Main Route and Subroute Code are required fields.');
-  //     return;
-  //   }
-
-  //   try {
-  //     const response = await addSubRouteAPI(formData); // Send the form data as JSON
-  //     toast.success('Subroute created successfully!');
-  //     setFormData({
-  //       subRoute: '',
-  //       subrouteCode: '',
-  //       mainRoute: '',
-  //       description: '',
-  //     });
-  //   } catch (error: any) {
-  //     console.error('Error submitting form:', error.message);
-  //     toast.error('Failed to create subroute. Please try again.');
-  //   }
-  // };
   const navigate = useNavigate(); // Initialize navigate here
+
+  
+  const { request: addSRoute } = useApi("post", 4000);
 
    const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!formData.mainRoute || !formData.subrouteCode) {
-      toast.warning('Main Route and Subroute Code are required fields.');
-      return;
-    }
+    console.log(formData);
 
+    setLoading(true)
+    console.log(loading);
+    
+    
     try {
-      await addSubRouteAPI(formData);
-      toast.success('Subroute created successfully!');
-      setFormData({
-        subRoute: '',
-        subrouteCode: '',
-        mainRoute: '',
-        description: '',
-      });
-      navigate('/route/subroute'); // Redirect after success
-    } catch (error: any) {
-      console.error('Error submitting form:', error.message);
-      toast.error('Failed to create subroute. Please try again.');
+      // Prepare the payload
+      const payload = {
+        ...formData
+      }
+      console.log(payload);
+      
+
+      // Call the API to add the item
+      const url = `${endpoints.ADD_SUBROUTE}`;
+      const { response, error } = await addSRoute(url, payload)
+      
+      if (!error && response) {
+        toast.success("subroute has been added successfully.")
+        setFormData({
+          subRouteName: '',
+          subrouteCode: '', // Updated to match the form input name
+          mainRouteId: '',
+          description: '',
+        })
+        setTimeout(() => {
+          navigate("/route/subroute")
+        }, 3000)
+      } else {
+        // Handle any API errors
+        toast.error(error?.message || "Failed to add subroute. Please try again.")
+      }
+    } catch (err) {
+      console.error("Error adding subroute:", err)
+      toast.error("An unexpected error occurred. Please try again.")
+    } finally {
+      setLoading(false)
     }
+   
   };
 
   return (
@@ -129,8 +142,8 @@ const CreateSubRoute: React.FC = () => {
               <label className="block mb-2 font-normal text-[14px] leading-[16.94px] text-[#303F58]">Sub Route</label>
               <input
                 type="text"
-                name="subRoute"
-                value={formData.subRoute}
+                name="subRouteName"
+                value={formData.subRouteName}
                 onChange={handleInputChange}
                 placeholder="Enter subroute"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -152,15 +165,15 @@ const CreateSubRoute: React.FC = () => {
             <div>
               <label className="block mb-2 font-normal text-[14px] leading-[16.94px] text-[#303F58]">Main Route</label>
               <select
-                name="mainRoute"
-                value={formData.mainRoute}
+                name="mainRouteId"
+                value={formData.mainRouteId}
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="" disabled>Select main route</option>
                 {routesList.map((route) => (
-                  <option key={route._id} value={route.mainRoute}>
-                    {route.mainRoute}
+                  <option key={route._id} value={route._id}>
+                    {route.mainRouteName}
                   </option>
                 ))}
               </select>

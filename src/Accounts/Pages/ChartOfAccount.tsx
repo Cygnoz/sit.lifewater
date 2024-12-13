@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import plus from "../../assets/circle-plus.svg";
 import NewAccountModal from "./NewAccountModal";
-import { getAllAccountsAPI } from "../../services/AccountsAPI/accounts";
+// import { getAllAccountsAPI } from "../../services/AccountsAPI/accounts";
 import { endpoints } from "../../services/ApiEndpoint";
 import useApi from "../../Hook/UseApi";
 
@@ -44,6 +44,8 @@ const ChartOfAccounts = () => {
 
       if (!error && response) {
         setLoading(false);
+        console.log(loading);
+        
         setAccounts(response.data);
         setFilteredAccounts(response.data); // Initialize sorted items
       }

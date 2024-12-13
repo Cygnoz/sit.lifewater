@@ -18,12 +18,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelect }) => {
   };
 
   return (
-    <div className="w-[76px] h-[1200px] pb-[134px] bg-[#820000] flex-col justify-start items-center inline-flex">
-      <div className="h-[860px] flex-col justify-center items-center gap-2 inline-flex">
+    <div className="w-[65px] h-[1200px] pb-[104px] bg-[#820000] flex-col justify-start items-center inline-flex">
+      <div className="h-[860px] flex-col mt-5 items-center gap-2 inline-flex">
         {navlist.map((item, index) => (
           <div
             key={index}
-            className={`self-stretch h-[54px] flex-col justify-start items-center gap-1.5 flex rounded-lg p-2 cursor-pointer transition-all duration-200 ease-in-out ${
+            className={`self-stretch h-[54px] flex-col p-1 justify-start items-center gap-1.5 flex rounded-lg  cursor-pointer transition-all duration-200 ease-in-out ${
               selectedNav === item.nav ? 'bg-[#530015]' : 'hover:bg-[#530015]' // Apply background color for selected item
             }`}
             onClick={() => handleClick(item.route, item.nav, item.subhead || [])}

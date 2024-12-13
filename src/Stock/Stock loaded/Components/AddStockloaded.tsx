@@ -1,23 +1,25 @@
-import React, { useState, ChangeEvent, useEffect, useRef } from "react";
-import printer from "../../../assets/images/printer.svg";
-import { getItemsAPI } from "../../../services/StockAPI/StockAPI";
-import { getWarehouseAPI } from "../../../services/WarehouseAPI/WarehouseAPI";
+import React, {
+  useState,
+  ChangeEvent,
+  useEffect,
+  useRef,
+  useContext,
+} from "react";
+
 import downarrow from "../../../assets/images/Vector.png";
 import circleplus from "../../../assets/images/Icon.svg";
 import trash from "../../../assets/images/trash.svg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import back from "../../../assets/images/backbutton.svg";
-import { STOCK_BASEURL } from "../../../services/Baseurl";
-import { getSubRoutesAPI } from "../../../services/RouteAPI/subRouteAPI";
-import {  addStockLoadedApi } from "../../../services/StockAPI/StockLoadedAPI";
+import { endpoints } from "../../../services/ApiEndpoint";
+import { WarehouseResponseContext } from "../../../Context/ContextShare";
+import { toast, ToastContainer } from "react-toastify";
+import useApi from "../../../Hook/UseApi";
 
 interface Item {
   itemName: string;
   quantity: number;
-  rate: number;
-  amount: number;
-  itemImage?: string; // Allow undefined
-  purchasePrice?: number;
+  itemId?: string;
 }
 
 interface WarehouseItem {
@@ -25,31 +27,45 @@ interface WarehouseItem {
   warehouseName: string;
   contactNo: string;
   address: string;
+  stock: [];
 }
 interface OrderDetails {
-  warehouse: string;
-  transferNumber: number;
-  mainRoute: string;
-  subRoute: string;
+  mainRouteId: string;
+  mainRouteName: string;
+  subRouteId: string;
+  subRouteName: string;
+  warehouseId: string;
+  warehouseName: string;
+  transferNumber: string;
+  stock: Item[]; // Array of items
+  notes?: string; // Optional notes
   date?: string;
-  items: Item[];
-  notes?: string;
-  termsAndConditions?: string;
+  termsAndConditions?: string; // Optional terms and conditions
 }
 interface Route {
   _id: string;
-  subRoute: string;
-  mainRoute: string;
+  subRouteName: string;
+  mainRouteName: string;
+  mainRouteId: string;
+  subRouteId: string;
 }
 
 const AddStockloaded: React.FC = () => {
   const [orderDetails, setOrderDetails] = useState<OrderDetails>({
-    warehouse: "",
-    mainRoute: "",
-    subRoute: "",
-    transferNumber: 0,
-    date: "",
-    items: [{ itemName: "", quantity: 0, rate: 0, amount: 0 }],
+    mainRouteId: "",
+    mainRouteName: "",
+    subRouteId: "",
+    subRouteName: "",
+    warehouseId: "",
+    warehouseName: "",
+    transferNumber: "",
+    stock: [
+      {
+        itemId: "",
+        itemName: "",
+        quantity: 0,
+      },
+    ],
     notes: "",
     termsAndConditions: "",
   });
@@ -59,136 +75,169 @@ const AddStockloaded: React.FC = () => {
   const [openDropdownType, setOpenDropdownType] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [searchValue, setSearchValue] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [items, setItems] = useState<Item[]>([]); // The full item list from your API
   const [warehouses, setWarehouses] = useState<WarehouseItem[]>([]);
-  const [mainRouteList, setMainRouteList] = useState<string[]>([]);
+  const [selectedMainRoute, setSelectedMainRoute] = useState<string>("");
+  const [selectedSubRoute, setSelectedSubRoute] = useState("");
+  const [filteredSubRoutes, setFilteredSubRoutes] = useState<Route[]>([]);
   const [routesList, setRouteList] = useState<Route[]>([]);
-  // const [filteredSubRoutes, setFilteredSubRoutes] = useState<Route[]>([]);
-  const [subRoutes, setSubRoutes] = useState<string[]>([]); // Specify type here
-  
+  const [mainRouteList, setMainRouteList] = useState<string[]>([]);
+
   console.log(routesList);
-  
+  const { request: getWarehouseData } = useApi("get", 4001);
 
-  const defaultImage =
-    "https://cdn1.iconfinder.com/data/icons/avatar-3/512/Manager-512.png";
+  const { request: getSubRoute } = useApi("get", 4000);
+  const handleMainRouteChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const mainRouteName = event.target.value;
 
-  // mainroute
+    // Find the selected route object to get mainRouteId
+    const selectedRoute = routesList.find(
+      (route) => route.mainRouteName === mainRouteName
+    );
+
+    const mainRouteId = selectedRoute ? selectedRoute.mainRouteId : "";
+
+    setSelectedMainRoute(mainRouteName);
+
+    // Filter subroutes based on the selected main route
+    const filtered = routesList.filter(
+      (route) => route.mainRouteName === mainRouteName
+    );
+
+    setFilteredSubRoutes(filtered);
+
+    // Update the orderDetails with the selected mainRouteName and mainRouteId
+    setOrderDetails((prev) => ({
+      ...prev,
+      mainRouteName, // Update the main route name
+      mainRouteId, // Update the main route ID
+      subRouteName: "", // Clear subroute when main route changes
+    }));
+  };
+
+  const handleSubRouteChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const subRouteName = event.target.value;
+
+    // Find the selected sub-route object to get subRouteId
+    const selectedSubRoute = filteredSubRoutes.find(
+      (route) => route.subRouteName === subRouteName
+    );
+
+    const subRouteId = selectedSubRoute ? selectedSubRoute._id : "";
+
+    setSelectedSubRoute(subRouteName);
+
+    // Update the orderDetails with the selected subRouteName and subRouteId
+    setOrderDetails((prev) => ({
+      ...prev,
+      subRouteName, // Update the sub-route name
+      subRouteId, // Update the sub-route ID
+    }));
+  };
+
   useEffect(() => {
+    // Fetch the routes list
     const fetchSubRoutes = async () => {
       try {
-        const response = await getSubRoutesAPI();
-        setRouteList(response);
+        const url = `${endpoints.GET_ALL_SUBROUTE}`;
+        const { response, error } = await getSubRoute(url);
 
-        // Ensure uniqueMainRoutes is typed correctly
-        const uniqueMainRoutes: string[] = Array.from(
-          new Set(response.map((route: Route) => route.mainRoute))
-        );
-        setMainRouteList(uniqueMainRoutes);
-      } catch (error) {
-        console.error("Error fetching sub-route data:", error);
+        if (error) {
+          console.error("Error fetching sub-route data:", error);
+          toast.error("Failed to fetch route data. Please try again.");
+          return;
+        }
+
+        const routes = Array.isArray(response) ? response : response?.data;
+
+        if (routes && Array.isArray(routes)) {
+          // Set the routes list for filtering
+          setRouteList(routes);
+
+          // Extract unique main routes
+          const uniqueMainRoutes = Array.from(
+            new Set(routes.map((route: Route) => route.mainRouteName))
+          );
+          setMainRouteList(uniqueMainRoutes as string[]);
+        }
+      } catch (err) {
+        console.error("Error fetching sub-route data:", err);
+        toast.error("An unexpected error occurred. Please try again.");
       }
     };
 
     fetchSubRoutes();
   }, []);
 
-  //all sub routes
-  useEffect(() => {
-    const fetchSubRoutes = async () => {
-      try {
-        const response = await getSubRoutesAPI();
-        setRouteList(response);
-        console.log("Response data:", response);
-
-        // Filter for subRoutes based on the dynamic mainRoute from orderDetails
-        const filteredSubRoutes: string[] = response
-        .filter((route: Route) => route.mainRoute === orderDetails.mainRoute)
-        .map((route: Route) => route.subRoute);
-
-        setSubRoutes(filteredSubRoutes);
-        console.log(
-          `Sub-routes under ${orderDetails.mainRoute}:`,
-          filteredSubRoutes
-        );
-      } catch (error) {
-        console.error("Error fetching sub-route data:", error);
-      }
-    };
-
-    // Trigger fetch when orderDetails.mainRoute changes
-    if (orderDetails.mainRoute) {
-      fetchSubRoutes();
-    }
-  }, [orderDetails.mainRoute]);
-
   // warehouses
-  useEffect(() => {
-    const fetchWarehouse = async () => {
-      try {
-        const response = await getWarehouseAPI();
-        console.log("Warehouses data:", response.warehouses);
-        setWarehouses(response.warehouses || []);
-      } catch (error) {
-        console.error("Failed to fetch warehouses:", error);
-      }
-    };
-    fetchWarehouse();
-  }, []);
-
-  // fetch items
-  useEffect(() => {
-    // Fetch the items list from API
-    const fetchItems = async () => {
-      setLoading(true);
-      try {
-        // Assuming fetchItemsAPI() fetches items
-        const response = await getItemsAPI();
-        setItems(response);
-        console.log(response);
-      } catch (error) {
-        console.error("Failed to fetch items:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchItems();
-  }, []);
-
-  // Filtered items excluding already selected ones
-  // const filteredItems = items.filter(
-  //   (item) =>
-  //     item.itemName.toLowerCase().includes(searchValue.toLowerCase()) &&
-  //     !orderDetails.items.some(
-  //       (orderItem) => orderItem.itemName === item.itemName
-  //     )
-  // );
-
-  const handleItemSelect = (item: Item, index: number) => {
-    const quantity = item.quantity || 1;
-    const rate = item.purchasePrice || 0;
-
-    setOrderDetails((prev) => {
-      const newItems = [...prev.items];
-      newItems[index] = {
-        itemName: item.itemName,
-        quantity,
-        rate,
-        amount: rate * quantity,
-        itemImage: item.itemImage,
-      };
-      return { ...prev, items: newItems };
-    });
-    setOpenDropdownId(null);
-    setOpenDropdownType(null);
+  const [selectedWarehouse, setSelectedWarehouse] =
+    useState<WarehouseItem | null>(null);
+  // Handle warehouse selection
+  const handleWarehouseChange = (event: any) => {
+    const warehouseId = event.target.value;
+    // Find the selected warehouse object
+    const selectedWarehouse = warehouses.find((w) => w._id === warehouseId);
+    const warehouseName = selectedWarehouse
+      ? selectedWarehouse.warehouseName
+      : "";
+    setSelectedWarehouse(selectedWarehouse || null);
+    // Update the orderDetails with the selected warehouseName and warehouseId
+    setOrderDetails((prev) => ({
+      ...prev,
+      warehouseId, // Store the warehouse ID
+      warehouseName, // Store the warehouse name
+    }));
   };
 
-  // Update order details
+  const filteredItems = selectedWarehouse ? selectedWarehouse.stock : [];
+
+  const { setWarehouseResponse } = useContext(WarehouseResponseContext)!;
+
+  const getAllWarehouse = async () => {
+    try {
+      const url = `${endpoints.GET_ALL_WAREHOUSE}`;
+      const { response, error } = await getWarehouseData(url);
+      if (!error && response) {
+        setWarehouses(response.data.warehouses);
+        console.log(response.data.warehouses, "warehouse");
+        setWarehouseResponse(response.data.warehouses);
+      } else {
+        console.log(error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    getAllWarehouse();
+  }, []);
+
+  const handleItemSelect = (selectedItem: any, index: number) => {
+    setOrderDetails((prev) => {
+      const updatedStock = [...prev.stock];
+      updatedStock[index] = {
+        ...updatedStock[index],
+        itemId: selectedItem.itemId, // Set itemId
+        itemName: selectedItem.itemName, // Set itemName
+        quantity: selectedItem.quantity, // Set quantity
+      };
+      return { ...prev, stock: updatedStock };
+    });
+    setOpenDropdownId(null); // Close the dropdown
+  };
+
   const updateOrder = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setOrderDetails({ ...orderDetails, [name]: value });
+
+    setOrderDetails((prev) => ({
+      ...prev,
+      [name]: value, // Dynamically updating the orderDetails based on the field name
+    }));
   };
 
   const handleItemChange = (
@@ -197,61 +246,84 @@ const AddStockloaded: React.FC = () => {
     value: string
   ) => {
     setOrderDetails((prev) => {
-      const newItems = [...prev.items];
+      const newItems = [...prev.stock];
       newItems[index] = {
         ...newItems[index],
         [field]: value,
       };
 
-      const quantity = Number(newItems[index].quantity) || 0;
-      const rate = Number(newItems[index].rate) || 0;
-      newItems[index].amount = rate * quantity;
+      // If the field is 'quantity', convert to a number
+      if (field === "quantity") {
+        newItems[index].quantity = Number(value) || 0;
+      }
 
-      return { ...prev, items: newItems };
+      return { ...prev, stock: newItems };
     });
   };
 
   const removeItem = (index: number) => {
     setOrderDetails((prev) => ({
       ...prev,
-      items:
-        prev.items.length > 1
-          ? prev.items.filter((_, i) => i !== index)
-          : [{ itemName: "", quantity: 0, rate: 0, amount: 0 }],
+      stock:
+        prev.stock.length > 1
+          ? prev.stock.filter((_, i) => i !== index)
+          : [{ itemId: "", itemName: "", quantity: 0 }], // Keep only itemId, itemName, and quantity
     }));
   };
 
-  // Add a new item row
   const addItem = () => {
-    setOrderDetails({
-      ...orderDetails,
-      items: [
-        ...orderDetails.items,
-        { itemName: "", quantity: 0, rate: 0, amount: 0 },
+    setOrderDetails((prev) => ({
+      ...prev,
+      stock: [
+        ...prev.stock,
+        { itemId: "", itemName: "", quantity: 0 }, // Add a blank row with itemId, itemName, and quantity
       ],
-    });
+    }));
   };
 
   const toggleDropdown = (index: number, type: string) => {
     setOpenDropdownId(index === openDropdownId ? null : index);
     setOpenDropdownType(type);
   };
+  const { request: AddStockLoad } = useApi("post", 4001);
+  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     try {
-      const response = await addStockLoadedApi(orderDetails);
-      console.log('Stock created:', response);
-      // Reset form or show a success message if needed
+      const url = `${endpoints.ADD_STOCK_LOAD}`;
+      const { response, error } = await AddStockLoad(url, orderDetails);
+      if (!error && response) {
+        console.log("Stock :", response);
+        toast.success(response.data.message);
+        setTimeout(() => {
+          navigate("/stockloaded");
+        }, 1000);
+      }
+      console.log(error);
+      toast.error(error.response.data.message);
     } catch (error: any) {
-      console.error(error.message);
-      // Show an error message to the user
+      console.error(error);
+      toast.error(error.data.message);
     }
   };
+  console.log("Loading stock details : ", orderDetails);
 
   return (
     <div>
-      <div className="flex bg-gray-50">
-        <div className="max-h-screen w-[70%]">
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+      <div className="">
+        <div className="max-h-screen mx-auto">
           {/* Main content */}
           <div className="flex-1 min-h-screen">
             <div className="flex gap-3 items-center w-full max-w-8xl ms-1 mt-2">
@@ -268,24 +340,23 @@ const AddStockloaded: React.FC = () => {
             </div>
             <div className="container mx-auto p-4">
               <div className="bg-white p-4 -mt-1 -ms-2 rounded-lg shadow-md">
-                {/* Customer and Salesman Selection */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block mb-2 font-[400px] text-[#303F58] text-[14px]">
                       Main Route
                     </label>
                     <select
-                      name="mainRoute"
-                      value={orderDetails.mainRoute}
-                      onChange={updateOrder}
-                      className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px] font-normal"
+                      name="mainRouteName"
+                      value={selectedMainRoute}
+                      onChange={handleMainRouteChange} // Updated to handle main route change
+                      className="w-full p-2 border rounded-md  text-[#000000] text-[14px] font-normal"
                     >
                       <option value="" className="font-normal">
                         Select Main Route
                       </option>
-                      {mainRouteList.map((mainRoute) => (
-                        <option key={mainRoute} value={mainRoute}>
-                          {mainRoute}
+                      {mainRouteList.map((mainRouteName) => (
+                        <option key={mainRouteName} value={mainRouteName}>
+                          {mainRouteName}
                         </option>
                       ))}
                     </select>
@@ -295,17 +366,15 @@ const AddStockloaded: React.FC = () => {
                       Sub Route
                     </label>
                     <select
-                      name="subRoute"
-                      value={orderDetails.subRoute}
-                      onChange={updateOrder}
-                      className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px] font-normal"
+                      name="subRouteName"
+                      value={selectedSubRoute}
+                      onChange={handleSubRouteChange} // Updated to handle sub route change
+                      className="w-full p-2 border rounded-md  text-[#000000] text-[14px] font-normal"
                     >
-                      <option value="" className="font-normal">
-                        Select Sub Route
-                      </option>
-                      {subRoutes.map((subRoute, index) => (
-                        <option key={index} value={subRoute}>
-                          {subRoute}
+                      <option value="">Select Sub Route</option>
+                      {filteredSubRoutes.map((route) => (
+                        <option key={route._id} value={route.subRouteName}>
+                          {route.subRouteName}
                         </option>
                       ))}
                     </select>
@@ -319,20 +388,15 @@ const AddStockloaded: React.FC = () => {
                       Warehouse
                     </label>
                     <select
-                      name="warehouse"
-                      value={orderDetails.warehouse}
-                      onChange={updateOrder}
-                      className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px]"
+                      onChange={handleWarehouseChange}
+                      className="w-full p-2 border rounded-md  text-[#000000] text-[14px] font-normal"
                     >
-                      <option value="" disabled>
-                        Select Warehouse
-                      </option>
-                      {warehouses.map((item) => (
-                        <option value={item.warehouseName}>
-                          {item.warehouseName}
+                      <option value="">Select Warehouse</option>
+                      {warehouses.map((warehouse) => (
+                        <option key={warehouse._id} value={warehouse._id}>
+                          {warehouse.warehouseName}
                         </option>
                       ))}
-                      {/* Add customer options */}
                     </select>
                   </div>
                   <div>
@@ -344,7 +408,7 @@ const AddStockloaded: React.FC = () => {
                       name="date"
                       value={orderDetails.date}
                       onChange={updateOrder}
-                      className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px] font-normal"
+                      className="w-full p-2 border rounded-md  text-[#000000] text-[14px] font-normal"
                     />
                   </div>
                   <div>
@@ -356,8 +420,8 @@ const AddStockloaded: React.FC = () => {
                       name="transferNumber"
                       value={orderDetails.transferNumber}
                       onChange={updateOrder}
-                      className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px] font-normal"
-                      placeholder="123"
+                      className="w-full p-2 border rounded-md  text-[#000000] text-[14px] font-normal"
+                      placeholder=""
                     />
                   </div>
                 </div>
@@ -367,24 +431,20 @@ const AddStockloaded: React.FC = () => {
                   <table className="min-w-full bg-white rounded-lg relative pb-4 border-dropdownText">
                     <thead className="text-[12px] text-center bg-[#FDF8F0] text-dropdownText">
                       <tr className="bg-lightPink">
-                        {[
-                          "Product",
-                          "Quantity",
-                          "Rate",
-                          "Amount",
-                          "Actions",
-                        ].map((item, index) => (
-                          <th
-                            key={index}
-                            className="py-2 px-4 font-medium border-b border-tableBorder relative"
-                          >
-                            {item}
-                          </th>
-                        ))}
+                        {["Product", "Quantity", "Actions"].map(
+                          (item, index) => (
+                            <th
+                              key={index}
+                              className="py-2 px-4 font-medium border-b border-tableBorder relative"
+                            >
+                              {item}
+                            </th>
+                          )
+                        )}
                       </tr>
                     </thead>
                     <tbody className="text-dropdownText text-center text-[13px]">
-                      {orderDetails.items.map((item, index) => (
+                      {orderDetails.stock.map((item, index) => (
                         <tr key={index}>
                           <td className="border-y py-3 px-2 border-tableBorder">
                             <div
@@ -395,20 +455,6 @@ const AddStockloaded: React.FC = () => {
                             >
                               {item.itemName ? (
                                 <div className="cursor-pointer gap-2 grid grid-cols-12 appearance-none items-center justify-center h-9 text-zinc-400 bg-white text-sm">
-                                  <div className="flex items-start col-span-4">
-                                    <img
-                                      className="rounded-full h-10 w-10"
-                                      src={
-                                        item.itemImage
-                                          ? `${STOCK_BASEURL}/${item.itemImage.replace(
-                                              /\\/g,
-                                              "/"
-                                            )}`
-                                          : defaultImage
-                                      }
-                                      alt={`${item.itemName}`}
-                                    />
-                                  </div>
                                   <div className="col-span-8 text-start">
                                     <p className="text-textColor">
                                       {item.itemName}
@@ -416,7 +462,12 @@ const AddStockloaded: React.FC = () => {
                                   </div>
                                 </div>
                               ) : (
-                                <div className="cursor-pointer flex appearance-none items-center justify-center h-9 text-zinc-400 bg-white text-sm gap-2">
+                                <div
+                                  className="cursor-pointer flex appearance-none items-center justify-center h-9 text-zinc-400 bg-white text-sm gap-2"
+                                  onClick={() =>
+                                    toggleDropdown(index, "searchProduct")
+                                  } // Show dropdown when clicked
+                                >
                                   <p>Type or click</p>
                                   <p>
                                     <img src={downarrow} alt="" width={12} />
@@ -439,54 +490,35 @@ const AddStockloaded: React.FC = () => {
                                     placeholder="Select Item"
                                     className="w-full p-2 border rounded-lg h-12 bg-[#F9F7F5]"
                                   />
-                                  {/* {loading ? (
-                                    <p>Loading...</p>
-                                  // ) : filteredItems.length > 0 ? (
-                                  //   filteredItems.map((filteredItem, idx) => (
-                                  //     <div
-                                  //       key={idx}
-                                  //       onClick={() =>
-                                  //         handleItemSelect(filteredItem, index)
-                                  //       }
-                                  //       className="grid bg-[#FDF8F0] grid-cols-12 gap-1 p-2 hover:bg-gray-100 cursor-pointer border border-slate-400 rounded-lg"
-                                  //     >
-                                  //       <div className="col-span-2 flex justify-center">
-                                  //         <img
-                                  //           className="rounded-full h-10"
-                                  //           src={
-                                  //             filteredItem.itemImage
-                                  //               ? `${STOCK_BASEURL}/${filteredItem.itemImage.replace(
-                                  //                   /\\/g,
-                                  //                   "/"
-                                  //                 )}`
-                                  //               : defaultImage
-                                  //           }
-                                  //           alt={
-                                  //             filteredItem.itemImage ||
-                                  //             "default image"
-                                  //           }
-                                  //         />
-                                  //       </div>
-                                  //       <div className="col-span-10 flex">
-                                  //         <div className="text-start">
-                                  //           <p className="font-bold text-sm text-black">
-                                  //             {filteredItem.itemName}
-                                  //           </p>
-                                  //           <p className="text-xs text-gray-500">
-                                  //             Rate: RS.
-                                  //             {filteredItem.purchasePrice}
-                                  //           </p>
-                                  //         </div>
-                                  //       </div>
-                                  //     </div>
-                                  //   ))
-                                  // ) : (
+
+                                  {filteredItems.length > 0 ? (
+                                    filteredItems.map(
+                                      (item: any, idx: number) => (
+                                        <div
+                                          key={idx}
+                                          onClick={() =>
+                                            handleItemSelect(item, idx)
+                                          } // Handle item selection
+                                          className="grid bg-[#FDF8F0] grid-cols-12 gap-1 p-2 hover:bg-gray-100 cursor-pointer border border-slate-400 rounded-lg"
+                                        >
+                                          <div className="col-span-10 flex">
+                                            <div className="text-start">
+                                              <p className="font-bold text-sm text-black">
+                                                {item.itemName}
+                                              </p>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )
+                                    )
+                                  ) : (
                                     <div className="text-center border-slate-400 border rounded-lg">
                                       <p className="text-red-500 text-sm py-4">
                                         Items Not Found!
                                       </p>
                                     </div>
-                                  )} */}
+                                  )}
+
                                   <Link to="/additem">
                                     <button className="bg-darkGreen text-[#820000] mt-1 rounded-lg py-4 px-6 flex items-center text-sm font-bold border-slate-400 border gap-2 w-full hover:bg-lightRed">
                                       <img src={circleplus} alt="" />{" "}
@@ -511,23 +543,7 @@ const AddStockloaded: React.FC = () => {
                               placeholder="0"
                             />
                           </td>
-                          <td className="py-2.5 px-4 border-y border-tableBorder">
-                            <input
-                              type="text"
-                              value={item.rate}
-                              disabled
-                              className="w-full text-center"
-                              placeholder="0"
-                            />
-                          </td>
-                          <td className="py-2.5 px-4 border-y border-tableBorder">
-                            <input
-                              value={item.amount}
-                              disabled
-                              className="w-full text-center"
-                              placeholder="0"
-                            />
-                          </td>
+
                           <td className="py-2.5 px-4 border-y border-tableBorder text-center">
                             <button
                               onClick={() => removeItem(index)}
@@ -558,7 +574,7 @@ const AddStockloaded: React.FC = () => {
                     name="notes"
                     value={orderDetails.notes}
                     onChange={updateOrder}
-                    className="w-full p-2 border rounded-md text-[#8F99A9] text-[14px] font-normal"
+                    className="w-full p-2 border rounded-md text-[#000000] text-[14px] font-normal"
                     placeholder="Add a Note"
                   ></textarea>
                 </div>
@@ -571,62 +587,27 @@ const AddStockloaded: React.FC = () => {
                     name="termsAndConditions"
                     value={orderDetails.termsAndConditions}
                     onChange={updateOrder}
-                    className="w-full p-2 border rounded-md text-[#8F99A9] text-[14px] font-normal"
+                    className="w-full p-2 border rounded-md text-[#000000] text-[14px] font-normal"
                     placeholder="Add Terms and Condition of Your Business"
                   ></textarea>
+                  <div className="flex justify-end gap-10 mt-5">
+                    <div>
+                     <Link to={'/stockloaded'}>
+                     <button className="bg-[#FEFDFA] rounded-lg text-[#565148] text-[14px] py-2 px-4 mx-1 mt-2 w-[74px] h-[38px] border border-[#565148]">
+                        Cancel
+                      </button>
+                     </Link>
+                    </div>
+                    <div>
+                      <button
+                        onClick={handleSubmit}
+                        className="bg-[#820000] rounded-lg text-[#FEFDF9] text-[14px] py-2 px-5 mx-1 mt-2 w-[108px] h-[38px]"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
                 </div>
-
-                {/* Total and Actions */}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex w-[30%] h-[250px] p-6 rounded-lg shadow-md mt-12 bg-white">
-          <div className="justify-center">
-            <div className="flex my-2">
-              <h3 className="text-[#4B5C79] text-[14px] font-normal">
-                Untaxed Amount
-              </h3>
-              <h4 className="text-[#303F58] text-[18px] font-bold ms-40">
-                Rs 0.00
-              </h4>
-            </div>
-            <div className="flex my-1">
-              <h3 className="text-[#4B5C79] text-[14px] font-normal">SGST</h3>
-              <h1 className="text-[#4B5C79] text-[14px] ms-64 font-normal">
-                Rs 0.00
-              </h1>
-            </div>
-            <div className="flex my-1">
-              <h3 className="text-[#4B5C79] text-[14px] font-normal">CGST</h3>
-              <h1 className="text-[#4B5C79] text-[14px] ms-64 font-normal">
-                Rs 0.00
-              </h1>
-            </div>
-            <div className="flex my-1">
-              <h4 className="text-[#0B1320] text-[16px] font-bold">Total</h4>
-              <h4 className="text-[#303F58] text-[18px] font-bold ms-60">
-                Rs 0.00
-              </h4>
-            </div>
-
-            <div className="flex ms-24 mt-5">
-              <div>
-                <button className="bg-[#FEFDFA] rounded-lg text-[#565148] text-[14px] py-2 px-4 mx-1 mt-2 w-[74px] h-[38px] border border-[#565148]">
-                  Cancel
-                </button>
-              </div>
-              <div>
-                <button className="bg-[#FEFDFA] rounded-lg text-[#565148] text-[14px] py-2 px-4 mx-1 mt-2 flex items-center w-[74px] h-[38px] border border-[#565148]">
-                  <img src={printer} className="me-1 mt-1 -ms-2" alt="" />
-                  Print
-                </button>
-              </div>
-              <div>
-                <button onClick={handleSubmit} className="bg-[#820000] rounded-lg text-[#FEFDF9] text-[14px] py-2 px-5 mx-1 mt-2 w-[108px] h-[38px]">
-                  Save
-                </button>
               </div>
             </div>
           </div>

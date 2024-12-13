@@ -26,7 +26,7 @@ const ViewCustmor: React.FC = () => {
 
   const { request: getACustomer } = useApi("get", 4000)
 
-  const getAllItems = async () => {
+  const getOneCustomer = async () => {
     try {
       const url = `${endpoints.GET_A_CUSTOMER}/${id}`
       const { response, error } = await getACustomer(url)
@@ -43,7 +43,7 @@ const ViewCustmor: React.FC = () => {
   }
 
   useEffect(() => {
-    getAllItems()
+    getOneCustomer()
   }, [])
 
   if (loading) {
@@ -150,13 +150,30 @@ const ViewCustmor: React.FC = () => {
             </div>
 
             {/* License Validity */}
-            <div className="p-8 rounded-[24px] flex justify-between items-center w-[388px] mx-8 h-[123px]" style={{ background: "linear-gradient(91.71deg, #FFE3B8 -19.39%, #D5DCB3 97.82%)" }}>
-              <img src={bottle} alt="License Validity" />
-              <div className="text-right">
-                <h2 className="text-xl font-semibold text-gray-800 mb-2">Bottle in hand</h2>
-                <p className="text-gray-600">0</p>
-              </div>
-            </div>
+            <div 
+  className="p-8 rounded-[24px] flex justify-between items-center w-[388px] mx-8 h-[123px]" 
+  style={{ background: "linear-gradient(91.71deg, #FFE3B8 -19.39%, #D5DCB3 97.82%)" }}
+>
+  <img src={bottle} alt="License Validity" />
+  <div className="text-right">
+    {customer.stock && customer.stock.length > 0 ? (
+      <>
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">
+          {customer.stock[0].itemName || "0"} in Hand
+        </h2>
+        <p className="text-gray-600">
+          {customer.stock[0].itemName || "N/A"} - {customer.stock[0].quantity} 
+          {customer.stock[0].status ? ` (${customer.stock[0].status})` : ''}
+        </p>
+      </>
+    ) : (
+      <>
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">No Stock</h2>
+        <p className="text-gray-600">No items in stock</p>
+      </>
+    )}
+  </div>
+</div>
           </div>
 
           {/* Right Side - Stats */}

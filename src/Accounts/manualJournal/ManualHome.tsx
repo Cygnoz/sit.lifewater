@@ -1,4 +1,4 @@
-import Ellipsis from "../../assets/icons/Ellipsis";
+// import Ellipsis from "../../assets/icons/Ellipsis";
 import Button from "../Components/Button";
 import PlusCircle from "../Components/PlusIcon";
 import { Link } from "react-router-dom";
@@ -16,6 +16,8 @@ function ManualHome({}: Props) {
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
+  console.log(toggleDropdown);
+  
 
   const handleClickOutside = (event: MouseEvent) => {
     if (

@@ -3,9 +3,9 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import SubHeader from './SubHeader';
-import CreateOrder from '../pages/Createorder';
-import ViewOrder from '../components/ViewOrder';
-import NewOrder from '../pages/NewOrder';
+import CreateOrder from '../Orders/pages/Createorder';
+
+// import NewOrder from '../Orders/components/NewOrder';
 import ActiveRoute from '../Route/Pages/Activeroute';
 import SubRoute from '../Route/Pages/SubRoute';
 import EditSubRoute from '../Route/Pages/EditSubRoute';
@@ -15,8 +15,7 @@ import CreateMainRoute from '../Route/Components/CreateMainRoute';
 import ViewRoute from '../Route/Components/ViewRoute';
 import AddVehicle from '../Vehicle/Components/AddVehicle';
 import CreateVehicle from '../Vehicle/Pages/CreateVehicle';
-import EditVehicles from '../Vehicle/Pages/EditVehicles';
-import ViewVehicle from '../Vehicle/Components/ViewVehicle';
+import ViewVehicle from '../Vehicle/ViewVehicle/ViewVehicle';
 import AddCustomer from '../Customer/Components/AddCustomer';
 import EditCustomer from '../Customer/Pages/EditCustomer';
 import ViewCustmor from '../Customer/Components/ViewCustmor';
@@ -25,7 +24,7 @@ import CreateInternalTransfer from '../Stock/Internal transfer/Pages/CreateInter
 import AddItem from '../Stock/Items/Components/AddItem';
 import CreateItem from '../Stock/Items/Pages/CreateItem';
 import EditItem from '../Stock/Items/Pages/EditItem';
-import StockLoaded from '../Modules/Stock/StockLoaded/Stock_loaded';
+import StockLoaded from '../Stock/Stock loaded/pages/Stock_loaded';
 import UnloadedAdd from '../Stock/Unload stock/Pages/UnloadAdd';
 import AddWStock from '../Stock/W stock/Components/AddWStock';
 import CreateWStock from '../Stock/W stock/Pages/CreateWstock';
@@ -78,6 +77,7 @@ import Login from '../Settings/Login/Login';
 import CreateStaff from '../Staff/Createstaff';
 import AddStaff from '../Staff/AddStaff';
 import StaffView from '../Staff/VieStaff/StaffView';
+import ViewOrder from '../Orders/components/ViewOrder';
 
 const App: React.FC = () => {
   const [selectedNav, setSelectedNav] = useState<string>(() => localStorage.getItem('selectedNav') || '');
@@ -117,17 +117,22 @@ const App: React.FC = () => {
   return (
     <>
       <div className="flex h-[1200px] bg-[#f6f6f6]">
-        <Sidebar onSelect={handleNavSelect} className="w-1/4" />
-        <div className="flex-1 p-4">
+      <div className="fixed h-full">
+      <Sidebar onSelect={handleNavSelect} className="w-1/4" /></div>
+       
+        <div className="ml-[65px] flex-1 p-4">
           <Header />
-          <SubHeader selectedNav={selectedNav} subhead={subhead} />
-          <div className='h-screen bg-[#f6f6f6]'>
+       
+          <SubHeader selectedNav={selectedNav} subhead={subhead}/>
+          
+          
+          <div className='h-screen bg-[#f6f6f6] z-10'>
             <Routes>
               <Route path='/dashboard' element={<MyComponent />} />
               
               {/* ORDERS */}
               <Route path='/orders' element={<CreateOrder />} />
-              <Route path='/addneworder' element={<NewOrder />} />
+              {/* <Route path='/addneworder' element={<NewOrder />} /> */}
               <Route path='/vieworder/:id' element={<ViewOrder />} />
 
               {/* STAFF */}
@@ -151,7 +156,7 @@ const App: React.FC = () => {
               {/* VEHICLE */}
               <Route path='/vehicle' element={<CreateVehicle />} />
               <Route path='/vehicle/addvehicle' element={<AddVehicle />} />
-              <Route path='/vehicle/editvehicle/:id' element={<EditVehicles />} />
+              <Route path='/vehicle/editvehicle/:id' element={<AddVehicle />} />
               <Route path='/viewvehicle/:id' element={<ViewVehicle />} />
 
               {/* CUSTOMER */}

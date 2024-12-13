@@ -6,7 +6,7 @@ import bgImage from "../../assets/images/Frame 6.png";
 import chartOfAcc from "../../assets/constants/chartOfAcc";
 import Modal from "../../Accounts/Components/Modal";
 import CehvronDown from "../../assets/icons/cheveronDown";
-import { createAccountAPI } from "../../services/AccountsAPI/accounts";
+// import { createAccountAPI } from "../../services/AccountsAPI/accounts";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { endpoints } from "../../services/ApiEndpoint";
@@ -182,9 +182,11 @@ function NewAccountModal({
   
   const { request: addNewAccount } = useApi("post", 4000);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e:any) => {
     e.preventDefault();
     setLoading(true);
+    console.log(loading);
+    
 
     try {
       // Prepare the payload

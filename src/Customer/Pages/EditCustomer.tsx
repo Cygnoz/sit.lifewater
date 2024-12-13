@@ -80,6 +80,8 @@ export default function EditCustomer() {
       whatsappNo: !whatsappSameAsMobile ? prev.mobileNo : "",
     }))
   }
+  console.log(handleWhatsappCheckbox);
+  
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();

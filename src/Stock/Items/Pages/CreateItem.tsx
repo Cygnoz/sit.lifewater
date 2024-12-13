@@ -9,7 +9,7 @@ import { Link, useNavigate } from "react-router-dom"
 import useApi from "../../../Hook/UseApi"
 import { endpoints } from "../../../services/ApiEndpoint"
 import SortBy from "../Components/SortByItems"
-import { toast } from "react-toastify"
+import { toast, ToastContainer } from "react-toastify"
 
 const CreateItem: React.FC = () => {
   const defaultImage = "https://cdn1.iconfinder.com/data/icons/avatar-3/512/Manager-512.png"
@@ -81,6 +81,8 @@ const CreateItem: React.FC = () => {
 
   return (
     <div className="flex min-h-screen w-full">
+      <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop={true} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored" />
+
       <div className="p-2 w-full">
         <div className="flex justify-between items-center mb-4">
           <div>

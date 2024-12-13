@@ -20,6 +20,8 @@ export const endpoints = {
   // stock
   ADD_W_STOCK: `wstock`,
   GET_W_STOCK: `wstock`,
+  ADD_STOCK_LOAD:`stock`,
+  GET_ALL_LOADED_STOCK:`stock`,
 
   //item
   GET_ALL_ITEMS: `item`,
@@ -34,12 +36,31 @@ export const endpoints = {
   ADD_WAREHOUSE: `warehouse`,
   DELETE_WAREHOUSE: `warehouse`,
 
+  // Orders
+  ADD_NEW_ORDER:`orders`,
+  GET_ALL_ORDERS:`orders`,
+  GET_AN_ORDER:`orders`,
+  DELETE_AN_ORDER:`orders`,
+
 
   // Route
   ADD_MAINROUTE: `addRoute`,
   GET_ALL_MAINROUTE: `getAllroutes`,
-  GET_A_MAINROUTE: `getroute/:id`,
+  GET_A_MAINROUTE: `getroute`,
+  DELETE_A_MAINROUTE:`delRoute`,
+  UPDATE_A_MAINROUTE:`updateRoute`,
 
+
+  //subroute
+  ADD_SUBROUTE:`addSRoute`,
+  GET_ALL_SUBROUTE:`viewSRoute`,
+  DELETE_A_SUBROUTE:`delSRoute`,
+  view_A_SUBROUTE:`viewSRoute`,
+  UPDATE_A_SUBROUTE:`updateSRoute`,
+
+  // Active routes
+
+  GET_ALL_ACTIVE_ROUTE:`getActiveRoutes`,
 
 
 
@@ -58,3 +79,4 @@ export const endpoints = {
   GET_ALL_JOURNALS: `get-all-journal`,
   GET_ONE_JOURNAL: `get-one-journal`
 }
+

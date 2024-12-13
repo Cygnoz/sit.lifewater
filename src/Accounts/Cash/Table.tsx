@@ -24,6 +24,8 @@ const CashAccountsTable = () => {
       },
     
   ]);
+  console.log(setAccountData);
+  
   const [searchValue, setSearchValue] = useState<string>("");
 
 

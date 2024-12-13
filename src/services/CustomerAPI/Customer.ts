@@ -46,6 +46,7 @@ interface ApiResponse {
 }
 
 
+<<<<<<< HEAD
 // // Combined API function for adding both business and individual customers
 // export const addCustomerAPI = async (customerData: FormData): Promise<ApiResponse> => {
 //   try {
@@ -55,14 +56,71 @@ interface ApiResponse {
 //     });
 //     console.log(response);
 //     return response; // Ensure response matches the expected ApiResponse structure
+=======
+// Combined API function for adding both business and individual customers
+export const addCustomerAPI = async (customerData: FormData): Promise<ApiResponse> => {
+  try {
+    // POST to a single endpoint
+    const response = await commonAPI('POST', `${BASEURL}/addcustomer`, customerData, {
+      // No need to specify Content-Type for FormData
+    });
+    console.log(response);
+    return response; // Ensure response matches the expected ApiResponse structure
+>>>>>>> 1235185e81313e82aaeb438cde991b3e7c149a4b
     
+  } catch (error: any) {
+    console.error(`Error adding customer of type `, error); // Log the full error for debugging
+    throw error; // Rethrow the error so it can be caught in the component
+  }
+};
+
+
+// export const addCustomerAPI = async (customerData: FormData | Record<string, any>): Promise<ApiResponse> => {
+//   try {
+//     const isFormData = customerData instanceof FormData;
+    
+//     const headers: Record<string, string> = {
+//       'Accept': 'application/json',
+//     };
+
+//     if (!isFormData) {
+//       headers['Content-Type'] = 'application/json';
+//     }
+
+
+
+//     const response = await axios.post(`${BASEURL}/api/addcustomer`, customerData, { headers });
+
+//     console.log("Response Status:", response.status);
+//     console.log("Response Data:", response.data);
+
+//     return response.data;
 //   } catch (error: any) {
-//     console.error(`Error adding customer of type `, error); // Log the full error for debugging
-//     throw error; // Rethrow the error so it can be caught in the component
+//     if (axios.isAxiosError(error)) {
+//       if (error.response) {
+//         console.error("Backend Error:", error.response.data);
+//         return {
+//           status: error.response.status,
+//           message: error.response.data.message || "An error occurred while adding the customer.",
+//         };
+//       } else if (error.request) {
+//         console.error("Network Error:", error.message);
+//         return {
+//           status: 0,
+//           message: "Network error. Please check your internet connection.",
+//         };
+//       }
+//     }
+//     console.error("Unexpected Error:", error);
+//     return {
+//       status: 500,
+//       message: "An unexpected error occurred.",
+//     };
 //   }
 // };
 
 
+<<<<<<< HEAD
 export const addCustomerAPI = async (customerData: FormData | Record<string, any>): Promise<ApiResponse> => {
   try {
     const isFormData = customerData instanceof FormData;
@@ -116,6 +174,8 @@ export const addCustomerAPI = async (customerData: FormData | Record<string, any
 //     throw error; 
 //   }
 // }
+=======
+>>>>>>> 1235185e81313e82aaeb438cde991b3e7c149a4b
 
 export const getAllCustomersAPI = async (): Promise<ApiResponse> => {
   try {
@@ -136,6 +196,7 @@ export const getAllCustomersAPI = async (): Promise<ApiResponse> => {
 
 
 
+<<<<<<< HEAD
 // export const deleteCustomerAPI = async (id: string) => {
 //   try {
 //     const response = await axios.delete(`${BASEURL}/customer/${id}`);
@@ -148,6 +209,8 @@ export const getAllCustomersAPI = async (): Promise<ApiResponse> => {
 //     return false;
 //   }
 // };
+=======
+>>>>>>> 1235185e81313e82aaeb438cde991b3e7c149a4b
 
 export const deleteCustomerAPI = async (id: string) => {
   try {
