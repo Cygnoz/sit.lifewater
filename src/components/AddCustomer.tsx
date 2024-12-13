@@ -76,7 +76,7 @@ export default function Component() {
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(true);
   const [selectedMainRoute, setSelectedMainRoute] = useState<string>("");
   const [selectedSubRoute, setSelectedSubRoute] = useState<string>("");
   const [filteredSubRoutes, setFilteredSubRoutes] = useState<Route[]>([]);
@@ -107,6 +107,9 @@ export default function Component() {
       }));
     }
   };
+  console.log("location saved:",isLocationSaved);
+  console.log("location getting:",isGettingLocation);
+  
 
   const handleMainRouteChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -180,44 +183,34 @@ export default function Component() {
     });
   };
 
-  const handleLocationFetch = async () => {
-    if (isLocationSaved) {
+  const fetchLocationAutomatically = async () => {
+    try {
+      setIsGettingLocation(true);
+      const coords = await getCurrentLocation();
       setFormData((prevData) => ({
         ...prevData,
         location: {
-          address: "",
+          address: "", // Update if you have a way to resolve the address
           coordinates: {
-            latitude: null,
-            longitude: null,
+            latitude: coords.latitude,
+            longitude: coords.longitude,
           },
         },
       }));
-      setIsLocationSaved(false);
-      toast.info("Location cleared.");
-    } else {
-      try {
-        setIsGettingLocation(true);
-        const coords = await getCurrentLocation();
-        setFormData((prevData) => ({
-          ...prevData,
-          location: {
-            address: "",
-            coordinates: {
-              latitude: coords.latitude,
-              longitude: coords.longitude,
-            },
-          },
-        }));
-        setIsLocationSaved(true);
-        toast.success("Location fetched successfully");
-      } catch (error) {
-        console.error("Error fetching location:", error);
-        toast.error("Error fetching location. Please try again.");
-      } finally {
-        setIsGettingLocation(false);
-      }
+      setIsLocationSaved(true);
+      // toast.success("Location fetched successfully");
+    } catch (error) {
+      // console.error("Error fetching location:", error);
+      // toast.error("Error fetching location. Please try again.");
+    } finally {
+      setIsGettingLocation(false);
     }
   };
+
+  useEffect(() => {
+    fetchLocationAutomatically();
+  }, []); // Empty dependency array ensures it runs only on component mount
+
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -640,31 +633,35 @@ export default function Component() {
             )}
           </div>
 
-          {isLocationSaved &&
+          {/* {isLocationSaved &&
             formData.location.coordinates.latitude &&
-            formData.location.coordinates.longitude && (
+            formData.location.coordinates.longitude && ( */}
+              <div>
+            <label htmlFor="location" className="text-sm font-medium text-gray-700">Current Location</label>
               <iframe
                 src={`https://www.google.com/maps?q=${formData.location.coordinates.latitude},${formData.location.coordinates.longitude}&z=15&output=embed`}
                 width="100%"
                 height="300"
                 className="mt-4 border rounded-md"
               ></iframe>
-            )}
-
+              </div>
+            {/* ) */}
+{/* 
           <button
             type="button"
             onClick={handleLocationFetch}
             disabled={isGettingLocation}
             className={`w-full bg-[#820000] text-white p-2 mt-4 rounded-md ${
               isGettingLocation ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            }`
+          }
           >
             {isLocationSaved
               ? "Clear Location"
               : isGettingLocation
               ? "Fetching Location..."
               : "Save Location"}
-          </button>
+          </button> */}
 
           <button
             type="submit"
