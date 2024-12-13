@@ -22,6 +22,7 @@ import Dashboard from './pages/Dashboard';
 import Maps from './pages/Map';
 import EditCustomer from './pages/EditCustomer';
 import Orders from './pages/Orders';
+import AddOrder from './components/AddOrder';
 // import Routed from './pages/Route';
 
 const App: React.FC = () => {
@@ -62,6 +63,8 @@ const App: React.FC = () => {
           <Route path="/endride" element={<EndRide />} />
           <Route path="/route" element={<Maps />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/addorder" element={<AddOrder />} />
+
 
         </Routes>
       </div>
