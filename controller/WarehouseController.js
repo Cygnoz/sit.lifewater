@@ -87,6 +87,25 @@ exports.getWarehouses = async (req, res) => {
   }
 };
 
+// Get a single warehouse by ID
+exports.getWarehouseById = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the ID from the route params
+    const warehouse = await Warehouse.findById(id);
+
+    if (!warehouse) {
+      return res.status(404).json({ message: 'Warehouse not found' });
+    }
+
+    res.status(200).json({ warehouse });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error fetching the warehouse',
+      error,
+    });
+  }
+};
+
 
 
 // Function to delete an warehouse by ID

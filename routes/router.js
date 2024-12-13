@@ -29,6 +29,7 @@ router.get('/wstock', verifyToken,  wStockController.getAllStock);
 //Warehouse
 router.post('/warehouse', verifyToken,  warehouseController.addWarehouse);
 router.get('/warehouse', verifyToken,  warehouseController.getWarehouses);
+router.get('/warehouse/:id', verifyToken,  warehouseController.getWarehouseById);
 router.delete('/warehouse/:id', verifyToken,  warehouseController.deleteWarehouse);
 
 
