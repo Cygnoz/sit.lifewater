@@ -39,6 +39,8 @@ exports.createCustomer = async (req, res) => {
         return res.status(400).json({ message: 'A customer with this email already exists.' });
       }
     }
+
+
     // Generate customerID
     let nextIdNumber = 1; // Default if the collection is empty
     const lastCustomer = await Customer.findOne().sort({ createdAt: -1 }); // Sort by creation date to find the last one
@@ -102,7 +104,7 @@ exports.createCustomer = async (req, res) => {
     });
     await trialEntry.save();
 
-    console.log(data);
+    // console.log(data);
     
     return res.status(201).json({
       message: 'Customer created successfully!',
@@ -207,116 +209,230 @@ exports.getCustomerById = async (req, res) => {
  
 
 // Update a customer by ID
+// exports.updateCustomerById = async (req, res) => {
+//   try {
+//     console.log("Update Customer:", req.body);
+//     const { id } = req.params;
+
+//     // Check and handle location
+//     if (req.body.location) {
+//       // Check if location is an object and not a stringified object like '[object Object]'
+//       if (typeof req.body.location === "object" && req.body.location !== null) {
+//         const { address = '', latitude, longitude } = req.body.location;
+
+//         // Validate and parse latitude and longitude
+//         const parsedLatitude = parseFloat(latitude);
+//         const parsedLongitude = parseFloat(longitude);
+
+//         // Check if latitude and longitude are valid numbers
+//         if (isNaN(parsedLatitude) || isNaN(parsedLongitude)) {
+//           console.error("Invalid latitude or longitude");
+//           return res.status(400).json({ message: "Invalid latitude or longitude" });
+//         }
+
+//         // Update the location field
+//         req.body.location = {
+//           address,
+//           coordinates: {
+//             type: "Point",
+//             coordinates: [parsedLongitude, parsedLatitude], // [longitude, latitude]
+//           },
+//         };
+//       } else {
+//         // If location is not a valid object, ignore it and log the issue
+//         console.warn("Invalid location object received, skipping location update");
+//         delete req.body.location; // Ensure location is not updated in this case
+//       }
+//     }
+//     const existingCustonmer = await Customer.findById(id);
+//     if (!existingCustonmer) {
+//       return res.status(404).json({ message: 'Customer not found' });
+//     }
+
+//     // Clean the customer data (ensure you have a cleanCustomerData function if needed)
+//     const cleanedData = cleanCustomerData(req.body);
+//     console.log("Cleaned Data:", cleanedData);
+
+//     if (cleanedData.depositAmount === "NaN") {
+//       cleanedData.depositAmount = 0; // or 0, depending on your requirements
+//     }
+
+//     const { fullName, whatsappNumber, location, email } = cleanedData;
+
+//     // cleanedData.logo=cleanedData.logo[1]
+//     cleanedData.location=req.body.location
+
+//     // Validate required fields
+//     if (!cleanedData.fullName) {
+//       return res.status(400).json({ message: 'Name is required.' });
+//     }
+//     if (!cleanedData.customerType) {
+//       return res.status(400).json({ message: 'Select Customer Type.' });
+//     }
+    
+
+//     // Check for existing customer by WhatsApp number (unique identifier)
+//     if(cleanedData.whatsappNumber){
+//       const existingWhatsappNumber = await Customer.findOne({ whatsappNumber, _id: { $ne: id } });
+//       if (existingWhatsappNumber) {
+//         return res.status(400).json({ message: 'A customer with this WhatsApp number already exists.' });
+//       }
+//     }
+
+//     if(cleanedData.email){
+//       const existingEmail = await Customer.findOne({ email, _id: { $ne: id } });
+//       if (existingEmail) {
+//         return res.status(400).json({ message: 'A customer with this email already exists.' });
+//       }
+//     }
+
+    
+
+
+//     // Update the customer in the database
+//     const updatedCustomer = await Customer.findByIdAndUpdate(
+//       req.params.id,
+//       cleanedData,
+//       { new: true } 
+//     );
+
+//     // Check if the customer was found and updated
+//     if (!updatedCustomer) {
+//       return res.status(404).json({ message: "Customer not found" });
+//     }
+
+//     // Update customerDisplayName in associated Account documents
+//     if ( cleanedData.fullName !== existingCustonmer.fullName) {
+//       const updatedAccount = await Account.updateMany(
+//         {
+//           accountName: existingCustonmer.fullName,
+//         },
+//         { $set: { accountName: cleanedData.fullName } }
+//       );
+//       console.log(
+//         `${updatedAccount.modifiedCount} account(s) associated with the accountName have been updated with the new customerDisplayName.`
+//       );
+//     }
+
+
+//     res.status(200).json({ 
+//       message: 'Customer Edited successfully',
+//       data: updatedCustomer,
+//     });    
+//   } catch (error) {
+//     console.error("Error updating customer:", error);
+//     res.status(500).json({ message: "Internal server error." });
+//   }
+// };
+
+
+
+
+
+
+
+
+
+
+// Update a customer by ID
 exports.updateCustomerById = async (req, res) => {
   try {
     console.log("Update Customer:", req.body);
     const { id } = req.params;
 
-    // Check and handle location
+    // Handle location
     if (req.body.location) {
-      // Check if location is an object and not a stringified object like '[object Object]'
       if (typeof req.body.location === "object" && req.body.location !== null) {
         const { address = '', latitude, longitude } = req.body.location;
 
-        // Validate and parse latitude and longitude
         const parsedLatitude = parseFloat(latitude);
         const parsedLongitude = parseFloat(longitude);
 
-        // Check if latitude and longitude are valid numbers
         if (isNaN(parsedLatitude) || isNaN(parsedLongitude)) {
           console.error("Invalid latitude or longitude");
           return res.status(400).json({ message: "Invalid latitude or longitude" });
         }
 
-        // Update the location field
         req.body.location = {
           address,
           coordinates: {
             type: "Point",
-            coordinates: [parsedLongitude, parsedLatitude], // [longitude, latitude]
+            coordinates: [parsedLongitude, parsedLatitude],
           },
         };
       } else {
-        // If location is not a valid object, ignore it and log the issue
         console.warn("Invalid location object received, skipping location update");
-        delete req.body.location; // Ensure location is not updated in this case
+        delete req.body.location;
       }
     }
-    const existingCustonmer = await Customer.findById(id);
-    if (!existingCustonmer) {
+
+    const existingCustomer = await Customer.findById(id);
+    if (!existingCustomer) {
       return res.status(404).json({ message: 'Customer not found' });
     }
 
-    // Clean the customer data (ensure you have a cleanCustomerData function if needed)
+    // Clean and sanitize customer data
     const cleanedData = cleanCustomerData(req.body);
+
+    // Remove the stock field to prevent updating it
+    delete cleanedData.stock;
+
     console.log("Cleaned Data:", cleanedData);
 
     if (cleanedData.depositAmount === "NaN") {
-      cleanedData.depositAmount = null; // or 0, depending on your requirements
+      cleanedData.depositAmount = 0;
     }
 
-    const { fullName, whatsappNumber, location, email } = cleanedData;
-
-    // cleanedData.logo=cleanedData.logo[1]
-    cleanedData.location=req.body.location
-
-    // Validate required fields
     if (!cleanedData.fullName) {
       return res.status(400).json({ message: 'Name is required.' });
     }
+
     if (!cleanedData.customerType) {
       return res.status(400).json({ message: 'Select Customer Type.' });
     }
-    
 
-    // Check for existing customer by WhatsApp number (unique identifier)
-    if(cleanedData.whatsappNumber){
-      const existingWhatsappNumber = await Customer.findOne({ whatsappNumber, _id: { $ne: id } });
+    // Check for unique WhatsApp number
+    if (cleanedData.whatsappNumber) {
+      const existingWhatsappNumber = await Customer.findOne({ whatsappNumber: cleanedData.whatsappNumber, _id: { $ne: id } });
       if (existingWhatsappNumber) {
         return res.status(400).json({ message: 'A customer with this WhatsApp number already exists.' });
       }
     }
 
-    if(cleanedData.email){
-      const existingEmail = await Customer.findOne({ email, _id: { $ne: id } });
+    // Check for unique email
+    if (cleanedData.email) {
+      const existingEmail = await Customer.findOne({ email: cleanedData.email, _id: { $ne: id } });
       if (existingEmail) {
         return res.status(400).json({ message: 'A customer with this email already exists.' });
       }
     }
 
-    
-
-
     // Update the customer in the database
     const updatedCustomer = await Customer.findByIdAndUpdate(
-      req.params.id,
+      id,
       cleanedData,
-      { new: true } 
+      { new: true, runValidators: true } 
     );
 
-    // Check if the customer was found and updated
     if (!updatedCustomer) {
       return res.status(404).json({ message: "Customer not found" });
     }
 
     // Update customerDisplayName in associated Account documents
-    if ( cleanedData.fullName !== existingCustonmer.fullName) {
+    if (cleanedData.fullName && cleanedData.fullName !== existingCustomer.fullName) {
       const updatedAccount = await Account.updateMany(
-        {
-          accountName: existingCustonmer.fullName,
-        },
+        { accountName: existingCustomer.fullName },
         { $set: { accountName: cleanedData.fullName } }
       );
       console.log(
-        `${updatedAccount.modifiedCount} account(s) associated with the accountName have been updated with the new customerDisplayName.`
+        `${updatedAccount.modifiedCount} account(s) associated with the accountName have been updated.`
       );
     }
-
 
     res.status(200).json({ 
       message: 'Customer Edited successfully',
       data: updatedCustomer,
-    });    
+    });
   } catch (error) {
     console.error("Error updating customer:", error);
     res.status(500).json({ message: "Internal server error." });
@@ -324,18 +440,39 @@ exports.updateCustomerById = async (req, res) => {
 };
 
 
+
 // Delete a business customer by ID
 exports.deleteCustomerById = async (req, res) => {
   try {
-    const deletedCustomer = await Customer.findByIdAndDelete(req.params.id);
+    const customerId = req.params.id;
+
+    // Find and delete the customer
+    const deletedCustomer = await Customer.findByIdAndDelete(customerId);
     if (!deletedCustomer) {
       return res.status(404).json({ message: 'Customer not found' });
     }
-    res.status(200).json({ message: 'Customer deleted successfully' });
+
+    // Delete the associated account
+    const deletedAccount = await Account.findOneAndDelete({ accountId: customerId });
+    if (!deletedAccount) {
+      console.warn(`Account not found for customerId: ${customerId}`);
+    }
+
+    // Delete the associated trial balance entries
+    const deletedTrialEntries = await TrialBalance.deleteMany({ operationId: customerId });
+    if (deletedTrialEntries.deletedCount === 0) {
+      console.warn(`No trial balance entries found for customerId: ${customerId}`);
+    }
+
+    res.status(200).json({
+      message: 'Customer, associated account, and trial balance entries deleted successfully',
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting  customer', error });
+    console.error('Error deleting customer and related data:', error);
+    res.status(500).json({ message: 'Error deleting customer and related data', error });
   }
 };
+
 
   
   //Clean Data 

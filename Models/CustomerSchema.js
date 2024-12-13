@@ -11,6 +11,7 @@ const stockSchema = new Schema({
  
 const customerSchema = new mongoose.Schema({
   customerID: { type: String },
+  companyName:{type:String},
   customerType: { type: String, required: true },
   logo: { type: String }, 
   fullName: { type: String, required: true },

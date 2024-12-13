@@ -108,19 +108,27 @@ exports.deleteSubroute = async (req, res) => {
 
 // View a single subroute by ID
 exports.viewSubroute = async (req, res) => {
-    try {
-        const { id } = req.params;
+  try {
+      const { id } = req.params;
 
-        const subroute = await Subroute.findById(id);
+      const subRoute = await Subroute.findById(id);
+      const mainRoutes = await MainRoute.find();
 
-        if (!subroute) {
-            return res.status(404).json({ message: 'Subroute not found' });
-        }
+      if (!subRoute) {
+          return res.status(404).json({ message: 'Subroute not found' });
+      }
 
-        res.status(200).json(subroute);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching subroute', error });
-    }
+      const mainRoute = mainRoutes.find(route => String(route._id) === String(subRoute.mainRouteId));
+
+      const enrichedSubRoute = {
+          ...subRoute.toObject(), // Convert Mongoose Document to plain object
+          mainRouteName: mainRoute ? mainRoute.mainRouteName : undefined, 
+      };
+
+      res.status(200).json(enrichedSubRoute);
+  } catch (error) {
+      res.status(500).json({ message: 'Error fetching subroute', error: error.message });
+  }
 };
 
 
