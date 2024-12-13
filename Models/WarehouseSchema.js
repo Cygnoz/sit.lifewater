@@ -5,7 +5,9 @@ const stockSchema = new Schema({
     itemId: { type: String },
     itemName: { type: String },
     quantity: { type: Number },
-    status: { type: String, default: undefined },
+    costPrice:{type:Number},
+    amount:{type:Number},
+    status: { type: String, default: "filled" },
   }, { _id: false });
   
 
