@@ -76,7 +76,7 @@ const CreateStaff: React.FC = () => {
       console.log(response);
 
     } catch (error) {
-      toast.error("Error occurred while deleting brand.");
+      toast.error("Error occurred while deleting customer.");
     }
 
   }

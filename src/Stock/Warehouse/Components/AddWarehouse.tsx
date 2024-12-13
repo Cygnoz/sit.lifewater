@@ -61,13 +61,14 @@ const AddWarehouse: React.FC = () => {
         setTimeout(() => {
           navigate('/warehouse')
         }, 1000)
+      }else{
+        toast.error(error.response?.data?.message || error.message || "Failed to save");
       }
-      toast.success(error?.data.message);
-
       console.log(response);
 
-    } catch (error) {
-      toast.error("Failed to save staff.");
+    } catch (error:any) {
+      // Catch block for unexpected errors
+      toast.error(error?.response?.data?.message || error?.message || "Failed to save warehouse");
       console.log(error);
     }
 
