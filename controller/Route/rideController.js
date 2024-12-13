@@ -68,49 +68,16 @@ exports.startRide = async (req, res) => {
           return res.status(500).json({ message: 'Internal server error.', error });
         }
       }
-  
-  
-      
-  
-      
-  
-      const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai","DD/MM/YY","/");
-      const openingDate = generatedDateTime.dateTime; 
+     
   
       // Create a new customer with the transformed location
-      const newCustomer = new Customer({ ...cleanedData, location: transformedLocation });
-  
-      const savedCustomer = await newCustomer.save();
-  
-      // Create a new account
-      const newAccount = new Account({
-        accountName: savedCustomer.fullName,
-        accountId: savedCustomer._id,
-        openingDate:openingDate,
-        accountSubhead: "Sundry Debtors",
-        accountHead: "Asset",
-        accountGroup: "Asset",
-        description: "Customer",
-      });
-  
-      const savedAccount = await newAccount.save();
-  
-      // Create trial balance entry
-      const trialEntry = new TrialBalance({
-        operationId: savedCustomer._id,
-        date: savedCustomer.createdAt,
-        date: savedCustomer.openingDate,
-        accountId: savedAccount._id,
-        accountName: savedAccount.accountName,
-        action: "Opening Balance",
-        debitAmount: savedCustomer.depositAmount || 0,
-        creditAmount: 0,
-      });
-      await trialEntry.save();
+      const newRide = new Ride({ ...cleanedData});  
+      const savedRide = await newRide.save();
+     
       
       return res.status(201).json({
-        message: 'Customer created successfully!',
-        data: savedCustomer
+        message: 'Ride Stareted successfully!',
+        data: savedRide
       });
       
     } catch (error) {
