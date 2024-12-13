@@ -14,6 +14,8 @@ interface FormData {
   addressLine2: string;
   city:string;
   street:string;
+  zipPostalCode:string;
+  flatNumber:string;
   email: string;
   numberOfBottles: string;
   ratePerBottle: string;
@@ -53,6 +55,8 @@ export default function Component() {
     addressLine2: "",
     city: "",
     street: "",
+    zipPostalCode: "",
+    flatNumber: "",
     email: "",
     numberOfBottles: "",
     ratePerBottle: "",
@@ -458,6 +462,34 @@ export default function Component() {
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter street"
+            />
+            {/* {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )} */}
+          </div>
+          <div>
+            <label className="block text-gray-700">zip postal code</label>
+            <input
+              type="number"
+              name="zipPostalCode"
+              value={formData.zipPostalCode}
+              onChange={handleInputChange}
+              className="w-full p-2 mt-1 border rounded-md"
+              placeholder="Enter zipcode"
+            />
+            {/* {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )} */}
+          </div>
+          <div>
+            <label className="block text-gray-700">flat number</label>
+            <input
+              type="text"
+              name="flatNumber"
+              value={formData.flatNumber}
+              onChange={handleInputChange}
+              className="w-full p-2 mt-1 border rounded-md"
+              placeholder="Enter zipcode"
             />
             {/* {errors.email && (
               <p className="text-red-500 text-sm">{errors.email}</p>
