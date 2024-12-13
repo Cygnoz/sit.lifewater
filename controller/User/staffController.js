@@ -98,7 +98,7 @@ exports.editStaff = async (req, res) => {
 
     const cleanedData = cleanCustomerData(req.body);
 
-    const existingStaff = await Staff.findById(req.params.id);
+    const existingStaff = await Staff.findById(id);
     if (!existingStaff) {
       return res.status(404).json({ message: 'Staff not found' });
     }
@@ -111,9 +111,6 @@ exports.editStaff = async (req, res) => {
     if (!cleanedData.mobileNumber) {
       return res.status(400).json({ message: 'Mobile Number is required' });
     }
-    if (!cleanedData.firstname) {
-      return res.status(400).json({ message: 'WhatsApp Number is required' });
-    }
     if (!cleanedData.designation) {
       return res.status(400).json({ message: 'Designation is required' });
     }
@@ -124,7 +121,7 @@ exports.editStaff = async (req, res) => {
       return res.status(400).json({ message: 'Staff member with this mobile number already exists.' });
     }
 
-    // Check for existing staff with the same mobile number
+    // Check for existing staff with the same username
     const existingStaffUsername = await Staff.findOne({ username, _id: { $ne: id } });
     if (existingStaffUsername) {
       return res.status(400).json({ message: 'Staff member with this username already exists.' });
@@ -137,36 +134,39 @@ exports.editStaff = async (req, res) => {
         return res.status(400).json({ message: 'Username and password are required for Sales staff.' });
       }
 
-      if(cleanedData.password && existingStaff.password ){
-
-        const oldpasword = decrypt(existingStaff.password);
-        const isMatch = password === oldpasword;
+      if (cleanedData.password && existingStaff.password) {
+        const oldPassword = decrypt(existingStaff.password);
+        const isMatch = password === oldPassword;
         if (!isMatch) {
-          cleanedData.password = encrypt(cleanedData.password);      
-      }}
-
+          cleanedData.password = encrypt(cleanedData.password);
+        }
+      }
+    } else if (existingStaff.designation === 'Sales' && (designation === 'Driver' || designation === 'Helper')) {
+      // If changing from Sales to Driver or Helper, remove username and password
+      await Staff.findByIdAndUpdate(id, { $unset: { username: "", password: "" } });
     }
 
     Object.assign(existingStaff, cleanedData);
     const updatedStaff = await existingStaff.save();
 
     // Proceed with updating the staff record
-    // const updatedStaff = await Staff.findByIdAndUpdate(req.params.id, cleanedData, { new: true });
+    // const updatedStaff = await Staff.findByIdAndUpdate(id, cleanedData, { new: true });
     
     // If staff not found
     if (!updatedStaff) {
       return res.status(404).json({ message: 'Staff not found' });
     }
+
     res.status(200).json({ 
       message: "Staff edited successfully.",
       data: updatedStaff,
     });    
   } catch (error) {
     console.log(error);
-    
     res.status(500).json({ message: "Internal server error." });
   }
 };
+
 
 
 
