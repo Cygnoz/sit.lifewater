@@ -1,5 +1,5 @@
 import { toast, ToastContainer, } from 'react-toastify';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import useApi from '../../../Hook/UseApi';
 import { endpoints } from '../../../services/ApiEndpoint';
@@ -17,7 +17,7 @@ interface WarehouseItem {
 
 const CreateWarehouse: React.FC = () => {
   const { loading, setLoading } = useContext(TableResponseContext)!
-
+  const navigate=useNavigate()
   const [warehouses, setWarehouses] = useState<WarehouseItem[]>([]);
   const [columns] = useState([
     { id: "warehouseName", label: "Warehouse Name", visible: true },
@@ -70,7 +70,9 @@ const CreateWarehouse: React.FC = () => {
       toast.error("Error occurred while deleting warehouse.");
     }
   }
-
+  const handleView = (id : string): void => {
+    navigate(`/viewWarehouse/${id}`)
+  }
 
   return (
     <div>
@@ -110,6 +112,7 @@ const CreateWarehouse: React.FC = () => {
           loading={loading.skeleton}
           searchableFields={["warehouseName", "contactNo", "address"]}
           onDeleteClick={handleDelete}
+          onViewClick={handleView}
         />
 
       </div>
