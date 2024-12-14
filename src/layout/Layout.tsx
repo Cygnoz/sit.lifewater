@@ -78,6 +78,7 @@ import CreateStaff from '../Staff/Createstaff';
 import AddStaff from '../Staff/AddStaff';
 import StaffView from '../Staff/VieStaff/StaffView';
 import ViewOrder from '../Orders/components/ViewOrder';
+import ViewWarehouse from '../Stock/Warehouse/Components/ViewWarehouse';
 
 const App: React.FC = () => {
   const [selectedNav, setSelectedNav] = useState<string>(() => localStorage.getItem('selectedNav') || '');
@@ -191,6 +192,7 @@ const App: React.FC = () => {
               <Route path='/warstock' element={<CreateWStock/>}/>
               <Route path='/addwarehouse' element={<AddWarehouse/>}/>
               <Route path='/warehouse' element={<CreateWarehouse/>}/>
+              <Route path='/viewWarehouse/:id' element={<ViewWarehouse/>}/>
 
               {/* REPORTS */}
               <Route path='/balancesheet' element={<BalanceSheet/>}/>

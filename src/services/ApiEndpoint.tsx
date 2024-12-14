@@ -35,12 +35,14 @@ export const endpoints = {
   GET_ALL_WAREHOUSE: `warehouse`,
   ADD_WAREHOUSE: `warehouse`,
   DELETE_WAREHOUSE: `warehouse`,
+  GET_A_WAREHOUSE:`warehouse`,
 
   // Orders
   ADD_NEW_ORDER:`orders`,
   GET_ALL_ORDERS:`orders`,
   GET_AN_ORDER:`orders`,
   DELETE_AN_ORDER:`orders`,
+  
 
 
   // Route

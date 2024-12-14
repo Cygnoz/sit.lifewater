@@ -28,7 +28,7 @@ const navlist = [
     subhead: [
       {
         headName: "Orders",
-        subRoute: "/",
+        subRoute: "/orders",
       },
     ],
   },
@@ -38,8 +38,8 @@ const navlist = [
     route: "/staff",
     subhead: [
       {
-        headName: "Dashboard",
-        subRoute: "/",
+        headName: "Staff",
+        subRoute: "/staff",
       }, 
     ],
   },
