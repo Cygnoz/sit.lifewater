@@ -53,7 +53,9 @@ const orderSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-
+  ReturnBottle: {
+    type:Number
+  },
   // Calculations
   totalAmount: {
     type: Number,
