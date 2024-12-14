@@ -17,7 +17,7 @@ interface Customer {
   message: string;
   depositAmount: number;
   ratePerBottle: number;
-  noOfBottles: number;
+  numberOfBottles: number;
   logo: string;
   mobileNo: string;
   customerID: string;
@@ -113,7 +113,7 @@ const ViewCustomers: React.FC = () => {
           {filteredCustomers.map((customer) => {
             const dueAmount =
               customer.depositAmount -
-              customer.ratePerBottle * customer.noOfBottles;
+              customer.ratePerBottle * customer.numberOfBottles;
 
             return (
               <div
@@ -229,7 +229,7 @@ const ViewCustomers: React.FC = () => {
                   {selectedCustomer.ratePerBottle}
                 </p>
                 <p className="mb-2">
-                  <strong>No of Bottles:</strong> {selectedCustomer.noOfBottles}
+                  <strong>No of Bottles:</strong> {selectedCustomer.numberOfBottles}
                 </p>
               </>
             )}

@@ -3,29 +3,32 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import backbutton from "../assets/images/nav-item.png";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { getSubRoutesAPI } from "../services/StartRide/StartRide";
-import {
-  getACustomerAPI,
-  updateCustomerAPI,
-} from "../services/customer/customerAPI";
+// import { getSubRoutesAPI } from "../services/StartRide/StartRide";
+import { endpoints } from "../services/ApiEndpoint";
+import useApi from "../Hook/UseApi";
 
 interface Route {
   _id: string;
   subRoute: string;
-  mainRoute: string;
+  mainRouteId: string;
+  mainRouteName: string;
+  subRouteName: string;
 }
 
 interface Location {
   address: string;
   coordinates: {
-    latitude: number | null;
-    longitude: number | null;
+    type: string;
+    coordinates: [number, number] | []; // Allow either a valid tuple or an empty array
   };
 }
+
+
 
 interface CustomerData {
   _id: string;
   customerType: string;
+  companyName:string;
   fullName: string;
   email: string;
   addressLine1: string;
@@ -48,45 +51,147 @@ const EditCustomer: React.FC = () => {
   const [mainRouteList, setMainRouteList] = useState<string[]>([]);
   const [customerData, setCustomerData] = useState<CustomerData | null>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading,setLoading] = useState(false)
 
-  useEffect(() => {
-    const fetchSubRoutes = async () => {
-      try {
-        const response: Route[] = await getSubRoutesAPI();
-        setRouteList(response);
 
-        const uniqueMainRoutes: string[] = Array.from(
-          new Set(response.map((route: Route) => route.mainRoute))
-        );
+  const { request: getSubRoute } = useApi("get", 4000);
+  const { request: getACustomer } = useApi("get", 4000)
+  const { request: updateCustomer } = useApi("put", 4000)
 
-        setMainRouteList(uniqueMainRoutes);
-      } catch (error) {
-        console.error("Error fetching sub-route data:", error);
-        toast.error("Failed to fetch routes");
-      }
-    };
 
-    fetchSubRoutes();
-  }, []);
 
-  useEffect(() => {
-    const fetchCustomerData = async () => {
-      if (id) {
+  // useEffect(() => {
+  //   const fetchSubRoutes = async () => {
+  //     try {
+  //       const response: Route[] = await getSubRoutesAPI();
+  //       setRouteList(response);
+
+  //       const uniqueMainRoutes: string[] = Array.from(
+  //         new Set(response.map((route: Route) => route.mainRoute))
+  //       );
+
+  //       setMainRouteList(uniqueMainRoutes);
+  //     } catch (error) {
+  //       console.error("Error fetching sub-route data:", error);
+  //       toast.error("Failed to fetch routes");
+  //     }
+  //   };
+
+  //   fetchSubRoutes();
+  // }, []);
+
+  // useEffect(() => {
+  //   // Fetch the routes list
+  //   const fetchSubRoutes = async () => {
+  //     try {
+  //       const url = `${endpoints.GET_ALL_SUBROUTE}`;
+  //       const { response, error } = await getSubRoute(url);
+
+  //       if (error) {
+  //         console.error("Error fetching sub-route data:", error);
+  //         toast.error("Failed to fetch route data. Please try again.");
+  //         return;
+  //       }
+
+  //       const routes = Array.isArray(response) ? response : response?.data;
+
+  //       if (routes && Array.isArray(routes)) {
+  //         // Set the routes list for filtering
+  //         setRouteList(routes);
+
+  //         // Extract unique main routes
+  //         const uniqueMainRoutes = Array.from(
+  //           new Set(routes.map((route: Route) => route.mainRouteName))
+  //         );
+  //         setMainRouteList(uniqueMainRoutes as string[]);
+  //       }
+  //     } catch (err) {
+  //       console.error("Error fetching sub-route data:", err);
+  //       toast.error("An unexpected error occurred. Please try again.");
+  //     }
+  //   };
+
+  //   fetchSubRoutes();
+  // }, []);
+
+    // Fetch routes and prepare dropdown lists
+    useEffect(() => {
+      const fetchSubRoutes = async () => {
         try {
-          const response = await getACustomerAPI(id); 
-          setCustomerData(response as any); 
-        } catch (error) {
-          console.error("Error fetching customer data:", error);
-          toast.error("Failed to fetch customer data");
-        } finally {
-          setIsLoading(false);
+          const url = `${endpoints.GET_ALL_SUBROUTE}`;
+          const { response, error } = await getSubRoute(url);
+  
+          if (error) {
+            console.error("Error fetching sub-route data:", error);
+            toast.error("Failed to fetch route data. Please try again.");
+            return;
+          }
+  
+          const routes = Array.isArray(response) ? response : response?.data;
+  
+          if (routes && Array.isArray(routes)) {
+            setRouteList(routes);
+  
+            // Extract unique main routes
+            const uniqueMainRoutes = Array.from(
+              new Set(routes.map((route: Route) => route.mainRouteName))
+            );
+            setMainRouteList(uniqueMainRoutes as string[]);
+          }
+        } catch (err) {
+          console.error("Error fetching sub-route data:", err);
+          toast.error("An unexpected error occurred. Please try again.");
         }
-      }
-    };
+      };
+  
+      fetchSubRoutes();
+    }, []);
 
-    fetchCustomerData();
-  }, [id]);
+  // useEffect(() => {
+  //   const fetchCustomerData = async () => {
+  //     if (id) {
+  //       try {
+  //         const response = await getACustomerAPI(id); 
+  //         setCustomerData(response as any); 
+  //       } catch (error) {
+  //         console.error("Error fetching customer data:", error);
+  //         toast.error("Failed to fetch customer data");
+  //       } finally {
+  //         setIsLoading(false);
+  //       }
+  //     }
+  //   };
+
+  //   fetchCustomerData();
+  // }, [id]);
+
+
+
+
+
+  const getOneCustomer = async () => {
+    try {
+      const url = `${endpoints.GET_A_CUSTOMER}/${id}`
+      const { response, error } = await getACustomer(url)
+      console.log(response)
+
+      if (!error && response) {
+        setLoading(false)
+        console.log(loading);
+        
+        setCustomerData(response.data)
+        console.log(customerData);
+        
+        // setSortedItems(response.data); // Initialize sorted items
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    getOneCustomer()
+  }, [])
 
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -104,6 +209,9 @@ const EditCustomer: React.FC = () => {
         return;
       }
 
+      console.log(getCurrentLocation);
+      
+
       navigator.geolocation.getCurrentPosition(
         (position) => resolve(position.coords),
         (error) => reject(error)
@@ -111,55 +219,116 @@ const EditCustomer: React.FC = () => {
     });
   };
 
-  const handleLocationFetch = async () => {
+  const handleLocationFetch = () => {
+    if (!customerData) return; // Ensure customerData is not null
+  
     if (
-      customerData?.location?.coordinates?.latitude &&
-      customerData?.location?.coordinates?.longitude
+      customerData.location?.coordinates?.coordinates &&
+      customerData.location.coordinates.coordinates.length === 2
     ) {
-      // Clear location if already saved
-      setCustomerData((prevData) =>
-        prevData
-          ? {
-              ...prevData,
+      // Clear Location
+      setCustomerData((prev) => {
+        if (!prev) return prev; // Safeguard against null
+        return {
+          ...prev,
+          location: {
+            ...prev.location,
+            coordinates: { type: "Point", coordinates: [] },
+          },
+        };
+      });
+    } else {
+      // Save Location
+      setIsGettingLocation(true)
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setCustomerData((prev) => {
+            if (!prev) return prev; // Safeguard against null
+            return {
+              ...prev,
               location: {
-                address: "",
+                ...prev.location,
                 coordinates: {
-                  latitude: null,
-                  longitude: null,
+                  type: "Point",
+                  coordinates: [longitude, latitude],
                 },
               },
-            }
-          : null
+            };
+          });
+          setIsGettingLocation(false)
+        },
+        (error) => {
+          console.error("Error fetching location:", error);
+        }
       );
-      toast.info("Location cleared.");
-    } else {
-      // Fetch location if not saved
-      try {
-        setIsGettingLocation(true);
-        const coords = await getCurrentLocation();
-        setCustomerData((prevData) =>
-          prevData
-            ? {
-                ...prevData,
-                location: {
-                  address: "", // Set address if needed
-                  coordinates: {
-                    latitude: coords.latitude,
-                    longitude: coords.longitude,
-                  },
-                },
-              }
-            : null
-        );
-        toast.success("Location fetched successfully");
-      } catch (error) {
-        console.error("Error fetching location:", error);
-        toast.error("Error fetching location. Please try again.");
-      } finally {
-        setIsGettingLocation(false);
-      }
     }
   };
+  
+
+
+  
+
+  // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+  
+  //   if (!customerData) {
+  //     toast.error("No customer data to update");
+  //     return;
+  //   }
+  
+  //   try {
+  //     const cleanedCustomerData: CustomerData = {
+  //       ...customerData,
+  //       numberOfBottles: Number(customerData.numberOfBottles),
+  //       ratePerBottle: Number(customerData.ratePerBottle),
+  //       depositAmount: Number(customerData.depositAmount),
+  //       location: {
+  //         address: customerData.location?.address || "",
+  //         coordinates: {
+  //           latitude: customerData.location?.coordinates?.latitude ?? null,
+  //           longitude: customerData.location?.coordinates?.longitude ?? null,
+  //         },
+  //       },
+  //     };
+  
+  //     // Create a new FormData object
+  //     const formData = new FormData();
+  //     Object.keys(cleanedCustomerData).forEach((key) => {
+  //       const value = cleanedCustomerData[key as keyof CustomerData];
+  //       // Flatten location data and append
+  //       if (key === "location") {
+  //         const locationData = value as Location;
+  //         formData.append("location[address]", locationData.address);
+  //         formData.append("location[latitude]", locationData.coordinates.latitude?.toString() || "");
+  //         formData.append("location[longitude]", locationData.coordinates.longitude?.toString() || "");
+  //       } else if (value !== null && value !== undefined) {
+  //         formData.append(key, value as any);
+  //       }
+  //     });
+  
+  //     // Log FormData to check the contents before sending
+  //     for (let [key, value] of formData.entries()) {
+  //       console.log(`${key}: ${value}`);
+  //     }
+  
+  //     // Send FormData to the API
+  //     const response = await updateCustomerAPI(customerData._id, formData);
+  //     console.log("Update response:", response);
+  
+  //     toast.success("Customer updated successfully");
+  //     setTimeout(() => {
+  //       navigate("/viewcustomers");
+  //     }, 2000);
+  //   } catch (error) {
+  //     toast.error(
+  //       error instanceof Error
+  //         ? error.message
+  //         : "An error occurred while updating the customer"
+  //     );
+  //     console.error("Error updating customer:", error);
+  //   }
+  // };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -170,6 +339,7 @@ const EditCustomer: React.FC = () => {
     }
   
     try {
+      // Prepare the cleaned customer data
       const cleanedCustomerData: CustomerData = {
         ...customerData,
         numberOfBottles: Number(customerData.numberOfBottles),
@@ -178,54 +348,75 @@ const EditCustomer: React.FC = () => {
         location: {
           address: customerData.location?.address || "",
           coordinates: {
-            latitude: customerData.location?.coordinates?.latitude ?? null,
-            longitude: customerData.location?.coordinates?.longitude ?? null,
+            type: "Point",
+            coordinates:
+              customerData.location?.coordinates?.coordinates.length === 2
+                ? customerData.location.coordinates.coordinates
+                : [0, 0], // Default to [0, 0] if coordinates are empty
           },
         },
       };
   
-      // Create a new FormData object
+      // Create FormData object
       const formData = new FormData();
       Object.keys(cleanedCustomerData).forEach((key) => {
         const value = cleanedCustomerData[key as keyof CustomerData];
-        // Flatten location data and append
         if (key === "location") {
+          // Flatten location data
           const locationData = value as Location;
           formData.append("location[address]", locationData.address);
-          formData.append("location[latitude]", locationData.coordinates.latitude?.toString() || "");
-          formData.append("location[longitude]", locationData.coordinates.longitude?.toString() || "");
+          if (locationData.coordinates.coordinates.length === 2) {
+            formData.append("location[longitude]", locationData.coordinates.coordinates[0].toString());
+            formData.append("location[latitude]", locationData.coordinates.coordinates[1].toString());
+          } else {
+            formData.append("location[longitude]", "");
+            formData.append("location[latitude]", "");
+          }
         } else if (value !== null && value !== undefined) {
           formData.append(key, value as any);
         }
       });
   
-      // Log FormData to check the contents before sending
+      // Log FormData for debugging
       for (let [key, value] of formData.entries()) {
         console.log(`${key}: ${value}`);
       }
   
-      // Send FormData to the API
-      const response = await updateCustomerAPI(customerData._id, formData);
-      console.log("Update response:", response);
+      // Send API request using the useApi hook
+      const { response, error } = await updateCustomer(
+        `${endpoints.UPDATE_CUSTOMER}/${id}`,
+        formData
+      );
   
+      if (error) {
+        console.error("Error updating customer:", error);
+        toast.error(error.response?.data?.message || error.message || "Failed to update");
+        return;
+      }
+  
+      console.log("Update response:", response);
       toast.success("Customer updated successfully");
+  
+      // Navigate after a delay
       setTimeout(() => {
         navigate("/viewcustomers");
       }, 2000);
     } catch (error) {
+      console.error("Unexpected error:", error);
       toast.error(
         error instanceof Error
           ? error.message
           : "An error occurred while updating the customer"
       );
-      console.error("Error updating customer:", error);
     }
   };
   
+  
+  
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  // if (isLoading) {
+  //   return <div>Loading...</div>;
+  // }
 
   if (!customerData) {
     return <div>No customer data available.</div>;
@@ -272,7 +463,7 @@ const EditCustomer: React.FC = () => {
           </div>
 
           {/* Company Name (for Business customers) */}
-          {/* {customerData.customerType === "Business" && (
+          {customerData.customerType === "Business" && (
             <div>
               <label className="block text-[#303F58] font-[14px] mb-2">
                 Company Name
@@ -286,7 +477,7 @@ const EditCustomer: React.FC = () => {
                 placeholder="Enter Company Name"
               />
             </div>
-          )} */}
+          )}
 
           {/* First Name */}
           <div>
@@ -414,7 +605,7 @@ const EditCustomer: React.FC = () => {
             <label className="block text-gray-700">Whatsapp Number</label>
             <input
               type="text"
-              name="whatsappNo"
+              name="whatsappNumber"
               value={customerData.whatsappNumber}
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
@@ -435,83 +626,87 @@ const EditCustomer: React.FC = () => {
             />
           </div>
 
-          {/* Main Route */}
-          <div className="space-y-1">
-            <label
-              htmlFor="main-route"
-              className="text-sm font-medium text-gray-700"
-            >
-              Main Route
-            </label>
-            <select
-              id="main-route"
-              name="mainRoute"
-              className="w-full p-2 border border-gray-300 rounded-lg"
-              value={customerData.mainRoute}
-              onChange={handleInputChange}
-            >
-              <option value="">Select Main Route</option>
-              {mainRouteList.map((mainRoute) => (
-                <option key={mainRoute} value={mainRoute}>
-                  {mainRoute}
-                </option>
-              ))}
-            </select>
-          </div>
+{/* Main Route */}
+<div className="space-y-1">
+        <label
+          htmlFor="main-route"
+          className="text-sm font-medium text-gray-700"
+        >
+          Main Route
+        </label>
+        <select
+          id="main-route"
+          name="mainRoute"
+          className="w-full p-2 border border-gray-300 rounded-lg"
+          value={customerData.mainRoute}
+          onChange={handleInputChange}
+          required
+        >
+          <option value="">Select Main Route</option>
+          {mainRouteList.map((mainRoute) => (
+            <option key={mainRoute} value={mainRoute}>
+              {mainRoute}
+            </option>
+          ))}
+        </select>
+      </div>
 
-          {/* Sub Route */}
-          <div className="space-y-1">
-            <label
-              htmlFor="sub-route"
-              className="text-sm font-medium text-gray-700"
-            >
-              Sub Route
-            </label>
-            <select
-              id="sub-route"
-              name="subRoute"
-              className="w-full p-2 border border-gray-300 rounded-lg"
-              value={customerData.subRoute}
-              onChange={handleInputChange}
-              disabled={!customerData.mainRoute}
-            >
-              <option value="">Select Sub Route</option>
-              {routesList
-                .filter((route) => route.mainRoute === customerData.mainRoute)
-                .map((route) => (
-                  <option key={route._id} value={route.subRoute}>
-                    {route.subRoute}
-                  </option>
-                ))}
-            </select>
-          </div>
+      {/* Sub Route */}
+      <div className="space-y-1">
+        <label
+          htmlFor="sub-route"
+          className="text-sm font-medium text-gray-700"
+        >
+          Sub Route
+        </label>
+        <select
+          id="sub-route"
+          name="subRoute"
+          className="w-full p-2 border border-gray-300 rounded-lg"
+          value={customerData.subRoute}
+          onChange={handleInputChange}
+          disabled={!customerData.mainRoute}
+          required
+        >
+          <option value="">Select Sub Route</option>
+          {routesList
+            .filter((route) => route.mainRouteName === customerData.mainRoute)
+            .map((route) => (
+              <option key={route._id} value={route.subRouteName}>
+                {route.subRouteName}
+              </option>
+            ))}
+        </select>
+      </div>
+
 
           {/* Location Map */}
-          {customerData.location?.coordinates?.latitude &&
-            customerData.location?.coordinates?.longitude && (
-              <iframe
-                src={`https://www.google.com/maps?q=${customerData.location.coordinates.latitude},${customerData.location.coordinates.longitude}&z=15&output=embed`}
-                width="100%"
-                height="300"
-                className="mt-4 border rounded-md"
-              ></iframe>
-            )}
+          {customerData.location?.coordinates?.coordinates && (
+  <iframe
+    src={`https://www.google.com/maps?q=${customerData.location.coordinates.coordinates[1]},${customerData.location.coordinates.coordinates[0]}&z=15&output=embed`}
+    width="100%"
+    height="300"
+    className="mt-4 border rounded-md"
+  ></iframe>
+)}
+
           {/* Location Fetch Button */}
           <button
-            type="button"
-            onClick={handleLocationFetch}
-            disabled={isGettingLocation}
-            className={`w-full bg-[#820000] text-white p-2 mt-4 rounded-md ${
-              isGettingLocation ? "opacity-70 cursor-not-allowed" : ""
-            }`}
-          >
-            {isGettingLocation
-              ? "Fetching Location..."
-              : customerData.location?.coordinates?.latitude &&
-                customerData.location?.coordinates?.longitude
-              ? "Clear Location"
-              : "Save Location"}
-          </button>
+  type="button"
+  onClick={handleLocationFetch}
+  disabled={isGettingLocation}
+  className={`w-full bg-[#820000] text-white p-2 mt-4 rounded-md ${
+    isGettingLocation ? "opacity-70 cursor-not-allowed" : ""
+  }`}
+>
+  {isGettingLocation
+    ? "Fetching Location..."
+    : customerData.location?.coordinates?.coordinates &&
+      customerData.location.coordinates.coordinates.length === 2
+    ? "Clear Location"
+    : "Save Location"}
+</button>
+
 
           {/* Submit Button */}
           <button

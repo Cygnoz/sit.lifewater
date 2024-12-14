@@ -3,15 +3,15 @@ pipeline {
     environment {
         // Define environment variables for AWS ECR and ECS
         AWS_REGION = 'ap-south-1'
-        ECR_REPOSITORY = 'lifwwater/staff'
-        IMAGE_NAME = 'lifwwater/staff'
+        ECR_REPOSITORY = 'lifewater/staffdec'
+        IMAGE_NAME = 'lifewater/staffdec'
         AWS_CREDENTIALS_ID = '2157424a-b8a7-45c0-90c2-bc0d407f6cea'
         AWS_ACCOUNT_ID = '654654462146' // Add your AWS account ID here
         SONARQUBE_PROJECT_KEY = 'lifewater-staff'
         SONARQUBE_SCANNER_CREDENTIALS_ID = '5e0ce777-033a-4fac-99c3-94931e52c95e' // Jenkins credentials ID for SonarQube token
         ECS_CLUSTER_NAME = 'lifewater-services' // Replace with your ECS cluster name
-        ECS_SERVICE_NAME = 'lifewater-staff' // Replace with your ECS service name
-        ECS_TASK_DEFINITION_NAME = 'lifewater--staff' // Replace with your ECS task definition name
+        ECS_SERVICE_NAME = 'lifewater-staffdec' // Replace with your ECS service name
+        ECS_TASK_DEFINITION_NAME = 'lifewater-staffdec' // Replace with your ECS task definition name
     }
     stages {
         stage('SonarQube Analysis') {
@@ -38,12 +38,26 @@ pipeline {
                 }
             }
         }
+
+         stage('TRIVY FS SCAN') {
+            steps {
+                sh "trivy fs . > trivyfs.txt"
+                archiveArtifacts artifacts: 'trivyfs.txt', fingerprint: true
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 script {
                     // Build Docker image
                     sh 'docker build -t $IMAGE_NAME .'
                 }
+            }
+        }
+
+        stage('TRIVY Image Scan') {
+            steps {
+                sh "trivy image ${IMAGE_NAME}:latest > trivyimage.txt"
+                archiveArtifacts artifacts: 'trivyimage.txt', fingerprint: true
             }
         }
         stage('Login to ECR') {
