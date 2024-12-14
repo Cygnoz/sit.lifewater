@@ -15,7 +15,6 @@ import pay from "../assets/images/pay.svg";
 import endride from "../assets/images/endride.svg";
 import hstory from "../assets/images/history.svg";
 import rout from "../assets/images/rout.svg";
-import profile from "../assets/images/profile.jpg";
 import Button from "../CommonComponents/Button";
 
 // Sidebar menu items
@@ -39,7 +38,7 @@ const Sidebar: React.FC<{ isSidebarOpen: boolean; handleToggleSidebar: () => voi
   handleToggleSidebar,
 }) => {
   const navigate = useNavigate();
-  const [storedUsername, setStoredUsername] = useState<string | null>(null);
+  const [storedUsername, setStoredUsername] = useState<any | null>(null);
   const [pagetitle, setPageTitle] = useState("");
   const [open, setOpen] = useState(false);
   const [activeItem, setActiveItem] = useState<string>(""); // State for active item
@@ -59,9 +58,10 @@ const Sidebar: React.FC<{ isSidebarOpen: boolean; handleToggleSidebar: () => voi
     };
   }, [isSidebarOpen, handleToggleSidebar]);
 
+  const firstname = JSON.parse(localStorage.getItem("firstname") || "{}");
   // Fetch localStorage data on mount
   useEffect(() => {
-    setStoredUsername(localStorage.getItem("userName"));
+    setStoredUsername(firstname);
   }, []);
 
   const handleNavigation = (path: string, title: string) => {
@@ -75,6 +75,8 @@ const Sidebar: React.FC<{ isSidebarOpen: boolean; handleToggleSidebar: () => voi
     localStorage.clear();
     navigate("/");
   };
+ console.log("response",storedUsername);
+ 
 
   return (
     <div>
@@ -92,14 +94,16 @@ const Sidebar: React.FC<{ isSidebarOpen: boolean; handleToggleSidebar: () => voi
             {pagetitle === "Home" && (
               <div>
                 <p className="text-sm font-semibold">
-                  Hello, {storedUsername || "User"}
-                </p>
-                <p className="text-xs">Welcome</p>
+                {(storedUsername?.data.firstname)}
+                {/* {`Hello, ${storedUsername || "User"}!`} */}
+              </p>
+
+                
               </div>
             )}
           </div>
           <img
-            src={profile}
+            src={(storedUsername?.data.profile) }
             alt="Profile"
             className="w-10 h-10 rounded-full object-cover cursor-pointer"
             onClick={() => setOpen(true)}

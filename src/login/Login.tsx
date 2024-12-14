@@ -12,6 +12,7 @@ import axios from "axios"
 const Login: React.FC = () => {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+ 
   const navigate = useNavigate()
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -35,8 +36,12 @@ const Login: React.FC = () => {
       if (response.response?.data.success) {
         toast.success(response.response?.data.message || "Login successful...");
         const token = response.response?.data.token.split(" ")[1];
+        const firstname =response.response?.data
+        const profile =response.response?.data
         localStorage.setItem("authToken", token);
         localStorage.setItem("userName", username);
+        localStorage.setItem("firstname", JSON.stringify(firstname || "")); // Convert to string
+        localStorage.setItem("profile", JSON.stringify(profile || {})); // Convert to string
 
         setTimeout(() => {
           navigate("/customers");

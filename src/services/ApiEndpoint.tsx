@@ -7,11 +7,14 @@ export const endpoints = {
     // Subroute
     GET_ALL_SUBROUTE:`viewSRoute`,
 
-
     // Customer
     ADD_CUSTOMER:`addcustomer`,
     GET_ALL_CUSTOMERS:`customer`,
     GET_A_CUSTOMER: `customer`,
     UPDATE_CUSTOMER: `editcustomer`,
+
+    // Order
+    ADD_ORDER:`orders`,
+    GET_ALL_ORDER:`orders`,
 
 }
