@@ -10,7 +10,7 @@ pipeline {
         AWS_ACCOUNT_ID = '654654462146' // Add your AWS account ID here
         ECS_CLUSTER_NAME = 'sit-lifewater' // Replace with your ECS cluster name
         ECS_SERVICE_NAME = 'sit-lifewater-admin' // Replace with your ECS service name
-        ECS_TASK_DEFINITION_NAME = 'sit-lifewater-admin' // Replace with your ECS task definition name
+        ECS_TASK_DEFINITION_NAME = 'sit/lifewater/admin' // Replace with your ECS task definition name
     }
 
     stages {
