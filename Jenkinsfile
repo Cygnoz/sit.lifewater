@@ -12,7 +12,7 @@ pipeline {
         SONARQUBE_SCANNER_CREDENTIALS_ID = 'b21b6fba-0b94-45ad-a18c-93cc746302eb'
         ECS_CLUSTER_NAME = 'sit-lifewater'
         ECS_SERVICE_NAME = 'sit-lifewater-order'
-        ECS_TASK_DEFINITION_NAME = 'sit/lifewater/order'
+        ECS_TASK_DEFINITION_NAME = 'sit-lifewater-order'
     } 
 
     
