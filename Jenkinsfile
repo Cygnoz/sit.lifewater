@@ -8,8 +8,8 @@ pipeline {
         IMAGE_NAME = 'lifewater/backend'
         AWS_CREDENTIALS_ID = '2157424a-b8a7-45c0-90c2-bc0d407f6cea'
         AWS_ACCOUNT_ID = '654654462146' // Add your AWS account ID here
-        SONARQUBE_PROJECT_KEY = 'backend'
-        SONARQUBE_SCANNER_CREDENTIALS_ID = 'eae93d9b-c38e-4f51-8700-09533901aca5' // Jenkins credentials ID for SonarQube token
+        SONARQUBE_PROJECT_KEY = 'sit/lifewater/backend'
+        SONARQUBE_SCANNER_CREDENTIALS_ID = '4fc8a937-028f-43fc-bb14-becd5498bfd3' // Jenkins credentials ID for SonarQube token
         ECS_CLUSTER_NAME = 'lifewater-services' // Replace with your ECS cluster name
         ECS_SERVICE_NAME = 'lifewater-backend' // Replace with your ECS service name
         ECS_TASK_DEFINITION_NAME = 'lifewater-backend' // Replace with your ECS task definition name
