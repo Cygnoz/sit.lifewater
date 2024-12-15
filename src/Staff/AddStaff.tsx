@@ -17,7 +17,7 @@ interface StaffData {
   emiratesId: string;
   firstname: string;
   lastname: string;
-  dateOfBirth: string;
+  dateofBirth: string;
   address: string;
   designation: string;
   profile: string;
@@ -37,7 +37,7 @@ function AddStaff({ }: Props) {
     {
       address: "",
       confirmPassword: "",
-      dateOfBirth: "",
+      dateofBirth: "",
       designation: "",
       emiratesId: "",
       firstname: "",
@@ -63,25 +63,26 @@ function AddStaff({ }: Props) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
   const toggleConfirmPasswordVisibility = () => setShowConfirmPassword((prev) => !prev);
-  
+
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    const { name, value, } = event.target;
-
-    setInitialStaffData({ ...initialStaffData, [name]: value })
-
+    const { name, value } = event.target;
+    setInitialStaffData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
     // Check if passwords match
     if (name === "confirmPassword" || name === "password") {
       const updatedPassword = name === "password" ? value : initialStaffData.password;
       const updatedConfirmPassword =
         name === "confirmPassword" ? value : initialStaffData.confirmPassword;
-
       setErrorMessage(
         updatedPassword !== updatedConfirmPassword ? "Passwords do not match" : ""
       );
     }
   };
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -94,7 +95,6 @@ function AddStaff({ }: Props) {
           profile: base64String,
         }));
       };
-
       reader.readAsDataURL(file);
     }
   };
@@ -103,12 +103,10 @@ function AddStaff({ }: Props) {
   const handleWhatsAppCheckbox = () => {
     setIsSameAsPhone((prevState) => {
       const newState = !prevState;
-
       setInitialStaffData((prevDetails: any) => ({
         ...prevDetails,
         whatsAppNumber: newState ? prevDetails.mobileNumber : "", // Copy mobileNumber or reset
       }));
-
       return newState;
     });
   };
@@ -128,6 +126,7 @@ function AddStaff({ }: Props) {
           ...response.data,
           confirmPassword: response.data.password,
           visaValidity: response.data.visaValidity?.slice(0, 10), // Format date for input field
+          dateofBirth: response.data.dateofBirth?.slice(0, 10),
         });
       }
       console.log(response?.data, "staffData");
@@ -143,11 +142,23 @@ function AddStaff({ }: Props) {
     }
   }, [id]);
 
+  // Watch for changes in designation and reset username/password if needed
+  useEffect(() => {
+    if (initialStaffData.designation !== "Sales") {
+      setInitialStaffData((prevData) => ({
+        ...prevData,
+        username: "",
+        password: "",
+        confirmPassword: "", // Also clear confirmPassword for consistency
+      }));
+    }
+  }, [initialStaffData.designation]);
 
   const { request: editStaff } = useApi("put", 4000);
 
+
   const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();  
+    event.preventDefault();
     // Validate passwords before saving or submitting
     if (
       initialStaffData.designation === "Sales" &&
@@ -156,35 +167,41 @@ function AddStaff({ }: Props) {
       toast.error("Passwords do not match");
       return; // Stop submission if passwords don't match
     }
-  
+
+    // Prepare the data to be sent to the backend
+    const dataToSubmit = {
+      ...initialStaffData,
+      username: initialStaffData.designation === "Sales" ? initialStaffData.username : "",
+      password: initialStaffData.designation === "Sales" ? initialStaffData.password : "",
+    };
+
     const url = isEditing
       ? `${endpoints.EDIT_STAFF}/${id}`
       : `${endpoints.ADD_STAFF}`;
-  
+
     try {
       const { response, error } = isEditing
-        ? await editStaff(url, initialStaffData)
-        : await addStaff(url, initialStaffData); 
+        ? await editStaff(url, dataToSubmit)
+        : await addStaff(url, dataToSubmit);
+
       if (!error && response) {
         toast.success(
           isEditing
             ? "Staff updated successfully."
             : `${response.data.message}`
         );
-  
+
         if (!isEditing) {
-          setInitialStaffData(initialStaffData); // Reset form after adding
+          setInitialStaffData(dataToSubmit); // Reset form after adding
         }
-        console.log(response);        
         if (isEditing) {
           setTimeout(() => {
-            navigate("/staff"); // Navigate to home after 2 seconds
+            navigate("/staff"); // Navigate to staff page after 2 seconds
           }, 2000);
         }
       } else {
-        toast.error(error?.data.message);
+        toast.error(error?.response?.data?.message || "An error occurred");
       }
-      toast.error(error?.response.data.message);
     } catch (error) {
       toast.error("An unexpected error occurred.");
       console.error("Error submitting staff data:", error);
@@ -250,7 +267,6 @@ function AddStaff({ }: Props) {
                           <p className="text-[#4B5C79] text-[12px] pt-1">At least 800 x 800 px Recommended. JPG or PNG is Allowed</p>
                         </div>
                       </div>
-
                       <input
                         type="file"
                         id="image"
@@ -273,12 +289,17 @@ function AddStaff({ }: Props) {
                     type="tel"
                     value={initialStaffData.mobileNumber}
                     name="mobileNumber"
-                    onChange={handleInputChange}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow only numeric characters
+                      if (/^\d*$/.test(value)) {
+                        handleInputChange(e);
+                      }
+                    }}
                     className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
-                    maxLength={10}
-                    pattern="\d{10}" // Regex pattern to enforce exactly 10 digits
+                    maxLength={15}
                     placeholder="Enter Mobile"
-                    title="Please enter exactly 10 digits"
+                    title="Please enter exactly 15 digits"
                   />
                 </div>
 
@@ -299,14 +320,23 @@ function AddStaff({ }: Props) {
                     </span>
                   </div>
                   <input
-                    type="number"
+                    type="tel"
                     required
                     name="whatsAppNumber"
                     value={initialStaffData.whatsAppNumber}
-                    onChange={handleInputChange}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow only numeric characters
+                      if (/^\d*$/.test(value)) {
+                        handleInputChange(e);
+                      }
+                    }}
                     className="mt-1 p-2 h-[36px] border border-gray-300 rounded-lg w-full"
                     placeholder="Enter WhatsApp number"
                     disabled={isSameAsPhone}
+                    maxLength={15}
+                    pattern="\d{15}" // Regex pattern to enforce exactly 10 digits
+                    title="Please enter exactly 15 digits"
                   />
                 </div>
 
@@ -334,7 +364,6 @@ function AddStaff({ }: Props) {
                     Visa Number
                   </label>
                   <input
-
                     type="tel" // Use "tel" to allow numeric input
                     value={initialStaffData.visaNumber}
                     name="visaNumber"
@@ -353,7 +382,6 @@ function AddStaff({ }: Props) {
                     Emirates ID
                   </label>
                   <input
-
                     type="tel" // Use "tel" to allow numeric input
                     value={initialStaffData.emiratesId}
                     onChange={handleInputChange}
@@ -410,8 +438,8 @@ function AddStaff({ }: Props) {
                   <input
 
                     type="date"
-                    name="dateOfBirth"
-                    value={initialStaffData.dateOfBirth}
+                    name="dateofBirth"
+                    value={initialStaffData.dateofBirth}
                     onChange={handleInputChange}
                     className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
                   />
@@ -478,82 +506,81 @@ function AddStaff({ }: Props) {
                   {/* Conditionally render input fields based on the selected designation */}
                   {initialStaffData.designation === "Sales" && (
                     <div className="mt-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Username
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      name="username"
-                      className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
-                      placeholder="Username"
-                      value={initialStaffData.username}
-                      onChange={handleInputChange}
-                    />
-                    <div className="grid grid-cols-2 gap-1">
-                      {/* Password Field */}
-                      <div className="mt-1 relative">
-                        <label className="block text-sm font-medium text-gray-700">
-                          Password
-                        </label>
-                        <div className="relative h-[48px]"> {/* Add fixed height */}
-                          <input
-                            required
-                            type={showPassword ? "text" : "password"} // Toggle input type
-                            name="password"
-                            className="h-[36px] p-2 border border-gray-300 rounded-lg w-full pr-10"
-                            placeholder="Password"
-                            value={initialStaffData.password}
-                            onChange={handleInputChange}
-                          />
-                          <div
-                            className="absolute inset-y-0 right-3 flex mt-[-10px] items-center cursor-pointer"
-                            onClick={togglePasswordVisibility}
-                          >
-                            {showPassword ? (
-                              <Eye color="#4B5C79" size={18} />
-                            ) : (
-                              <EyeOffIcon color="#4B5C79" size={18} />
-                            )}
+                      <label className="block text-sm font-medium text-gray-700">
+                        Username
+                      </label>
+                      <input
+                        required
+                        type="text"
+                        name="username"
+                        className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
+                        placeholder="Username"
+                        value={initialStaffData.username}
+                        onChange={handleInputChange}
+                      />
+                      <div className="grid grid-cols-2 mt-2 gap-2">
+                        {/* Password Field */}
+                        <div className=" relative">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Password
+                          </label>
+                          <div className="relative h-[48px]"> {/* Add fixed height */}
+                            <input
+                              required
+                              type={showPassword ? "text" : "password"} // Toggle input type
+                              name="password"
+                              className="h-[36px] p-2 border border-gray-300 mt-1 rounded-lg w-full pr-10"
+                              placeholder="Password"
+                              value={initialStaffData.password}
+                              onChange={handleInputChange}
+                            />
+                            <div
+                              className="absolute inset-y-0 right-3 flex mt-[-10px] items-center cursor-pointer"
+                              onClick={togglePasswordVisibility}
+                            >
+                              {showPassword ? (
+                                <Eye color="#4B5C79" size={18} />
+                              ) : (
+                                <EyeOffIcon color="#4B5C79" size={18} />
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                  
-                      {/* Confirm Password Field */}
-                      <div className="mt-1 relative">
-                        <label className="block text-sm font-medium text-gray-700">
-                          Confirm Password
-                        </label>
-                        <div className="relative h-[48px]"> {/* Add fixed height */}
-                          <input
-                            required
-                            type={showConfirmPassword ? "text" : "password"} // Toggle input type
-                            name="confirmPassword"
-                            className="h-[36px] p-2 border border-gray-300 rounded-lg w-full pr-10"
-                            placeholder="Confirm Password"
-                            value={initialStaffData.confirmPassword}
-                            onChange={handleInputChange}
-                          />
-                          <div
-                            className="absolute inset-y-0 right-3 mt-[-10px] flex items-center cursor-pointer"
-                            onClick={toggleConfirmPasswordVisibility}
-                          >
-                            {showConfirmPassword ? (
-                              <Eye color="#4B5C79" size={18} />
-                            ) : (
-                              <EyeOffIcon color="#4B5C79" size={18} />
+
+                        {/* Confirm Password Field */}
+                        <div className="relative">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Confirm Password
+                          </label>
+                          <div className="relative h-[48px]"> {/* Add fixed height */}
+                            <input
+                              required
+                              type={showConfirmPassword ? "text" : "password"} // Toggle input type
+                              name="confirmPassword"
+                              className="h-[36px] p-2 border border-gray-300 mt-1 rounded-lg w-full pr-10"
+                              placeholder="Confirm Password"
+                              value={initialStaffData.confirmPassword}
+                              onChange={handleInputChange}
+                            />
+                            <div
+                              className="absolute inset-y-0 right-3 mt-[-10px] flex items-center cursor-pointer"
+                              onClick={toggleConfirmPasswordVisibility}
+                            >
+                              {showConfirmPassword ? (
+                                <Eye color="#4B5C79" size={18} />
+                              ) : (
+                                <EyeOffIcon color="#4B5C79" size={18} />
+                              )}
+                            </div>
+                            {errorMessage && (
+                              <p className="text-red-500 text-sm pt-1 absolute -bottom-5">
+                                {errorMessage}
+                              </p>
                             )}
                           </div>
-                          {errorMessage && (
-                            <p className="text-red-500 text-sm pt-1 absolute -bottom-5">
-                              {errorMessage}
-                            </p>
-                          )}
                         </div>
                       </div>
                     </div>
-                  </div>
-                  
                   )}
                 </div>
 
@@ -589,7 +616,6 @@ function AddStaff({ }: Props) {
             </div>
 
             <div className="mt-6 flex justify-end gap-2">
-
               <Link to={"/staff"}>
                 <Button variant="fourthiary">
                   Cancel
