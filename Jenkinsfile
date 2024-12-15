@@ -3,15 +3,15 @@ pipeline {
     environment {
         // Define environment variables for AWS ECR and ECS
         AWS_REGION = 'ap-south-1'
-        ECR_REPOSITORY = 'lifewater/staffdec'
-        IMAGE_NAME = 'lifewater/staffdec'
+        ECR_REPOSITORY = 'sit/lifewater/staff'
+        IMAGE_NAME = 'sit/lifewater/staff'
         AWS_CREDENTIALS_ID = '2157424a-b8a7-45c0-90c2-bc0d407f6cea'
         AWS_ACCOUNT_ID = '654654462146' // Add your AWS account ID here
         SONARQUBE_PROJECT_KEY = 'sit/lifewater/staff'
         SONARQUBE_SCANNER_CREDENTIALS_ID = '3693ea49-64d0-43ca-8676-9cebbf7f7c46' // Jenkins credentials ID for SonarQube token
-        ECS_CLUSTER_NAME = 'lifewater-services' // Replace with your ECS cluster name
-        ECS_SERVICE_NAME = 'lifewater-staffdec' // Replace with your ECS service name
-        ECS_TASK_DEFINITION_NAME = 'lifewater-staffdec' // Replace with your ECS task definition name
+        ECS_CLUSTER_NAME = 'sit-lifewater' // Replace with your ECS cluster name
+        ECS_SERVICE_NAME = 'sit-lifewater-staff' // Replace with your ECS service name
+        ECS_TASK_DEFINITION_NAME = 'sit-lifewater-staff' // Replace with your ECS task definition name
     }
     stages {
         stage('SonarQube Analysis') {
