@@ -12,7 +12,7 @@ pipeline {
         SONARQUBE_SCANNER_CREDENTIALS_ID = '4fc8a937-028f-43fc-bb14-becd5498bfd3' // Jenkins credentials ID for SonarQube token
         ECS_CLUSTER_NAME = 'sit-lifewater' // Replace with your ECS cluster name
         ECS_SERVICE_NAME = 'sit-lifewater-backend' // Replace with your ECS service name
-        ECS_TASK_DEFINITION_NAME = 'sit/lifewater/backend' // Replace with your ECS task definition name
+        ECS_TASK_DEFINITION_NAME = 'sit-lifewater-backend' // Replace with your ECS task definition name
     }
  
     stages {
