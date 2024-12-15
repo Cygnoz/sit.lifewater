@@ -8,7 +8,7 @@ pipeline {
         IMAGE_NAME = 'sit/lifewater/stock'
         AWS_CREDENTIALS_ID = '2157424a-b8a7-45c0-90c2-bc0d407f6cea'
         AWS_ACCOUNT_ID = '654654462146' // Add your AWS account ID here 
-        SONARQUBE_PROJECT_KEY = 'sit/lifewater/stock'
+        SONARQUBE_PROJECT_KEY = 'sit-lifewater-stock'
         SONARQUBE_SCANNER_CREDENTIALS_ID = '33783e26-dcad-4ca0-9e48-d9a03e821431' // Jenkins credentials ID for SonarQube token
         ECS_CLUSTER_NAME = 'sit-lifewater' // Replace with your ECS cluster name
         ECS_SERVICE_NAME = 'sit-lifewater-stock' // Replace with your ECS service name
