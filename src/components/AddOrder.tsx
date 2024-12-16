@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import backbutton from "../assets/images/nav-item.png";
 // import plus from "../assets/images/Icons/circle-plus.svg";
 // import minus from "../assets/images/Icons/circle-minus.svg";
@@ -28,7 +28,9 @@ interface OrdrerData {
     paymentMode: string,
     notes: string,
     termsAndCondition: string,
-    totalAmount: string,
+    totalAmount: number,
+    returnBottle: number,
+    ratePerItem: string,
     stock: Item[];
 }
 
@@ -39,7 +41,8 @@ const AddOrder = ({ }: Props) => {
     const [ratePerCustomer, setRatePerCustomer] = useState("");
     const [error, setError] = useState("");
     const [quantity, setQuantity] = useState("");
-
+    const navigate = useNavigate()
+    const [loading, setLoading] = useState<boolean>(false);
     const [orderData, setOrderData] = useState<OrdrerData>({
         orderNumber: "",
         mainRouteName: "",
@@ -47,22 +50,46 @@ const AddOrder = ({ }: Props) => {
         subRouteName: "",
         subRouteId: "",
         customerId: "",
-        salesman: "staff",
+        salesman: "",
         date: "",
         paymentMode: "",
         notes: "",
         termsAndCondition: "",
-        totalAmount: "",
-        stock: [], // Set to empty string
-
+        totalAmount: 0, // Initialized as a number
+        returnBottle: 0, // Initialized as a number
+        ratePerItem: "", // Initialized as a number
+        stock: [],
     });
+
 
     console.log(orderData);
     console.log(orderData.stock[0]?.quantity, "qnt");
 
+    const [activeRoute, setActiveRoute] = useState<any | null>(null);
+    useEffect(() => {
+        const RouteDetails = JSON.parse(localStorage.getItem("activeRoute") || "{}");
+        setActiveRoute(RouteDetails);
+    }, []);
+    // Fetch localStorage data on mount
+    useEffect(() => {
+        // Only call getALLCustomers when activeRoute is set
+        if (activeRoute) {
+            getASubroute(),
+                getALLCustomers();
+        }
+    }, [activeRoute]);
+
+    console.log("route Dettails", activeRoute);
+
     const handleInputFocus = () => {
         // Show all customers when the input is focused
         setFilteredCustomers(customers);
+    };
+    const handleReturnBottleChange = (e: any) => {
+        setOrderData((prev) => ({
+            ...prev,
+            returnBottle: Number(e.target.value) || 0, // Convert to number
+        }));
     };
 
 
@@ -74,7 +101,7 @@ const AddOrder = ({ }: Props) => {
         }
 
         if (value === quantity) {
-            setError("Warning: Quantity is below the recommended level."); // Show warning for low quantities
+            setError("Warning: This item is now out of stock."); // Show warning for low quantities
         } else {
             setError(""); // Clear any previous warnings or errors
         }
@@ -84,17 +111,27 @@ const AddOrder = ({ }: Props) => {
             const updatedItems = prevState.stock.map(item =>
                 item.itemId === selectedItem?.itemId ? { ...item, quantity: value } : item
             );
-
-            // Calculate new total amount after quantity change
-            const ratePerBottle: any = ratePerCustomer || 0;
-            const newTotalAmount = updatedItems.reduce((total, item) => total + (item.quantity * ratePerBottle), 0);
-
-            return { ...prevState, stock: updatedItems, totalAmount: newTotalAmount.toString() }; // Update total amount
+            return { ...prevState, stock: updatedItems }; // Update stock only, calculation will occur in useEffect
         });
-
-
-
     };
+
+    useEffect(() => {
+        // Perform calculation whenever stock or ratePerCustomer changes
+        const ratePerBottle: any = orderData.ratePerItem || 0;
+
+        const newTotalAmount: any = orderData.stock.reduce(
+            (total, item) => total + item.quantity * ratePerBottle,
+            0
+        );
+
+        setOrderData((prevState) => ({
+            ...prevState,
+            totalAmount: newTotalAmount.toString(),
+        }));
+    }, [orderData.stock, orderData.ratePerItem]); // Dependencies to trigger recalculation
+
+
+
     const handleItemClick = (itemId: string, itemName: string, mainRouteId: any, mainRouteName: any, subRouteName: any, quantity: any, _id: any,) => {
 
         setOrderData((prevState) => ({
@@ -103,7 +140,7 @@ const AddOrder = ({ }: Props) => {
             mainRouteId: mainRouteId,
             mainRouteName: mainRouteName,
             subRouteName: subRouteName,
-            subRouteId:_id,
+            subRouteId: _id,
         }));
         setQuantity(quantity)
         setSelectedItem({ itemId, itemName });
@@ -138,7 +175,9 @@ const AddOrder = ({ }: Props) => {
         setOrderData((prevData) => ({
             ...prevData,
             customerId: customers._id,
+            ratePerItem: customers.ratePerBottle || "",
         }));
+        //
         setRatePerCustomer(customers.ratePerBottle)
         console.log(customers.ratePerBottle, "rate");
 
@@ -153,89 +192,109 @@ const AddOrder = ({ }: Props) => {
 
     const { request: getAllCustomers } = useApi("get", 4000);
     // Get All customer 
+
     const getALLCustomers = async () => {
+        setLoading(true);
         try {
             const url = `${endpoints.GET_ALL_CUSTOMERS}`;
             const { response, error } = await getAllCustomers(url);
+
             if (!error && response) {
-                const filteredCustomers = response.data.filter((customer: any) => customer.subRoute === "PMG");
+                const subRoute = activeRoute?.subRouteName;
+                console.log(subRoute, "subRoute");
+
+                // Filter customers based on subRoute
+                const filteredCustomers = response.data.filter(
+                    (customer: any) => customer.subRoute === subRoute
+                );
+
                 setCustomers(filteredCustomers);
                 console.log(filteredCustomers, "filtered customers");
             }
-            console.log(response?.data, "customer");
-
         } catch (error) {
             console.log(error);
+        } finally {
+            setLoading(false); // Stop loading
         }
     };
 
 
 
-    const [subRoutes, setSubRoutes] = useState<any[]>([])
+    const [subRoutes, setSubRoutes] = useState<any>({
+        stock: [], // Initialize with an empty array to avoid undefined
+    });
 
     const { request: getSubRoutes } = useApi("get", 4000)
-    const getALLSubroute = async () => {
+    const id = activeRoute?.subRouteId;
+    console.log(id);
+    const getASubroute = async () => {
         try {
-            const url = `${endpoints.GET_ALL_SUBROUTE}`;
-            const { response, error } = await getSubRoutes(url);
+            const url = `${endpoints.VIEW_A_SUBROUTE}/${id}`
+            const { response, error } = await getSubRoutes(url)
 
             if (!error && response) {
-                // Filter subroutes with subRouteName "PMG"
-                const filteredSubRoute = response.data.filter((subRoute: any) => subRoute.subRouteName === "PMG");
-                setSubRoutes(filteredSubRoute);
-                console.log(filteredSubRoute, "filtered Subroute");
+                setSubRoutes(response.data)
+                console.log("API RESPONSE :", response.data)
             }
         } catch (error) {
-            console.log(error);
+            setError("An error occured")
+            console.log(error)
         }
-    };
+    }
 
     useEffect(() => {
-        getALLSubroute(),
+        getASubroute(),
             getALLCustomers();
 
     }, [])
+
+    // Set today's date when the component loads
+    useEffect(() => {
+        const today = new Date().toISOString().split("T")[0]; // Format YYYY-MM-DD
+        setOrderData((prevData) => ({ ...prevData, date: today }));
+    }, []);
 
     const { request: AddOrder } = useApi("post", 4001);
 
     const handleSubmit = async () => {
         try {
-          const orderWithDefaults = {
-            ...orderData,
-            stock: orderData.stock.map(item => ({
-              ...item,
-            })),
-          };
-          const url = `${endpoints.ADD_ORDER}`;
-          const { response, error } = await AddOrder(url, orderWithDefaults)
-          if (!error && response) {
-            console.log('Order', response);
-            toast.success(response.data.message);
-            
-    
-          }
-          console.log(error);
-          toast.error(error.response.data.message);
+            const orderWithDefaults = {
+                ...orderData,
+                stock: orderData.stock.map(item => ({
+                    ...item,
+                })),
+            };
+            const url = `${endpoints.ADD_ORDER}`;
+            const { response, error } = await AddOrder(url, orderWithDefaults)
+            if (!error && response) {
+                console.log('Order', response);
+                toast.success(response.data.message);
+                setTimeout(() => {
+                    navigate("/orders")
+                }, 1000)
+            }
+            console.log(error);
+            toast.error(error.response.data.message);
         } catch (error: any) {
-          console.error(error);
-          toast.error(error.data.message);
+            console.error(error);
+            toast.error(error.data.message);
         }
-      };
+    };
 
     return (
         <div className="py-3 px-2 bg-[#FFFFFF] shadow-md rounded-lg">
-        <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={true}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
+            <ToastContainer
+                position="top-center"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={true}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+            />
             <div className="flex items-center mb-4">
                 <Link to="/orders">
                     <button className="w-10 rounded-full flex items-center justify-center">
@@ -246,7 +305,7 @@ const AddOrder = ({ }: Props) => {
                     New Order
                 </h2>
             </div>
-            <form  className="space-y-4">
+            <form className="space-y-4">
                 <div className="px-5">
                     <div className="relative">
                         <label className="block text-gray-700">Search Customer</label>
@@ -256,27 +315,24 @@ const AddOrder = ({ }: Props) => {
                             onChange={handleSearchChange}
                             onFocus={handleInputFocus}
                             className="w-full p-2 mt-1 border rounded-md"
-                            placeholder="Search Customer"
+                            placeholder="Search Customer"                           
                         />
-                        <div className="absolute z-10  w-full bg-white mt-1 max-h-52  overflow-auto rounded shadow-lg">
-
-                            {customers.length > 0 ? (
-                                // Show filtered customers
-                                <div>
-                                    {filteredCustomers.map((customer: any) => (
-
-                                        <div
-                                            key={`${customer.customerID}-${customer.ratePerBottle}`}
-                                            className="p-2 cursor-pointer m-2 border-2 rounded-lg hover:bg-gray-100"
-                                            onClick={() => handleCustomerSelect(customer)}
-                                        >
-                                            {customer.fullName}
-                                        </div>
-                                    ))}
-                                </div>
+                        {/* Dropdown for customer suggestions */}
+                        <div className="absolute z-10 w-full bg-white mt-1 max-h-52 overflow-auto rounded shadow-lg">
+                            {loading ? (
+                                <div className="p-2 text-gray-500">Loading...</div>
+                            ) : customers.length > 0 ? (
+                                filteredCustomers.map((customer: any) => (
+                                    <div
+                                        key={`${customer.customerID}-${customer.ratePerBottle}`}
+                                        className="p-2 cursor-pointer m-2 border-2 rounded-lg hover:bg-gray-100"
+                                        onClick={() => handleCustomerSelect(customer)}
+                                    >
+                                        {customer.fullName}
+                                    </div>
+                                ))
                             ) : (
-                                // Show "No customers found" or "No customers available" message
-                                <div className="p-2 text-red">No customers found</div>
+                                <div className="p-2">No customers found</div>
                             )}
                         </div>
                     </div>
@@ -292,7 +348,6 @@ const AddOrder = ({ }: Props) => {
                             className="w-full p-2 mt-1 border rounded-md"
                             placeholder="Order Number"
                         />
-
                     </div>
                     <div className="pt-2 flex">
                         <div className="relative w-[75%] gap-2  mb-2"> {/* Ensure full width and margin for spacing */}
@@ -304,21 +359,31 @@ const AddOrder = ({ }: Props) => {
                             >
                                 {selectedItem ? selectedItem.itemName : "Select an item"}
                             </div>
-
                             {/* Dropdown List */}
                             {isOpen && (
                                 <div className="absolute z-10 w-full mt-2 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                    {subRoutes.map((subRoute) =>
-                                        subRoute.stock.map((item: any) => (
+                                    {
+                                        subRoutes.stock.map((item: any) => (
                                             <div
                                                 key={item.itemId}
-                                                onClick={() => handleItemClick(item.itemId, item.itemName, subRoute.mainRouteId, subRoute.mainRouteName, subRoute.subRouteName, item.quantity, subRoute._id)}
+                                                onClick={() =>
+                                                    handleItemClick(
+                                                        item.itemId,
+                                                        item.itemName,
+                                                        subRoutes.mainRouteId,
+                                                        subRoutes.mainRouteName,
+                                                        subRoutes.subRouteName,
+                                                        item.quantity,
+                                                        subRoutes._id
+                                                    )
+                                                }
                                                 className="p-2 m-2 border-2 rounded-lg text-left cursor-pointer hover:bg-gray-100"
                                             >
                                                 {item.itemName}
                                             </div>
                                         ))
-                                    )}
+
+                                    }
                                 </div>
                             )}
                         </div>
@@ -333,10 +398,9 @@ const AddOrder = ({ }: Props) => {
                                 onChange={handleQuantityChange}
                                 value={orderData.stock[0]?.quantity} // Display the quantity of the first item
                             />
-                            {error && <div className="text-red-500 text-sm mt-1">{error}</div>}
-
                         </div>
                     </div>
+                    {error && <div className="text-red-500 text-center text-sm mt-1">{error}</div>}
                     <div className="grid grid-cols-2 gap-2 pt-2">
                         <div>
                             <label className="block text-gray-700">Date</label>
@@ -346,6 +410,7 @@ const AddOrder = ({ }: Props) => {
                                 value={orderData.date}
                                 onChange={handleInputChange}
                                 className="w-full p-2 mt-1 border rounded-md"
+                                readOnly
                             />
 
                         </div>
@@ -359,7 +424,6 @@ const AddOrder = ({ }: Props) => {
                             >
                                 <option value="Cash">Cash</option>
                                 <option value="Credit">Credit</option>
-                                <option value="Coupon">Coupon</option>
                                 <option value="FOC">FOC</option>
                             </select>
                         </div>
@@ -390,18 +454,80 @@ const AddOrder = ({ }: Props) => {
                             />
                         </div>
                     </div>
+
+                    {/* salesman */}
                     <div className="pt-2">
                         <label className="block text-gray-700">Sales Man</label>
                         <input
                             type="text"
                             name="salesman"
-                            value={orderData.salesman}
+                            value={activeRoute?.salesmanName}
                             onChange={handleInputChange}
                             className="w-full p-2 mt-1 border rounded-md"
                             placeholder="Enter email"
                             readOnly
                         />
                     </div>
+
+                    {/* Return  Empty Bottle */}
+                    <div className="pt-2">
+                        <label className="block text-gray-700">Return  Empty Bottle</label>
+                        <input
+                            type="number"
+                            name="ReturnBottle"
+                            value={orderData.returnBottle}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (/^\d*$/.test(value)) { // Only allow numbers
+                                    handleReturnBottleChange(e); // Update state if the input is valid
+                                }
+                            }}
+                            onKeyDown={(e) => {
+                                if (
+                                    e.key === "e" || // Prevent 'e' for exponential notation
+                                    e.key === "+" || // Prevent '+'
+                                    e.key === "-" || // Prevent '-'
+                                    e.key === "." || // Prevent '.'
+                                    e.key === " "    // Prevent space
+                                ) {
+                                    e.preventDefault();
+                                }
+                            }}
+                            className="w-full p-2 mt-1 border rounded-md"
+                            placeholder="Return Empty Bottle"
+                        />
+                    </div>
+
+                    {/* Rate per Item */}
+                    <div className="pt-2">
+                        <label className="block text-gray-700">Rate Per Item</label>
+                        <input
+                            type="number"
+                            name="ratePerItem"
+                            value={orderData.ratePerItem}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (/^\d*$/.test(value)) { // Only allow numbers
+                                    handleInputChange(e); // Update state if the input is valid
+                                }
+                            }}
+                            onKeyDown={(e) => {
+                                if (
+                                    e.key === "e" || // Prevent 'e' for exponential notation
+                                    e.key === "+" || // Prevent '+'
+                                    e.key === "-" || // Prevent '-'
+                                    e.key === "." || // Prevent '.'
+                                    e.key === " "    // Prevent space
+                                ) {
+                                    e.preventDefault();
+                                }
+                            }}
+                            className="w-full p-2 mt-1 border rounded-md"
+                            placeholder="Rate Per Item"
+                        />
+
+                    </div>
+
                     <div className="pt-2">
                         <label className="block text-gray-700">Note</label>
                         <input
@@ -440,7 +566,6 @@ const AddOrder = ({ }: Props) => {
                         </div>
                     </div>
                     <div className=" py-3 ">
-
                         <Button size="xl" onClick={handleSubmit}>
                             Submit
                         </Button>

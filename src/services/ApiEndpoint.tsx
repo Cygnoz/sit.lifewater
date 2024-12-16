@@ -9,6 +9,7 @@ export const endpoints = {
 
     // Subroute
     GET_ALL_SUBROUTE:`viewSRoute`,
+    VIEW_A_SUBROUTE:`viewSRoute`,
 
     // Customer
     ADD_CUSTOMER:`addcustomer`,
