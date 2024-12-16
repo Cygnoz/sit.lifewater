@@ -5,8 +5,8 @@ const router = express.Router()
 
 const AccountsController = require('../controller/Accounts/accountController')
 const journalController = require('../controller/Accounts/journalController');
-
 const ActiveRouteController = require("../controller/Route/ActiveRouteController")
+const startRideController = require("../controller/Route/rideController")
 const EndRideController = require('../controller/Route/EndRideController')
 const mainRouteController = require("../controller/Route/MainRouteController")
 const subrouteController = require('../controller/Route/SubRouteController');
@@ -74,6 +74,10 @@ router.delete("/customer/:id", verifyToken, CustomerController.deleteCustomerByI
 router.post("/activroutes", verifyToken, ActiveRouteController.createActiveRoute) // add active route
 router.get("/getActiveRoutes", verifyToken, ActiveRouteController.getActiveRoutes) // get all active routes
 router.get("/viewActiveRoute/:id", verifyToken, ActiveRouteController.viewActiveRouteById) // view active route by ID
+
+
+//start ride
+router.post('/start-ride', verifyToken, startRideController.startRide); // end ride
 
 
 //endride
