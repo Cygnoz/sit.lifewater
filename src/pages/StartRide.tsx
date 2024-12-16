@@ -5,19 +5,12 @@ import start from '../assets/images/start.png'
 
 
 const StartRide: React.FC = () => {
-  const [storedUsername, setStoredUsername] = useState<string | null>(null);
-  const [storedProfile, setStoredProfile] = useState<string | null>(null);
-
-  // Retrieve username from session storage on component load
-  useEffect(() => {
-    const savedUsername = localStorage.getItem("userName");
-    // const storedProfile = localStorage.getItem("profile");
-    if (savedUsername && storedProfile) {
-      console.log(savedUsername, "user");
-      setStoredUsername(savedUsername);
-      setStoredProfile(storedProfile)
-    }
-  }, []);
+  const [storedUsername, setStoredUsername] = useState<any | null>(null);
+    const firstname = JSON.parse(localStorage.getItem("firstname") || "{}");
+    // Fetch localStorage data on mount
+    useEffect(() => {
+      setStoredUsername(firstname);
+    }, []);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-between p-4">
@@ -27,26 +20,14 @@ const StartRide: React.FC = () => {
           <div className="">
             <p className="text-[#000000] text-[14px] font-[700]">
               Hello,
-              {storedUsername ? (
-                <span> {storedUsername}</span>
-              ) : (
-                <span>User</span>
-              )}
+              {(storedUsername?.data.firstname)}
             </p>
             <p className="text-sm">Welcome</p>
           </div>
-          {/* {storedProfile ? (
-    <img 
-      className="object-cover w-11 h-11 rounded-full" 
-      src={`${BASEURL}/uploads/${storedProfile}`} 
-      alt="Profile"
-    />
-  ) : (
-  )} */}
           <img
-            className="object-cover w-11 h-11 rounded-full"
-            src="path/to/default-image.jpg"
-            alt="Default Profile"
+            src={(storedUsername?.data.profile) }
+            alt="Profile"
+            className="w-10 h-10 rounded-full object-cover cursor-pointer"
           />
         </div>
       </header>

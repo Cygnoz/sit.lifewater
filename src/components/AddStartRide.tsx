@@ -1,327 +1,495 @@
-import React, { useEffect, useState } from 'react';
- 
-import { useNavigate } from 'react-router-dom';
-import { addActiveRouteAPI, getAllStaffsAPI, getSubRoutesAPI, getVehicleAPI } from '../services/StartRide/StartRide';
-import { BASEURL } from '../services/BaseURL';
- 
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import { endpoints } from "../services/ApiEndpoint";
+import useApi from "../Hook/UseApi";
+
 interface Route {
   _id: string;
   subRoute: string;
-  mainRoute: string;
+  mainRouteName: string;
+  subRouteName: string;
+  stock: [];
 }
- 
+
 interface Staff {
   designation: string;
   _id: string;
   firstname: string;
   lastname: string;
 }
- 
 interface Vehicle {
   _id: string;
   vehicleNo: string;
 }
- 
+
 const AddStartRide: React.FC = () => {
   const [routesList, setRouteList] = useState<Route[]>([]);
-  const [mainRouteList, setMainRouteList] = useState<string[]>([]);
-  const [selectedMainRoute, setSelectedMainRoute] = useState<string>('');
-  const [selectedSubRoute, setSelectedSubRoute] = useState<string>('');
-  const [filteredSubRoutes, setFilteredSubRoutes] = useState<Route[]>([]);
+  const [selectedMainRoute, setSelectedMainRoute] = useState<{
+    mainRouteName: string;
+    mainRouteId: string | null;
+  } | null>(null);
+
+  const [selectedSubRoute, setSelectedSubRoute] = useState<{
+    subRouteName: string;
+    subRouteId: string | null;
+    stock: [];
+  } | null>(null);
+
+  const [mainRouteList, setMainRouteList] = useState<
+    { mainRouteName: string; mainRouteId: string }[]
+  >([]);
+  const [filteredSubRoutes, setFilteredSubRoutes] = useState<
+    { subRouteName: string; _id: string; stock: [] }[]
+  >([]);
+  const [selectedHelper, setSelectedHelper] = useState<{
+    name: string;
+    id: string | null;
+  } | null>(null);
+  const [selectedDriver, setSelectedDriver] = useState<{
+    name: string;
+    id: string | null;
+  } | null>(null);
+
   const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [openingStock, setOpeningStock] = useState<number | "">("");
+  const [startingKm, setStartingKm] = useState<number | "">("");
   const [vehicleList, setVehicleList] = useState<Vehicle[]>([]);
-  const [openingStock, setOpeningStock] = useState<number | ''>('');
-  const [loadedStock, setLoadedStock] = useState<number | ''>('');
-  const [totalStock, setTotalStock] = useState<number | ''>('');
-  const [startingKm, setStartingKm] = useState<number | ''>('');
   const navigate = useNavigate();
-  const [storedUsername, setStoredUsername] = useState<string | null>(null);
-  const [storedProfile, setStoredProfile] = useState<string | null>(null);
- 
-  // Retrieve username from session storage on component load
+
+  const [storedUsername, setStoredUsername] = useState<any | null>(null);
+  const firstname = JSON.parse(localStorage.getItem("firstname") || "{}");
+  // Fetch localStorage data on mount
   useEffect(() => {
-    const savedUsername = localStorage.getItem("firstname");
-    const storedProfile = localStorage.getItem("profile");
-    if (savedUsername && storedProfile) {
-      console.log(savedUsername , storedProfile);
-      setStoredUsername(savedUsername);
-      setStoredProfile(storedProfile)
-    }
+    setStoredUsername(firstname);
   }, []);
- 
+  const handleMainRouteChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const mainRouteName = event.target.value;
+
+    // Find the selected main route details
+    const selectedMainRouteDetails = mainRouteList.find(
+      (route) => route.mainRouteName === mainRouteName
+    );
+
+    setSelectedMainRoute({
+      mainRouteName,
+      mainRouteId: selectedMainRouteDetails?.mainRouteId || null,
+    });
+
+    // Filter subroutes based on the selected main route
+    const filtered = routesList.filter(
+      (route) => route.mainRouteName === mainRouteName
+    );
+
+    setFilteredSubRoutes(
+      filtered.map((subRoute) => ({
+        subRouteName: subRoute.subRouteName,
+        _id: subRoute._id,
+        stock: subRoute.stock,
+      }))
+    );
+
+    // Reset the selected subroute
+    setSelectedSubRoute(null);
+  };
+
+  const handleSubRouteChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const subRouteId = event.target.value;
+  
+    // Find the selected subroute details
+    const selectedSubRouteDetails = filteredSubRoutes.find(
+      (subRoute) => subRoute._id === subRouteId
+    );
+  
+    if (selectedSubRouteDetails) {
+      setSelectedSubRoute({
+        subRouteName: selectedSubRouteDetails?.subRouteName || "",
+        subRouteId: selectedSubRouteDetails?._id || null,
+        stock: selectedSubRouteDetails?.stock || [],
+      });
+  
+      // Update the opening stock as the length of the stock array
+      setOpeningStock(selectedSubRouteDetails.stock.length);
+    } else {
+      setSelectedSubRoute(null);
+      setOpeningStock(""); // Reset if no subroute is selected
+    }
+  };
+  
+
+  const { request: getSubRoute } = useApi("get", 4000);
+
   useEffect(() => {
     const fetchSubRoutes = async () => {
       try {
-        const response = await getSubRoutesAPI();
-        setRouteList(response);
-  
-        // Ensure uniqueMainRoutes is typed correctly
-        const uniqueMainRoutes: string[] = Array.from(new Set(response.map((route: Route) => route.mainRoute)));
-        setMainRouteList(uniqueMainRoutes);
-      } catch (error) {
-        console.error('Error fetching sub-route data:', error);
+        const url = `${endpoints.GET_ALL_SUBROUTE}`;
+        const { response, error } = await getSubRoute(url);
+
+        if (error) {
+          console.error("Error fetching sub-route data:", error);
+          toast.error("Failed to fetch route data. Please try again.");
+          return;
+        }
+
+        const routes = Array.isArray(response) ? response : response?.data;
+
+        if (routes && Array.isArray(routes)) {
+          // Process and set the route list with stock details
+          setRouteList(routes);
+
+          console.log("All subroute and stock data:", routes);
+
+          // Extract unique main routes with their IDs
+          const uniqueMainRoutes = Array.from(
+            new Map(
+              routes.map((route) => [
+                route.mainRouteName,
+                {
+                  mainRouteName: route.mainRouteName,
+                  mainRouteId: route.mainRouteId,
+                },
+              ])
+            ).values()
+          );
+          setMainRouteList(uniqueMainRoutes);
+        }
+      } catch (err) {
+        console.error("Error fetching sub-route data:", err);
+        toast.error("An unexpected error occurred. Please try again.");
       }
     };
-  
+
     fetchSubRoutes();
   }, []);
- 
-  useEffect(() => {
-    const fetchStaff = async () => {
-      try {
-        const response = await getAllStaffsAPI();
-        setStaffList(response as any);
-      } catch (error) {
-        console.error("Error fetching staff data:", error);
-      }
-    };
- 
-    fetchStaff();
-  }, []);
- 
-  useEffect(() => {
-    const fetchVehicle = async () => {
-      try {
-        const apiResponse = await getVehicleAPI() as Vehicle[]; // Ensure correct typing
-        setVehicleList(apiResponse);
-      } catch (error) {
-        console.error("Error fetching vehicle data:", error);
-        setVehicleList([]);
-      }
-    };
-  
-    fetchVehicle();
-  }, []);
- 
-  // Update filtered sub-routes based on selected main route
-  const handleMainRouteChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const mainRoute = event.target.value;
-    setSelectedMainRoute(mainRoute);
-    setFilteredSubRoutes(routesList.filter(route => route.mainRoute === mainRoute));
-    setSelectedSubRoute(''); // Reset sub-route selection
-  };
- 
-  const handleSubRouteChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedSubRoute(event.target.value);
-  };
- 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
- 
-    const newActiveRoute = {
-      mainRoute: selectedMainRoute,
-      subRoute: selectedSubRoute,
-      helper: (document.getElementById('helper') as HTMLSelectElement)?.value,
-      driver: (document.getElementById('driver') as HTMLSelectElement)?.value,
-      vehicleNo: (document.getElementById('vehicle') as HTMLSelectElement)?.value,      
-      openingStock,
-      loadedStock,
-      totalStock,
-      startingKm,
-      salesman:storedUsername
-    };
- 
-    try {
-      const response = await addActiveRouteAPI(newActiveRoute);
-      console.log('ActiveRoute created successfully:', response);
-      const { driver, vehicleNo, mainRoute, loadedStock, subRoute, startingKm } = response?.data;
-      const  activeRouteId = response?.data?._id
-      localStorage.setItem("activeRouteId", activeRouteId)
-      localStorage.setItem("driver", driver); // Replace driverValue with the actual driver data
-      localStorage.setItem("vehicleNo", vehicleNo); // Replace vehicleNoValue with the actual vehicle number
-      localStorage.setItem("mainRoute", mainRoute); // Replace mainRouteValue with the actual route data
-      localStorage.setItem("stock", loadedStock); // Replace stockValue with the actual stock data
-      localStorage.setItem("subRoute",subRoute);
-      localStorage.setItem("startingKm",startingKm);
-    
-  
 
-      console.log('activeroute set in localStorage');
-      
-      navigate('/home');
+  // Vehicle
+  const { request: getAllVehicleData } = useApi("get", 4000);
+  const getAllVehicle = async () => {
+    try {
+      const url = `${endpoints.GET_ALL_VEHICLES}`;
+      const { response, error } = await getAllVehicleData(url);
+      if (!error && response) {
+        setVehicleList(response.data);
+        console.log(response.data, "vehicle");
+      } else {
+        console.log(error);
+      }
     } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred while creating the ActiveRoute.');
+      console.log(error);
     }
   };
- 
+
+  useEffect(() => {
+    getAllVehicle();
+  }, []);
+
+  // staff , helper and driver details
+  const { request: getAllStaffData } = useApi("get", 4000);
+  const getAllStaff = async () => {
+    try {
+      const url = `${endpoints.GET_ALL_STAFF}`;
+      const { response, error } = await getAllStaffData(url);
+      if (!error && response) {
+        setStaffList(response.data);
+        console.log("staff", response.data);
+      } else {
+        console.log(error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getAllStaff();
+  }, []);
+
+  const handleHelperChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const helperId = event.target.value;
+
+    // Find the selected helper's details
+    const selectedHelperDetails = staffList.find(
+      (staff) => staff._id === helperId
+    );
+
+    setSelectedHelper({
+      name: `${selectedHelperDetails?.firstname}`,
+      id: selectedHelperDetails?._id || null,
+    });
+  };
+
+  console.log("Selected helper", selectedHelper?.name); // "John Doe"
+  console.log("Selected helper", selectedHelper?.id); // "abcd1234"
+
+  const handleDriverChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const driverId = event.target.value;
+
+    // Find the selected helper's details
+    const selectedDriverDetails = staffList.find(
+      (staff) => staff._id === driverId
+    );
+
+    setSelectedDriver({
+      name: `${selectedDriverDetails?.firstname} ${selectedDriverDetails?.lastname}`,
+      id: selectedDriverDetails?._id || null,
+    });
+  };
+
+  const { request: addStartRide } = useApi("post", 4000);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  
+    // Ensure all required fields are selected
+    if (!selectedMainRoute || !selectedSubRoute || !startingKm || !selectedDriver || !selectedHelper) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
+  
+    // Format stock data
+    const formattedStock = selectedSubRoute?.stock.map((item: any) => ({
+      itemId: item.itemId, // Replace with the actual field
+      itemName: item.itemName || "Unknown Item", // Replace with the actual field
+      quantity: item.quantity || 1, // Replace with the actual field
+    }));
+  
+    // Create payload
+    const newActiveRoute = {
+      mainRouteId: selectedMainRoute?.mainRouteId,
+      mainRouteName: selectedMainRoute?.mainRouteName,
+      subRouteId: selectedSubRoute?.subRouteId,
+      subRouteName: selectedSubRoute?.subRouteName,
+      helperName: selectedHelper?.name,
+      helperId: selectedHelper?.id,
+      driverName: selectedDriver?.name,
+      driverId: selectedDriver?.id,
+      vehicleNumber: (document.getElementById("vehicle") as HTMLSelectElement)?.value,
+      stock: formattedStock || [],
+      startingKm,
+      salesmanName: storedUsername?.data.firstname,
+      salesmanId: storedUsername?.data._id,
+    };
+  
+    console.log("Payload to be sent:", newActiveRoute);
+
+     // Save to local storage
+     try {
+      localStorage.setItem("activeRoute", JSON.stringify(newActiveRoute));
+      console.log("Data saved to local storage.");
+  } catch (error) {
+      console.error("Error saving to local storage:", error);
+      toast.error("Failed to save data to local storage.");
+      return;
+  }
+  
+    try {
+      const url = `${endpoints.ADD_ACTIVE_ROUTE}`;
+      console.log("API :",url);
+      
+      const { response, error } = await addStartRide(url, newActiveRoute);
+  
+      if (error) {
+        console.error("Error posting Start Ride data:", error);
+        toast.error(error?.response?.data?.message || error.message || "Failed to Start Ride");
+        return;
+      }
+  
+      if (response) {
+        console.log("Start Ride Response:", response);
+        toast.success("Ride started successfully!");
+        setTimeout(()=>{
+          navigate("/customers"); // Navigate to rides page or any other page
+        },2000)
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+    }
+  };
+  
+  
+
   return (
     <div className="flex items-center justify-center bg-gray-100 p-4 rounded-lg mt-3">
+         <ToastContainer
+              position="top-center"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={true}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+            />
       <div className="bg-white w-full max-w-lg rounded-lg shadow-md p-6">
         <header className="flex justify-end items-center mb-6">
-        <div className="flex items-center space-x-2">
-        <div className="">
+          <div className="flex items-center space-x-2">
+            <div className="">
               <p className="text-[#000000] text-[14px] font-[700]">
                 Hello,
-                {storedUsername ? (
-                 <span> {storedUsername}</span>
-                ) : (
-                  <span>User</span>
-                )}
+                {storedUsername?.data.firstname}
               </p>
               <p className="text-sm">Welcome</p>
             </div>
-            {storedProfile ? (
-    <img
-      className="object-cover w-11 h-11 rounded-full"
-      src={`${BASEURL}/uploads/${storedProfile}`}
-      alt="Profile"
-    />
-  ) : (
-    <img
-      className="object-cover w-11 h-11 rounded-full"
-      src="path/to/default-image.jpg"
-      alt="Default Profile"
-    />
-  )}
-        </div>
+            <img
+              src={storedUsername?.data.profile}
+              alt="Profile"
+              className="w-10 h-10 rounded-full object-cover cursor-pointer"
+            />
+          </div>
         </header>
- 
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Main Route Selection */}
-          <div className="space-y-1">
-            <label htmlFor="main-route" className="text-sm font-medium text-gray-700">
+
+          <div>
+            <label
+              htmlFor="helper"
+              className="text-sm font-medium text-gray-700"
+            >
               Main Route
             </label>
             <select
-              id="main-route"
-              className="w-full p-2 border border-gray-300 rounded-lg"
-              value={selectedMainRoute}
               onChange={handleMainRouteChange}
+              className="w-full p-2 border border-gray-300 rounded-lg"
             >
               <option value="">Select Main Route</option>
-              {mainRouteList.map((mainRoute) => (
-                <option key={mainRoute} value={mainRoute}>
-                  {mainRoute}
+              {mainRouteList.map((route) => (
+                <option key={route.mainRouteId} value={route.mainRouteName}>
+                  {route.mainRouteName}
                 </option>
               ))}
             </select>
           </div>
- 
-          {/* Sub Route Selection */}
-          <div className="space-y-1">
-            <label htmlFor="sub-route" className="text-sm font-medium text-gray-700">
+          <div>
+            <label
+              htmlFor="helper"
+              className="text-sm font-medium text-gray-700"
+            >
               Sub Route
             </label>
             <select
-              id="sub-route"
-              className="w-full p-2 border border-gray-300 rounded-lg"
-              value={selectedSubRoute}
               onChange={handleSubRouteChange}
-              disabled={!selectedMainRoute} // Disable if no main route selected
+              className="w-full p-2 border border-gray-300 rounded-lg"
             >
               <option value="">Select Sub Route</option>
-              {filteredSubRoutes.map((route) => (
-                <option key={route._id} value={route.subRoute}>
-                  {route.subRoute}
+              {filteredSubRoutes.map((subRoute) => (
+                <option key={subRoute._id} value={subRoute._id}>
+                  {subRoute.subRouteName}
                 </option>
               ))}
             </select>
           </div>
- 
+
           <div className="space-y-1">
-            <label htmlFor="helper" className="text-sm font-medium text-gray-700">
+            <label
+              htmlFor="helper"
+              className="text-sm font-medium text-gray-700"
+            >
               Helper
             </label>
-            <select id="helper" className="w-full p-2 border border-gray-300 rounded-lg">
+            <select
+              id="helper"
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              onChange={handleHelperChange}
+            >
               <option value="">Select Helper</option>
               {staffList
-                .filter((staff) => staff.designation === 'Helper')
+                .filter((staff) => staff.designation === "Helper")
                 .map((staff) => (
-                  <option key={staff._id} value={staff.firstname}>
+                  <option key={staff._id} value={staff._id}>
                     {staff.firstname} {staff.lastname}
                   </option>
                 ))}
             </select>
           </div>
- 
+
           <div className="space-y-1">
-            <label htmlFor="driver" className="text-sm font-medium text-gray-700">
+            <label
+              htmlFor="helper"
+              className="text-sm font-medium text-gray-700"
+            >
               Driver
             </label>
-            <select id="driver" className="w-full p-2 border border-gray-300 rounded-lg">
-              <option value="">Select Driver</option>
+            <select
+              id="helper"
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              onChange={handleDriverChange}
+            >
+              <option value="">Select Helper</option>
               {staffList
-                .filter((staff) => staff.designation === 'Driver')
+                .filter((staff) => staff.designation === "Driver")
                 .map((staff) => (
-                  <option key={staff._id} value={staff.firstname}>
+                  <option key={staff._id} value={staff._id}>
                     {staff.firstname} {staff.lastname}
                   </option>
                 ))}
             </select>
           </div>
- 
+
           <div className="space-y-1">
-            <label htmlFor="vehicle" className="text-sm font-medium text-gray-700">
+            <label
+              htmlFor="vehicle"
+              className="text-sm font-medium text-gray-700"
+            >
               Select Vehicle Number
             </label>
-            <select id="vehicle" className="w-full p-2 border border-gray-300 rounded-lg">
+            <select
+              id="vehicle"
+              className="w-full p-2 border border-gray-300 rounded-lg"
+            >
               <option value="">Select Vehicle No</option>
-              {vehicleList.map((vehicle) => (
+              {vehicleList?.map((vehicle) => (
                 <option key={vehicle._id} value={vehicle.vehicleNo}>
                   {vehicle.vehicleNo}
                 </option>
               ))}
             </select>
           </div>
- 
+
           {/* Stock Section */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label htmlFor="opening-stock" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="opening-stock"
+                className="text-sm font-medium text-gray-700"
+              >
                 Opening Stock
               </label>
               <input
                 type="number"
                 id="opening-stock"
                 value={openingStock}
-                onChange={(e) => setOpeningStock(Number(e.target.value) || '')}
+                readOnly
                 className="w-full p-2 border border-gray-300 rounded-lg"
               />
             </div>
+
             <div className="space-y-1">
-              <label htmlFor="loaded-stock" className="text-sm font-medium text-gray-700">
-                Loaded Stock
-              </label>
-              <input
-                type="number"
-                id="loaded-stock"
-                value={loadedStock}
-                onChange={(e) => setLoadedStock(Number(e.target.value) || '')}
-                className="w-full p-2 border border-gray-300 rounded-lg"
-              />
-            </div>
-          </div>
- 
-          {/* Stock Hand and KM */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label htmlFor="total-stock" className="text-sm font-medium text-gray-700">
-                Total stock in Hand
-              </label>
-              <input
-                type="number"
-                id="total-stock"
-                value={totalStock}
-                onChange={(e) => setTotalStock(Number(e.target.value) || '')}
-                className="w-full p-2 border border-gray-300 rounded-lg"
-              />
-            </div>
-            <div className="space-y-1">
-              <label htmlFor="started-km" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="started-km"
+                className="text-sm font-medium text-gray-700"
+              >
                 Starting KM
               </label>
               <input
                 type="number"
                 id="startingKm"
                 value={startingKm}
-                onChange={(e) => setStartingKm(Number(e.target.value) || '')}
+                onChange={(e) => setStartingKm(Number(e.target.value) || "")}
                 className="w-full p-2 border border-gray-300 rounded-lg"
+                placeholder="Enter starting KM"
               />
             </div>
           </div>
- 
+
           {/* Submit Button */}
           <div className="flex justify-center">
             <button
@@ -336,5 +504,5 @@ const AddStartRide: React.FC = () => {
     </div>
   );
 };
- 
+
 export default AddStartRide;

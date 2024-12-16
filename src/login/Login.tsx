@@ -38,13 +38,15 @@ const Login: React.FC = () => {
         const token = response.response?.data.token.split(" ")[1];
         const firstname =response.response?.data
         const profile =response.response?.data
+        const _id =response.response?.data
         localStorage.setItem("authToken", token);
         localStorage.setItem("userName", username);
         localStorage.setItem("firstname", JSON.stringify(firstname || "")); // Convert to string
         localStorage.setItem("profile", JSON.stringify(profile || {})); // Convert to string
+        localStorage.setItem("_id", JSON.stringify(_id || {})); // Convert to string
 
         setTimeout(() => {
-          navigate("/customers");
+          navigate("/start");
         }, 1000);
       } else {
         const errorMessage = response.response?.data.message || "Invalid username or password";

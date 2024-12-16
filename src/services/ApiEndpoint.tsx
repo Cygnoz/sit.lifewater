@@ -2,6 +2,9 @@ export const endpoints = {
     //lofin
     LOGIN:`staff/login`,
 
+    // For Active Route only 
+    ADD_ACTIVE_ROUTE:`start-ride`,  GET_ALL_STAFF: `getallstaffs`, GET_ALL_VEHICLES: `viewVehicles`,
+
 
 
     // Subroute
