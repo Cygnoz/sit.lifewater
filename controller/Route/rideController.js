@@ -54,68 +54,58 @@ const validateRideAssignments = async (helperId, driverId, salesmanId, vehicleNu
     }
 };
 
-// Function to fetch stock from a subroute
-const fetchSubrouteStock = async (subRouteId) => {
-    const subroute = await SubRoute.findOne({ _id: subRouteId });
-    if (!subroute || !subroute.stock || subroute.stock.length === 0) {
-        throw new Error('No stock available in the selected subroute.');
-    }
-    return subroute.stock;
-};
-
-// Update the startRide function to check for stock availability
+// Update the startRide function to check for stock availability within the controller
 exports.startRide = async (req, res) => {
-    console.log("Add Ride:", req.body);
-    try {
-        const cleanedData = cleanCustomerData(req.body);
+  console.log("Add Ride:", req.body);
+  try {
+      const cleanedData = cleanCustomerData(req.body);
 
-        console.log('Cleaned data:', cleanedData);
+      console.log('Cleaned data:', cleanedData);
 
-        // Validate required fields
-        if (!cleanedData.mainRouteId || !cleanedData.mainRouteName) {
-            return res.status(400).json({ message: 'Select main Route' });
-        }
-        if (!cleanedData.subRouteId || !cleanedData.subRouteName) {
-            return res.status(400).json({ message: 'Select Customer Type.' });
-        }
+      // Validate required fields
+      if (!cleanedData.mainRouteId || !cleanedData.mainRouteName) {
+          return res.status(400).json({ message: 'Select main Route' });
+      }
+      if (!cleanedData.subRouteId || !cleanedData.subRouteName) {
+          return res.status(400).json({ message: 'Select Customer Type.' });
+      }
 
-        // Validate ride assignments
-        try {
-            await validateRideAssignments(
-                cleanedData.helperId,
-                cleanedData.driverId,
-                cleanedData.salesmanId,
-                cleanedData.vehicleNumber
-            );
-        } catch (error) {
-            return res.status(400).json({ message: error.message });
-        }
+      // Validate ride assignments
+      try {
+          await validateRideAssignments(
+              cleanedData.helperId,
+              cleanedData.driverId,
+              cleanedData.salesmanId,
+              cleanedData.vehicleNumber
+          );
+      } catch (error) {
+          return res.status(400).json({ message: error.message });
+      }
 
-        // Check for stock in the subroute
-        let subrouteStock;
-        try {
-            subrouteStock = await fetchSubrouteStock(cleanedData.subRouteId);
-        } catch (error) {
-            return res.status(400).json({ message: error.message });
-        }
+      // Check for stock in the subroute (integrated validation within the controller)
+      const subroute = await SubRoute.findOne({ _id: cleanedData.subRouteId });
+      if (!subroute || !subroute.stock || subroute.stock.length === 0) {
+          return res.status(400).json({ message: 'No stock available in the selected subroute.' });
+      }
 
-        // Add stock to the ride
-        const newRide = new Ride({
-            ...cleanedData,
-            stock: subrouteStock,
-        });
-        const savedRide = await newRide.save();
+      // Add stock to the ride
+      const newRide = new Ride({
+          ...cleanedData,
+          stock: subroute.stock,
+      });
+      const savedRide = await newRide.save();
 
-        return res.status(201).json({
-            message: 'Ride Started successfully!',
-            data: savedRide,
-        });
+      return res.status(201).json({
+          message: 'Ride Started successfully!',
+          data: savedRide,
+      });
 
-    } catch (error) {
-        console.error('Error starting ride:', error);
-        res.status(500).json({ message: "Internal server error." });
-    }
+  } catch (error) {
+      console.error('Error starting ride:', error);
+      res.status(500).json({ message: "Internal server error." });
+  }
 };
+
 
 
 
