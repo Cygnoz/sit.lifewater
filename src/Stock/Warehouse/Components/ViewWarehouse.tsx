@@ -37,7 +37,7 @@ const ViewWarehouse: React.FC = () => {
   if (!warehouse) return <p>Loading warehouse details...</p>;
 
   return (
-    <div className="flex  w-full">
+    <div className="w-full">
       <div className="flex-1 mt-2 p-2  overflow-auto">
         <div className="bg-white p-6 rounded-lg shadow-md mx-auto">
           {/* Header */}
@@ -47,38 +47,47 @@ const ViewWarehouse: React.FC = () => {
                 <img src={backbutton} alt="Back" />
               </button>
             </Link>
-            <h2 className="text-xl font-bold">View Warehouse Details</h2>
+            <h2 className="text-xl font-bold">Warehouse Details</h2>
           </div>
           <hr className="mt-2" />
           <p className="text-sm text-gray-500 mt-2">
-            <span className="font-bold">{warehouse.warehouseName}</span>
+            <label htmlFor="Warehouse">Warehouse</label>
+            <p className="font-bold">{warehouse.warehouseName}</p>
           </p>
           {warehouse.stock &&
             warehouse.stock.map((item: any, index: number) => (
               <div
                 key={index}
-                className="mt-6 bg-gradient-to-r from-[#e3e6d5] to-[#f7e7ce] rounded-lg flex justify-between items-center p-3"
+                className="mt-6 bg-gradient-to-r from-[#e3e6d5] to-[#f7e7ce] rounded-lg flex justify-between items-center p-4"
               >
-                <div className="flex items-center gap-10">
-                  <div>
-                    <p className="text-sm text-gray-500">Item</p>
-                    <p className="font-semibold">{item.itemName}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Quantity</p>
-                    <p className="font-semibold"> {item.quantity} Pcs</p>
-                  </div>
+                <div>
+                  <p className="text-sm text-gray-500">Item</p>
+                  <p className="font-semibold">{item.itemName}</p>
                 </div>
+                <div>
+                  <p className="text-sm text-gray-500">Quantity</p>
+                  <p className="font-semibold"> {item.quantity} Pcs</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Amount</p>
+                  <p className="font-semibold"> {item.amount} </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">CostPrice</p>
+                  <p className="font-semibold"> {item.costPrice} </p>
+                </div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
               </div>
             ))}
 
           {/* Summary */}
-          <div className="grid grid-cols-2 gap-4 mt-6">
+          <div className="gap-4 mt-6">
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-500 mt-4">Address</p>
               <p className="font-semibold">{warehouse.address || "N/A"}</p>
-              <p className="text-sm text-gray-500 mt-4">Delivered By</p>
-              <p className="font-semibold ">{warehouse.salesman || "N/A"}</p>
               <p className="text-sm text-gray-500 mt-4">Mobile number</p>
               <p className="font-semibold ">{warehouse.contactNo || "N/A"}</p>
             </div>

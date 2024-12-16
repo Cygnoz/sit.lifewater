@@ -17,6 +17,7 @@ interface Item {
   costPrice: number;
   amount: number;
   _id?: string;
+  resaleable?:boolean;
 
 }
 
@@ -25,6 +26,7 @@ interface WarehouseItem {
   warehouseName: string;
   contactNo: string;
   address: string;
+  
 }
 
 interface OrderDetails {
@@ -35,6 +37,7 @@ interface OrderDetails {
   notes: string;
   termsAndConditions: string;
   _id?: string,
+  
 }
 interface AddWStockProps {
   onAddNewItem?: () => void;
@@ -46,7 +49,7 @@ const AddWStock: React.FC<AddWStockProps> = () => {
     warehouse: '',
     date: '',
     transferNumber: "",
-    items: [{ itemId: '', itemName: '', quantity: 0, costPrice: 0, amount: 0 }], // Set to empty string
+    items: [{ itemId: '', itemName: '', quantity: 0, costPrice: 0, amount: 0 ,resaleable:false}], // Set to empty string
     notes: '',
     termsAndConditions: '',
   });
@@ -125,7 +128,7 @@ const AddWStock: React.FC<AddWStockProps> = () => {
   const addItem = () => {
     setOrderDetails((prev) => ({
       ...prev,
-      items: [...prev.items, { itemId: '', itemName: '', quantity: 0, costPrice: 0, amount: 0 }],
+      items: [...prev.items, { itemId: '', itemName: '', quantity: 0, costPrice: 0, amount: 0 ,resaleable:false}],
     }));
     console.log(orderDetails);
   };
@@ -136,7 +139,7 @@ const AddWStock: React.FC<AddWStockProps> = () => {
       items:
         prev.items.length > 1
           ? prev.items.filter((_, i) => i !== index)
-          : [{ itemId: '', itemName: '', quantity: 0, costPrice: 0, amount: 0, _id: "" }],
+          : [{ itemId: '', itemName: '', quantity: 0, costPrice: 0, amount: 0, _id: "",resaleable:false }],
     }));
   };
 
@@ -152,6 +155,7 @@ const AddWStock: React.FC<AddWStockProps> = () => {
         quantity,
         costPrice,
         amount: costPrice * quantity, // Calculate amount based on rate and quantity
+        resaleable:item.resaleable
       };
       return { ...prev, items: newItems };
     });
@@ -301,7 +305,7 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                       name="transferNumber"
                       value={orderDetails.transferNumber}
                       onChange={updateOrder}
-                      placeholder="123"
+                      placeholder=""
                       className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px]"
                     />
                   </div>
