@@ -99,19 +99,19 @@ const AddStartRide: React.FC = () => {
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const subRouteId = event.target.value;
-  
+
     // Find the selected subroute details
     const selectedSubRouteDetails = filteredSubRoutes.find(
       (subRoute) => subRoute._id === subRouteId
     );
-  
+
     if (selectedSubRouteDetails) {
       setSelectedSubRoute({
         subRouteName: selectedSubRouteDetails?.subRouteName || "",
         subRouteId: selectedSubRouteDetails?._id || null,
         stock: selectedSubRouteDetails?.stock || [],
       });
-  
+
       // Update the opening stock as the length of the stock array
       setOpeningStock(selectedSubRouteDetails.stock.length);
     } else {
@@ -119,7 +119,6 @@ const AddStartRide: React.FC = () => {
       setOpeningStock(""); // Reset if no subroute is selected
     }
   };
-  
 
   const { request: getSubRoute } = useApi("get", 4000);
 
@@ -238,25 +237,36 @@ const AddStartRide: React.FC = () => {
       id: selectedDriverDetails?._id || null,
     });
   };
-
+  // for stock details
+  const formattedStock = selectedSubRoute?.stock.map((item: any) => ({
+    itemId: item.itemId, // Replace with the actual field
+    itemName: item.itemName || "Unknown Item", // Replace with the actual field
+    quantity: item.quantity || 1, // Replace with the actual field
+  }));
   const { request: addStartRide } = useApi("post", 4000);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-  
+
     // Ensure all required fields are selected
-    if (!selectedMainRoute || !selectedSubRoute || !startingKm || !selectedDriver || !selectedHelper) {
+    if (
+      !selectedMainRoute ||
+      !selectedSubRoute ||
+      !startingKm ||
+      !selectedDriver ||
+      !selectedHelper
+    ) {
       toast.error("Please fill all required fields.");
       return;
     }
-  
+
     // Format stock data
     const formattedStock = selectedSubRoute?.stock.map((item: any) => ({
       itemId: item.itemId, // Replace with the actual field
       itemName: item.itemName || "Unknown Item", // Replace with the actual field
       quantity: item.quantity || 1, // Replace with the actual field
     }));
-  
+
     // Create payload
     const newActiveRoute = {
       mainRouteId: selectedMainRoute?.mainRouteId,
@@ -267,66 +277,69 @@ const AddStartRide: React.FC = () => {
       helperId: selectedHelper?.id,
       driverName: selectedDriver?.name,
       driverId: selectedDriver?.id,
-      vehicleNumber: (document.getElementById("vehicle") as HTMLSelectElement)?.value,
+      vehicleNumber: (document.getElementById("vehicle") as HTMLSelectElement)
+        ?.value,
       stock: formattedStock || [],
       startingKm,
       salesmanName: storedUsername?.data.firstname,
       salesmanId: storedUsername?.data._id,
     };
-  
+
     console.log("Payload to be sent:", newActiveRoute);
 
-     // Save to local storage
-     try {
+    // Save to local storage
+    try {
       localStorage.setItem("activeRoute", JSON.stringify(newActiveRoute));
       console.log("Data saved to local storage.");
-  } catch (error) {
+    } catch (error) {
       console.error("Error saving to local storage:", error);
       toast.error("Failed to save data to local storage.");
       return;
-  }
-  
+    }
+
     try {
       const url = `${endpoints.ADD_ACTIVE_ROUTE}`;
-      console.log("API :",url);
-      
+      console.log("API :", url);
+
       const { response, error } = await addStartRide(url, newActiveRoute);
-  
+
       if (error) {
         console.error("Error posting Start Ride data:", error);
-        toast.error(error?.response?.data?.message || error.message || "Failed to Start Ride");
+        toast.error(
+          error?.response?.data?.message ||
+            error.message ||
+            "Failed to Start Ride"
+        );
         return;
       }
-  
+
       if (response) {
         console.log("Start Ride Response:", response);
         toast.success("Ride started successfully!");
-        setTimeout(()=>{
+        setTimeout(() => {
           navigate("/customers"); // Navigate to rides page or any other page
-        },2000)
+        }, 2000);
       }
     } catch (error) {
       console.error("Unexpected error:", error);
       toast.error("An unexpected error occurred. Please try again.");
     }
   };
-  
-  
 
   return (
     <div className="flex items-center justify-center bg-gray-100 p-4 rounded-lg mt-3">
-         <ToastContainer
-              position="top-center"
-              autoClose={3000}
-              hideProgressBar={false}
-              newestOnTop={true}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="colored"
-            />
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       <div className="bg-white w-full max-w-lg rounded-lg shadow-md p-6">
         <header className="flex justify-end items-center mb-6">
           <div className="flex items-center space-x-2">
@@ -461,7 +474,7 @@ const AddStartRide: React.FC = () => {
                 htmlFor="opening-stock"
                 className="text-sm font-medium text-gray-700"
               >
-                Opening Stock
+                Total Item
               </label>
               <input
                 type="number"
@@ -487,6 +500,50 @@ const AddStartRide: React.FC = () => {
                 className="w-full p-2 border border-gray-300 rounded-lg"
                 placeholder="Enter starting KM"
               />
+            </div>
+          </div>
+          <div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-[#fdf8f0]">
+                    <th className="border border-gray-300 px-4 py-2 text-left text-gray-600">
+                      Item
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 text-left text-gray-600">
+                      Quantity
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formattedStock && formattedStock.length > 0 ? (
+                    formattedStock.map(
+                      (
+                        item: { itemName: string; quantity: number },
+                        index: number
+                      ) => (
+                        <tr key={index} className="hover:bg-gray-100">
+                          <td className="border border-gray-300 px-4 py-2">
+                            {item.itemName || "Unknown Item"}
+                          </td>
+                          <td className="border border-gray-300 px-4 py-2">
+                            {item.quantity || 0}
+                          </td>
+                        </tr>
+                      )
+                    )
+                  ) : (
+                    <tr>
+                      <td
+                        className="border border-gray-300 px-4 py-2 text-center"
+                        colSpan={2}
+                      >
+                        No stock available in this Subroute
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
 
