@@ -56,6 +56,9 @@ const orderSchema = new mongoose.Schema({
   ReturnBottle: {
     type:Number
   },
+  ratePerItem: {
+    type: String,
+  },
   // Calculations
   totalAmount: {
     type: Number,
