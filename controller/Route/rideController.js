@@ -129,6 +129,31 @@ exports.getActiveRides = async (req, res) => {
 
 
 
+  //get single active ride
+  exports.viewSingleActiveRoute = async (req, res) => {
+    try {
+        // Extract the ride ID from the request parameters
+        const { rideId } = req.params;
+
+        // Query for the ride with the given ID and status 'active'
+        const activeRide = await Ride.findOne({ _id: rideId, status: 'active' });
+
+        if (!activeRide) {
+            return res.status(404).json({ message: 'Active ride not found.' });
+        }
+
+        return res.status(200).json({
+            message: 'Active ride fetched successfully!',
+            data: activeRide,
+        });
+    } catch (error) {
+        console.error('Error fetching single active ride:', error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
+
+
 
 
 
