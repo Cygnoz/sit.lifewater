@@ -284,60 +284,7 @@ console.log(rideList,activeRoutes,rides);
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="flex = items-center bg-gradient-to-r from-[#820000] to-[#2C353B] rounded-lg p-4  shadow">
-          <div className="flex items-center justify-center w-12 h-12  rounded-full">
-            <img src={car} alt="" />
-          </div>
-          <div className="ml-4">
-            {" "}
-            <div className="text-white">Most Visited Vehicle</div>
-            <div className="text-lg text-white font-bold">
-              {" "}
-              {mostVisitedVehicle || "N/A"}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex = items-center bg-gradient-to-r from-[#820000] to-[#2C353B] rounded-lg p-4  shadow">
-          <div className="flex items-center justify-center w-12 h-12  rounded-full">
-            <img src={user} alt="" />
-          </div>
-          <div className="ml-4">
-            <div className="text-white">Most Visited Sales Man</div>
-            <div className="text-lg text-white font-bold">
-              {mostVisitedSalesman || "N/A"}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex = items-center bg-gradient-to-r from-[#820000] to-[#2C353B] rounded-lg p-4  shadow">
-          <div className="flex items-center justify-center w-12 h-12  rounded-full">
-            <img src={map} alt="" />
-          </div>
-          <div className="ml-4">
-            <div className="text-white">Most Visited Sub Route</div>
-
-            <div className="text-lg text-white font-bold">
-              {mostVisitedSbRoute || "N/A"}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex = items-center bg-gradient-to-r from-[#820000] to-[#2C353B] rounded-lg p-4  shadow">
-          <div className="flex items-center justify-center w-12 h-12  rounded-full">
-            <img src={bottle} alt="" />
-          </div>
-          <div className="ml-4">
-            <div className="text-white"> Bottle Stock</div>
-
-            <div className="text-lg text-white font-bold">
-              {" "}
-              {totalStock || "N/A"}
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
       <div className="flex space-x-7 mb-4">
         <button

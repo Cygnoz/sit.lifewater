@@ -63,7 +63,7 @@ export const endpoints = {
   // Active routes
 
   GET_ALL_ACTIVE_ROUTE:`active-rides`,
-  GET_AN_ACTIVE_ROUTE:`getsingleride`,
+  GET_AN_ACTIVE_ROUTE:`viewActiveRoute`,
 
 
 

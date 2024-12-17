@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from "react";
 import back from "../../assets/images/backbutton.svg";
 import { Link, useParams } from "react-router-dom";
-import car from "../../assets/images/car-front.png";
-import user from "../../assets/images/user.png";
 import user2 from "../../assets/images/user2.png";
-import map from "../../assets/images/map-pinned.png";
-import bottle from "../../assets/images/bottlesvg.svg";
-import history from "../../assets/images/history.png";
 import dollar from "../../assets/images/badge-dollar-sign.png";
 import { endpoints } from "../../services/ApiEndpoint";
 import useApi from "../../Hook/UseApi";
@@ -16,28 +11,28 @@ const ViewActiveRoute: React.FC = () => {
   const [activeSection, setActiveSection] = useState("routeDetail");
   const [error, setError] = useState("");
   const { id } = useParams(); // Assumes route ID is passed as a URL parameter
-  const { request: getActiveRoutes } = useApi("get", 4000)
+  const { request: getActiveRoutes } = useApi("get", 4000);
 
   const getAnActiveroute = async () => {
     try {
-      const url = `${endpoints.GET_AN_ACTIVE_ROUTE}/${id}`
+      const url = `${endpoints.GET_AN_ACTIVE_ROUTE}/${id}`;
       console.log(id);
-      
-      const { response, error } = await getActiveRoutes(url)
-      console.log("API RESPONSE :", response?.data)
-      
+
+      const { response, error } = await getActiveRoutes(url);
+      console.log("API RESPONSE :", response?.data.data);
+
       if (!error && response) {
-       setRouteData(response)
+        setRouteData(response?.data.data);
       }
     } catch (error) {
-      setError("An error occured")
-      console.log(error)
+      setError("An error occured");
+      console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
-    getAnActiveroute()
-  }, [])
+    getAnActiveroute();
+  }, []);
 
   return (
     <div className="px-6 py-3">
@@ -49,56 +44,6 @@ const ViewActiveRoute: React.FC = () => {
           </div>
         </Link>
         <h2 className="text-2xl font-bold">View Active Route</h2>
-      </div>
-
-      {/* Display route info cards if data is loaded */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="flex items-center bg-gradient-to-r from-[#820000] to-[#2C353B] rounded-lg p-4 shadow">
-          <div className="flex items-center justify-center w-12 h-12 rounded-full">
-            <img src={car} alt="" />
-          </div>
-          <div className="ml-4">
-            <div className="text-white">Current Vehicle</div>
-            <div className="text-lg text-white font-bold">
-              {" "}
-              {routeData?.route.vehicleNo || "N/A"}
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center bg-gradient-to-r from-[#820000] to-[#2C353B]  rounded-lg p-4 shadow">
-          <div className="flex items-center justify-center w-12 h-12 rounded-full">
-            <img src={user} alt="" />
-          </div>
-          <div className="ml-4">
-            <div className="text-white">Current Salesman</div>
-            <div className="text-lg text-white font-bold">
-              {" "}
-              {routeData?.route.Salesman || "N/A"}
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center bg-gradient-to-r from-[#820000] to-[#2C353B]  rounded-lg p-4 shadow">
-          <div className="flex items-center justify-center w-12 h-12 rounded-full">
-            <img src={map} alt="" />
-          </div>
-          <div className="ml-4">
-            <div className="text-white">Current Sub Route</div>
-            <div className="text-lg text-white font-bold">
-              {routeData?.route.subRoute || "N/A"}
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center bg-gradient-to-r from-[#820000] to-[#2C353B]  rounded-lg p-4 shadow">
-          <div className="flex items-center justify-center w-12 h-12 rounded-full">
-            <img src={bottle} alt="" />
-          </div>
-          <div className="ml-4">
-            <div className="text-white">Bottle Stock</div>
-            <div className="text-lg text-white font-bold">
-              {routeData?.route.totalStock || "N/A"}
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Error message display */}
@@ -117,17 +62,8 @@ const ViewActiveRoute: React.FC = () => {
           <img src={user2} alt="" className="mr-2" />
           Route Detail
         </button>
-        <button
-          className={`w-[221px] p-2 font-bold rounded-lg flex items-center ${
-            activeSection === "rideHistory"
-              ? "bg-[#E3E6D5] text-black"
-              : "bg-white"
-          }`}
-          onClick={() => setActiveSection("rideHistory")}
-        >
-          <img src={history} alt="" className="mr-2" />
-          Ride History
-        </button>
+       
+  
 
         <button
           className={`w-[221px] font-bold p-2 rounded-lg flex items-center ${
@@ -148,42 +84,64 @@ const ViewActiveRoute: React.FC = () => {
           <div className="grid grid-cols-4 gap-4">
             <div>
               <p className="font-semibold">Main Route</p>
-              <p className="text-[#8F99A9]">{routeData?.route.mainRoute || "N/A"}</p>
+              <p className="text-[#8F99A9]">
+                {routeData?.mainRouteName || "N/A"}
+              </p>
             </div>
             <div>
               <p className="font-semibold">Sub Route</p>
-              <p className="text-[#8F99A9]">{routeData?.route.subRoute || "N/A"}</p>
+              <p className="text-[#8F99A9]">
+                {routeData?.subRouteName || "N/A"}
+              </p>
             </div>
             <div>
               <p className="font-semibold">Starting KM</p>
-              <p className="text-[#8F99A9]">{routeData?.route.startingKm || "N/A"}</p>
+              <p className="text-[#8F99A9]">{routeData?.startingKm || "N/A"}</p>
             </div>
 
             <div>
               <p className="font-semibold">Driver</p>
-              <p className="text-[#8F99A9]">{routeData?.route.driver || "N/A"}</p>
+              <p className="text-[#8F99A9]">{routeData?.driverName || "N/A"}</p>
             </div>
             <div>
               <p className="font-semibold">Helper</p>
-              <p className="text-[#8F99A9]">{routeData?.route.helper || "N/A"}</p>
+              <p className="text-[#8F99A9]">{routeData?.helperName || "N/A"}</p>
             </div>
             <div>
-              <p className="font-semibold">Description</p>
-              <p className="text-[#8F99A9]">{routeData?.route.description || "N/A"}</p>
+              <p className="font-semibold">Sales Man</p>
+              <p className="text-[#8F99A9]">{routeData?.salesmanName || "N/A"}</p>
             </div>
+            <div>
+              <p className="font-semibold">Vehicle No</p>
+              <p className="text-[#8F99A9]">{routeData?.vehicleNumber || "N/A"}</p>
+            </div>
+           
           </div>
         </div>
       )}
 
-      {activeSection === "rideHistory" && (
-        <div className="bg-white p-6 rounded-lg shadow">
-          <p className="font-semibold">No Ride History </p>
-        </div>
-      )}
+  
 
       {activeSection === "currentStock" && (
         <div className="bg-white p-6 rounded-lg shadow">
-          <p className="font-semibold">No Current Stock </p>
+          <h3 className="font-semibold text-lg">Current Stock</h3>
+          {routeData?.stock?.length > 0 ? (
+            <ul className="mt-4 space-y-2">
+              {routeData.stock.map((item :any, index:any) => (
+                <li
+                  key={index}
+                  className="flex justify-between items-center p-3 bg-[#fdf8f0] rounded"
+                >
+                  <span className="font-medium">{item.itemName}</span>
+                  <span className="font-medium text-gray-500">
+                    Quantity: {item.quantity}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500">No Current Stock</p>
+          )}
         </div>
       )}
     </div>

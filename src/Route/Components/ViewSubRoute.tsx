@@ -243,61 +243,6 @@ const ViewSubRoute: React.FC = () => {
         </div>
       )}
 
-      {activeSection === "rideHistory" && (
-        <div className="bg-white p-6 rounded-lg shadow">
-        <div className="flex justify-between items-center mb-4">
-          <div className="absolute ml-3 ">
-            <img src={search} alt="search" className="h-5 w-5" />
-          </div>
-          <input
-            className="pl-9 text-sm w-[100%] rounded-md text-start text-gray-800 h-10 p-2 border-0 focus:ring-1 focus:ring-gray-400"
-            style={{
-              backgroundColor: "rgba(28, 28, 28, 0.04)",
-              outline: "none",
-              boxShadow: "none",
-            }}
-            placeholder="Search Ride"
-          />
-        </div>
-        <table className="w-full text-left">
-          <thead className=" bg-[#fdf8f0]">
-            <tr className="border-b">
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Sl No
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Date
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Sales Man
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Driver
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Vehicle
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Main Route
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Sub Route
-              </th>
-
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Stock
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Sold
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-           <div className="text-center">no Data</div>
-          </tbody>
-        </table>
-      </div>
-      )}
 
 {activeSection === "currentStock" && (
   <div className="bg-white p-6 rounded-lg shadow">
@@ -306,7 +251,7 @@ const ViewSubRoute: React.FC = () => {
         {sData.stock.map((item:any) => (
           <div 
             key={item.itemId} 
-            className="flex justify-between items-center border-b pb-2 last:border-b-0"
+            className="flex justify-between items-center border-b p-2 last:border-b-0 bg-[#fdf8f0]"
           >
             <div>
               <p className="font-medium capitalize">{item.itemName}</p>

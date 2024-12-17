@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import printer from "../../assets/images/printer.svg";
 import search from "../../assets/images/search.svg";
-import eye from "../../assets/images/eye.svg";
+import Eye from "../../assets/icons/Eye";
 import { useNavigate } from "react-router-dom";
 import useApi from "../../Hook/UseApi";
 import { endpoints } from "../../services/ApiEndpoint";
@@ -124,7 +124,7 @@ const ActiveRoute: React.FC = () => {
               <th className="p-2 text-[12px] text-center text-[#303F58]">Sub Route</th>
               <th className="p-2 text-[12px] text-center text-[#303F58]">Driver</th>
               <th className="p-2 text-[12px] text-center text-[#303F58]">Vehicle No</th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">Toatal items</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Total items</th>
               <th className="p-2 text-[12px] text-center text-[#303F58]">Actions</th>
             </tr>
           </thead>
@@ -158,7 +158,7 @@ const ActiveRoute: React.FC = () => {
                       onClick={() => handleView(route._id)}
                       className="text-blue-500"
                     >
-                      <img src={eye} alt="View" />
+                       <Eye color={"#569FBC"} />
                     </button>
                   </td>
                 </tr>
