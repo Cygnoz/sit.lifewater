@@ -23,11 +23,15 @@ pipeline {
                     scannerHome = tool 'sonarqube' // Replace with your SonarQube Scanner tool name
                 }
                 withSonarQubeEnv('APIND_Sonarqube') { // Replace with your SonarQube server name
-                    // Use the SonarQube Scanner
-                    withCredentials([string(credentialsId: "${SONARQUBE_SCANNER_CREDENTIALS_ID}", variable: 'SONAR_TOKEN')]) {
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} -Dsonar.sources=. -Dsonar.login=${SONAR_TOKEN}"
-                    }
-                }
+    // Use the SonarQube Scanner with exclusions for specified files
+    withCredentials([string(credentialsId: "${SONARQUBE_SCANNER_CREDENTIALS_ID}", variable: 'SONAR_TOKEN')]) {
+        sh "${scannerHome}/bin/sonar-scanner \
+            -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
+            -Dsonar.sources=. \
+            -Dsonar.exclusions=**/dependency-check-report.html,**/trivyfs.txt,**/trivyimage.txt \
+            -Dsonar.login=${SONAR_TOKEN}"
+               }
+             }
             }
         }
         stage('Dependency-Check Analysis') {
@@ -127,9 +131,4 @@ pipeline {
         }
     }
 }
-        
-    
-<<<<<<< HEAD
-=======
-
->>>>>>> 908858fef2191cf9a12c97675d655b1a9fecc6c9
+       
