@@ -78,7 +78,7 @@ router.get("/viewActiveRoute/:id", verifyToken, ActiveRouteController.viewActive
 
 //start ride
 router.post('/start-ride', verifyToken, startRideController.startRide); // end ride
-
+router.get('/active-rides',verifyToken, startRideController.getActiveRides)
 
 //endride
 router.post('/end-ride', verifyToken, EndRideController.endRide); // end ride

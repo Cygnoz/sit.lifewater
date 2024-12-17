@@ -107,6 +107,27 @@ exports.startRide = async (req, res) => {
 };
 
 
+exports.getActiveRides = async (req, res) => {
+    try {
+        // Query rides where the status is active
+        const activeRides = await Ride.find({ status: 'active' });
+  
+        if (activeRides.length === 0) {
+            return res.status(404).json({ message: 'No active rides found.' });
+        }
+  
+        return res.status(200).json({
+            message: 'Active rides fetched successfully!',
+            data: activeRides,
+        });
+  
+    } catch (error) {
+        console.error('Error fetching active rides:', error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+  };
+
+
 
 
 
