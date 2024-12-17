@@ -28,10 +28,10 @@ pipeline {
         sh "${scannerHome}/bin/sonar-scanner \
             -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
             -Dsonar.sources=. \
-            -Dsonar.exclusions=**/dependency-check-report.html,**/trivyfs.txt,**/trivyimage.txt \ 
+            -Dsonar.exclusions=**/dependency-check-report.html,**/trivyfs.txt,**/trivyimage.txt \
             -Dsonar.login=${SONAR_TOKEN}"
                }
-              }
+             }
             }
         }
         stage('Dependency-Check Analysis') {
