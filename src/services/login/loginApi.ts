@@ -21,7 +21,7 @@ interface LoginResponse {
 }
 
 export const loginStaffAPI = async (loginData: LoginData): Promise<LoginResponse> => {
-  const response = await fetch(`${BASEURL}/api/staff/login`, {
+  const response = await fetch(`${BASEURL}/staff/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

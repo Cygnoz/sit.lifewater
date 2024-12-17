@@ -14,7 +14,7 @@ export const endRideAPI = async (payload: {
   expenses: { remarks: string; amount: string }[];
 }) => {
   try {
-    const response = await axios.post(`${BASEURL}/api/end-ride`, payload);
+    const response = await axios.post(`${BASEURL}end-ride`, payload);
     return response.data;
   } catch (error) {
     console.error("Failed to end ride:", error);
@@ -23,6 +23,6 @@ export const endRideAPI = async (payload: {
 };
 
 export const getAllEndRidesAPI = async () => {
-  const response = await axios.get(`${BASEURL}/api/getallendride`);
+  const response = await axios.get(`${BASEURL}getallendride`);
   return response.data;
 };
