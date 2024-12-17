@@ -37,11 +37,7 @@ const ViewWarehouse: React.FC = () => {
   if (!warehouse) return <p>Loading warehouse details...</p>;
 
   return (
-<<<<<<< HEAD
     <div className="w-full">
-=======
-    <div className="flex  w-full">
->>>>>>> 908858fef2191cf9a12c97675d655b1a9fecc6c9
       <div className="flex-1 mt-2 p-2  overflow-auto">
         <div className="bg-white p-6 rounded-lg shadow-md mx-auto">
           {/* Header */}
@@ -51,26 +47,17 @@ const ViewWarehouse: React.FC = () => {
                 <img src={backbutton} alt="Back" />
               </button>
             </Link>
-<<<<<<< HEAD
             <h2 className="text-xl font-bold">Warehouse Details</h2>
           </div>
           <hr className="mt-2" />
           <p className="text-sm text-gray-500 mt-2">
             <label htmlFor="Warehouse">Warehouse</label>
             <p className="font-bold">{warehouse.warehouseName}</p>
-=======
-            <h2 className="text-xl font-bold">View Warehouse Details</h2>
-          </div>
-          <hr className="mt-2" />
-          <p className="text-sm text-gray-500 mt-2">
-            <span className="font-bold">{warehouse.warehouseName}</span>
->>>>>>> 908858fef2191cf9a12c97675d655b1a9fecc6c9
           </p>
           {warehouse.stock &&
             warehouse.stock.map((item: any, index: number) => (
               <div
                 key={index}
-<<<<<<< HEAD
                 className="mt-6 bg-gradient-to-r from-[#e3e6d5] to-[#f7e7ce] rounded-lg flex justify-between items-center p-4"
               >
                 <div>
@@ -93,37 +80,14 @@ const ViewWarehouse: React.FC = () => {
                 <div></div>
                 <div></div>
                 <div></div>
-=======
-                className="mt-6 bg-gradient-to-r from-[#e3e6d5] to-[#f7e7ce] rounded-lg flex justify-between items-center p-3"
-              >
-                <div className="flex items-center gap-10">
-                  <div>
-                    <p className="text-sm text-gray-500">Item</p>
-                    <p className="font-semibold">{item.itemName}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Quantity</p>
-                    <p className="font-semibold"> {item.quantity} Pcs</p>
-                  </div>
-                </div>
->>>>>>> 908858fef2191cf9a12c97675d655b1a9fecc6c9
               </div>
             ))}
 
           {/* Summary */}
-<<<<<<< HEAD
           <div className="gap-4 mt-6">
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-500 mt-4">Address</p>
               <p className="font-semibold">{warehouse.address || "N/A"}</p>
-=======
-          <div className="grid grid-cols-2 gap-4 mt-6">
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500 mt-4">Address</p>
-              <p className="font-semibold">{warehouse.address || "N/A"}</p>
-              <p className="text-sm text-gray-500 mt-4">Delivered By</p>
-              <p className="font-semibold ">{warehouse.salesman || "N/A"}</p>
->>>>>>> 908858fef2191cf9a12c97675d655b1a9fecc6c9
               <p className="text-sm text-gray-500 mt-4">Mobile number</p>
               <p className="font-semibold ">{warehouse.contactNo || "N/A"}</p>
             </div>

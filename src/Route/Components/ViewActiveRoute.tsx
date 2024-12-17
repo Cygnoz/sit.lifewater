@@ -8,28 +8,36 @@ import map from "../../assets/images/map-pinned.png";
 import bottle from "../../assets/images/bottlesvg.svg";
 import history from "../../assets/images/history.png";
 import dollar from "../../assets/images/badge-dollar-sign.png";
-import { getActiveRouteByIdAPI } from "../../services/RouteAPI/ActiveRoute";
+import { endpoints } from "../../services/ApiEndpoint";
+import useApi from "../../Hook/UseApi";
 
 const ViewActiveRoute: React.FC = () => {
   const [routeData, setRouteData] = useState<any>(null);
   const [activeSection, setActiveSection] = useState("routeDetail");
   const [error, setError] = useState("");
   const { id } = useParams(); // Assumes route ID is passed as a URL parameter
+  const { request: getActiveRoutes } = useApi("get", 4000)
+
+  const getAnActiveroute = async () => {
+    try {
+      const url = `${endpoints.GET_AN_ACTIVE_ROUTE}/${id}`
+      console.log(id);
+      
+      const { response, error } = await getActiveRoutes(url)
+      console.log("API RESPONSE :", response?.data)
+      
+      if (!error && response) {
+       setRouteData(response)
+      }
+    } catch (error) {
+      setError("An error occured")
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
-    const fetchRouteData = async () => {
-      try {
-        const data = await getActiveRouteByIdAPI(id as string);
-        setRouteData(data);
-        console.log(data);
-        console.log(routeData);
-      } catch (err: any) {
-        setError(err.message || "Failed to load route data");
-      }
-    };
-
-    fetchRouteData();
-  }, [id]);
+    getAnActiveroute()
+  }, [])
 
   return (
     <div className="px-6 py-3">
