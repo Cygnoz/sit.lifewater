@@ -5,7 +5,7 @@ import { BASEURL } from "../Baseurl";
 
 export const getActiveRouteAPI = async () => {
     try {
-      const response = await axios.get(`${BASEURL}/api/getActiveRoutes`, {
+      const response = await axios.get(`${BASEURL}/getActiveRoutes`, {
         headers: {
           'Content-Type': 'application/json'  // Ensure correct content type
         }
@@ -19,7 +19,7 @@ export const getActiveRouteAPI = async () => {
 
   export const getActiveRouteByIdAPI = async (id: string | number) => {
     try {
-        const response = await axios.get(`${BASEURL}/api/viewActiveRoute/${id}`, {
+        const response = await axios.get(`${BASEURL}/viewActiveRoute/${id}`, {
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -35,7 +35,7 @@ export const getActiveRouteAPI = async () => {
 
 export const getAllEndRidesAPI = async () => {
   try {
-    const response = await axios.get(`${BASEURL}/api/getallendride`);
+    const response = await axios.get(`${BASEURL}/getallendride`);
     return response.data;
   } catch (error) {
     console.error("Error fetching rides:", error);

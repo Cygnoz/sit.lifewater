@@ -10,7 +10,7 @@
 
 // export const addBusinessCustomerAPI = async (customerData: FormData): Promise<ApiResponse> => {
 //   try {
-//     const response = await commonAPI('POST', `${BASEURL}/api/business-customer`, customerData, {
+//     const response = await commonAPI('POST', `${BASEURL}/business-customer`, customerData, {
 //       // No need to specify Content-Type for FormData
 //     });
 
@@ -23,7 +23,7 @@
 
 // export const addIndividualCustomerAPI = async (individualData:FormData): Promise<ApiResponse> => {
 //   try {
-//     const response = await commonAPI('POST', `${BASEURL}/api/customer`,individualData,{
+//     const response = await commonAPI('POST', `${BASEURL}/customer`,individualData,{
       
 //     });
 //     return response;
@@ -111,7 +111,7 @@ export const addCustomerAPI = async (customerData: FormData): Promise<ApiRespons
 
 export const getAllCustomersAPI = async (): Promise<ApiResponse> => {
   try {
-    const response = await axios.get(`${BASEURL}/api/customer`);
+    const response = await axios.get(`${BASEURL}/customer`);
 
     console.log("Response Status:", response.status); // Check the response status
     console.log("Response Data:", response.data); // Check the response data
@@ -131,7 +131,7 @@ export const getAllCustomersAPI = async (): Promise<ApiResponse> => {
 
 export const deleteCustomerAPI = async (id: string) => {
   try {
-    const response = await axios.delete(`${BASEURL}/api/customer/${id}`);
+    const response = await axios.delete(`${BASEURL}/customer/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting customer:", error);
@@ -142,7 +142,7 @@ export const deleteCustomerAPI = async (id: string) => {
 export const getACustomerAPI = async (id: string): Promise<ApiResponse> => {
   try {
     // Use `id` to fetch the customer by their ID
-    const response = await commonAPI('GET', `${BASEURL}/api/customer/${id}`, null, {
+    const response = await commonAPI('GET', `${BASEURL}/customer/${id}`, null, {
       // No need to specify headers for GET requests
     });
 
@@ -156,7 +156,7 @@ export const getACustomerAPI = async (id: string): Promise<ApiResponse> => {
 
 export const updateCustomerAPI = async (id: string, formData: FormData) => {
   try {
-    const response = await axios.put(`${BASEURL}/api/editcustomer/${id}`, formData, {
+    const response = await axios.put(`${BASEURL}/editcustomer/${id}`, formData, {
       headers: {
         'Content-Type': 'application/json', // Set the correct content type for form data
       },

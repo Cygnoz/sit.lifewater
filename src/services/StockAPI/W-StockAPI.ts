@@ -21,7 +21,7 @@ interface StockData {
 
 export const createStock = async (stockData: StockData) => {
   try {
-    const response = await axios.post(`${STOCK_BASEURL}/api/wstock`, stockData);
+    const response = await axios.post(`${STOCK_BASEURL}/wstock`, stockData);
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to create stock");
@@ -30,7 +30,7 @@ export const createStock = async (stockData: StockData) => {
 
 export const getAllStocks = async () => {
     try {
-      const response = await axios.get(`${STOCK_BASEURL}/api/wstock`);
+      const response = await axios.get(`${STOCK_BASEURL}/wstock`);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
