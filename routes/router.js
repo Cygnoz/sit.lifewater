@@ -5,7 +5,7 @@ const router = express.Router()
 
 const AccountsController = require('../controller/Accounts/accountController')
 const journalController = require('../controller/Accounts/journalController');
-const ActiveRouteController = require("../controller/Route/ActiveRouteController")
+// const ActiveRouteController = require("../controller/Route/ActiveRouteController")
 const startRideController = require("../controller/Route/rideController")
 const EndRideController = require('../controller/Route/EndRideController')
 const mainRouteController = require("../controller/Route/MainRouteController")
@@ -78,28 +78,18 @@ router.delete("/customer/:id", verifyToken, CustomerController.deleteCustomerByI
 //start ride
 router.post('/start-ride', verifyToken, startRideController.startRide); // end ride
 router.get('/active-rides',verifyToken, startRideController.getActiveRides)
-router.get("/viewActiveRoute/:id", verifyToken, startRideController.viewSingleActiveRoute) // view active route by ID
+router.get("/viewActiveRoute/:rideId", verifyToken, startRideController.viewSingleActiveRoute) // view active route by ID
 
 //endride
 router.post('/end-ride', verifyToken, EndRideController.endRide); // end ride
 router.get('/getallendride', verifyToken, EndRideController.getEndRide); // get all end ride
-router.get('/getsingleride/:rideId',verifyToken,EndRideController.EndRideController.viewActiveRouteById)
+
 
 
 
 //acoounts
 router.post('/addaccounts', verifyToken, AccountsController.addAccount); // add account
 router.get('/getallaccounts', verifyToken, AccountsController.getAllAccount); // get all accounts
-
-// router.get('/get-one-account/:accountId', verifyToken,accountController.getOneAccount);
-
-// router.put('/edit-account/:accountId', verifyToken,accountController.editAccount);
-
-// router.delete('/delete-account/:accountId', verifyToken,accountController.deleteAccount);
-
-// router.post('/auto-generate-account', verifyToken,accountController.autoGenerateAccount);
-
-
 
 //Journal
 router.post('/add-journal-entry', verifyToken,journalController.addJournalEntry); // add journal entry
