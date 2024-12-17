@@ -15,7 +15,7 @@ const StockLoaded: React.FC = () => {
   const [columns] = useState([
     { id: "date", label: "Date", visible: true },
     { id: "transferNumber", label: "Transfer No", visible: true },
-    { id: "stock", label: "Stock (Item & Quantity)", visible: true },
+    // { id: "stock", label: "Stock (Item & Quantity)", visible: true },
     { id: "mainRouteName", label: "Main Route", visible: true },
     { id: "subRouteName", label: "Sub Route", visible: true },
   
