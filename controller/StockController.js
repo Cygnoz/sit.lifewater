@@ -432,7 +432,7 @@ exports.addStock = async (req, res) => {
     const cleanedData = cleanCustomerData(req.body);
     cleanedData.stock = (cleanedData.stock || [])
       .map(item => cleanCustomerData(item))
-      .filter(item => item.itemId && item.itemId.trim() !== "");
+      .filter(item => item.itemId && item.itemId.trim() !== "" && item.quantity > 0);
 
     // Validate required fields
     if (!cleanedData.mainRouteId || !cleanedData.mainRouteName) {
@@ -448,7 +448,10 @@ exports.addStock = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Enter Transfer Number' });
     }
     if (!cleanedData.stock || cleanedData.stock.length === 0) {
-      return res.status(400).json({ success: false, message: 'Select an item' });
+      return res.status(400).json({
+        success: false,
+        message: 'Stock must contain valid items with quantity greater than 0'
+      });
     }
 
     // Fetch the warehouse and subroute
@@ -477,13 +480,6 @@ exports.addStock = async (req, res) => {
         });
       }
 
-      if (item.quantity === 0) {
-        return res.status(400).json({
-          success: false,
-          message: `Cannot load 0 stock quantity to subroute`
-        });
-      }
-
       if (item.quantity > warehouseItem.quantity) {
         return res.status(400).json({
           success: false,
@@ -494,6 +490,13 @@ exports.addStock = async (req, res) => {
 
     // Update warehouse stock and decrement quantities
     for (const item of cleanedData.stock) {
+      if (item.quantity <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Cannot process item ${item.itemName} with quantity 0 or less`
+        });
+      }
+
       const warehouseItemIndex = warehouseStock.findIndex(stock => stock.itemId === item.itemId);
 
       if (warehouseItemIndex >= 0) {
@@ -523,19 +526,17 @@ exports.addStock = async (req, res) => {
         itemId: item.itemId,
         itemName: item.itemName,
         quantity: item.quantity,
-        status: isResalable ? "Filled" : undefined// Set status based on resaleable property
+        status: isResalable ? "Filled" : undefined // Set status based on resaleable property
       };
-
-      console.log("New Stock Item Before Save:", newStockItem);
 
       if (subRouteItemIndex >= 0) {
         // If the item already exists in subroute stock, update its quantity and status
         subRouteStock[subRouteItemIndex].quantity += item.quantity;
-        subRouteStock[subRouteItemIndex].status = isResalable ? "Filled" : undefined; // Update status accordingly
+        subRouteStock[subRouteItemIndex].status = isResalable ? "Filled" : undefined;
       } else {
         // Add new item to the subroute stock
         subRouteStock.push(newStockItem);
-        console.log(newStockItem);
+        console.log("New Stock Item Added:", newStockItem);
       }
     }
 
@@ -573,6 +574,7 @@ exports.addStock = async (req, res) => {
     });
   }
 };
+
 
 
 
