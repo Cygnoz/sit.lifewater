@@ -83,7 +83,7 @@ router.get('/active-rides',verifyToken, startRideController.getActiveRides)
 //endride
 router.post('/end-ride', verifyToken, EndRideController.endRide); // end ride
 router.get('/getallendride', verifyToken, EndRideController.getEndRide); // get all end ride
-router.get('/getsingleride/:id',verifyToken,EndRideController.EndRideController.viewActiveRouteById)
+router.get('/getsingleride/:rideId',verifyToken,EndRideController.EndRideController.viewActiveRouteById)
 
 
 
