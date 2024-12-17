@@ -3,7 +3,7 @@ import { BASEURL } from "../Baseurl";
 
 export const addJournalEntryAPI = async (formData: any) => {
     try {
-      const response = await axios.post(`${BASEURL}/api/add-journal-entry`, formData, {
+      const response = await axios.post(`${BASEURL}/add-journal-entry`, formData, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -20,7 +20,7 @@ export const addJournalEntryAPI = async (formData: any) => {
 
   export const getAllJournalsAPI = async () => {
     try {
-      const response = await axios.get(`${BASEURL}/api/get-all-journal`, {
+      const response = await axios.get(`${BASEURL}/get-all-journal`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -35,7 +35,7 @@ export const addJournalEntryAPI = async (formData: any) => {
 
   export const getOneJournalAPI = async (id: string) => {
     try {
-      const response = await axios.get(`${BASEURL}/api/get-one-journal/${id}`, {
+      const response = await axios.get(`${BASEURL}/get-one-journal/${id}`, {
         headers: {
           'Content-Type': 'application/json',
         },

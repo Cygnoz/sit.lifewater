@@ -18,7 +18,7 @@ export const addWarehouseAPI = async (formData: {
 }): Promise<ApiResponse> => {
   try {
     const response = await axios.post(
-      `${STOCK_BASEURL}/api/warehouse`,
+      `${STOCK_BASEURL}/warehouse`,
       formData,
       {
         headers: {
@@ -42,7 +42,7 @@ export const addWarehouseAPI = async (formData: {
 //get
 export const getWarehouseAPI = async () => {
   try {
-    const response = await axios.get(`${STOCK_BASEURL}/api/warehouse`, {
+    const response = await axios.get(`${STOCK_BASEURL}/warehouse`, {
       headers: {
         'Content-Type': 'application/json'
       }
@@ -58,7 +58,7 @@ export const getWarehouseAPI = async () => {
 //delete
 export const deleteWarehouseIdAPI = async (id: string) => {
   try {
-    const response = await fetch(`${STOCK_BASEURL}/api/warehouse/${id}`, {
+    const response = await fetch(`${STOCK_BASEURL}/warehouse/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json', // Ensure headers are correctly set if needed by your server

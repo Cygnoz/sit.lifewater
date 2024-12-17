@@ -23,7 +23,7 @@ interface StockData {
 
 export const addStockLoadedApi = async (stockData: StockData) => {
     try {
-      const response = await axios.post(`${STOCK_BASEURL}/api/stock`, stockData);
+      const response = await axios.post(`${STOCK_BASEURL}/stock`, stockData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data || "Failed to add loaded stock");
@@ -33,7 +33,7 @@ export const addStockLoadedApi = async (stockData: StockData) => {
   
 export const getAllStockloaded = async () => {
   try {
-    const response = await axios.get(`${STOCK_BASEURL}/api/stock`,);
+    const response = await axios.get(`${STOCK_BASEURL}/stock`,);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

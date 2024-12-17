@@ -28,7 +28,7 @@ interface ApiResponse {
 
 export const addVehicleAPI = async (vehicleData: FormData): Promise<ApiResponse> => {
     try {
-      const response = await axios.post(`${BASEURL}/api/addVehicle`, vehicleData, {
+      const response = await axios.post(`${BASEURL}/addVehicle`, vehicleData, {
         headers: {
           'Content-Type': 'application/json'  // Ensure correct content type
         }
@@ -42,7 +42,7 @@ export const addVehicleAPI = async (vehicleData: FormData): Promise<ApiResponse>
 
 export const getVehicleAPI = async (): Promise<ApiResponse> => {
     try {
-        const response = await commonAPI('GET', `${BASEURL}/api/viewVehicles`, null);
+        const response = await commonAPI('GET', `${BASEURL}/viewVehicles`, null);
         return response; // Ensure the response matches the expected ApiResponse structure
     } catch (error: any) {
         console.error("Error fetching vehicle data:", error);
@@ -53,7 +53,7 @@ export const getVehicleAPI = async (): Promise<ApiResponse> => {
 export const getVehicleByIdAPI = async (id: string): Promise<ApiResponse> => {
     try {
       // Use `id` instead of `_id`
-      const response = await commonAPI('GET', `${BASEURL}/api/viewvehicle/${id}`, null, {
+      const response = await commonAPI('GET', `${BASEURL}/viewvehicle/${id}`, null, {
         // No need to specify any headers for GET requests
       });
   
@@ -67,7 +67,7 @@ export const getVehicleByIdAPI = async (id: string): Promise<ApiResponse> => {
 
 export const deleteVehicleByIdAPI = async (id: string) => {
     try {
-      const response = await fetch(`${BASEURL}/api/deletevehicle/${id}`, {
+      const response = await fetch(`${BASEURL}/deletevehicle/${id}`, {
         method: 'DELETE',
       });
   
@@ -86,7 +86,7 @@ export const deleteVehicleByIdAPI = async (id: string) => {
 
   export const updateVehicleAPI = async (id: string, formData: FormData) => {
     try {
-      const response = await axios.put(`${BASEURL}/api/editvehicle/${id}`, formData, {
+      const response = await axios.put(`${BASEURL}/editvehicle/${id}`, formData, {
         headers: {
           'Content-Type': 'application/json'  // Ensure correct content type
         }

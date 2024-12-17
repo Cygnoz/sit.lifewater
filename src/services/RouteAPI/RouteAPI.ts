@@ -4,7 +4,7 @@ import { BASEURL } from '../Baseurl';
 // Function to add a route
 export const addRouteAPI = async (formData: any) => {
   try {
-    const response = await axios.post(`${BASEURL}/api/addRoute`, formData, {
+    const response = await axios.post(`${BASEURL}/addRoute`, formData, {
       headers: {
         'Content-Type': 'application/json'  // Ensure correct content type
       }
@@ -19,7 +19,7 @@ export const addRouteAPI = async (formData: any) => {
 // Function to get all routes
 export const getRoutesAPI = async () => {
   try {
-    const response = await axios.get(`${BASEURL}/api/getAllRoutes`, {
+    const response = await axios.get(`${BASEURL}/getAllRoutes`, {
       headers: {
         'Content-Type': 'application/json'  // Ensure correct content type
       }
@@ -34,7 +34,7 @@ export const getRoutesAPI = async () => {
 // Function to delete a route
 export const deleteRouteAPI = async (id: string) => {
   try {
-    const response = await fetch(`${BASEURL}/api/delRoute/${id}`, {
+    const response = await fetch(`${BASEURL}/delRoute/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ export const deleteRouteAPI = async (id: string) => {
 // Function to update a route
 // export const updateRouteAPI = async (id: string, updateData: any) => {
 //   try {
-//     const response = await axios.put(`${BASEURL}/api/updateRoute/${id}`, updateData, {
+//     const response = await axios.put(`${BASEURL}/updateRoute/${id}`, updateData, {
 //       headers: {
 //         'Content-Type': 'application/json',  // Ensure correct content type
 //       },
@@ -77,7 +77,7 @@ export const updateRouteAPI = async (id: string | undefined, updateData: any) =>
   }
 
   try {
-    const response = await axios.put(`${BASEURL}/api/updateRoute/${id}`, updateData, {
+    const response = await axios.put(`${BASEURL}/updateRoute/${id}`, updateData, {
       headers: {
         'Content-Type': 'application/json',  // Ensure correct content type
       },
@@ -93,7 +93,7 @@ export const updateRouteAPI = async (id: string | undefined, updateData: any) =>
 
 export const getRouteByIdAPI = async (id: string) => {
   try {
-    const response = await axios.get(`${BASEURL}/api/getroute/${id}`);
+    const response = await axios.get(`${BASEURL}/getroute/${id}`);
     return response.data; // Assuming your server returns data in this format
   } catch (error:unknown) {
      if (axios.isAxiosError(error)) {
