@@ -12,6 +12,8 @@ interface Route {
   stock: [];
 }
 
+
+
 interface Staff {
   designation: string;
   _id: string;

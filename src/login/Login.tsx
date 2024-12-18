@@ -46,6 +46,7 @@ const Login: React.FC = () => {
 
         setTimeout(() => {
           navigate("/start")
+          
         }, 1000)
       } else {
         const errorMessage = response.response?.data.message || "Invalid username or password"

@@ -12,6 +12,9 @@ const StartRide: React.FC = () => {
       setStoredUsername(firstname);
     }, []);
 
+
+
+    
   return (
     <div className="min-h-screen flex flex-col items-center justify-between p-4">
       {/* Header */}
