@@ -436,7 +436,7 @@ const AddStartRide: React.FC = () => {
               className="w-full p-2 border border-gray-300 rounded-lg"
               onChange={handleDriverChange}
             >
-              <option value="">Select Helper</option>
+              <option value="">Select Driver</option>
               {staffList
                 .filter((staff) => staff.designation === "Driver")
                 .map((staff) => (
