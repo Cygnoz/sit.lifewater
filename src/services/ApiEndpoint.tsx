@@ -6,7 +6,6 @@ export const endpoints = {
     ADD_ACTIVE_ROUTE:`start-ride`,  GET_ALL_STAFF: `getallstaffs`, GET_ALL_VEHICLES: `viewVehicles`,
 
 
-
     // Subroute
     GET_ALL_SUBROUTE:`viewSRoute`,
     VIEW_A_SUBROUTE:`viewSRoute`,
@@ -20,9 +19,4 @@ export const endpoints = {
     // Order
     ADD_ORDER:`orders`,
     GET_ALL_ORDER:`orders`,
-
-    // Order
-    ADD_ORDER:`orders`,
-    GET_ALL_ORDER:`orders`,
-
 }
