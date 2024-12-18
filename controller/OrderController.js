@@ -266,29 +266,52 @@ exports.createOrder = async (req, res) => {
       }
     }
 
-    // Handle return bottles if provided in the request
+    // Handle return bottles
     if (cleanedData.returnBottle && cleanedData.returnBottle > 0) {
-      for (const customerItem of customerStock) {
-        const itemDetails = await Item.findById(customerItem.itemId);
+      const returnBottleAmount = cleanedData.returnBottle;
 
-        if (itemDetails && itemDetails.resaleable) {
-          // Find the item in subroute stock
-          const subRouteItemIndex = subRouteStock.findIndex(stock => stock.itemId === customerItem.itemId);
+      for (const item of cleanedData.stock || []) {
+        // Update customer's stock to reflect the return
+        const customerItemIndex = customerStock.findIndex(stock => stock.itemId === item.itemId);
 
-          if (subRouteItemIndex >= 0) {
-            // If the item exists, update the returnBottle count in the subroute stock
-            subRouteStock[subRouteItemIndex].returnBottle = 
-              (parseInt(subRouteStock[subRouteItemIndex].returnBottle) || 0) + cleanedData.returnBottle;
-          } else {
-            // If the item doesn't exist, create a new entry with returnBottle count
-            subRouteStock.push({
-              itemId: customerItem.itemId,
-              itemName: customerItem.itemName,
-              quantity: 0,  // No quantity for return bottles
-              status: "Unfilled",
-              returnBottle: cleanedData.returnBottle.toString(),  // Store return bottles as a string
+        if (customerItemIndex >= 0) {
+          const customerItem = customerStock[customerItemIndex];
+
+          if (returnBottleAmount > customerItem.quantity) {
+            return res.status(400).json({
+              success: false,
+              message: `Return amount for item ${item.itemName} exceeds customer's current stock. Available: ${customerItem.quantity}, Returned: ${returnBottleAmount}`
             });
           }
+
+          // Decrement the return amount from customer's stock
+          customerItem.quantity -= returnBottleAmount;
+
+          // Remove the item from customer stock if quantity becomes 0
+          if (customerItem.quantity <= 0) {
+            customerStock.splice(customerItemIndex, 1);
+          }
+        } else {
+          return res.status(400).json({
+            success: false,
+            message: `Customer does not have item ${item.itemName} in stock for return`
+          });
+        }
+
+        // Update subroute stock to reflect the returned items
+        const subRouteItemIndex = subRouteStock.findIndex(stock => stock.itemId === item.itemId);
+
+        if (subRouteItemIndex >= 0) {
+          subRouteStock[subRouteItemIndex].quantity += returnBottleAmount;
+          // Increment returnBottle count in subroute
+          subRouteStock[subRouteItemIndex].returnBottle = (subRouteStock[subRouteItemIndex].returnBottle || 0) + returnBottleAmount;
+        } else {
+          subRouteStock.push({
+            itemId: item.itemId,
+            itemName: item.itemName,
+            quantity: returnBottleAmount,
+            returnBottle: returnBottleAmount
+          });
         }
       }
     }
@@ -330,6 +353,9 @@ exports.createOrder = async (req, res) => {
     });
   }
 };
+
+
+
 
 
 
