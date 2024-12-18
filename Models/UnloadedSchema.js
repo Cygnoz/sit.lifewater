@@ -8,7 +8,7 @@ const unloadSchema = new mongoose.Schema({
   },
   warehouseName: {
     type: String,
-  },
+  }, 
   date: {
     type: Date,
     default: Date.now

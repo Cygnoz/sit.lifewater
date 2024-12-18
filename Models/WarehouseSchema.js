@@ -9,7 +9,7 @@ const stockSchema = new Schema({
     amount:{type:Number},
     status: { type: String, default: undefined },
   }, { _id: false });
-  
+   
 
 const warehouseSchema = new mongoose.Schema({
     warehouseName: { type: String },

@@ -8,7 +8,7 @@ const stockSchema = new Schema({
   quantity: { type: Number },
   status: { type: String },
 }, { _id: false });
-
+ 
 const orderSchema = new mongoose.Schema({
   // Order identification
   orderNumber: {

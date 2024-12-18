@@ -7,4 +7,4 @@ const transferSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('TransferLog', transferSchema);
+module.exports = mongoose.model('TransferLog', transferSchema); 

@@ -1,7 +1,7 @@
 const WStock = require('../Models/WStockSchema');
 const Warehouse = require('../Models/WarehouseSchema');
 
-
+ 
 // Function to add a new warehouse
 exports.addWarehouse = async (req, res) => {
   console.log("Add Warehouse:", req.body);

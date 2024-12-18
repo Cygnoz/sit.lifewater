@@ -9,7 +9,7 @@ const unloadController = require('../controller/UnloadController');
 
 const { verifyToken } = require('../middleware/auth');
 
-//Stock
+//Stock 
 router.post('/stock', verifyToken, stockController.addStock);
 router.get('/stock', verifyToken,  stockController.getAllStock);
 router.get('/stockstats', verifyToken,  stockController.getStockStats);

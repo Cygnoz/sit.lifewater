@@ -12,7 +12,7 @@ const wStockSchema = new mongoose.Schema({
     amount: { type: Number },
     status: { type: String ,default: undefined}
   }],
-  
+   
   notes: { type: String },
   termsAndConditions: { type: String }
 });

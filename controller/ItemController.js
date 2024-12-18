@@ -10,7 +10,7 @@ exports.addItem = async (req, res) => {
     //Required check
     if ( typeof cleanedData.itemName ==='undefined' ) {
       return res.status(400).json({ message: 'Item Name Required ' });
-    }
+    } 
     if ( typeof cleanedData.sku ==='undefined') {
       return res.status(400).json({ message: 'SKU Required' });
     }

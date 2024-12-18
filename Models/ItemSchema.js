@@ -1,6 +1,6 @@
 // v1.0
 const mongoose = require('mongoose');
-
+ 
 const itemSchema = new mongoose.Schema({
   itemName: { type: String },
   sku: { type: String },

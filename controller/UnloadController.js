@@ -2,7 +2,7 @@ const Unload = require('../Models/UnloadedSchema');
 const { updateWarehouseStock } = require('../controller/WarehouseController');
 const Warehouse = require('../Models/WarehouseSchema');
 const Item = require('../Models/ItemSchema'); 
-
+ 
 // Function to add a new unload document
 exports.addUnload = async (req, res) => {
   console.log("Unload Item:", req.body);

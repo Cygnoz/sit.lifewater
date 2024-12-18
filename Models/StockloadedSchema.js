@@ -12,7 +12,7 @@ const stockSchema = new mongoose.Schema({
   
   date: { type: Date, default: Date.now },
   transferNumber: { type: String },
-  
+   
   stock: [{
     itemId: { type: String },
     itemName: { type: String },

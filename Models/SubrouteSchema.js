@@ -10,7 +10,7 @@ const stockSchema = new Schema({
   returnBottle: {type :Number}
 }, { _id: false });
 
-
+ 
 const subRouteSchema = new Schema({
   subRouteName: { type: String },
   subrouteCode: { type: String },

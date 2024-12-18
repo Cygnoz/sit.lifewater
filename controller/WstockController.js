@@ -1,6 +1,6 @@
 const WStock = require('../Models/WStockSchema');
 const Warehouse = require('../Models/WarehouseSchema');
-
+ 
 
 
 // Add stock to warehouse
