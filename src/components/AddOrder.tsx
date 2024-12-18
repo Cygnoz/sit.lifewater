@@ -32,6 +32,7 @@ interface OrdrerData {
     totalAmount: number,
     returnBottle: number,
     ratePerItem: string,
+    rideId:string,
     stock: Item[];
 }
 
@@ -60,10 +61,11 @@ const AddOrder = ({ }: Props) => {
         totalAmount: 0, // Initialized as a number
         returnBottle: 0, // Initialized as a number
         ratePerItem: "", // Initialized as a number
+        rideId:"",
         stock: [],
     });
-    console.log("Input Data",orderData);
-    
+    console.log("Input Data", orderData);
+
     console.log(orderData.stock[0]?.quantity, "qnt");
     // Generate unique order number on component mount
     useEffect(() => {
@@ -80,7 +82,16 @@ const AddOrder = ({ }: Props) => {
     useEffect(() => {
         const RouteDetails = JSON.parse(localStorage.getItem("activeRoute") || "{}");
         setActiveRoute(RouteDetails);
+        const RideId = JSON.parse(localStorage.getItem("StartRide") || "{}");
+        const Id=  (RideId.data._id)
+        if(RideId){
+            setOrderData((prevData) => ({
+                ...prevData,
+                rideId: Id,
+            }));
+        }
     }, []);
+    
     // Fetch localStorage data on mount
     useEffect(() => {
         // Only call getALLCustomers when activeRoute is set
@@ -366,7 +377,7 @@ const AddOrder = ({ }: Props) => {
                             value={orderData.orderNumber}
                             onChange={handleInputChange}
                             className="w-full p-2 mt-1 border rounded-md"
-                            placeholder="Order Number"
+                            readOnly
                         />
                     </div>
                     <div className="pt-2 flex">
@@ -435,12 +446,16 @@ const AddOrder = ({ }: Props) => {
                                     onClick={incrementQuantity}
                                 >
                                     <img src={plus} alt="" />
-
                                 </button>
                             </div>
                         </div>
 
                     </div>
+                    {quantity ?
+                    <div className="text-[13px] ms-1">
+                        Quantity : {quantity}
+                    </div> : ""
+                    }
                     {error && <div className="text-red-500 text-center text-sm mt-1">{error}</div>}
                     <div className="grid grid-cols-2 gap-2 pt-2">
                         <div>
@@ -462,7 +477,9 @@ const AddOrder = ({ }: Props) => {
                                 className="w-full p-2 mt-1 border rounded-md"
                                 value={orderData.paymentMode}
                                 onChange={handleInputChange}
+                                required
                             >
+                                <option value="">Select Payment Mode</option>
                                 <option value="Cash">Cash</option>
                                 <option value="Credit">Credit</option>
                                 <option value="FOC">FOC</option>
@@ -478,7 +495,6 @@ const AddOrder = ({ }: Props) => {
                                 value={activeRoute?.mainRouteName}
                                 onChange={handleInputChange}
                                 className="w-full p-2 mt-1 border rounded-md"
-                                placeholder="Enter email"
                                 readOnly
                             />
                         </div>
@@ -490,7 +506,6 @@ const AddOrder = ({ }: Props) => {
                                 value={activeRoute?.subRouteName}
                                 onChange={handleInputChange}
                                 className="w-full p-2 mt-1 border rounded-md"
-                                placeholder="Enter email"
                                 readOnly
                             />
                         </div>
@@ -505,7 +520,6 @@ const AddOrder = ({ }: Props) => {
                             value={activeRoute?.salesmanName}
                             onChange={handleInputChange}
                             className="w-full p-2 mt-1 border rounded-md"
-                            placeholder="Enter email"
                             readOnly
                         />
                     </div>

@@ -316,6 +316,8 @@ const AddStartRide: React.FC = () => {
       if (response) {
         console.log("Start Ride Response:", response);
         toast.success("Ride started successfully!");
+        const StartRide = localStorage.setItem("StartRide", JSON.stringify(response.data))
+        console.log(StartRide);      
         setTimeout(() => {
           navigate("/customers"); // Navigate to rides page or any other page
         }, 2000);
