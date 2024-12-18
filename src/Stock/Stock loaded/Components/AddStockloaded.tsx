@@ -307,6 +307,40 @@ const AddStockloaded: React.FC = () => {
     }
   };
   console.log("Loading stock details : ", orderDetails);
+// auto generating transfer number
+
+const [stocks, setStocks] = useState([]);
+console.log(stocks);
+
+
+const { request: getStockData } = useApi("get", 4001);
+useEffect(() => {
+  const getAllStock = async () => {
+    try {
+      const url = `${endpoints.GET_ALL_LOADED_STOCK}`;
+      const { response, error } = await getStockData(url);
+      if (!error && response) {
+        setStocks(response.data);
+        
+        
+
+        // Auto-generate the transfer number
+        const count = response.data.length; // Current number of stocks
+        const newTransferNumber = `TN-${count + 1}`; // Auto-generate with prefix TN-
+        setOrderDetails((prev) => ({
+          ...prev,
+          transferNumber: newTransferNumber,
+        })); // Update transfer number
+      } else {
+        console.log(error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  getAllStock();
+}, []); // Add dependencies if necessary
 
   return (
     <div>
@@ -411,19 +445,8 @@ const AddStockloaded: React.FC = () => {
                       className="w-full p-2 border rounded-md  text-[#000000] text-[14px] font-normal"
                     />
                   </div>
-                  <div>
-                    <label className="block mb-2 font-[400px] text-[#303F58] text-[14px]">
-                      Transfer Number
-                    </label>
-                    <input
-                      type="number"
-                      name="transferNumber"
-                      value={orderDetails.transferNumber}
-                      onChange={updateOrder}
-                      className="w-full p-2 border rounded-md  text-[#000000] text-[14px] font-normal"
-                      placeholder=""
-                    />
-                  </div>
+          
+
                 </div>
 
                 {/* Add Item Section */}

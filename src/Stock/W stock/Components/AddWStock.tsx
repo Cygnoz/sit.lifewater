@@ -9,7 +9,6 @@ import useApi from "../../../Hook/UseApi";
 import { toast, ToastContainer } from "react-toastify";
 import Button from "../../../commoncomponents/Buttons/Button";
 
-
 interface Item {
   itemId: string;
   itemName: string;
@@ -17,8 +16,7 @@ interface Item {
   costPrice: number;
   amount: number;
   _id?: string;
-  resaleable?:boolean;
-
+  resaleable?: boolean;
 }
 
 interface WarehouseItem {
@@ -26,7 +24,6 @@ interface WarehouseItem {
   warehouseName: string;
   contactNo: string;
   address: string;
-  
 }
 
 interface OrderDetails {
@@ -36,22 +33,29 @@ interface OrderDetails {
   items: Item[];
   notes: string;
   termsAndConditions: string;
-  _id?: string,
-  
+  _id?: string;
 }
 interface AddWStockProps {
   onAddNewItem?: () => void;
 }
 
 const AddWStock: React.FC<AddWStockProps> = () => {
-
   const [orderDetails, setOrderDetails] = useState<OrderDetails>({
-    warehouse: '',
-    date: '',
+    warehouse: "",
+    date: "",
     transferNumber: "",
-    items: [{ itemId: '', itemName: '', quantity: 0, costPrice: 0, amount: 0 ,resaleable:false}], // Set to empty string
-    notes: '',
-    termsAndConditions: '',
+    items: [
+      {
+        itemId: "",
+        itemName: "",
+        quantity: 0,
+        costPrice: 0,
+        amount: 0,
+        resaleable: false,
+      },
+    ], // Set to empty string
+    notes: "",
+    termsAndConditions: "",
   });
   console.log(orderDetails);
 
@@ -62,8 +66,7 @@ const AddWStock: React.FC<AddWStockProps> = () => {
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [warehouses, setWarehouses] = useState<WarehouseItem[]>([]);
-  const navigate = useNavigate()
-
+  const navigate = useNavigate();
 
   const { request: getWarehouseData } = useApi("get", 4001);
   const getAllWarehouse = async () => {
@@ -75,38 +78,68 @@ const AddWStock: React.FC<AddWStockProps> = () => {
         console.log(response.data.warehouses);
       } else {
         console.log(error);
-
       }
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   const { request: getItems } = useApi("get", 4001);
 
   const getAllItems = async () => {
     try {
       const url = `${endpoints.GET_ALL_ITEMS}`;
-      const { response, error } = await getItems(url)
+      const { response, error } = await getItems(url);
 
       if (!error && response) {
-        setLoading(false)
+        setLoading(false);
         setItems(response.data);
         console.log(response.data, "Items");
-
       }
     } catch (error) {
       console.log(error);
-
     }
-  }
-
+  };
 
   useEffect(() => {
-    getAllWarehouse(),
-      getAllItems()
-
+    getAllWarehouse(), getAllItems();
   }, []);
+
+  // Transffer number auto generating
+
+  const [stocks, setStocks] = useState([]);
+console.log(stocks);
+
+const { request: getWStockData } = useApi("get", 4001);
+
+useEffect(() => {
+  const getAllWarehouseStock = async () => {
+    try {
+      const url = `${endpoints.GET_W_STOCK}`;
+      const { response, error } = await getWStockData(url);
+      if (!error && response && response.data && Array.isArray(response.data.data)) {
+        setStocks(response.data.data);
+        console.log("here", response.data.data);          
+
+        // Auto-generate the transfer number
+        const count = response.data.data.length; // Current number of stocks
+        const newTransferNumber = `TN-${count + 1}`; // Auto-generate with prefix TN-
+        setOrderDetails((prev) => ({
+          ...prev,
+          transferNumber: newTransferNumber,
+        })); // Update transfer number
+      } else {
+        console.log(error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  getAllWarehouseStock();
+}, []); // Add dependencies if necessary
+
+
 
   // Filtered items excluding already selected ones
   const filteredItems = items.filter(
@@ -128,7 +161,17 @@ const AddWStock: React.FC<AddWStockProps> = () => {
   const addItem = () => {
     setOrderDetails((prev) => ({
       ...prev,
-      items: [...prev.items, { itemId: '', itemName: '', quantity: 0, costPrice: 0, amount: 0 ,resaleable:false}],
+      items: [
+        ...prev.items,
+        {
+          itemId: "",
+          itemName: "",
+          quantity: 0,
+          costPrice: 0,
+          amount: 0,
+          resaleable: false,
+        },
+      ],
     }));
     console.log(orderDetails);
   };
@@ -139,7 +182,17 @@ const AddWStock: React.FC<AddWStockProps> = () => {
       items:
         prev.items.length > 1
           ? prev.items.filter((_, i) => i !== index)
-          : [{ itemId: '', itemName: '', quantity: 0, costPrice: 0, amount: 0, _id: "",resaleable:false }],
+          : [
+              {
+                itemId: "",
+                itemName: "",
+                quantity: 0,
+                costPrice: 0,
+                amount: 0,
+                _id: "",
+                resaleable: false,
+              },
+            ],
     }));
   };
 
@@ -155,7 +208,7 @@ const AddWStock: React.FC<AddWStockProps> = () => {
         quantity,
         costPrice,
         amount: costPrice * quantity, // Calculate amount based on rate and quantity
-        resaleable:item.resaleable
+        resaleable: item.resaleable,
       };
       return { ...prev, items: newItems };
     });
@@ -163,8 +216,6 @@ const AddWStock: React.FC<AddWStockProps> = () => {
     setOpenDropdownId(null); // Close the dropdown
     setOpenDropdownType(null);
   };
-
-
 
   const handleItemChange = (
     index: number,
@@ -175,7 +226,8 @@ const AddWStock: React.FC<AddWStockProps> = () => {
       const newItems = [...prev.items];
       newItems[index] = {
         ...newItems[index],
-        [field]: field === "costPrice" || field === "quantity" ? Number(value) : value, // Ensure numbers
+        [field]:
+          field === "costPrice" || field === "quantity" ? Number(value) : value, // Ensure numbers
       };
 
       const quantity = Number(newItems[index].quantity) || 0;
@@ -185,7 +237,6 @@ const AddWStock: React.FC<AddWStockProps> = () => {
       return { ...prev, items: newItems };
     });
   };
-
 
   const toggleDropdown = (index: number, type: string) => {
     setOpenDropdownId(index === openDropdownId ? null : index);
@@ -198,19 +249,18 @@ const AddWStock: React.FC<AddWStockProps> = () => {
     try {
       const orderWithDefaults = {
         ...orderDetails,
-        items: orderDetails.items.map(item => ({
+        items: orderDetails.items.map((item) => ({
           ...item,
         })),
       };
       const url = `${endpoints.ADD_W_STOCK}`;
-      const { response, error } = await AddItems(url, orderWithDefaults)
+      const { response, error } = await AddItems(url, orderWithDefaults);
       if (!error && response) {
-        console.log('Stock', response);
+        console.log("Stock", response);
         toast.success(response.data.message);
         setTimeout(() => {
-          navigate('/warstock')
-        }, 1000)
-
+          navigate("/warstock");
+        }, 1000);
       }
       console.log(error);
       toast.error(error.response.data.message);
@@ -219,9 +269,6 @@ const AddWStock: React.FC<AddWStockProps> = () => {
       toast.error(error.data.message);
     }
   };
-
-
-
 
   return (
     <>
@@ -289,12 +336,13 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                       value={orderDetails.date}
                       onChange={updateOrder}
                       className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px]"
+                      required
                     />
                   </div>
                 </div>
 
                 {/* Date and Order Number */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                {/* <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block mb-2 font-medium text-[#303F58] text-[14px]">
                       Transfer Number
@@ -309,14 +357,20 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                       className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px]"
                     />
                   </div>
-                </div>
+                </div> */}
 
                 {/* Add Item Section */}
                 <div className="rounded-lg border-2 border-tableBorder mt-5">
                   <table className="min-w-full bg-white rounded-lg relative pb-4 border-dropdownText">
                     <thead className="text-[12px] text-center bg-[#FDF8F0] text-dropdownText">
                       <tr className="bg-lightPink">
-                        {["Product", "Quantity", "Rate", "Amount", "Actions"].map((item, index) => (
+                        {[
+                          "Product",
+                          "Quantity",
+                          "Rate",
+                          "Amount",
+                          "Actions",
+                        ].map((item, index) => (
                           <th
                             key={index}
                             className="py-2 px-4 font-medium border-b border-tableBorder relative"
@@ -333,12 +387,16 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                           <td className="border-y py-3 px-2 border-tableBorder">
                             <div
                               className="relative w-full"
-                              onClick={() => toggleDropdown(index, "searchProduct")}
+                              onClick={() =>
+                                toggleDropdown(index, "searchProduct")
+                              }
                             >
                               {item.itemName ? (
                                 <div className="cursor-pointer gap-2 grid grid-cols-12 appearance-none items-center justify-center h-9 text-zinc-400 bg-white text-sm">
                                   <div className="col-span-8 text-start">
-                                    <p className="text-textColor text-center">{item.itemName}</p>
+                                    <p className="text-textColor text-center">
+                                      {item.itemName}
+                                    </p>
                                   </div>
                                 </div>
                               ) : (
@@ -351,56 +409,72 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                               )}
                             </div>
                             {/* Dropdown for selecting items */}
-                            {openDropdownId === index && openDropdownType === "searchProduct" && (
-                              <div
-                                ref={dropdownRef}
-                                className="absolute z-10 bg-white shadow rounded-md mt-1 p-2 w-[40%] space-y-1"
-                              >
-                                <input
-                                  type="text"
-                                  value={searchValue}
-                                  onChange={(e) => setSearchValue(e.target.value)}
-                                  placeholder="Select Item"
-                                  className="w-full p-2 border rounded-lg h-12 bg-[#F9F7F5]"
-                                />
-                                {loading ? (
-                                  <p>Loading...</p>
-                                ) : filteredItems.length > 0 ? (
-                                  filteredItems.map((filteredItem, idx) => (
-                                    <div
-                                      key={idx}
-                                      onClick={() => handleItemSelect(filteredItem, index)}
-                                      className="grid bg-[#FDF8F0] grid-cols-12 gap-1 p-2 hover:bg-gray-100 cursor-pointer border border-slate-400 rounded-lg"
-                                    >
-                                      <div className="col-span-10 flex">
-                                        <div className="text-start">
-                                          <p className="font-bold text-sm text-black">{filteredItem.itemName}</p>
-                                          <p className="text-xs text-gray-500">
-                                            AED: {filteredItem.costPrice}
-                                          </p>
+                            {openDropdownId === index &&
+                              openDropdownType === "searchProduct" && (
+                                <div
+                                  ref={dropdownRef}
+                                  className="absolute z-10 bg-white shadow rounded-md mt-1 p-2 w-[40%] space-y-1"
+                                >
+                                  <input
+                                    type="text"
+                                    value={searchValue}
+                                    onChange={(e) =>
+                                      setSearchValue(e.target.value)
+                                    }
+                                    placeholder="Select Item"
+                                    className="w-full p-2 border rounded-lg h-12 bg-[#F9F7F5]"
+                                  />
+                                  {loading ? (
+                                    <p>Loading...</p>
+                                  ) : filteredItems.length > 0 ? (
+                                    filteredItems.map((filteredItem, idx) => (
+                                      <div
+                                        key={idx}
+                                        onClick={() =>
+                                          handleItemSelect(filteredItem, index)
+                                        }
+                                        className="grid bg-[#FDF8F0] grid-cols-12 gap-1 p-2 hover:bg-gray-100 cursor-pointer border border-slate-400 rounded-lg"
+                                      >
+                                        <div className="col-span-10 flex">
+                                          <div className="text-start">
+                                            <p className="font-bold text-sm text-black">
+                                              {filteredItem.itemName}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                              AED: {filteredItem.costPrice}
+                                            </p>
+                                          </div>
                                         </div>
                                       </div>
+                                    ))
+                                  ) : (
+                                    <div className="text-center border-slate-400 border rounded-lg">
+                                      <p className="text-red-500 text-sm py-4">
+                                        Items Not Found!
+                                      </p>
                                     </div>
-                                  ))
-                                ) : (
-                                  <div className="text-center border-slate-400 border rounded-lg">
-                                    <p className="text-red-500 text-sm py-4">Items Not Found!</p>
-                                  </div>
-                                )}
-                                <Link to="/additem">
-                                  <button className="bg-darkGreen text-[#820000] mt-1 rounded-lg py-4 px-6 flex items-center text-sm font-bold border-slate-400 border gap-2 w-full hover:bg-lightRed">
-                                    <img src={circleplus} alt="" /> <p>Add New Item</p>
-                                  </button>
-                                </Link>
-                              </div>
-                            )}
+                                  )}
+                                  <Link to="/additem">
+                                    <button className="bg-darkGreen text-[#820000] mt-1 rounded-lg py-4 px-6 flex items-center text-sm font-bold border-slate-400 border gap-2 w-full hover:bg-lightRed">
+                                      <img src={circleplus} alt="" />{" "}
+                                      <p>Add New Item</p>
+                                    </button>
+                                  </Link>
+                                </div>
+                              )}
                           </td>
                           {/* Quantity Input */}
                           <td className="py-2.5 px-4 border-y border-tableBorder">
                             <input
                               type="number"
                               value={item.quantity}
-                              onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  index,
+                                  "quantity",
+                                  e.target.value
+                                )
+                              }
                               className="text-center w-20"
                               placeholder="0"
                             />
@@ -431,7 +505,10 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                           </td>
                           {/* Actions */}
                           <td className="py-2.5 px-4 border-y border-tableBorder text-center">
-                            <button onClick={() => removeItem(index)} className="text-red-500 px-2 py-1">
+                            <button
+                              onClick={() => removeItem(index)}
+                              className="text-red-500 px-2 py-1"
+                            >
                               <img src={trash} alt="" />
                             </button>
                           </td>
@@ -440,7 +517,6 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                     </tbody>
                   </table>
                 </div>
-
 
                 <button
                   className="flex items-center text-[#820000] text-md font-bold gap-2 mx-1 my-4"
@@ -476,10 +552,8 @@ const AddWStock: React.FC<AddWStockProps> = () => {
 
                 {/* Total and Actions */}
                 <div className="flex justify-end space-x-4 mt-3">
-                  <Button variant='fourthiary'>
-                    Cancel
-                  </Button>
-                  <Button variant='primary' onClick={handleSubmit}>
+                  <Button variant="fourthiary">Cancel</Button>
+                  <Button variant="primary" onClick={handleSubmit}>
                     Save
                   </Button>
                 </div>
