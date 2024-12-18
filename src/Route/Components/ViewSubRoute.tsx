@@ -40,7 +40,7 @@ const ViewSubRoute: React.FC = () => {
   const [error, setError] = useState("");
   // const [subrouteData, setSubRouteData] = useState<any>(null);
   const [activeSection, setActiveSection] = useState("routeDetail");
-  const [sData,setSData] = useState<any>(null)
+  const [sData, setSData] = useState<any>(null)
   // const [mainRideList, setMainRideList] = useState<Ride[]>([]); // Explicitly type as Ride[]
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate();
@@ -74,10 +74,10 @@ const ViewSubRoute: React.FC = () => {
     try {
       const url = `${endpoints.view_A_SUBROUTE}/${id}`
       console.log(id);
-      
+
       const { response, error } = await getSubRoutes(url)
       console.log("API RESPONSE :", response)
-      
+
       if (!error && response) {
         setLoading(false)
         setSData(response.data)
@@ -95,13 +95,13 @@ const ViewSubRoute: React.FC = () => {
   }, [])
 
   console.log(sData);
-  
+
 
   const handleEdit = (id: string): void => {
     navigate(`/route/editsubroute/${id}`);
   };
 
-  
+
 
 
 
@@ -109,15 +109,15 @@ const ViewSubRoute: React.FC = () => {
     <div className="px-6 py-3">
       {/* Back Button and Title */}
       <div className="flex justify-between gap-3 items-center w-full max-w-8xl mb-2 ">
-        
-          <div className="icon-placeholder flex">
+
+        <div className="icon-placeholder flex">
           <Link to={"/route/subroute"}>
             <img className="bg-[#ffff] rounded-full p-2" src={back} alt="" />
-            </Link>
-            <h2 className="text-2xl font-bold ms-1">View Sub Route</h2>
+          </Link>
+          <h2 className="text-2xl font-bold ms-1">View Sub Route</h2>
 
-            </div>
-            <div className="flex justify-between">
+        </div>
+        <div className="flex justify-between">
           <button
             onClick={() => handleEdit(sData?._id)}
             className=" justify-between items-center font-[600] text-white gap-2 bg-[#820000]  flex px-5 py-2 shadow rounded-md"
@@ -126,7 +126,7 @@ const ViewSubRoute: React.FC = () => {
             <p>Edit</p>
           </button>
         </div>
-       
+
       </div>
 
       {/* Display route info cards if data is loaded */}
@@ -175,22 +175,20 @@ const ViewSubRoute: React.FC = () => {
       {/* Buttons for navigating sections */}
       <div className="flex space-x-7 mb-4">
         <button
-          className={`w-[221px] font-bold p-2 rounded-lg flex items-center ${
-            activeSection === "routeDetail"
+          className={`w-[221px] font-bold p-2 rounded-lg flex items-center ${activeSection === "routeDetail"
               ? "bg-[#E3E6D5] text-black"
               : "bg-white"
-          }`}
+            }`}
           onClick={() => setActiveSection("routeDetail")}
         >
           <img src={user2} alt="" className="mr-2" />
           Route Detail
         </button>
         <button
-          className={`w-[221px] p-2 font-bold rounded-lg flex items-center ${
-            activeSection === "rideHistory"
+          className={`w-[221px] p-2 font-bold rounded-lg flex items-center ${activeSection === "rideHistory"
               ? "bg-[#E3E6D5] text-black"
               : "bg-white"
-          }`}
+            }`}
           onClick={() => setActiveSection("rideHistory")}
         >
           <img src={history} alt="" className="mr-2" />
@@ -198,11 +196,10 @@ const ViewSubRoute: React.FC = () => {
         </button>
 
         <button
-          className={`w-[221px] font-bold p-2 rounded-lg flex items-center ${
-            activeSection === "currentStock"
+          className={`w-[221px] font-bold p-2 rounded-lg flex items-center ${activeSection === "currentStock"
               ? "bg-[#E3E6D5] text-black"
               : "bg-white"
-          }`}
+            }`}
           onClick={() => setActiveSection("currentStock")}
         >
           <img src={dollar} alt="" className="mr-2" />
@@ -244,32 +241,41 @@ const ViewSubRoute: React.FC = () => {
       )}
 
 
-{activeSection === "currentStock" && (
-  <div className="bg-white p-6 rounded-lg shadow">
-    {sData.stock && sData.stock.length > 0 ? (
-      <div className="space-y-3">
-        {sData.stock.map((item:any) => (
-          <div 
-            key={item.itemId} 
-            className="flex justify-between items-center border-b p-2 last:border-b-0 bg-[#fdf8f0]"
-          >
-            <div>
-              <p className="font-medium capitalize">{item.itemName}</p>
-              {item.status && (
-                <p className="text-sm text-gray-500">{item.status}</p>
-              )}
-            </div>
-            <div className="font-semibold">
-              Quantity: {item.quantity}
-            </div>
+      {activeSection === "currentStock" && (
+        <div className="bg-white p-6 rounded-lg shadow">
+          {sData.stock && sData.stock.length > 0 ? (
+            <div className="space-y-3">
+            {sData.stock.map((item: any) => (
+              <div>
+                {item.returnBottle && (
+                  <div className="flex justify-between items-center border-b p-2 mb-3 last:border-b-0 bg-[#fdf8f0]"
+                  >
+                    <p className="font-medium">Return Bottle:</p>
+                    <p className="text-gray-700 font-semibold">Quantity: {item.returnBottle}</p>
+                  </div>
+                )}
+                <div
+                  key={item.itemId}
+                  className="flex justify-between items-center border-b p-2 last:border-b-0 bg-[#fdf8f0]"
+                >
+                  <div>
+                    <p className="font-medium capitalize">{item.itemName}</p>
+                    {item.status && (
+                      <p className="text-sm text-gray-500">{item.status}</p>
+                    )}
+                  </div>
+                  <div className="font-semibold">
+                    Quantity: {item.quantity}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-    ) : (
-      <p className="font-semibold">No Current Stock</p>
-    )}
-  </div>
-)}
+          ) : (
+            <p className="font-semibold">No Current Stock</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -159,11 +159,24 @@ const ViewCustmor: React.FC = () => {
     {customer.stock && customer.stock.length > 0 ? (
       <>
         <h2 className="text-xl font-semibold text-gray-800 mb-2">
-          {customer.stock[0].itemName || "0"} in Hand
+          Stock in Hand
         </h2>
         <p className="text-gray-600">
-          {customer.stock[0].itemName || "N/A"} - {customer.stock[0].quantity} 
-          {customer.stock[0].status ? ` (${customer.stock[0].status})` : ''}
+          {
+            customer.stock.map((item:any)=>(
+              <div className="flex gap-2">
+                <p>
+                         {  item.itemName}
+
+                </p>
+                <p>
+                  : {item.quantity}
+                </p>
+              </div>
+            ))
+          }
+          {/* {customer.stock[0].itemName || "N/A"} - {customer.stock[0].quantity} 
+          {customer.stock[0].status ? ` (${customer.stock[0].status})` : ''} */}
         </p>
       </>
     ) : (

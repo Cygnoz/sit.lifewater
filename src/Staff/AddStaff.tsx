@@ -335,7 +335,6 @@ function AddStaff({ }: Props) {
                     placeholder="Enter WhatsApp number"
                     disabled={isSameAsPhone}
                     maxLength={15}
-                    pattern="\d{15}" // Regex pattern to enforce exactly 10 digits
                     title="Please enter exactly 15 digits"
                   />
                 </div>
