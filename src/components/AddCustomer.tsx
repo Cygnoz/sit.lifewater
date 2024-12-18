@@ -495,12 +495,13 @@ export default function Component() {
             <div className="w-1/2">
               <label className="block text-gray-700">Number of Bottles</label>
               <input
-                type="text"
+                type="number"
                 name="numberOfBottles"
                 value={formData.numberOfBottles}
                 onChange={handleInputChange}
                 className="w-full p-2 mt-1 border rounded-md"
                 placeholder="Number of Bottles"
+                inputMode="numeric"
               />
               {errors.numberOfBottles && (
                 <p className="text-red-500 text-sm">{errors.numberOfBottles}</p>
@@ -509,12 +510,13 @@ export default function Component() {
             <div className="w-1/2">
               <label className="block text-gray-700">Rate per bottle</label>
               <input
-                type="text"
+                type="number"
                 name="ratePerBottle"
                 value={formData.ratePerBottle}
                 onChange={handleInputChange}
                 className="w-full p-2 mt-1 border rounded-md"
                 placeholder="Rate per bottle"
+                 inputMode="numeric"
               />
               {errors.ratePerBottle && (
                 <p className="text-red-500 text-sm">{errors.ratePerBottle}</p>
