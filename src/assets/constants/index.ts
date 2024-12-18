@@ -6,7 +6,7 @@ import supply from '../images/supply.svg';
 import customer from '../images/customer.svg';
 import sale from '../images/sale.svg';
 // import purchase from '../images/purchase.svg';
-import reports from '../images/reports.svg';
+// import reports from '../images/reports.svg';
 import accountant from '../images/sale.svg';
 import vehicle from '../images/vehicle.svg';
 import ride from '../images/ride.png'
@@ -177,24 +177,24 @@ const navlist = [
     ],
 
   },
-  {
-    nav: "Reports",
-    icon:reports,
-    route: "/creditsale",
-    subhead: [
-      { headName: "Credit Sale", subRoute: "/creditsale" },
-      { headName: "Cash Sale", subRoute: "/cashsale" },
-      { headName: "Coupon Sale", subRoute: "/couponsale" },
-      { headName: "Trail Balance", subRoute: "/trailbalance" },
-      { headName: "Total Sale", subRoute: "/totalsale" },
-      { headName: "Return Stock", subRoute: "/returnstock" },
-      { headName: "Stock Sold", subRoute: "/stocksold" },
-      { headName: "Profit & Lose", subRoute: "/profit-lose" },
-      { headName: "Balance Sheet", subRoute: "/balancesheet" },
-      { headName: "Day Book", subRoute: "/daybook" },
-    ],
+  // {
+  //   nav: "Reports",
+  //   icon:reports,
+  //   route: "/creditsale",
+  //   subhead: [
+  //     { headName: "Credit Sale", subRoute: "/creditsale" },
+  //     { headName: "Cash Sale", subRoute: "/cashsale" },
+  //     { headName: "Coupon Sale", subRoute: "/couponsale" },
+  //     { headName: "Trail Balance", subRoute: "/trailbalance" },
+  //     { headName: "Total Sale", subRoute: "/totalsale" },
+  //     { headName: "Return Stock", subRoute: "/returnstock" },
+  //     { headName: "Stock Sold", subRoute: "/stocksold" },
+  //     { headName: "Profit & Lose", subRoute: "/profit-lose" },
+  //     { headName: "Balance Sheet", subRoute: "/balancesheet" },
+  //     { headName: "Day Book", subRoute: "/daybook" },
+  //   ],
 
-  },
+  // },
 
  
 ];

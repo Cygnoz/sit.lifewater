@@ -29,16 +29,16 @@ import UnloadedAdd from '../Stock/Unload stock/Pages/UnloadAdd';
 import AddWStock from '../Stock/W stock/Components/AddWStock';
 import CreateWStock from '../Stock/W stock/Pages/CreateWstock';
 import EditMainRoute from '../Route/Pages/EditMainRoute';
-import BalanceSheet from '../Reportss/Pages/Balancesheet';
-import CashSale from '../Reportss/Pages/Cashsale';
-import CouponSale from '../Reportss/Pages/Couponsale';
-import CreditSale from '../Reportss/Pages/Creditsale';
-import DayBook from '../Reportss/Pages/DayBook';
-import ProfitLoss from '../Reportss/Pages/Profit&loss';
-import ReturnStock from '../Reportss/Pages/ReturnStock';
-import StockSold from '../Reportss/Pages/StockSold';
-import TotalSale from '../Reportss/Pages/TotalSale';
-import TrailBalance from '../Reportss/Pages/Trailbalance';
+// import BalanceSheet from '../Reportss/Pages/Balancesheet';
+// import CashSale from '../Reportss/Pages/Cashsale';
+// import CouponSale from '../Reportss/Pages/Couponsale';
+// import CreditSale from '../Reportss/Pages/Creditsale';
+// import DayBook from '../Reportss/Pages/DayBook';
+// import ProfitLoss from '../Reportss/Pages/Profit&loss';
+// import ReturnStock from '../Reportss/Pages/ReturnStock';
+// import StockSold from '../Reportss/Pages/StockSold';
+// import TotalSale from '../Reportss/Pages/TotalSale';
+// import TrailBalance from '../Reportss/Pages/Trailbalance';
 // import AddNewVendors from '../Purchase/Components/AddNewVendors';
 // import AddPaymentReceipt from '../Purchase/Components/AddPaymentReceipt';
 // import AddPurchase from '../Purchase/Components/AddPurchase';
@@ -195,7 +195,7 @@ const App: React.FC = () => {
               <Route path='/viewWarehouse/:id' element={<ViewWarehouse/>}/>
 
               {/* REPORTS */}
-              <Route path='/balancesheet' element={<BalanceSheet/>}/>
+              {/* <Route path='/balancesheet' element={<BalanceSheet/>}/>
               <Route path='/cashsale' element={<CashSale/>}/>
               <Route path='/couponsale' element={<CouponSale/>}/>
               <Route path='/creditsale' element={<CreditSale/>}/>
@@ -204,7 +204,7 @@ const App: React.FC = () => {
               <Route path='/returnstock' element={<ReturnStock/>}/>
               <Route path='/stocksold' element={<StockSold/>}/>
               <Route path='/totalsale' element={<TotalSale/>}/>
-              <Route path='/trailbalance' element={<TrailBalance/>}/>
+              <Route path='/trailbalance' element={<TrailBalance/>}/> */}
 
               {/* PURCHASE */}
 
