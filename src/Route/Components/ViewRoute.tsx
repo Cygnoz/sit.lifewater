@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import back from "../../assets/images/backbutton.svg";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import car from "../../assets/images/car-front.png";
-import user from "../../assets/images/user.png";
+// import car from "../../assets/images/car-front.png";
+// import user from "../../assets/images/user.png";
 import user2 from "../../assets/images/user2.png";
-import map from "../../assets/images/map-pinned.png";
-import bottle from "../../assets/images/bottlesvg.svg";
+// import map from "../../assets/images/map-pinned.png";
+// import bottle from "../../assets/images/bottlesvg.svg";
 import history from "../../assets/images/history.png";
 import dollar from "../../assets/images/badge-dollar-sign.png";
 import { getRouteByIdAPI } from "../../services/RouteAPI/RouteAPI";
@@ -77,7 +77,7 @@ const ViewRoute: React.FC = () => {
   const [searchTerms, setSearchTerms] = useState<string>(""); // Search term state
   const [totalStock,setTotalStock]=useState(0)
   const navigate = useNavigate();
-console.log(rideList,activeRoutes,rides);
+console.log(rideList,activeRoutes,rides,mostVisitedSalesman,totalStock,mostVisitedVehicle,mostVisitedSbRoute);
 
   // State initialization
 
