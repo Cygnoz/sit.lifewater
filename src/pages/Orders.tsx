@@ -2,15 +2,16 @@ import { Link } from "react-router-dom";
 import searchIcon from "../assets/images/search (2).svg";
 import plusIcon from "../assets/images/pluscircle.svg";
 import order from "../assets/images/order.png";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import useApi from "../Hook/UseApi";
 import { endpoints } from "../services/ApiEndpoint";
+import { AllOrderResponseContext } from "../Context/ContextShare";
 
 type Props = {}
 
 const Orders = ({ }: Props) => {
   const [orders, setOrders] = useState([])
-
+  const {setOrderResponse} = useContext(AllOrderResponseContext)!
   const { request: getALLOrders } = useApi("get", 4001)
   const getALLOrderss = async () => {
     try {
@@ -19,7 +20,7 @@ const Orders = ({ }: Props) => {
       if (!error && response) {
         setOrders(response.data)
         console.log("API RESPONSE :", response.data)
-
+        setOrderResponse(response.data)
       }
     } catch (error) {
       console.log(error)
@@ -56,9 +57,11 @@ const Orders = ({ }: Props) => {
                   <p className="text-[#303F58]">Customer</p>
                   <p className="text-[#303F58] text-[16px] font-bold ms-1">{order.customerName || "NA"}</p>
                 </div>
-                <button className="bg-[#F6F6F6] h-6 text-[13px] rounded-md px-3 border border-[#820000]">
+                <Link to={`/orders/${order._id}`}>
+                <button  className="bg-[#F6F6F6] h-6 text-[13px] rounded-md px-3 border border-[#820000]">
                   View
                 </button>
+                </Link>
               </div>
               <p className="text-[#303F58] pt-1">Item</p>
               <p className="text-[#303F58] font-semibold ms-1">

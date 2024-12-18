@@ -1,13 +1,14 @@
 import { Link, useNavigate } from "react-router-dom"
 import backbutton from "../assets/images/nav-item.png";
-// import plus from "../assets/images/Icons/circle-plus.svg";
-// import minus from "../assets/images/Icons/circle-minus.svg";
-import { useEffect, useState } from "react";
+import plus from "../assets/images/Icons/circle-plus.svg";
+import minus from "../assets/images/Icons/circle-minus.svg";
+import { useContext, useEffect, useState } from "react";
 import { endpoints } from "../services/ApiEndpoint";
 import useApi from "../Hook/UseApi";
 import Button from "../CommonComponents/Button";
 import { toast, ToastContainer } from "react-toastify";
-
+import { AllOrderResponseContext } from "../Context/ContextShare";
+import UniqueOrderNumber from "./UniqueOrderNumber";
 type Props = {}
 interface Item {
     itemId: string;
@@ -35,12 +36,13 @@ interface OrdrerData {
 }
 
 const AddOrder = ({ }: Props) => {
+    const { orderResponse } = useContext(AllOrderResponseContext)!
     const [customers, setCustomers] = useState([]);
     const [filteredCustomers, setFilteredCustomers] = useState([]);
     const [searchValue, setSearchValue] = useState("");
     const [ratePerCustomer, setRatePerCustomer] = useState("");
     const [error, setError] = useState("");
-    const [quantity, setQuantity] = useState("");
+    const [quantity, setQuantity] = useState(Number);
     const navigate = useNavigate()
     const [loading, setLoading] = useState<boolean>(false);
     const [orderData, setOrderData] = useState<OrdrerData>({
@@ -60,10 +62,19 @@ const AddOrder = ({ }: Props) => {
         ratePerItem: "", // Initialized as a number
         stock: [],
     });
-
-
-    console.log(orderData);
+    console.log("Input Data",orderData);
+    
     console.log(orderData.stock[0]?.quantity, "qnt");
+    // Generate unique order number on component mount
+    useEffect(() => {
+        if (orderResponse) {
+            const newOrderNumber = UniqueOrderNumber(orderResponse);
+            setOrderData((prevData) => ({
+                ...prevData,
+                orderNumber: newOrderNumber,
+            }));
+        }
+    }, [orderResponse]);
 
     const [activeRoute, setActiveRoute] = useState<any | null>(null);
     useEffect(() => {
@@ -85,25 +96,34 @@ const AddOrder = ({ }: Props) => {
         // Show all customers when the input is focused
         setFilteredCustomers(customers);
     };
-    const handleReturnBottleChange = (e: any) => {
+    const handleReturnBottleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        // Convert to number and handle empty case
+        const numericValue = value === '' ? 0 : Number(value);
         setOrderData((prev) => ({
             ...prev,
-            returnBottle: Number(e.target.value) || 0, // Convert to number
+            returnBottle: numericValue,
         }));
     };
 
+    const incrementQuantity = () => {
+        handleQuantityChange(orderData.stock[0]?.quantity + 1);
+    };
 
-    const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value: any = Math.max(1, Number(e.target.value)); // Ensure quantity is at least 1
+    const decrementQuantity = () => {
+        handleQuantityChange(orderData.stock[0]?.quantity - 1);
+    };
+
+    const handleQuantityChange = (value: number) => {
+        if (value < 1) return; // Prevent quantity from going below 1
         if (value > quantity) {
             setError(`Only ${quantity} units are left in stock.`);
-            return; // Exit the function to prevent updates
+            return;
         }
-
         if (value === quantity) {
-            setError("Warning: This item is now out of stock."); // Show warning for low quantities
+            setError("Warning: This item is now out of stock.");
         } else {
-            setError(""); // Clear any previous warnings or errors
+            setError("");
         }
 
         setOrderData((prevState) => {
@@ -277,7 +297,7 @@ const AddOrder = ({ }: Props) => {
             toast.error(error.response.data.message);
         } catch (error: any) {
             console.error(error);
-            toast.error(error.data.message);
+            toast.error(error?.data.message);
         }
     };
 
@@ -315,7 +335,7 @@ const AddOrder = ({ }: Props) => {
                             onChange={handleSearchChange}
                             onFocus={handleInputFocus}
                             className="w-full p-2 mt-1 border rounded-md"
-                            placeholder="Search Customer"                           
+                            placeholder="Search Customer"
                         />
                         {/* Dropdown for customer suggestions */}
                         <div className="absolute z-10 w-full bg-white mt-1 max-h-52 overflow-auto rounded shadow-lg">
@@ -350,7 +370,7 @@ const AddOrder = ({ }: Props) => {
                         />
                     </div>
                     <div className="pt-2 flex">
-                        <div className="relative w-[75%] gap-2  mb-2"> {/* Ensure full width and margin for spacing */}
+                        <div className="relative w-[70%] gap-2  mb-2"> {/* Ensure full width and margin for spacing */}
                             {/* Selected Item Display */}
                             <label className="block text-gray-700">Select Item</label>
                             <div
@@ -389,16 +409,37 @@ const AddOrder = ({ }: Props) => {
                         </div>
 
                         {/* Quantity Input */}
-                        <div className=" items-center gap-2"> {/* Aligns the items horizontally */}
+                        <div className="items-center gap-2"> {/* Aligns the items horizontally */}
                             <label className="block text-gray-700">Quantity</label>
-                            <input
-                                type="number"
-                                className="w-28 p-2 mt-1 ms-2 border rounded-md"
-                                placeholder="01"
-                                onChange={handleQuantityChange}
-                                value={orderData.stock[0]?.quantity} // Display the quantity of the first item
-                            />
+                            <div className="flex mx-1">
+
+                                <button
+                                    type="button" // Prevent form submission
+                                    onClick={decrementQuantity}
+                                >
+                                    <img src={minus} alt="" />
+                                </button>
+
+
+                                <input
+                                    type="number"
+                                    className="w-10 p-2 mt-1 mx-1 border rounded-md text-center"
+                                    placeholder="01"
+                                    onChange={(e) => handleQuantityChange(Number(e.target.value))}
+                                    min={1}
+                                    value={orderData.stock[0]?.quantity} // Display the quantity of the first item
+                                />
+
+                                <button
+                                    type="button" // Prevent form submission
+                                    onClick={incrementQuantity}
+                                >
+                                    <img src={plus} alt="" />
+
+                                </button>
+                            </div>
                         </div>
+
                     </div>
                     {error && <div className="text-red-500 text-center text-sm mt-1">{error}</div>}
                     <div className="grid grid-cols-2 gap-2 pt-2">
@@ -434,7 +475,7 @@ const AddOrder = ({ }: Props) => {
                             <input
                                 type="text"
                                 name="mainRouteName"
-                                value={orderData.mainRouteName}
+                                value={activeRoute?.mainRouteName}
                                 onChange={handleInputChange}
                                 className="w-full p-2 mt-1 border rounded-md"
                                 placeholder="Enter email"
@@ -446,7 +487,7 @@ const AddOrder = ({ }: Props) => {
                             <input
                                 type="text"
                                 name="subRouteName"
-                                value={orderData.subRouteName}
+                                value={activeRoute?.subRouteName}
                                 onChange={handleInputChange}
                                 className="w-full p-2 mt-1 border rounded-md"
                                 placeholder="Enter email"
@@ -474,8 +515,8 @@ const AddOrder = ({ }: Props) => {
                         <label className="block text-gray-700">Return  Empty Bottle</label>
                         <input
                             type="number"
-                            name="ReturnBottle"
-                            value={orderData.returnBottle}
+                            name="returnBottle"
+                            value={orderData.returnBottle || ''} // Use `|| ''`
                             onChange={(e) => {
                                 const value = e.target.value;
                                 if (/^\d*$/.test(value)) { // Only allow numbers

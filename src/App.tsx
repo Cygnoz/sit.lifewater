@@ -23,6 +23,7 @@ import Maps from './pages/Map';
 import EditCustomer from './pages/EditCustomer';
 import Orders from './pages/Orders';
 import AddOrder from './components/AddOrder';
+import ViewOrderModal from './pages/ViewOrderModal';
 // import Routed from './pages/Route';
 
 const App: React.FC = () => {
@@ -64,6 +65,7 @@ const App: React.FC = () => {
           <Route path="/route" element={<Maps />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/addorder" element={<AddOrder />} />
+          <Route path="/orders/:id" element={<ViewOrderModal />} />
 
 
         </Routes>
