@@ -19,4 +19,5 @@ export const endpoints = {
     // Order
     ADD_ORDER:`orders`,
     GET_ALL_ORDER:`orders`,
+    VIEW_A_ORDER: `orders`,
 }
