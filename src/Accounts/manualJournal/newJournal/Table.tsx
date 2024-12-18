@@ -47,7 +47,7 @@ function Table({}: Props) {
     getAllJournals();
   }, []);
 
-  const tableHeaders = ["Date", "Reference Rating", "Notes", "Amount", ""];
+  const tableHeaders = ["Date","Journal ID", "Reference Rating", "Notes", "Amount", ""];
 
   // Filter journals based on the search value
   const filteredJournals = useMemo(() => {
@@ -117,6 +117,9 @@ function Table({}: Props) {
               >
                 <td className="py-2.5 px-4 border-y border-tableBorder">
                   {item?.date}
+                </td>
+                <td className="py-2.5 px-4 border-y border-tableBorder">
+                  {item?.journalId}
                 </td>
                 <td className="py-2.5 px-4 border-y border-tableBorder">
                   {item?.reference}

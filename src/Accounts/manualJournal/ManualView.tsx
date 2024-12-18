@@ -56,7 +56,7 @@ function ManualView({}: Props) {
           <div className="flex justify-between">
             <div className="flex gap-3 items-center">
               <p className="text-xl text-textColor font-bold pr-4 border-borderRight">
-                {oneJournal ? `#${oneJournal?.reference}` : "#001"}
+                {oneJournal ? `#${oneJournal?.journalId}` : "#001"}
               </p>
             </div>
             <div className="flex gap-3 items-center">
@@ -87,7 +87,7 @@ function ManualView({}: Props) {
                   <p className="font-bold text-2xl">JOURNAL</p>
                   {/* journalId */}
                   <p className="ml-auto">
-                    {oneJournal ? `#${oneJournal?.reference}` : "#0001"}
+                    {oneJournal ? `#${oneJournal?.journalId}` : "#0001"}
                   </p>
                 </div>
 

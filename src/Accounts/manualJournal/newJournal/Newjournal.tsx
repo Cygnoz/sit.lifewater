@@ -81,6 +81,41 @@ function NewJournal({ }: Props) {
     Array(initialTransactions.length).fill("")
   );
 
+  // Auto generate Journal id
+
+const { request: getJournalData } = useApi("get", 4000);
+
+useEffect(() => {
+  const fetchAllJournals = async () => {
+    try {
+      const url = `${endpoints.GET_ALL_JOURNALS}`;
+      const { response, error } = await getJournalData(url);
+
+      if (!error && response) {
+        const allJournals = response.data;
+        console.log("here is:",allJournals);
+        
+
+        // Auto-generate the journalId
+        const count = allJournals.length; // Current number of journals
+        const newJournalId = `JN-${count + 1}`; // Auto-generate with prefix JN-
+
+        // Update newJournalDatas with the generated journalId
+        setNewJournelDatas((prev) => ({
+          ...prev,
+          journalId: newJournalId,
+        }));
+      } else {
+        console.log("Error fetching journals:", error);
+      }
+    } catch (error) {
+      console.error("Something went wrong:", error);
+    }
+  };
+
+  fetchAllJournals();
+}, []); // Add dependencies if necessary
+
   const addRow = () => {
     const newRow = {
       accountId: "",
@@ -443,7 +478,7 @@ if (errors.length > 0) {
                 }
               />
             </div>
-            <div className="w-[26%]">
+            {/* <div className="w-[26%]">
               <label className="block text-sm text-textColor">Journal#</label>
               <input
                 
@@ -458,41 +493,8 @@ if (errors.length > 0) {
                   })
                 }
               />
-            </div>
-            <div className="w-[40%]">
-              <label className="block text-sm text-textColor">Reference#</label>
-              <input
-                type="text"
-                className="mt-1 w-full border border-inputBorder rounded-md text-sm p-2"
-                placeholder="Value"
-                value={newJournalDatas.reference}
-                onChange={(e) =>
-                  setNewJournelDatas({
-                    ...newJournalDatas,
-                    reference: e.target.value,
-                  })
-                }
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between w-full gap-9">
-            <div className="w-[72%]">
-              <label className="block text-sm text-textColor">Notes</label>
-              <input
-                type="text"
-                className="mt-1 w-full border border-inputBorder rounded-md text-sm p-2"
-                placeholder="Value"
-                value={newJournalDatas.note}
-                onChange={(e) =>
-                  setNewJournelDatas({
-                    ...newJournalDatas,
-                    note: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="w-[26%]">
+            </div> */}
+             <div className="w-[26%]">
               <label className="block text-sm text-textColor">
                 Journal Type
               </label>
@@ -513,6 +515,43 @@ if (errors.length > 0) {
                 </label>
               </div>
             </div>
+            
+            <div className="w-[40%]">
+              <label className="block text-sm text-textColor">Reference#</label>
+              <input
+                type="text"
+                className="mt-1 w-full border border-inputBorder rounded-md text-sm p-2"
+                placeholder="Value"
+                value={newJournalDatas.reference}
+                onChange={(e) =>
+                  setNewJournelDatas({
+                    ...newJournalDatas,
+                    reference: e.target.value,
+                  })
+                }
+              />
+            </div>
+          </div>
+         
+          
+
+          <div className="flex items-center justify-between w-full gap-9">
+            <div className="w-[72%]">
+              <label className="block text-sm text-textColor">Notes</label>
+              <input
+                type="text"
+                className="mt-1 w-full border border-inputBorder rounded-md text-sm p-2"
+                placeholder="Value"
+                value={newJournalDatas.note}
+                onChange={(e) =>
+                  setNewJournelDatas({
+                    ...newJournalDatas,
+                    note: e.target.value,
+                  })
+                }
+              />
+            </div>
+           
             <div className="w-[50%]">
               <label className="block text-sm text-textColor">Currency</label>
               <select
