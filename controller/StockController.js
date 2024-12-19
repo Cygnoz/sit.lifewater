@@ -517,7 +517,7 @@ exports.addStock = async (req, res) => {
         return res.status(404).json({ success: false, message: `Item ${item.itemName} not found in inventory` });
       }
 
-      const isResalable = itemDetails.resalable;
+      const isResalable = itemDetails.resaleable;
 
       // Add or update the item in the subroute stock
       const subRouteItemIndex = subRouteStock.findIndex(stock => stock.itemId === item.itemId);

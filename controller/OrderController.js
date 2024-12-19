@@ -412,8 +412,6 @@ exports.viewAllOrders = async (req, res) => {
 };
 
 
-const Order = require('../models/Order'); // Adjust the path to your Order model
-const Customer = require('../models/Customer'); // Adjust the path to your Customer model
 
 exports.getTodayOrders = async (req, res) => {
   try {
