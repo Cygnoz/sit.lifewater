@@ -1,7 +1,7 @@
 import { useState } from "react"
 import Eye from "../../assets/icons/Eye"
 import EyeOffIcon from "../../assets/icons/EyeOffIcon"
-import { toast } from "react-toastify"
+import { toast, ToastContainer } from "react-toastify"
 import { useNavigate } from "react-router-dom"
 import Button from "../../commoncomponents/Buttons/Button"
 import useApi from "../../Hook/UseApi"
@@ -35,13 +35,17 @@ const Login = () => {
       // Check if login is successful
       if (response.response?.data.success) {
         // Display success message and navigate to dashboard
-        toast.success(response.response?.data.message || 'Login successful! Redirecting...');
         const token = response.response?.data.token.split(' ')[1];
-
+        toast.success(response.response?.data.message || 'Login successful! Redirecting...');   
+        console.log(response);
+           
         // Save the token for future authenticated requests
         localStorage.setItem("authToken", token);
         // Pass username via navigate state
-        navigate("/dashboard")
+        setTimeout(()=>{
+          navigate("/dashboard")
+        }, 2000)
+        
       } else {
         // Show an error message if login fails
         const errorMessage = response.response?.data.message || "Invalid username or password";
@@ -66,6 +70,18 @@ const Login = () => {
 
   return (
     <div className=" flex items-center justify-center min-h-screen">
+      <ToastContainer
+              position="top-center"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={true}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+            />
       <div className="w-[40%] text-[rgb(48,63,88,1)]  ">
         <h1 className="font-bold  text-3xl text-center">Login</h1>
 
