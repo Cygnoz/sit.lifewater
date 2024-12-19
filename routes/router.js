@@ -38,6 +38,7 @@ router.post('/orders', verifyToken,  orderController.createOrder);
 router.get('/orders/:id', verifyToken,  orderController.viewOrder);
 router.get('/orders', verifyToken,  orderController.viewAllOrders);
 router.delete('/orders/:id', verifyToken,  orderController.deleteOrder);
+router.get('/today/:rideId', orderController.getTodayOrders);
 
 //Unloading
 router.post('/addunload', verifyToken,  unloadController.addUnload);

@@ -385,6 +385,9 @@ exports.viewOrder = async (req, res) => {
   }
 };
 
+
+
+
 // Function to view all orders
 exports.viewAllOrders = async (req, res) => {
   try {
@@ -407,6 +410,59 @@ exports.viewAllOrders = async (req, res) => {
     });
   }
 };
+
+
+const Order = require('../models/Order'); // Adjust the path to your Order model
+const Customer = require('../models/Customer'); // Adjust the path to your Customer model
+
+exports.getTodayOrders = async (req, res) => {
+  try {
+    const { rideId } = req.params;
+
+    // Validate rideId
+    if (!rideId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Ride ID is required',
+      });
+    }
+
+    // Fetch orders for the given rideId
+    const orders = await Order.find({ rideId });
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No orders found for this ride',
+      });
+    }
+
+    // Fetch associated customer info
+    const ordersWithCustomerInfo = await Promise.all(
+      orders.map(async (order) => {
+        const customer = await Customer.findById(order.customerId).select('fullName');
+
+        return {
+          ...order.toObject(),
+          customerName: customer ? customer.fullName : 'Unknown',
+        };
+      })
+    );
+
+    res.status(200).json({
+      success: true,
+      data: ordersWithCustomerInfo,
+    });
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching orders',
+      error: error.message,
+    });
+  }
+};
+
 
 
 // Function to delete an order by ID

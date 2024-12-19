@@ -16,7 +16,7 @@ const orderSchema = new mongoose.Schema({
     trim: true
   },
   rideId:{
-    type: String
+    type: String,
   },
   mainRouteName:{
     type:String,
