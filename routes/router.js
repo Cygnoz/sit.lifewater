@@ -79,6 +79,7 @@ router.delete("/customer/:id", verifyToken, CustomerController.deleteCustomerByI
 router.post('/start-ride', verifyToken, startRideController.startRide); // end ride
 router.get('/active-rides',verifyToken, startRideController.getActiveRides)
 router.get("/viewActiveRoute/:rideId", verifyToken, startRideController.viewSingleActiveRoute) // view active route by ID
+router.put('/complete-ride', verifyToken, startRideController.completeRide)
 
 //endride
 router.post('/end-ride', verifyToken, EndRideController.endRide); // end ride

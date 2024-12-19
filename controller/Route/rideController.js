@@ -128,6 +128,42 @@ exports.getActiveRides = async (req, res) => {
   };
 
 
+  exports.completeRide = async (req, res) => {
+    const { rideId, endingKM, travelledKM, expenses } = req.body;
+  
+    // Validate inputs
+    if (!rideId || !endingKM || !travelledKM || !Array.isArray(expenses)) {
+      return res.status(400).json({ message: 'Invalid inputs' });
+    }
+  
+    try {
+      // Find the ride by ID
+      const ride = await Ride.findById(rideId);
+      if (!ride) {
+        return res.status(404).json({ message: 'Ride not found' });
+      }
+  
+      if (ride.status !== 'active') {
+        return res.status(400).json({ message: 'Ride is not active' });
+      }
+  
+      // Update ride details
+      ride.endingKM = endingKM;
+      ride.travelledKM = travelledKM;
+      ride.expenses = expenses;
+      ride.status = 'completed';
+  
+      // Save updated ride
+      await ride.save();
+  
+      return res.status(200).json({ message: 'Ride completed successfully', ride });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  };
+
+
 
   //get single active ride
   exports.viewSingleActiveRoute = async (req, res) => {
