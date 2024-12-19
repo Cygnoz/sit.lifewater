@@ -80,6 +80,7 @@ router.post('/start-ride', verifyToken, startRideController.startRide); // end r
 router.get('/active-rides',verifyToken, startRideController.getActiveRides)
 router.get("/viewActiveRoute/:rideId", verifyToken, startRideController.viewSingleActiveRoute) // view active route by ID
 router.put('/complete-ride', verifyToken, startRideController.completeRide)
+router.get('/completedride', verifyToken, startRideController.getAllCompletedRides)
 
 //endride
 router.post('/end-ride', verifyToken, EndRideController.endRide); // end ride

@@ -165,6 +165,35 @@ exports.getActiveRides = async (req, res) => {
 
 
 
+  exports.getAllCompletedRides = async (req, res) => {
+    try {
+      // Fetch all rides with status "completed"
+      const completedRides = await Ride.find({ status: 'completed' });
+  
+      // Check if any completed rides exist
+      if (completedRides.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'No completed rides found',
+        });
+      }
+  
+      return res.status(200).json({
+        success: true,
+        data: completedRides,
+      });
+    } catch (error) {
+      console.error('Error fetching completed rides:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal Server Error',
+        error: error.message,
+      });
+    }
+  };
+
+
+
   //get single active ride
   exports.viewSingleActiveRoute = async (req, res) => {
     try {
