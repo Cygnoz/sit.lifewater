@@ -138,8 +138,6 @@ exports.getAllRoutes = async (req, res) => {
 
 
 
- 
-// View a route by ObjectId
 exports.viewRouteById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -147,51 +145,45 @@ exports.viewRouteById = async (req, res) => {
     // Validate ObjectId format
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
-        success: false, 
-        message: 'Invalid route ID format'
+        success: false,
+        message: 'Invalid route ID format',
       });
     }
 
-    // Find main route
-    const route = await MainRoute.findById(id);
-    if (!route) {
-      console.log(`No route found for ID: ${id}`);
+    // Find main route by ID
+    const mainRoute = await MainRoute.findById(id).select('mainRouteName');
+    if (!mainRoute) {
       return res.status(404).json({
         success: false,
-        message: 'Route not found'
+        message: 'Main route not found',
       });
     }
 
-    // Find associated subroutes using route name
-    const subroutes = await SubRoute.find({ mainRoute: route.mainRoute });
-    console.log('Subroutes:', subroutes);
-    console.log('Route:', route);
-    
-    
-
-    // Combine data
-    const routeData = {
-      mainRoute: route,
-      subroutes: subroutes
-    };
+    // Find subroutes associated with the main route ID
+    const subroutes = await SubRoute.find({ mainRouteId: id }).select('subRouteName stock');
+    if (!subroutes || subroutes.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No subroutes found for this main route',
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      data: routeData
+      data: {
+        mainRouteName: mainRoute.mainRouteName,
+        subroutes: subroutes, // Subroutes with subRouteName and stock
+      },
     });
-
   } catch (error) {
-    console.error('Error fetching route:', error);
+    console.error('Error fetching subroutes and stock:', error);
     return res.status(500).json({
       success: false,
-      message: 'Error fetching route',
-      error: error.message
+      message: 'Error fetching subroutes and stock',
+      error: error.message,
     });
   }
 };
-
- 
-
 
 
 

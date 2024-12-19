@@ -7,6 +7,7 @@ const stockSchema = new Schema({
   itemName: { type: String },
   quantity: { type: Number },
   status: { type: String },
+  returnBottle: {type :Number}
 }, { _id: false });
 
 const subRouteSchema = new Schema({
