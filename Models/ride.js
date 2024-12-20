@@ -34,6 +34,7 @@ const RideSchema = new Schema({
   stock: { type: [stockSchema], default: undefined },
   expenses: { type: [expenseSchema], default: undefined }, // Added Expense Schema Array
   status: { type: String, default: 'active' },
-},{ timestamps: true });
+  createdDate: { type: Date, default: Date.now },
+});
 
 module.exports = mongoose.model('Ride', RideSchema);
