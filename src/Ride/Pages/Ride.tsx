@@ -193,7 +193,7 @@ console.log(loading,setItemsPerPage);
         {/* Pagination Controls */}
         <div className="flex justify-center gap-2 mt-4">
           <button
-            className="border px-4 py-2 rounded-md"
+            className="border px-4 py-2 bg-red-800 text-white rounded-md"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
           >
@@ -203,7 +203,7 @@ console.log(loading,setItemsPerPage);
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className="border px-4 py-2 rounded-md"
+            className="border px-4 bg-red-800 text-white py-2 rounded-md"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
