@@ -138,6 +138,55 @@ exports.getAllRoutes = async (req, res) => {
 
 
 
+// exports.viewRouteById = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     // Validate ObjectId format
+//     if (!mongoose.Types.ObjectId.isValid(id)) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Invalid route ID format',
+//       });
+//     }
+
+//     // Find main route by ID
+//     const mainRoute = await MainRoute.findById(id).select('mainRouteName');
+//     if (!mainRoute) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Main route not found',
+//       });
+//     }
+
+//     // Find subroutes associated with the main route ID
+//     const subroutes = await SubRoute.find({ mainRouteId: id }).select('subRouteName stock');
+//     if (!subroutes || subroutes.length === 0) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'No subroutes found for this main route',
+//       });
+//     }
+
+//     return res.status(200).json({
+//       success: true,
+//       data: {
+//         mainRoute,
+//         subroutes: subroutes, // Subroutes with subRouteName and stock
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error fetching subroutes and stock:', error);
+//     return res.status(500).json({
+//       success: false,
+//       message: 'Error fetching subroutes and stock',
+//       error: error.message,
+//     });
+//   }
+// };
+
+
+// View a route by ObjectId
 exports.viewRouteById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -150,40 +199,51 @@ exports.viewRouteById = async (req, res) => {
       });
     }
 
-    // Find main route by ID
-    const mainRoute = await MainRoute.findById(id).select('mainRouteName');
-    if (!mainRoute) {
+    // Find main route
+    const route = await MainRoute.findById(id);
+    if (!route) {
+      console.log(`No route found for ID: ${id}`);
       return res.status(404).json({
         success: false,
-        message: 'Main route not found',
+        message: 'Route not found',
       });
     }
 
-    // Find subroutes associated with the main route ID
-    const subroutes = await SubRoute.find({ mainRouteId: id }).select('subRouteName stock');
-    if (!subroutes || subroutes.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'No subroutes found for this main route',
-      });
-    }
+    // Find associated subroutes using mainRouteId
+    const subroutes = await SubRoute.find({ mainRouteId: route._id });
+
+    // Calculate total stock from all subroutes
+    const totalStock = subroutes.reduce((total, subroute) => {
+      const subrouteStock = (subroute.stock || []).reduce((sum, item) => {
+        return sum + (item.quantity || 0); // Add quantity of each item in the stock array
+      }, 0);
+      return total + subrouteStock; // Add to total across all subroutes
+    }, 0);
+
+    console.log('Subroutes:', subroutes);
+    console.log('Route:', route);
+
+    // Combine data
+    const routeData = {
+      mainRoute: route,
+      subroutes: subroutes,
+      totalStock: totalStock, // Include total stock
+    };
 
     return res.status(200).json({
       success: true,
-      data: {
-        mainRouteName: mainRoute.mainRouteName,
-        subroutes: subroutes, // Subroutes with subRouteName and stock
-      },
+      data: routeData,
     });
   } catch (error) {
-    console.error('Error fetching subroutes and stock:', error);
+    console.error('Error fetching route:', error);
     return res.status(500).json({
       success: false,
-      message: 'Error fetching subroutes and stock',
+      message: 'Error fetching route',
       error: error.message,
     });
   }
 };
+
 
 
 

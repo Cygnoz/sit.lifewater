@@ -156,7 +156,7 @@ exports.getActiveRides = async (req, res) => {
       // Save updated ride
       await ride.save();
   
-      return res.status(200).json({ message: 'Ride completed successfully', ride });
+      return res.status(200).json({ message: 'Ride completed successfully', data:ride });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Internal Server Error' });
@@ -191,6 +191,43 @@ exports.getActiveRides = async (req, res) => {
       });
     }
   };
+
+
+
+  //mainroute ridehistory
+
+  exports.getCompletedRidesByMainRoute = async (req, res) => {
+    try {
+      const { mainRouteId } = req.params; // Extract mainRouteId from request parameters
+  
+      // Fetch rides matching the mainRouteId and status "completed"
+      const completedRides = await Ride.find({
+        mainRouteId: mainRouteId,
+        status: 'completed',
+      });
+  
+      // Check if any rides exist
+      if (completedRides.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: `No completed rides found for mainRouteId: ${mainRouteId}`,
+        });
+      }
+  
+      return res.status(200).json({
+        success: true,
+        data: completedRides,
+      });
+    } catch (error) {
+      console.error('Error fetching completed rides by mainRouteId:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal Server Error',
+        error: error.message,
+      });
+    }
+  };
+  
 
 
 

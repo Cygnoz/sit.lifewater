@@ -86,7 +86,8 @@ router.get('/completedride', verifyToken, startRideController.getAllCompletedRid
 router.post('/end-ride', verifyToken, EndRideController.endRide); // end ride
 router.get('/getallendride', verifyToken, EndRideController.getEndRide); // get all end ride
 
-
+//mainroute ride history
+router.get('/rides/completed/:mainRouteId', startRideController.getCompletedRidesByMainRoute);
 
 
 //acoounts
