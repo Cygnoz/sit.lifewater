@@ -47,17 +47,17 @@ import EditMainRoute from '../Route/Pages/EditMainRoute';
 // import Purchase from '../Purchase/Pages/Purchase';
 // import PurchaseOrder from '../Purchase/Pages/PurchaseOrder';
 // import Suppliers from '../Purchase/Pages/Suppliers';
-import AddCollection from '../Sales/Components/AddCollection';
-import AddCoupon from '../Sales/Components/AddCoupon';
-import AddCreditNote from '../Sales/Components/AddCreditNote';
-import AddReceipt from '../Sales/Components/AddReceipt';
-import Bottles from '../Sales/Pages/Bottles';
-import Coupon from '../Sales/Pages/Coupon';
-import CreditNotes from '../Sales/Pages/CreditNotes';
-import EditCoupon from '../Sales/Pages/EditCoupon';
+// import AddCollection from '../Sales/Components/AddCollection';
+// import AddCoupon from '../Sales/Components/AddCoupon';
+// import AddCreditNote from '../Sales/Components/AddCreditNote';
+// import Bottles from '../Sales/Pages/Bottles';
+// import Coupon from '../Sales/Pages/Coupon';
+// import CreditNotes from '../Sales/Pages/CreditNotes';
+// import EditCoupon from '../Sales/Pages/EditCoupon';
+// import Salesman from '../Sales/Pages/Salesman';
 import Invoice from '../Sales/Pages/Invoice';
 import Receipt from '../Sales/Pages/Receipt';
-import Salesman from '../Sales/Pages/Salesman';
+import AddReceipt from '../Sales/Components/AddReceipt';
 import AddStockloaded from '../Stock/Stock loaded/Components/AddStockloaded';
 import AddInternalStock from '../Stock/Internal transfer/Components/AddInternalStock';
 import AddUnloadStock from '../Stock/Unload stock/Components/AddUnloadStock';
@@ -218,17 +218,17 @@ const App: React.FC = () => {
               <Route path='/suppliers' element={<Suppliers/>}/> */}
 
               {/* SALES */}
-              <Route path='/addcollection' element={<AddCollection/>}/>
+              {/* <Route path='/addcollection' element={<AddCollection/>}/>
               <Route path='/addcoupon' element={<AddCoupon/>}/>
               <Route path='/addcreditnote' element={<AddCreditNote/>}/>
-              <Route path='/addreciept' element={<AddReceipt/>}/>
               <Route path='/bottles' element={<Bottles/>}/>
               <Route path='/coupon' element={<Coupon/>}/>
               <Route path='/editcoupon' element={<EditCoupon/>}/>
-              <Route path='/creditnote' element={<CreditNotes/>}/>
+              <Route path='/creditnote' element={<CreditNotes/>}/> */}
               <Route path='/invoice' element={<Invoice/>}/>
               <Route path='/reciept' element={<Receipt/>}/>
-              <Route path='/salesman' element={<Salesman/>}/>
+              <Route path='/addreciept' element={<AddReceipt/>}/>
+              {/* <Route path='/salesman' element={<Salesman/>}/> */}
 
               {/* ACCOUNTS */}
               <Route path='/journals' element={<ManualHome/>}/>

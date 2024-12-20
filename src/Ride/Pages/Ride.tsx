@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import printer from "../../assets/images/printer.svg";
 import split from "../../assets/images/list-filter.svg";
 import search from "../../assets/images/search.svg";
-import eyeIcon from "../../assets/images/eye.svg";
 import { endpoints } from "../../services/ApiEndpoint";
 import { TableResponseContext } from "../../assets/Context/ContextShare";
 import useApi from "../../Hook/UseApi";
@@ -21,15 +20,12 @@ interface RideData {
 const Ride: React.FC = () => {
   const [rides, setRides] = useState<RideData[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedStock, setSelectedStock] = useState<
-    { itemName: string; quantity: number }[] | null
-  >(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const itemsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(4); // Set to 4 rides per page
 
   const { loading, setLoading } = useContext(TableResponseContext)!;
   const { request: getALLRIDE } = useApi("get", 4000);
+console.log(loading,setItemsPerPage);
 
   const getALLRides = async () => {
     try {
@@ -49,7 +45,6 @@ const Ride: React.FC = () => {
           travelledKM: ride.travelledKM,
         }));
         setRides(mappedData);
-        console.log("API :", mappedData);
       }
     } catch (error) {
       console.error(error);
@@ -68,35 +63,22 @@ const Ride: React.FC = () => {
     );
   });
 
+  // Calculate pagination
   const totalPages = Math.ceil(filteredRides.length / itemsPerPage);
-  const paginatedRides = filteredRides.slice(
+  const currentData = filteredRides.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const handleNextPage = () => {
-    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
   };
-
-  const handlePreviousPage = () => {
-    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
-  };
-
-  const handleViewStock = (stock: { itemName: string; quantity: number }[]) => {
-    setSelectedStock(stock);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedStock(null);
-  };
-  console.log(loading);
-  
 
   return (
     <div className="mt-2">
-      <div className="flex gap-3 items-center w-full max-w-8xl mb-6 ms-3">
+      <div className="flex gap-3 items-center w-full max-w-8xl  ms-3">
         <div>
           <h3 className="text-[#303F58] text-[20px] font-bold">Ride</h3>
           <p className="text-[#4B5C79]">View completed ride details here</p>
@@ -137,81 +119,83 @@ const Ride: React.FC = () => {
         <table className="w-full text-left">
           <thead className="bg-[#fdf8f0]">
             <tr className="border-b">
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Sl No
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Date
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Sales Man
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Driver
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Vehicle
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Route
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Travelled KM
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Stock
-              </th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Sl No</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Date</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Sales Man</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Driver</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Vehicle</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Route</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Travelled KM</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Stock</th>
             </tr>
           </thead>
           <tbody>
-            {paginatedRides.map((ride, index) => (
-              <tr className="border-b" key={ride._id}>
-                <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                  {(currentPage - 1) * itemsPerPage + index + 1}
+            {currentData.map((ride, index) => (
+              <tr className="border-b-2" key={ride._id}>
+                <td className="p-2 text-[14px] text-center text-[#4B5C79]">
+                  {index + 1 + (currentPage - 1) * itemsPerPage}
                 </td>
-                <td className="p-2 text-[14] text-center text-[#4B5C79]">
+                <td className="p-2 text-[14px] text-center text-[#4B5C79]">
                   {ride.createdAt
                     ? new Date(ride.createdAt).toLocaleDateString()
                     : "N/A"}
                 </td>
-                <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                  {ride.salesmanName}
+                <td className="p-2 text-[14px] text-center text-[#4B5C79]">
+                  {ride.salesmanName || "N/A"}
                 </td>
-                <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                  {ride.driverName}
+                <td className="p-2 text-[14px] text-center text-[#4B5C79]">
+                  {ride.driverName || "N/A"}
                 </td>
-                <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                  {ride.vehicleNumber}
+                <td className="p-2 text-[14px] text-center text-[#4B5C79]">
+                  {ride.vehicleNumber || "N/A"}
                 </td>
-                <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                  {ride.mainRouteName}
+                <td className="p-2 text-[14px] text-center text-[#4B5C79]">
+                  {ride.mainRouteName || "N/A"}
                 </td>
-                <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                  {ride.travelledKM || "0"}
+                <td className="p-2 text-[14px] text-center text-[#4B5C79]">
+                  {ride.travelledKM || 0}
                 </td>
-                <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                  <button
-                    onClick={() => handleViewStock(ride.stock)}
-                    className=" flex items-center"
-                  >
-                    <img
-                      src={eyeIcon}
-                      alt="View Stock"
-                      className="h-5 w-5 mr-1"
-                    />
-                    {ride.stock.length}
-                  </button>
+                <td className="p-2 text-[14px] text-center text-[#4B5C79]">
+                  {ride.stock && ride.stock.length > 0 ? (
+                    <table className="w-full bg-[#fdf8f0]  rounded-lg text-left border-spacing-10">
+                      <thead>
+                        <tr className="border-1 ">
+                          <th className="p-2 text-[12px] text-center text-[#303F58]">
+                            Item Name
+                          </th>
+                          <th className="p-2 text-[12px] text-center text-[#303F58]">
+                            Quantity
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {ride.stock.map((item) => (
+                          <tr key={item.itemName} className="border-b">
+                            <td className="p-2 text-[14px] text-center text-[#4B5C79]">
+                              {item.itemName || "N/A"}
+                            </td>
+                            <td className="p-2 text-[14px] text-center text-[#4B5C79]">
+                              {item.quantity || 0} pcs
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    "No Stock"
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        <div className="flex justify-between items-center mt-4">
+        {/* Pagination Controls */}
+        <div className="flex justify-center gap-2 mt-4">
           <button
-            onClick={handlePreviousPage}
+            className="border px-4 py-2 rounded-md"
+            onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
           >
             Previous
           </button>
@@ -219,44 +203,14 @@ const Ride: React.FC = () => {
             Page {currentPage} of {totalPages}
           </span>
           <button
-            onClick={handleNextPage}
+            className="border px-4 py-2 rounded-md"
+            onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
           >
             Next
           </button>
         </div>
       </div>
-
-      {isModalOpen && selectedStock && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <h3 className="text-lg font-bold mb-4">Stock Details</h3>
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-[#fdf8f0]">
-                  <th className="border-b p-2 text-[#303F58]">Item Name</th>
-                  <th className="border-b p-2 text-[#303F58]">Quantity</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedStock.map((item, idx) => (
-                  <tr key={idx}>
-                    <td className="border-b p-2">{item.itemName}</td>
-                    <td className="border-b p-2">{item.quantity}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <button
-              onClick={closeModal}
-              className="mt-4 px-4 py-2 bg-red-800 rounded hover:bg-red-900 text-white float-end"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

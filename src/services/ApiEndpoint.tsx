@@ -68,6 +68,9 @@ export const endpoints = {
   // Ride 
   GET_ALL_COMPLETED_RIDE:`completedride`,
 
+  // ridehistory in main route
+  GET_RIDE_HISTORY:`rides/completed`,
+
 
 
 

@@ -7,6 +7,8 @@ import { TableResponseContext } from "../../../assets/Context/ContextShare";
 import { endpoints } from "../../../services/ApiEndpoint";
 import useApi from "../../../Hook/UseApi";
 
+
+
 const StockLoaded: React.FC = () => {
   const [stockload, setStockload] = useState<any[]>([]);
   const { loading, setLoading } = useContext(TableResponseContext)!;
@@ -15,7 +17,6 @@ const StockLoaded: React.FC = () => {
   const [columns] = useState([
     { id: "date", label: "Date", visible: true },
     { id: "transferNumber", label: "Transfer No", visible: true },
-    // { id: "stock", label: "Stock (Item & Quantity)", visible: true },
     { id: "mainRouteName", label: "Main Route", visible: true },
     { id: "subRouteName", label: "Sub Route", visible: true },
   
@@ -80,13 +81,15 @@ const StockLoaded: React.FC = () => {
           </div>
         </div>
         <div className="bg-white p-5 mt-5 rounded-lg">
-          <Table
-            columns={columns}
-            data={stockload}
-            searchPlaceholder={"Search Stock"}
-            loading={loading.skeleton}
-            searchableFields={["transferNumber", "mainRouteName"]}
-          />
+        <Table
+  columns={columns}
+  data={stockload}
+  searchPlaceholder={"Search Stock"}
+  loading={loading.skeleton}
+  searchableFields={["transferNumber", "mainRouteName"]}
+  showAction={false} // Explicitly disable the action column
+/>
+
         </div>
       </div>
     </div>

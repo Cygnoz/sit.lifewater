@@ -141,13 +141,12 @@ const navlist = [
     icon:sale,
     route: "/invoice",
     subhead: [
-      { headName: "Dashboard", subRoute: "/" },
       { headName: "Invoice", subRoute: "/invoice" },
       { headName: "Reciept", subRoute: "/reciept" },
-      { headName: "Credit Notes", subRoute: "/creditnote" },
-      { headName: "Bottles", subRoute: "/bottles" },
-      { headName: "Coupon", subRoute: "/coupon" },
-      { headName: "SalesmanSDr.", subRoute: "/salesman" },
+      // { headName: "Credit Notes", subRoute: "/creditnote" },
+      // { headName: "Bottles", subRoute: "/bottles" },
+      // { headName: "Coupon", subRoute: "/coupon" },
+      // { headName: "SalesmanSDr.", subRoute: "/salesman" },
      
     ],
   },
