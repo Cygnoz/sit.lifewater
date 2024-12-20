@@ -211,10 +211,7 @@ exports.viewRouteById = async (req, res) => {
 
     // Calculate total stock from all subroutes
     const totalStock = subroutes.reduce((total, subroute) => {
-      const subrouteStock = (subroute.stock || []).reduce((sum, item) => {
-        return sum + (item.quantity || 0); // Add quantity of each item in the stock array
-      }, 0);
-      return total + subrouteStock; // Add to total across all subroutes
+      return total + (subroute.stock?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0);
     }, 0);
 
     console.log('Subroutes:', subroutes);
@@ -223,7 +220,7 @@ exports.viewRouteById = async (req, res) => {
     // Combine data
     const routeData = {
       mainRoute: route,
-      subroutes: subroutes,
+      subroutes: subroutes, // Include subroutes with stock array as is
       totalStock: totalStock, // Include total stock
     };
 
