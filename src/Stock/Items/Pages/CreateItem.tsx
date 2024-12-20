@@ -10,6 +10,7 @@ import useApi from "../../../Hook/UseApi"
 import { endpoints } from "../../../services/ApiEndpoint"
 import SortBy from "../Components/SortByItems"
 import { toast, ToastContainer } from "react-toastify"
+import ViewItemModal from "../Components/ViewItemModal"
 
 const CreateItem: React.FC = () => {
   const defaultImage = "https://cdn1.iconfinder.com/data/icons/avatar-3/512/Manager-512.png"
@@ -47,17 +48,17 @@ const CreateItem: React.FC = () => {
 
   const { request: deleteItem } = useApi("delete", 4001);
 
-  const handleDelete = async (_id: string)=>{
-    try{
-      const url =`${endpoints.DELETE_AN_ITEM}/${_id}`;
+  const handleDelete = async (_id: string) => {
+    try {
+      const url = `${endpoints.DELETE_AN_ITEM}/${_id}`;
       const { response, error } = await deleteItem(url);
       getAllItems()
-      if(!error && response){
+      if (!error && response) {
         toast.success(response?.data.message);
       }
       console.log(response);
-     
-    }catch (error) {
+
+    } catch (error) {
       toast.error("Error occurred while deleting brand.");
     }
   }
@@ -116,7 +117,7 @@ const CreateItem: React.FC = () => {
               />
             </div>
             <div className="flex space-x-4">
-            <SortBy  onSortChange={handleSortChange} />
+              <SortBy onSortChange={handleSortChange} />
               <button className="flex items-center border text-sm text-[#565148] font-medium  border-[#565148] px-4 py-2 rounded-lg">
                 <img className="mr-1" src={printer} alt="Print" />
                 Print
@@ -154,9 +155,14 @@ const CreateItem: React.FC = () => {
                       <td className="px-4 py-3 text-center text-[#4B5C79]">{item.costPrice}</td>
                       <td className="px-4 py-3 text-center text-[#4B5C79]">{item.sellingPrice}</td>
                       <td className="px-4 py-3 text-center">
+
                         <button className="text-green-500 mr-2" onClick={() => handleEdit(item._id)}>
                           <img src={vector} alt="Edit" />
                         </button>
+                        <button className="mt-2">
+                          <ViewItemModal id={item._id} />
+                        </button>
+
                         <button className="text-red-500" onClick={() => handleDelete(item._id)}>
                           <img src={trash} alt="Delete" />
                         </button>

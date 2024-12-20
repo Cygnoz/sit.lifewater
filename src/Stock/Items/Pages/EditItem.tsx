@@ -53,7 +53,10 @@ const AddItem: React.FC = () => {
 
       if (!error && response) {
         // Access the actual data from the Axios response
-        const itemData = response.data
+
+        console.log(response);
+        
+        const itemData = response.data.item
         console.log("Item Data:", itemData)
         setFormValues({
           itemName: itemData.itemName || "",

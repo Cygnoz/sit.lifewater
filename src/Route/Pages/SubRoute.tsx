@@ -28,6 +28,7 @@ function SubRoute({}: Props) {
   const { request: getSubRoutes } = useApi("get", 4000)
   const getALLSubroute = async () => {
     try {
+      setLoading({ ...loading, skeleton: true, noDataFound: false })
       const url = `${endpoints.GET_ALL_SUBROUTE}`
       const { response, error } = await getSubRoutes(url)
       console.log("API RESPONSE :",response)
@@ -64,11 +65,9 @@ function SubRoute({}: Props) {
         toast.success(response?.data.message);
       }
       console.log(response);
-     
     }catch (error) {
       toast.error("Error occurred while deleting route.");
     }
-
   }
 
   const navigate = useNavigate();
@@ -80,8 +79,6 @@ function SubRoute({}: Props) {
   const handleEdit = (id: string): void => {
     navigate(`/route/editsubroute/${id}`);
   };
-
-
 
   const handleView = (id: string): void => {
     navigate(`/route/viewsubroute/${id}`);
@@ -132,7 +129,7 @@ function SubRoute({}: Props) {
         <Table 
           columns={columns} 
           data={subRoutes} 
-          searchPlaceholder="Search Customer" 
+          searchPlaceholder="Search Route" 
           loading={loading.skeleton} 
           searchableFields={[ "subRouteName", "subrouteCode"]}
           onViewClick={handleView} // Add this prop

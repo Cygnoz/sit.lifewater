@@ -13,6 +13,7 @@ import dollar from "../../assets/images/badge-dollar-sign.png";
 import vector from "../../assets/images/Vector.svg";
 import useApi from "../../Hook/UseApi";
 import { endpoints } from "../../services/ApiEndpoint";
+import SubRouteRideHostory from "./SubRouteRideHostory";
 
 // interface Ride {
 //   _id: string;
@@ -276,6 +277,14 @@ const ViewSubRoute: React.FC = () => {
           )}
         </div>
       )}
+
+      {
+        activeSection === "rideHistory" && (
+          <div>
+            <SubRouteRideHostory SubRoute={sData.subRouteName } />
+          </div>
+        )
+      }
     </div>
   );
 };

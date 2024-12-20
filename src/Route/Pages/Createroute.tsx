@@ -2,53 +2,42 @@ import active from "../../assets/images/shopping-route.svg";
 import total from "../../assets/images/processing.svg";
 import totsub from "../../assets/images/packing_route.svg";
 import publicc from "../../assets/images/public-service route.svg";
-import printer from "../../assets/images/printer.svg";
-import vector from "../../assets/images/Vector.svg";
-import trash from "../../assets/images/trash.svg";
 import plus from "../../assets/circle-plus.svg";
-import eye from "../../assets/images/eye.svg";
 // import dot from "../../assets/ellipsis-vertical.svg";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
-import search from "../../assets/images/search.svg";
+import { useEffect, useState, useContext } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { endpoints } from "../../services/ApiEndpoint";
 import useApi from "../../Hook/UseApi";
-import SortByMainRoute from "../Components/SortByMainRoute";
+import Table from "../../commoncomponents/Table/Table";
+import { TableResponseContext } from "../../assets/Context/ContextShare";
 
-export interface Route {
-  id: string;
-  _id: string;
-  mainRouteName: string;
-  mainRouteCode: string;
-  subRoute: string;
-  description: string;
-  key:string;
-  order:any
-}
+
 
 const CreateRoute: React.FC = () => {
-  const [routesList, setRouteList] = useState<Route[]>([]); // Full route list
-  const [filteredRouteList, setFilteredRouteList] = useState<Route[]>([]); // Filtered route list
-  const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState<string>(""); // Search query
+  const [routesList, setRouteList] = useState<any[]>([]); // Full route list
+  const { loading, setLoading } = useContext(TableResponseContext)!
 
-  console.log(filteredRouteList);
+  const [columns] = useState([
+    { id: "mainRouteName", label: "Route", visible: true },
+    { id: "mainRouteCode", label: "Subrout Code", visible: true },
+    { id: "description", label: "Description", visible: true },
+  ]);
 
   const { request: getmainroute } = useApi("get", 4000);
+
   const getALLMainroute = async () => {
     try {
+      setLoading({ ...loading, skeleton: true, noDataFound: false })
       const url = `${endpoints.GET_ALL_MAINROUTE}`;
       const { response, error } = await getmainroute(url);
       console.log("API RESPONSE :", response);
 
       if (!error && response) {
-        setLoading(false);
-        console.log(loading);
-
+        setLoading(false)
         setRouteList(response.data);
-        setFilteredRouteList(response.data); // Initialize sorted items
+        console.log(response.data);
       }
     } catch (error) {
       console.log(error);
@@ -61,18 +50,17 @@ const CreateRoute: React.FC = () => {
 
   const { request: deleteMainRoute } = useApi("delete", 4000);
 
-
-  const handleDelete =async (id:string) => {
-    try{
-      const url =`${endpoints.DELETE_A_MAINROUTE}/${id}`;
+  const handleDelete = async (id: string) => {
+    try {
+      const url = `${endpoints.DELETE_A_MAINROUTE}/${id}`;
       const { response, error } = await deleteMainRoute(url);
       getALLMainroute()
-      if(!error && response){
+      if (!error && response) {
         toast.success(response?.data.message);
       }
       console.log(response);
-     
-    }catch (error) {
+
+    } catch (error) {
       toast.error("Error occurred while deleting route.");
     }
 
@@ -94,28 +82,16 @@ const CreateRoute: React.FC = () => {
     navigate("/route/subroute");
   };
 
-  const tableRef = useRef<HTMLDivElement>(null);
-  const handlePrint = () => {
-    const printContent = tableRef.current;
-    const originalContent = document.body.innerHTML;
-    if (printContent) {
-      document.body.innerHTML = printContent.innerHTML;
-      window.print();
-      document.body.innerHTML = originalContent;
-    }
-  };
-
-  const handleSortChange = (key: keyof Route, order: 'asc' | 'desc') => {
-    const sortedRoutes = [...filteredRouteList].sort((a, b) => {
-      if (order === "asc") {
-        return a[key].localeCompare(b[key]);
-      } else {
-        return b[key].localeCompare(a[key]);
-      }
-    });
-    setFilteredRouteList(sortedRoutes);
-  };
-  
+  // const tableRef = useRef<HTMLDivElement>(null);
+  // const handlePrint = () => {
+  //   const printContent = tableRef.current;
+  //   const originalContent = document.body.innerHTML;
+  //   if (printContent) {
+  //     document.body.innerHTML = printContent.innerHTML;
+  //     window.print();
+  //     document.body.innerHTML = originalContent;
+  //   }
+  // };
 
   return (
     <>
@@ -130,7 +106,7 @@ const CreateRoute: React.FC = () => {
         draggable
         pauseOnHover
         theme="colored"
-        // optional CSS class for further styling
+      // optional CSS class for further styling
       />
 
       <div className="flex min-h-screen w-full">
@@ -171,13 +147,13 @@ const CreateRoute: React.FC = () => {
 
               <div className="p-4 bg-white shadow-md rounded-lg">
                 <img src={total} alt="" />
-                <div className="w-[700px] font-bold leading-normal text-[#303F58] text-[17px] mt-2">
+                <div className=" font-bold leading-normal text-[#303F58] text-[17px] mt-2">
                   Total Route
                 </div>
                 <p className="text-[#4B5C79] w-[400] text-[12]">
                   Lorem ipsum dolor sit amet consectetur{" "}
                 </p>
-                <div className="w-[700px] text-[#820000] font-bold  leading-normal text-[18px] mt-3">
+                <div className=" text-[#820000] font-bold  leading-normal text-[18px] mt-3">
                   {routesList.length}
                 </div>
               </div>
@@ -187,13 +163,13 @@ const CreateRoute: React.FC = () => {
                 className="p-4 bg-white shadow-md rounded-lg"
               >
                 <img src={totsub} alt="" />
-                <div className="w-[700px] font-bold leading-normal text-[#303F58] text-[17px] mt-2">
+                <div className=" font-bold leading-normal text-[#303F58] text-[17px] mt-2">
                   Total Sub Route
                 </div>
                 <p className="text-[#4B5C79] w-[400] text-[12]">
                   Lorem ipsum dolor sit amet consectetur{" "}
                 </p>
-                <div className="w-[700px] text-[#820000] font-bold  leading-normal text-[18px] mt-3">
+                <div className=" text-[#820000] font-bold  leading-normal text-[18px] mt-3">
                   20
                 </div>
               </div>
@@ -213,102 +189,21 @@ const CreateRoute: React.FC = () => {
             </div>
 
             {/* Table Section */}
-            <div className="bg-white shadow-md rounded-lg p-4">
-              <div className="flex justify-between items-center mb-4 gap-4">
-                <div className="absolute ml-3 ">
-                  <img src={search} alt="search" className="h-5 w-5" />
-                </div>
-                <input
-                  className="pl-9 text-sm w-[100%] rounded-md text-start text-gray-800 h-10 p-2 border-0 focus:ring-1 focus:ring-gray-400"
-                  style={{
-                    backgroundColor: "rgba(28, 28, 28, 0.04)",
-                    outline: "none",
-                    boxShadow: "none",
-                  }}
-                  placeholder="Search Route"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)} // Update search query
-                />
-                <div className="flex w-[60%] justify-end gap-4">
-                <SortByMainRoute onSortChange={handleSortChange} />
-                {/* Sorting dropdown */}
-                  <button
-                    onClick={handlePrint}
-                    className="flex border text-[14] w-[500] text-[#565148] border-[#565148] px-4 py-2 rounded-lg"
-                  >
-                    <img className="mt-1 me-1" src={printer} alt="" />
-                    Print
-                  </button>
-                </div>
-              </div>
-              <div ref={tableRef}>
-                <table className="print-table w-full text-left">
-                  <thead className="bg-[#fdf8f0]">
-                    <tr className="border-b">
-                      <th className="p-2 text-[12px] text-center text-[#303F58]">
-                        Sl No
-                      </th>
-                      <th className="p-2 text-[12px] text-center text-[#303F58]">
-                        Route
-                      </th>
-                      <th className="p-2 text-[12px] text-center text-[#303F58]">
-                        Route Code
-                      </th>
-                      {/* <th className="p-2 text-[12px] text-center text-[#303F58]">
-                    Sub Route
-                  </th> */}
-                      <th className="p-2 text-[12px] text-center text-[#303F58]">
-                        Description
-                      </th>
-                      <th className="no-print p-2 text-[12px] text-center text-[#303F58]">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredRouteList.map((route, index) => (
-                      <tr className="border-b" key={route.id}>
-                        <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                          {index + 1}
-                        </td>
-                        <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                          {route.mainRouteName}
-                        </td>
-                        <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                          {route.mainRouteCode}
-                        </td>
-                        {/* <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                      {route.subRoute}
-                    </td> */}
-                        <td className="p-2 text-[14px] text-center text-[#4B5C79]">
-                          {route.description}
-                        </td>
-                        <td className="no-print p-2 text-[14px] text-center text-[#4B5C79]">
-                          <button
-                            onClick={() => handleView(route._id)}
-                            className="text-blue-500"
-                          >
-                            <img src={eye} alt="View" />
-                          </button>
+            <div>
 
-                          <button
-                            onClick={() => handleEdit(route._id)}
-                            className="text-red-500 ml-2"
-                          >
-                            <img src={vector} alt="Edit" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(route._id)}
-                            className="text-red-500 ml-2"
-                          >
-                            <img src={trash} alt="Delete" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            </div>
+            <div className="bg-white shadow-md rounded-lg p-4">
+              <Table
+                columns={columns}
+                data={routesList}
+                searchPlaceholder="Search Route"
+                loading={loading.skeleton}
+                searchableFields={["mainRouteName", "mainRouteCode"]}
+                onViewClick={handleView} // Add this prop
+                onEditClick={handleEdit}
+                onDeleteClick={handleDelete}
+              />
+
             </div>
           </div>
         </div>
