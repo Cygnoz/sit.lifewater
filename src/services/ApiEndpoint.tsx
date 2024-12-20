@@ -65,6 +65,9 @@ export const endpoints = {
   GET_ALL_ACTIVE_ROUTE:`active-rides`,
   GET_AN_ACTIVE_ROUTE:`viewActiveRoute`,
 
+  // Ride 
+  GET_ALL_COMPLETED_RIDE:`completedride`,
+
 
 
 
