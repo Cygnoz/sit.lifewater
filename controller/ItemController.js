@@ -1,4 +1,5 @@
 const Item = require('../Models/ItemSchema'); 
+const Warehouse = require('../Models/WarehouseSchema');
 
 // Create a new item
 exports.addItem = async (req, res) => {
@@ -133,15 +134,39 @@ exports.getItems = async (req, res) => {
 // Get a single item by ID
 exports.getItemById = async (req, res) => {
   try {
-    const item = await Item.findById(req.params.id); // Find the item by ID
+    // Find the item by ID
+    const item = await Item.findById(req.params.id);
 
-    if (!item) return res.status(404).json({ message: 'Item not found' });
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
 
-    res.status(200).json(item); // Return the found item
+    // Fetch warehouses containing the item in stock
+    const warehouses = await Warehouse.find({ "stock.itemId": req.params.id });
+
+    // Calculate the total quantity of the item across all warehouses
+    const totalQuantity = warehouses.reduce((sum, warehouse) => {
+      const itemStock = warehouse.stock.find(stock => stock.itemId === req.params.id);
+      return sum + (itemStock ? itemStock.quantity : 0);
+    }, 0);
+
+    // Prepare the response
+    res.status(200).json({
+      item: item,
+      totalQuantity: totalQuantity,
+      warehouses: warehouses.map(warehouse => ({
+        warehouseId: warehouse._id,
+        warehouseName: warehouse.warehouseName,
+        stock: warehouse.stock.filter(stock => stock.itemId === req.params.id),
+      })),
+    });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error." });
+    console.error('Error fetching item details:', error);
+    res.status(500).json({ message: "Internal server error.", error: error.message });
   }
 };
+
+
 
 
 
