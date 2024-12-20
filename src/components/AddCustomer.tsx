@@ -393,7 +393,7 @@ export default function Component() {
           </div>
 
           <div>
-            <label className="block text-gray-700">email</label>
+            <label className="block text-gray-700">Email</label>
             <input
               type="text"
               name="email"
@@ -405,7 +405,7 @@ export default function Component() {
 
           </div>
           <div>
-            <label className="block text-gray-700">addressLine 1</label>
+            <label className="block text-gray-700">AddressLine 1</label>
             <input
               type="text"
               name="addressLine1"
@@ -419,7 +419,7 @@ export default function Component() {
             )}
           </div>
           <div>
-            <label className="block text-gray-700">addressLine 2</label>
+            <label className="block text-gray-700">AddressLine 2</label>
             <input
               type="text"
               name="addressLine2"
@@ -433,7 +433,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">city</label>
+            <label className="block text-gray-700">City</label>
             <input
               type="text"
               name="city"
@@ -447,7 +447,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">street</label>
+            <label className="block text-gray-700">Street</label>
             <input
               type="text"
               name="street"
@@ -461,7 +461,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">zip postal code</label>
+            <label className="block text-gray-700">Zip Postal Code</label>
             <input
               type="number"
               name="zipPostalCode"
@@ -477,7 +477,7 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">flat number</label>
+            <label className="block text-gray-700">flat Number</label>
             <input
               type="text"
               name="flatNumber"
@@ -547,7 +547,7 @@ export default function Component() {
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter Mobile Number"
-              maxLength={15}
+              maxLength={10}
             />
             {errors.mobileNumber && (
               <p className="text-red-500 text-sm">{errors.mobileNumber}</p>
@@ -563,6 +563,7 @@ export default function Component() {
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter WhatsApp Number"
+              maxLength={10}
             />
             {errors.whatsappNumber && (
               <p className="text-red-500 text-sm">{errors.whatsappNumber}</p>

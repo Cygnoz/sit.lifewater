@@ -6,14 +6,17 @@ import { useContext, useEffect, useState } from "react";
 import useApi from "../Hook/UseApi";
 import { endpoints } from "../services/ApiEndpoint";
 import { AllOrderResponseContext } from "../Context/ContextShare";
+import ViewOrderModal from "./ViewOrderModal";
 
 type Props = {}
 
 const Orders = ({ }: Props) => {
   const [orders, setOrders] = useState([])
-  const {setOrderResponse} = useContext(AllOrderResponseContext)!
+  const { setOrderResponse } = useContext(AllOrderResponseContext)!
+  const [loading, setLoading] = useState<boolean>(false);
   const { request: getALLOrders } = useApi("get", 4001)
   const getALLOrderss = async () => {
+    setLoading(true);
     try {
       const url = `${endpoints.GET_ALL_ORDER}`
       const { response, error } = await getALLOrders(url)
@@ -24,6 +27,8 @@ const Orders = ({ }: Props) => {
       }
     } catch (error) {
       console.log(error)
+    } finally {
+      setLoading(false); // Stop loading
     }
   }
 
@@ -48,8 +53,10 @@ const Orders = ({ }: Props) => {
           <img className="m-2" src={plusIcon} alt="Add Customer" width={30} />
         </Link>
       </div>
-      <div>
-        {orders.length > 0 ? (
+      <div>{loading ? (
+        <div className="p-2 text-center text-gray-500">Loading...</div>
+      )
+        : orders.length > 0 ? (
           orders.map((order: any) => (
             <div className="bg-gradient-to-l from-[#E3E6D5] to-[#F7E7CE] my-3 p-5 rounded-xl" key={order.id || Math.random()}>
               <div className="flex justify-between">
@@ -57,11 +64,7 @@ const Orders = ({ }: Props) => {
                   <p className="text-[#303F58]">Customer</p>
                   <p className="text-[#303F58] text-[16px] font-bold ms-1">{order.customerName || "NA"}</p>
                 </div>
-                <Link to={`/orders/${order._id}`}>
-                <button  className="bg-[#F6F6F6] h-6 text-[13px] rounded-md px-3 border border-[#820000]">
-                  View
-                </button>
-                </Link>
+                <ViewOrderModal id={order._id} />
               </div>
               <p className="text-[#303F58] pt-1">Item</p>
               <p className="text-[#303F58] font-semibold ms-1">

@@ -83,7 +83,7 @@ const AddOrder = ({ }: Props) => {
         const RouteDetails = JSON.parse(localStorage.getItem("activeRoute") || "{}");
         setActiveRoute(RouteDetails);
         const RideId = JSON.parse(localStorage.getItem("StartRide") || "{}");
-        const Id=  (RideId.data._id)
+        const Id=  (RideId?.data._id)
         if(RideId){
             setOrderData((prevData) => ({
                 ...prevData,
@@ -249,8 +249,6 @@ const AddOrder = ({ }: Props) => {
         }
     };
 
-
-
     const [subRoutes, setSubRoutes] = useState<any>({
         stock: [], // Initialize with an empty array to avoid undefined
     });
@@ -286,8 +284,10 @@ const AddOrder = ({ }: Props) => {
     }, []);
 
     const { request: AddOrder } = useApi("post", 4001);
-
     const handleSubmit = async () => {
+        if(!orderData.customerId){
+
+        }
         try {
             const orderWithDefaults = {
                 ...orderData,
@@ -339,7 +339,7 @@ const AddOrder = ({ }: Props) => {
             <form className="space-y-4">
                 <div className="px-5">
                     <div className="relative">
-                        <label className="block text-gray-700">Search Customer</label>
+                        <label className="block text-gray-700">Select Customer</label>
                         <input
                             type="text"
                             value={searchValue}
@@ -368,7 +368,6 @@ const AddOrder = ({ }: Props) => {
                         </div>
                     </div>
 
-
                     <div className="pt-2">
                         <label className="block text-gray-700">Order Number</label>
                         <input
@@ -394,7 +393,7 @@ const AddOrder = ({ }: Props) => {
                             {isOpen && (
                                 <div className="absolute z-10 w-full mt-2 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
                                     {
-                                        subRoutes.stock.map((item: any) => (
+                                        subRoutes?.stock?.map((item: any) => (
                                             <div
                                                 key={item.itemId}
                                                 onClick={() =>
