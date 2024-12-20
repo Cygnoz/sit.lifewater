@@ -118,9 +118,6 @@ exports.updateRoute = async (req, res) => {
     return res.status(200).json({  route: updatedRoute });
   } catch (error) {
     console.error('Error updating route:', error.message);
-    return res.status(500).json({
-      message: "Internal server error."
-    });
   }
 };
  
