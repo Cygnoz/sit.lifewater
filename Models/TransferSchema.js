@@ -1,9 +1,13 @@
 const mongoose = require('mongoose');
 
 const transferSchema = new mongoose.Schema({
-  fromRoute: {type: String, required: true },
-  toRoute: { type: String, required: true },
+  fromRoute: {type: String },
+  fromRouteId :{type: String },
+  toRouteId :{type: String },
+  toRoute: { type: String },
   filledBottlesTransferred: { type: Number, required: true },
+  notes: {type: String},
+  termsAndConditions: {type:String},
   date: { type: Date, default: Date.now }
 });
 
