@@ -41,7 +41,7 @@ router.delete('/orders/:id', verifyToken,  orderController.deleteOrder);
 router.get('/today/:rideId', orderController.getTodayOrders);
 
 //Unloading
-router.post('/addunload', verifyToken,  unloadController.addUnload);
+router.post('/addunload', verifyToken,  unloadController.unloadStock);
 router.get('/unload', verifyToken,  unloadController.getAllUnloads);
 
 module.exports = router;

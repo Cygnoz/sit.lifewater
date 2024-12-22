@@ -3,12 +3,18 @@ const mongoose = require('mongoose');
 
 const unloadSchema = new mongoose.Schema({
 
-  mainRoute: {
+  subRoute: {
     type: String,
   },
+  subRouteId: {
+    type: String,
+    },
   warehouseName: {
     type: String,
-  }, 
+  },
+  warehouseId: {
+    type: String,
+    },
   date: {
     type: Date,
     default: Date.now
@@ -16,14 +22,18 @@ const unloadSchema = new mongoose.Schema({
   transferNumber: {
     type: String,
   },
-  items: [{
-    itemName: String,
-    quantity: Number,
-    amount:String,
-    rate:String
+  stock: [{
+    itemId: { type: String },
+    itemName: { type: String },
+    quantity: { type: Number },
+    status: { type: String, default: undefined }     
   }],
-  autoNotes: String,
-  termsAndConditions: String
+  notes:{ 
+    type: String,
+    },
+  termsAndConditions:{
+    type: String
+  }
 });
 
 module.exports = mongoose.model('Unload', unloadSchema);
