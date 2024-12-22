@@ -23,6 +23,9 @@ export const endpoints = {
   ADD_STOCK_LOAD:`stock`,
   GET_ALL_LOADED_STOCK:`stock`,
   ADD_INTERNAL_TRANSFER:`internaltransfer`,
+                 // unloads
+                ADD_UNLOAD_STOCK:`addunload`,
+                GET_ALL_UNLOADS:`unload`,
 
   //item
   GET_ALL_ITEMS: `item`,

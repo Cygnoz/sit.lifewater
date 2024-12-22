@@ -4,12 +4,12 @@ import split from '../../../assets/images/list-filter.svg';
 import search from '../../../assets/images/search.svg';
 import plus from '../../../assets/circle-plus.svg';
 import { Link } from 'react-router-dom';
-import { getAllUnloadsAPI } from '../../../services/StockAPI/UnloadAPI';
+import { endpoints } from '../../../services/ApiEndpoint';
+import useApi from '../../../Hook/UseApi';
 
 const UnloadedAdd: React.FC = () => {
   const [unloads, setUnloads] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -18,20 +18,29 @@ const UnloadedAdd: React.FC = () => {
   // Search state
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  useEffect(() => {
-    const fetchUnloads = async () => {
-      try {
-        const unloadsData = await getAllUnloadsAPI();
-        setUnloads(unloadsData);
-      } catch (error) {
-        setError('Failed to fetch unloads. Please try again later.');
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { request: getAllUnloadStockss } = useApi("get", 4001);
 
-    fetchUnloads();
+
+
+  const getALLUnloads = async () => {
+    try {
+  
+      const url = `${endpoints.GET_ALL_UNLOADS}`;
+      const { response, error } = await getAllUnloadStockss(url);
+      console.log("API RESPONSE :", response);
+
+      if (!error && response) {
+     
+        setUnloads(response.data);
+        console.log(response.data.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getALLUnloads();
   }, []);
 
   // Filter unloads based on search term
@@ -51,9 +60,7 @@ const UnloadedAdd: React.FC = () => {
   // Change page
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
-
+  
   return (
     <div>
       <div className="flex justify-between items-center my-2">
@@ -103,22 +110,22 @@ const UnloadedAdd: React.FC = () => {
         <table className="w-full text-left">
           <thead className='bg-[#fdf8f0]'>
             <tr className="border-b">
-              <th className="p-2 text-[12px] text-center text-[#303F58] w-16"><input type="checkbox" /></th>
+            
               <th className="p-2 text-[12px] text-center text-[#303F58]">Sl No</th>
               <th className="p-2 text-[12px] text-center text-[#303F58]">Date</th>
               <th className="p-2 text-[12px] text-center text-[#303F58]">Transfer No</th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">Main Route</th>
+              <th className="p-2 text-[12px] text-center text-[#303F58]">Sub Route</th>
               <th className="p-2 text-[12px] text-center text-[#303F58]">Warehouses</th>
             </tr>
           </thead>
           <tbody>
             {currentItems.map((unload, index) => (
               <tr key={unload._id} className="border-b">
-                <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16"><input type="checkbox" /></td>
+              
                 <td className="p-2 text-[14px] text-center text-[#4B5C79]">{indexOfFirstItem + index + 1}</td>
                 <td className="p-2 text-[14px] text-center text-[#4B5C79]">{new Date(unload.date).toLocaleDateString()}</td>
                 <td className="p-2 text-[14px] text-center text-[#4B5C79]">{unload.transferNumber}</td>
-                <td className="p-2 text-[14px] text-center text-[#4B5C79]">{unload.mainRoute}</td>
+                <td className="p-2 text-[14px] text-center text-[#4B5C79]">{unload.subRouteName}</td>
                 <td className="p-2 text-[14px] text-center text-[#4B5C79]">{unload.warehouseName}</td>
               </tr>
             ))}
@@ -138,7 +145,7 @@ const UnloadedAdd: React.FC = () => {
             <button
               key={i}
               onClick={() => paginate(i + 1)}
-              className={`px-3 py-1 mx-1 rounded-md ${currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+              className={`px-3 py-1 mx-1 rounded-md ${currentPage === i + 1 ? 'bg-red-800 text-white' : 'bg-gray-200'}`}
             >
               {i + 1}
             </button>
