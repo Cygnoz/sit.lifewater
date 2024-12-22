@@ -1,19 +1,18 @@
 // Utility to generate a unique order number
 const UniqueOrderNumber = (orderResponse: any[], prefix: string = "ORD"): string => {
-    // Extract all existing order numbers from the orderResponse
-    const previouslyUsedOrderNumbers = new Set(
-        orderResponse.map((order) => order.orderNumber) // Collect all order numbers into a Set
-    );
+    // Find the highest existing order number
+    const maxOrderNumber = orderResponse
+        .map((order) => {
+            const match = order.orderNumber.match(new RegExp(`^${prefix}-(\\d+)$`)); // Extract numeric part
+            return match ? parseInt(match[1], 10) : 0; // Convert to a number, or 0 if invalid
+        })
+        .reduce((max, current) => Math.max(max, current), 0); // Get the maximum
 
-    let orderNumber: string;
+    // Increment the highest order number
+    const newOrderNumber = maxOrderNumber + 1;
 
-    // Generate a unique order number
-    do {
-        const randomNum = Math.floor(Math.random() * 90000) + 10000; // Generate a 5-digit random number
-        orderNumber = `${prefix}-${randomNum}`; // Prefix with 'ORD' or custom prefix
-    } while (previouslyUsedOrderNumbers.has(orderNumber)); // Ensure uniqueness
-
-    return orderNumber;
+    // Return the new order number with the prefix
+    return `${prefix}-${newOrderNumber.toString().padStart(5, "0")}`; // Ensures 5-digit format
 };
 
 export default UniqueOrderNumber;

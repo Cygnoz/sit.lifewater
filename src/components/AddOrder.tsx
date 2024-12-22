@@ -9,6 +9,8 @@ import Button from "../CommonComponents/Button";
 import { toast, ToastContainer } from "react-toastify";
 import { AllOrderResponseContext } from "../Context/ContextShare";
 import UniqueOrderNumber from "./UniqueOrderNumber";
+import user from '../assets/images/Icons/user-round-plus.svg'
+import { format } from 'date-fns';
 type Props = {}
 interface Item {
     itemId: string;
@@ -32,7 +34,7 @@ interface OrdrerData {
     totalAmount: number,
     returnBottle: number,
     ratePerItem: string,
-    rideId:string,
+    rideId: string,
     stock: Item[];
 }
 
@@ -61,7 +63,7 @@ const AddOrder = ({ }: Props) => {
         totalAmount: 0, // Initialized as a number
         returnBottle: 0, // Initialized as a number
         ratePerItem: "", // Initialized as a number
-        rideId:"",
+        rideId: "",
         stock: [],
     });
     console.log("Input Data", orderData);
@@ -81,17 +83,29 @@ const AddOrder = ({ }: Props) => {
     const [activeRoute, setActiveRoute] = useState<any | null>(null);
     useEffect(() => {
         const RouteDetails = JSON.parse(localStorage.getItem("activeRoute") || "{}");
+        console.log(RouteDetails, "Route Details");
+    
+        // Set activeRoute state
         setActiveRoute(RouteDetails);
+    
         const RideId = JSON.parse(localStorage.getItem("StartRide") || "{}");
-        const Id=  (RideId?.data._id)
-        if(RideId){
+        const Id = RideId?.data?._id; // Use optional chaining for safety
+    
+        // Check if Id is present and RouteDetails has valid values
+        if (Id && RouteDetails && Object.keys(RouteDetails).length > 0) {
             setOrderData((prevData) => ({
                 ...prevData,
                 rideId: Id,
+                mainRouteId: RouteDetails?.mainRouteId,
+                mainRouteName: RouteDetails?.mainRouteName,
+                subRouteId: RouteDetails?.subRouteId,
+                subRouteName: RouteDetails?.subRouteName,
+                salesman: RouteDetails?.salesmanName,
             }));
         }
     }, []);
     
+
     // Fetch localStorage data on mount
     useEffect(() => {
         // Only call getALLCustomers when activeRoute is set
@@ -107,9 +121,11 @@ const AddOrder = ({ }: Props) => {
         // Show all customers when the input is focused
         setFilteredCustomers(customers);
     };
+
+   
     const handleReturnBottleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        // Convert to number and handle empty case
+        // Convert value to a number or set to 0 if empty
         const numericValue = value === '' ? 0 : Number(value);
         setOrderData((prev) => ({
             ...prev,
@@ -163,15 +179,11 @@ const AddOrder = ({ }: Props) => {
 
 
 
-    const handleItemClick = (itemId: string, itemName: string, mainRouteId: any, mainRouteName: any, subRouteName: any, quantity: any, _id: any,) => {
+    const handleItemClick = (itemId: any, itemName: any, quantity: any) => {
 
         setOrderData((prevState) => ({
             ...prevState,
-            stock: [{ itemId, itemName, quantity: 1 }], // Use the quantity from the input
-            mainRouteId: mainRouteId,
-            mainRouteName: mainRouteName,
-            subRouteName: subRouteName,
-            subRouteId: _id,
+            stock: [{ itemId, itemName, quantity: 1 }], // Use the quantity from the input          
         }));
         setQuantity(quantity)
         setSelectedItem({ itemId, itemName });
@@ -277,16 +289,31 @@ const AddOrder = ({ }: Props) => {
 
     }, [])
 
-    // Set today's date when the component loads
-    useEffect(() => {
-        const today = new Date().toISOString().split("T")[0]; // Format YYYY-MM-DD
-        setOrderData((prevData) => ({ ...prevData, date: today }));
-    }, []);
+
+useEffect(() => {
+    const now = new Date();
+    const formattedDateTime = format(now, 'yyyy-MM-dd HH:mm:ss'); // Format: YYYY-MM-DD HH:MM:SS
+    setOrderData((prevData) => ({ ...prevData, date: formattedDateTime }));
+}, []);
+
 
     const { request: AddOrder } = useApi("post", 4001);
     const handleSubmit = async () => {
-        if(!orderData.customerId){
-
+        if (!orderData.customerId) {
+            toast.error("Select a customer.");
+            return;
+        }
+        if (!orderData.orderNumber.trim()) {
+            toast.error("Enter an order number.");
+            return;
+        }
+        if (orderData.stock.length === 0) {
+            toast.error("Add at least one stock item.");
+            return;
+        }
+        if (!orderData.paymentMode) {
+            toast.error("Select a payment mode.");
+            return;
         }
         try {
             const orderWithDefaults = {
@@ -353,19 +380,32 @@ const AddOrder = ({ }: Props) => {
                             {loading ? (
                                 <div className="p-2 text-gray-500">Loading...</div>
                             ) : customers.length > 0 ? (
-                                filteredCustomers.map((customer: any) => (
-                                    <div
-                                        key={`${customer.customerID}-${customer.ratePerBottle}`}
-                                        className="p-2 cursor-pointer m-2 border-2 rounded-lg hover:bg-gray-100"
-                                        onClick={() => handleCustomerSelect(customer)}
-                                    >
-                                        {customer.fullName}
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="p-2">No customers found</div>
-                            )}
+                                <div>
+                                    {
+                                        filteredCustomers.map((customer: any) => (
+                                            <div
+                                                key={`${customer.customerID}-${customer.ratePerBottle}`}
+                                                onClick={() => handleCustomerSelect(customer)}
+                                            >
+                                                <div className="p-2 cursor-pointer m-2 border-2 rounded-lg hover:bg-gray-100"                                        >
+                                                    {customer.fullName}
+                                                </div>
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+
+                            ) :
+                                (
+                                    <div className="p-2">No customers found</div>
+                                )}
                         </div>
+                        <Link to={'/addcustomers'}>
+                            <div className="flex gap-1 my-1 cursor-pointer">
+                                <img src={user} alt="" />
+                                <p className="text-[#820000] text-[14px] font-semibold">Add New Customer</p>
+                            </div>
+                        </Link>
                     </div>
 
                     <div className="pt-2">
@@ -400,11 +440,7 @@ const AddOrder = ({ }: Props) => {
                                                     handleItemClick(
                                                         item.itemId,
                                                         item.itemName,
-                                                        subRoutes.mainRouteId,
-                                                        subRoutes.mainRouteName,
-                                                        subRoutes.subRouteName,
                                                         item.quantity,
-                                                        subRoutes._id
                                                     )
                                                 }
                                                 className="p-2 m-2 border-2 rounded-lg text-left cursor-pointer hover:bg-gray-100"
@@ -451,25 +487,14 @@ const AddOrder = ({ }: Props) => {
 
                     </div>
                     {quantity ?
-                    <div className="text-[13px] ms-1">
-                        Quantity : {quantity}
-                    </div> : ""
+                        <div className="text-[13px] ms-1">
+                            Quantity : {quantity}
+                        </div> : ""
                     }
                     {error && <div className="text-red-500 text-center text-sm mt-1">{error}</div>}
-                    <div className="grid grid-cols-2 gap-2 pt-2">
-                        <div>
-                            <label className="block text-gray-700">Date</label>
-                            <input
-                                type="date"
-                                name="date"
-                                value={orderData.date}
-                                onChange={handleInputChange}
-                                className="w-full p-2 mt-1 border rounded-md"
-                                readOnly
-                            />
+                    <div className="flex  pt-2">
 
-                        </div>
-                        <div>
+                        <div className="w-full">
                             <label className="block text-gray-700">Payment Mode</label>
                             <select
                                 name="paymentMode"
@@ -484,72 +509,6 @@ const AddOrder = ({ }: Props) => {
                                 <option value="FOC">FOC</option>
                             </select>
                         </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 pt-2">
-                        <div className="">
-                            <label className="block text-gray-700">Main Route</label>
-                            <input
-                                type="text"
-                                name="mainRouteName"
-                                value={activeRoute?.mainRouteName}
-                                onChange={handleInputChange}
-                                className="w-full p-2 mt-1 border rounded-md"
-                                readOnly
-                            />
-                        </div>
-                        <div className="">
-                            <label className="block text-gray-700">Sub Route</label>
-                            <input
-                                type="text"
-                                name="subRouteName"
-                                value={activeRoute?.subRouteName}
-                                onChange={handleInputChange}
-                                className="w-full p-2 mt-1 border rounded-md"
-                                readOnly
-                            />
-                        </div>
-                    </div>
-
-                    {/* salesman */}
-                    <div className="pt-2">
-                        <label className="block text-gray-700">Sales Man</label>
-                        <input
-                            type="text"
-                            name="salesman"
-                            value={activeRoute?.salesmanName}
-                            onChange={handleInputChange}
-                            className="w-full p-2 mt-1 border rounded-md"
-                            readOnly
-                        />
-                    </div>
-
-                    {/* Return  Empty Bottle */}
-                    <div className="pt-2">
-                        <label className="block text-gray-700">Return  Empty Bottle</label>
-                        <input
-                            type="number"
-                            name="returnBottle"
-                            value={orderData.returnBottle || ''} // Use `|| ''`
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                if (/^\d*$/.test(value)) { // Only allow numbers
-                                    handleReturnBottleChange(e); // Update state if the input is valid
-                                }
-                            }}
-                            onKeyDown={(e) => {
-                                if (
-                                    e.key === "e" || // Prevent 'e' for exponential notation
-                                    e.key === "+" || // Prevent '+'
-                                    e.key === "-" || // Prevent '-'
-                                    e.key === "." || // Prevent '.'
-                                    e.key === " "    // Prevent space
-                                ) {
-                                    e.preventDefault();
-                                }
-                            }}
-                            className="w-full p-2 mt-1 border rounded-md"
-                            placeholder="Return Empty Bottle"
-                        />
                     </div>
 
                     {/* Rate per Item */}
@@ -577,10 +536,35 @@ const AddOrder = ({ }: Props) => {
                                 }
                             }}
                             className="w-full p-2 mt-1 border rounded-md"
-                            placeholder="Rate Per Item"
+                            placeholder="Rate Rate"
                         />
 
                     </div>
+
+                    {/* Return  Empty Bottle */}
+                    <div className="pt-2">
+                        <label className="block text-gray-700">Return  Empty Bottle</label>
+                        <input
+            type="number"
+            name="returnBottle"
+            value={orderData.returnBottle || ''} // Use `|| ''` to handle undefined
+            onChange={handleReturnBottleChange} // Call directly to handle input change
+            onKeyDown={(e) => {
+                if (
+                    e.key === "e" || // Prevent 'e' for exponential notation
+                    e.key === "+" || // Prevent '+'
+                    e.key === "-" || // Prevent '-'
+                    e.key === "." || // Prevent '.'
+                    e.key === " "    // Prevent space
+                ) {
+                    e.preventDefault();
+                }
+            }}
+            className="w-full p-2 mt-1 border rounded-md"
+            placeholder="Empty Return Bottle Number"
+        />
+                    </div>
+
 
                     <div className="pt-2">
                         <label className="block text-gray-700">Note</label>
@@ -590,18 +574,7 @@ const AddOrder = ({ }: Props) => {
                             value={orderData.notes}
                             onChange={handleInputChange}
                             className="w-full p-2 mt-1 border rounded-md"
-                            placeholder="Enter Note"
-                        />
-                    </div>
-                    <div className="pt-2">
-                        <label className="block text-gray-700">Terms And Condition</label>
-                        <input
-                            type="text"
-                            name="termsAndCondition"
-                            value={orderData.termsAndCondition}
-                            onChange={handleInputChange}
-                            className="w-full p-2 mt-1 border rounded-md"
-                            placeholder="Terms And Condition"
+                            placeholder="Add Note"
                         />
                     </div>
                     <div>
@@ -614,7 +587,6 @@ const AddOrder = ({ }: Props) => {
                                 value={orderData.totalAmount ? orderData.totalAmount : ratePerCustomer}
                                 onChange={handleInputChange}
                                 className="w-full p-2 mt-1 border rounded-md"
-                                placeholder="Total Amount"
                                 readOnly
                             />
                         </div>
