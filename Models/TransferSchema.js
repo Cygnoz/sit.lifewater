@@ -8,6 +8,14 @@ const transferSchema = new mongoose.Schema({
   filledBottlesTransferred: { type: Number, required: true },
   notes: {type: String},
   termsAndConditions: {type:String},
+  transferNumber: { type: String },
+   
+  stock: [{
+    itemId: { type: String },
+    itemName: { type: String },
+    quantity: { type: Number },
+    status: { type: String, default: undefined }     
+  }],
   date: { type: Date, default: Date.now }
 });
 

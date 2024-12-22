@@ -757,13 +757,15 @@ exports.internalTransfer = async (req, res) => {
 
     console.log("Updated Destination Subroute Stock:", toRouteStock);
 
-    // Log the transfer
+    // Log the transfer with stock details
     const transferLog = new TransferLog({
       fromRoute: cleanedData.fromRoute,
       fromRouteId: cleanedData.fromRouteId,
       toRoute: cleanedData.toRoute,
       toRouteId: cleanedData.toRouteId,
       filledBottlesTransferred: cleanedData.stock.reduce((sum, item) => sum + item.quantity, 0),
+      stock: cleanedData.stock, // Include transferred stock details
+      transferNumber: cleanedData.transferNumber, // Save transfer number
       notes: cleanedData.notes,
       termsAndConditions: cleanedData.termsAndConditions
     });
@@ -787,6 +789,7 @@ exports.internalTransfer = async (req, res) => {
     });
   }
 };
+
 
 
 
