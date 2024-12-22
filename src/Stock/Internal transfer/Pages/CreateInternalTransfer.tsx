@@ -4,6 +4,7 @@ import search from "../../../assets/images/search.svg";
 
 // import plus from '../../../assets/circle-plus.svg'
 import { Link } from "react-router-dom";
+import AddNewButton from "../../../commoncomponents/Buttons/AddNewButton";
 
 const CreateInternalTransfer: React.FC = () => {
   return (
@@ -14,7 +15,11 @@ const CreateInternalTransfer: React.FC = () => {
           <p className="text-gray-500 ms-2 my-2">Lorem ipsum dolor sit amet</p>
         </div>
         <div className="flex justify-between">
-          <Link to={"/addinternaltransfer"}></Link>
+          <Link to={"/addinternaltransfer"}>
+          <AddNewButton>
+            Add New Transfer
+          </AddNewButton>
+          </Link>
         </div>
       </div>
 
