@@ -101,7 +101,7 @@ const CreateSubRoute: React.FC = () => {
         }, 3000)
       } else {
         // Handle any API errors
-        toast.error(error?.message || "Failed to add subroute. Please try again.")
+        toast.error(error?.data.message || "Failed to add subroute. Please try again.")
       }
     } catch (err) {
       console.error("Error adding subroute:", err)

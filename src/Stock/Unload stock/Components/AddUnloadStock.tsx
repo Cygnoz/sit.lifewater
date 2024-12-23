@@ -298,7 +298,7 @@ console.log(mainRouteId);
         toast.success(response.data.message);
         setTimeout(() => {
           navigate("/unloadstock");
-        }, 1000);
+        }, 3000);
       }
       console.log(error);
       toast.error(error.response.data.message);
