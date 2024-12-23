@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const unloadSchema = new mongoose.Schema({
 
-  subRoute: {
+  subRouteName: {
     type: String,
   },
   subRouteId: {

@@ -16,7 +16,7 @@ exports.unloadStock = async (req, res) => {
       .filter(item => item.itemId && item.itemId.trim() !== "" && item.quantity > 0);
 
     // Validate required fields
-    if (!cleanedData.subRouteId || !cleanedData.subRoute) {
+    if (!cleanedData.subRouteId || !cleanedData.subRouteName) {
       return res.status(400).json({ success: false, message: 'Select Sub Route' });
     }
     if (!cleanedData.warehouseId || !cleanedData.warehouseName) {
