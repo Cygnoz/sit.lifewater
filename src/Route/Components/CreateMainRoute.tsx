@@ -36,7 +36,6 @@ const AddMainRoute: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     console.log(loading);
-    
 
     try {
       // Prepare the payload
@@ -56,7 +55,10 @@ const AddMainRoute: React.FC = () => {
         }, 3000);
       } else {
         // Handle any API errors
-        toast.error(error?.message || "Failed to add mainroute. Please try again.");
+        toast.error(
+          error.response?.data?.message ||
+            "Failed to add Main Route. Please try again."
+        );
       }
     } catch (err) {
       console.error("Error adding mainroute:", err);
@@ -141,21 +143,27 @@ const AddMainRoute: React.FC = () => {
               placeholder="Enter description"
               className="w-full h-[36px] px-3 py-2 border border-[#CECECE] rounded-[4px] bg-[#FFFFFF] focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
               style={{ resize: "none", overflow: "hidden" }} // Inline styles to remove resize handles
-             
             />
           </div>
 
           {/* Action Buttons */}
           <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              className="px-2 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition"
-              onClick={() =>
-                setFormData({ mainRouteName: "", mainRouteCode: "", description: "" })
-              } // Optional: reset on cancel
-            >
-              Cancel
-            </button>
+            <Link to={"/route/createroute"}>
+              <button
+                type="button"
+                className="px-2 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition"
+                onClick={() =>
+                  setFormData({
+                    mainRouteName: "",
+                    mainRouteCode: "",
+                    description: "",
+                  })
+                } // Optional: reset on cancel
+              >
+                Cancel
+              </button>
+            </Link>
+
             <button
               type="submit"
               className="px-10 py-2 bg-red-800 text-white rounded-md hover:bg-red-800 transition"
