@@ -791,6 +791,16 @@ exports.internalTransfer = async (req, res) => {
 };
 
 
+exports.getAllTransfers = async (req, res) => {
+    try {
+      const tranfers = await TransferLog.find();
+      res.status(200).json(tranfers);
+    } catch (error) {
+      console.error('Error fetching unloads:', error);
+      res.status(500).json({ message: 'Failed to fetch unloads', error });
+    }
+  };
+
 
 
 

@@ -14,6 +14,7 @@ router.post('/stock', verifyToken, stockController.addStock);
 router.get('/stock', verifyToken,  stockController.getAllStock);
 router.get('/stockstats', verifyToken,  stockController.getStockStats);
 router.put('/internaltransfer', verifyToken,  stockController.internalTransfer);
+router.get('/getalltransfers', verifyToken, stockController.getAllTransfers)
 
 //Item
 router.post('/item', verifyToken,  itemController.addItem);
