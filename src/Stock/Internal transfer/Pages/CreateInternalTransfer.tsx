@@ -1,12 +1,52 @@
-import printer from "../../../assets/images/printer.svg";
-import split from "../../../assets/images/list-filter.svg";
-import search from "../../../assets/images/search.svg";
 
-// import plus from '../../../assets/circle-plus.svg'
 import { Link } from "react-router-dom";
 import AddNewButton from "../../../commoncomponents/Buttons/AddNewButton";
+import useApi from "../../../Hook/UseApi";
+import { endpoints } from "../../../services/ApiEndpoint";
+import { useContext, useEffect, useState } from "react";
+import { TableResponseContext } from "../../../assets/Context/ContextShare";
+import Table from "../../../commoncomponents/Table/Table";
 
 const CreateInternalTransfer: React.FC = () => {
+
+  const { request: getAllTransfer } = useApi("get", 4001);
+  const [allTransfer, setAllTransfer] = useState<any[]>([]);
+  const { loading, setLoading } = useContext(TableResponseContext)!;
+
+  const [columns] = useState([
+    { id: "date", label: "Date", visible: true },
+    { id: "transferNumber", label: "Transfer No", visible: true },
+    { id: "fromRoute", label: "From Route", visible: true },
+    { id: "toRoute", label: "To Route", visible: true },
+    { id: "filledBottlesTransferred", label: "Bottles", visible: true },
+
+  ]);
+
+  const getTransfer = async () => {
+    try {
+      setLoading({ ...loading, skeleton: true, noDataFound: false })
+
+      const url = `${endpoints.GET_INTERNAL_TRANSFER}`;
+      const { response, error } = await getAllTransfer(url);
+      if (!error && response) {
+        setAllTransfer(response.data)
+        console.log(response.data, "transfer");
+        setLoading({ ...loading, skeleton: false })
+
+      } else {
+        console.log(error);
+        setLoading({ ...loading, skeleton: false, noDataFound: true })
+      }
+    } catch (error) {
+      console.log(error);
+      setLoading({ ...loading, skeleton: false, noDataFound: true })
+    }
+  }
+
+  useEffect(() => {
+    getTransfer()
+  }, [])
+
   return (
     <div>
       <div className="flex justify-between items-center my-2">
@@ -16,103 +56,25 @@ const CreateInternalTransfer: React.FC = () => {
         </div>
         <div className="flex justify-between">
           <Link to={"/addinternaltransfer"}>
-          <AddNewButton>
-            Add New Transfer
-          </AddNewButton>
+            <AddNewButton>
+              Add New Transfer
+            </AddNewButton>
           </Link>
         </div>
       </div>
 
       {/* Table Section */}
       <div className="bg-white shadow-md rounded-lg p-4">
-        <div className="flex justify-between items-center mb-4">
-          <div className="absolute ml-3 ">
-            <img src={search} alt="search" className="h-5 w-5" />
-          </div>
-          <input
-            className="pl-9 text-sm w-[100%] rounded-md text-start text-gray-800 h-10 p-2 border-0 focus:ring-1 focus:ring-gray-400"
-            style={{
-              backgroundColor: "rgba(28, 28, 28, 0.04)",
-              outline: "none",
-              boxShadow: "none",
-            }}
-            placeholder="Search Stock"
-          />
-          <div className="flex w-[60%] justify-end">
-            <button className="flex border text-[14] w-[500] text-[#565148] border-[#565148] px-4 py-2 me-2 rounded-lg">
-              <img className="mt-1 me-1" src={split} alt="" />
-              Sort By
-            </button>
-            <button className="flex border text-[14] w-[500] text-[#565148] border-[#565148] px-4 py-2 rounded-lg">
-              <img className="mt-1 me-1" src={printer} alt="" />
-              Print
-            </button>
-          </div>
-        </div>
-        <table className="w-full text-left">
-          <thead className=" bg-[#fdf8f0]">
-            <tr className="border-b">
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Sl No
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Date
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Transfer No
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Frome Route
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                To Route
-              </th>
-              <th className="p-2 text-[12px] text-center text-[#303F58]">
-                Stock
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b">
-              
-              <td className="p-2 text-[14] text-center text-[#4B5C79]">1</td>
-              <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                15 May 2023
-              </td>
-              <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                IN-44
-              </td>
-
-              <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                Kakka
-              </td>
-              <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                patta
-              </td>
-              <td className="p-2 text-[14] text-center text-[#4B5C79]">89</td>
-            </tr>
-          </tbody>
-
-          <tbody>
-            <tr className="border-b">
-             
-              <td className="p-2 text-[14] text-center text-[#4B5C79]">2</td>
-              <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                15 May 2023
-              </td>
-              <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                IN-44
-              </td>
-
-              <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                Kaooa
-              </td>
-              <td className="p-2 text-[14] text-center text-[#4B5C79]">pala</td>
-              <td className="p-2 text-[14] text-center text-[#4B5C79]">44</td>
-            </tr>
-          </tbody>
-        </table>
+        <Table
+          columns={columns}
+          data={allTransfer}
+          searchPlaceholder={"Search All Transfer"}
+          loading={loading.skeleton}
+          searchableFields={["transferNumber", "fromRoute","toRoute"]}
+          showAction={false} // Explicitly disable the action column
+        />
       </div>
+
     </div>
   );
 };

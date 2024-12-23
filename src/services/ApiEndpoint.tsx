@@ -9,7 +9,7 @@ export const endpoints = {
   EDIT_VEHICLE: `editvehicle`,
   DELETE_VEHICLE: `deletevehicle`,
   VIEW_AN_VEHICLE: `viewvehicle`,
-  
+
   // staff
   GET_ALL_STAFF: `getallstaffs`,
   ADD_STAFF: `addstaff`,
@@ -20,12 +20,16 @@ export const endpoints = {
   // stock
   ADD_W_STOCK: `wstock`,
   GET_W_STOCK: `wstock`,
-  ADD_STOCK_LOAD:`stock`,
-  GET_ALL_LOADED_STOCK:`stock`,
-  ADD_INTERNAL_TRANSFER:`internaltransfer`,
-                 // unloads
-                ADD_UNLOAD_STOCK:`addunload`,
-                GET_ALL_UNLOADS:`unload`,
+  ADD_STOCK_LOAD: `stock`,
+  GET_ALL_LOADED_STOCK: `stock`,
+
+  // internal transfer
+  ADD_INTERNAL_TRANSFER: `internaltransfer`,
+  GET_INTERNAL_TRANSFER: `getalltransfers`,
+
+  // unloads
+  ADD_UNLOAD_STOCK: `addunload`,
+  GET_ALL_UNLOADS: `unload`,
 
   //item
   GET_ALL_ITEMS: `item`,
@@ -39,41 +43,41 @@ export const endpoints = {
   GET_ALL_WAREHOUSE: `warehouse`,
   ADD_WAREHOUSE: `warehouse`,
   DELETE_WAREHOUSE: `warehouse`,
-  GET_A_WAREHOUSE:`warehouse`,
+  GET_A_WAREHOUSE: `warehouse`,
 
   // Orders
-  ADD_NEW_ORDER:`orders`,
-  GET_ALL_ORDERS:`orders`,
-  GET_AN_ORDER:`orders`,
-  DELETE_AN_ORDER:`orders`,
-  
+  ADD_NEW_ORDER: `orders`,
+  GET_ALL_ORDERS: `orders`,
+  GET_AN_ORDER: `orders`,
+  DELETE_AN_ORDER: `orders`,
+
 
 
   // Route
   ADD_MAINROUTE: `addRoute`,
   GET_ALL_MAINROUTE: `getAllroutes`,
   GET_A_MAINROUTE: `getroute`,
-  DELETE_A_MAINROUTE:`delRoute`,
-  UPDATE_A_MAINROUTE:`updateRoute`,
+  DELETE_A_MAINROUTE: `delRoute`,
+  UPDATE_A_MAINROUTE: `updateRoute`,
 
 
   //subroute
-  ADD_SUBROUTE:`addSRoute`,
-  GET_ALL_SUBROUTE:`viewSRoute`,
-  DELETE_A_SUBROUTE:`delSRoute`,
-  view_A_SUBROUTE:`viewSRoute`,
-  UPDATE_A_SUBROUTE:`updateSRoute`,
+  ADD_SUBROUTE: `addSRoute`,
+  GET_ALL_SUBROUTE: `viewSRoute`,
+  DELETE_A_SUBROUTE: `delSRoute`,
+  view_A_SUBROUTE: `viewSRoute`,
+  UPDATE_A_SUBROUTE: `updateSRoute`,
 
   // Active routes
 
-  GET_ALL_ACTIVE_ROUTE:`active-rides`,
-  GET_AN_ACTIVE_ROUTE:`viewActiveRoute`,
+  GET_ALL_ACTIVE_ROUTE: `active-rides`,
+  GET_AN_ACTIVE_ROUTE: `viewActiveRoute`,
 
   // Ride 
-  GET_ALL_COMPLETED_RIDE:`completedride`,
+  GET_ALL_COMPLETED_RIDE: `completedride`,
 
   // ridehistory in main route
-  GET_RIDE_HISTORY:`rides/completed`,
+  GET_RIDE_HISTORY: `rides/completed`,
 
 
 
