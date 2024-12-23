@@ -3,7 +3,7 @@ import React, { useState, ChangeEvent, useRef, useEffect } from 'react';
 import trash from '../../../assets/images/trash.svg'
 import circleplus from '../../../assets/images/Icon.svg'
 import back from '../../../assets/images/backbutton.svg'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../../commoncomponents/Buttons/Button';
 import downarrow from '../../../assets/images/Vector.png';
 import useApi from '../../../Hook/UseApi';
@@ -34,7 +34,9 @@ const AddInternalStock: React.FC = () => {
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const [openDropdownType, setOpenDropdownType] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-
+  const [error, setError] = useState("");
+  const navigate = useNavigate()
+  const [initialQuantity, setInitialQuantity] = useState(Number)
   const [orderDetails, setOrderDetails] = useState<OrderDetails>({
     fromRoute: '',
     fromRouteId: '',
@@ -66,7 +68,6 @@ const AddInternalStock: React.FC = () => {
     console.log(orderDetails);
   };
 
-
   // Remove a item
   const removeItem = (index: number) => {
     setOrderDetails((prev) => ({
@@ -82,24 +83,20 @@ const AddInternalStock: React.FC = () => {
     }));
   };
 
-
   // Handle item selection
-  const handleItemSelect = (item: Item, index: number) => {
-    const quantity = 1; // Default quantity is 1
+  const handleItemSelect = (item: Item, index: number, quantity: any) => {
 
     setOrderDetails((prev) => {
       const newItems = [...prev.stock];
-
       // Ensure the index exists in the stock array
-
-
       newItems[index] = {
         ...newItems[index],
         itemId: item.itemId || "",
         itemName: item.itemName || "",
-        quantity,
+        quantity: 1,
       };
-
+      setInitialQuantity(quantity)
+      console.log(initialQuantity, "qnt");
       return { ...prev, stock: newItems };
     });
 
@@ -107,19 +104,32 @@ const AddInternalStock: React.FC = () => {
     setOpenDropdownType(null);
   };
 
-
   const handleItemChange = (index: number, key: string, value: string) => {
+    const quantity = parseInt(value, 10); // Convert value to number
+
+    if (isNaN(quantity) || quantity < 1) {
+      setError("Quantity must be at least 1.");
+      return;
+    }
+    if (quantity > initialQuantity) {
+      setError(`Only ${initialQuantity} units are left in stock.`);
+      return;
+    }
+    if (quantity === initialQuantity) {
+      setError("Warning: This item is now out of stock.");
+    } else {
+      setError("");
+    }
+
     setOrderDetails((prev) => {
       const newItems = [...prev.stock];
       newItems[index] = {
         ...newItems[index],
-        [key]: value, // Update the specific key with the new value
+        [key]: quantity, // Update the specific key with the validated numeric value
       };
-
       return { ...prev, stock: newItems };
     });
-  };
-
+  }
 
   const toggleDropdown = (index: number, type: string) => {
     setOpenDropdownId(index === openDropdownId ? null : index);
@@ -137,7 +147,7 @@ const AddInternalStock: React.FC = () => {
   const [itemData, setItemData] = useState<Item[]>([]); // The full item list from your API
   console.log(itemData, "items");
 
-  const filteredItems = itemData.filter(
+  const filteredItems = itemData?.filter(
     (item) =>
       !orderDetails.stock.some(
         (orderItem) => orderItem.itemName === item.itemName
@@ -249,7 +259,6 @@ const AddInternalStock: React.FC = () => {
   }, []);
 
   const { request: AddInternalTransfer } = useApi("put", 4001);
-
   const handleSubmit = async () => {
     if (!orderDetails.fromRoute) {
       toast.error("Select a from route.");
@@ -263,22 +272,20 @@ const AddInternalStock: React.FC = () => {
       toast.error("Enter transfer number.");
       return;
     }
-
     const hasValidItem = orderDetails.stock.some((item) => item.itemId.trim() !== '');
     if (!hasValidItem) {
       toast.error("Select at least one item.");
       return;
     }
     try {
-
       const url = `${endpoints.ADD_INTERNAL_TRANSFER}`;
       const { response, error } = await AddInternalTransfer(url, orderDetails)
       if (!error && response) {
         console.log('Order', response);
         toast.success(response.data.message);
-        // setTimeout(() => {
-        //     navigate("/orders")
-        // }, 1000)
+        setTimeout(() => {
+            navigate("/internaltransfer")
+        }, 1000)
       }
       console.log(error);
       toast.error(error.response.data.message);
@@ -288,6 +295,30 @@ const AddInternalStock: React.FC = () => {
     }
   };
 
+  const { request: getAllTransfer } = useApi("get", 4001);
+
+  useEffect(() => {
+    const getTransfer = async () => {
+      try {
+        const url = `${endpoints.GET_INTERNAL_TRANSFER}`;
+        const { response, error } = await getAllTransfer(url);
+        if (!error && response) {
+          // Auto-generate the transfer number
+          const count = response.data.length; // Current number of stocks
+          const newTransferNumber = `INT-${count + 1}`; // Auto-generate with prefix TN-
+          setOrderDetails((prev) => ({
+            ...prev,
+            transferNumber: newTransferNumber,
+          })); // Update transfer number
+        } else {
+          console.log(error);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    getTransfer()
+  }, [])
 
   return (
     <div>
@@ -373,7 +404,7 @@ const AddInternalStock: React.FC = () => {
                     name="transferNumber"
                     value={orderDetails.transferNumber}
                     onChange={handleInputChange}
-                    placeholder='Transfer Number'
+                    readOnly
                   />
                 </div>
 
@@ -399,6 +430,7 @@ const AddInternalStock: React.FC = () => {
                                 <div className="cursor-pointer gap-2 grid grid-cols-12 appearance-none items-center justify-center h-9 text-zinc-400 bg-white text-sm">
                                   <div className="col-span-8 text-start">
                                     <p className="text-textColor text-center">{item.itemName}</p>
+                                    <p className="text-textColor text-[12px] text-center">Quantity : {initialQuantity}</p>
                                   </div>
                                 </div>
                               ) : (
@@ -410,11 +442,11 @@ const AddInternalStock: React.FC = () => {
                             </div>
                             {openDropdownId === index && openDropdownType === "searchProduct" && (
                               <div ref={dropdownRef} className="absolute z-10 bg-white shadow rounded-md mt-1 p-2 w-[40%] space-y-1">
-                                {filteredItems.length > 0 ? (
-                                  filteredItems.map((item: any, idx) => (
+                                {filteredItems?.length > 0 ? (
+                                  filteredItems?.map((item: any, idx) => (
                                     <div
                                       key={idx}
-                                      onClick={() => handleItemSelect(item, index)}
+                                      onClick={() => handleItemSelect(item, index, item.quantity)}
                                       className="grid bg-[#FDF8F0] grid-cols-12 gap-1 p-2 hover:bg-gray-100 cursor-pointer border border-slate-400 rounded-lg"
                                     >
                                       <div className="col-span-10 flex">
@@ -432,10 +464,9 @@ const AddInternalStock: React.FC = () => {
                             <input
                               key={index}
                               type="number"
+                              min="1" // Prevents user from typing negative values in the input
                               value={item.quantity}
-                              onChange={(e) =>
-                                handleItemChange(index, "quantity", e.target.value)
-                              }
+                              onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
                               className="p-1 text-center border rounded-md"
                             />
                           </td>
@@ -450,7 +481,7 @@ const AddInternalStock: React.FC = () => {
                       ))}
                     </tbody>
                   </table>
-
+                  <p className="text-red-500 text-center text-sm mt-2">{error}</p>
                   <button onClick={addItem} className=" ms-32 bg-darkGreen text-darkRed flex item-center  font-bold rounded-lg  px-1 text-[#820000]">
                     <img src={circleplus} alt="" className='mt-1 ms-1 h-4 w-5' /> Add Item
                   </button>
@@ -482,9 +513,11 @@ const AddInternalStock: React.FC = () => {
 
                 {/* Total and Actions */}
                 <div className='flex justify-end gap-2 my-3 pt-2'>
+                  <Link to={"/internaltransfer"}>
                   <Button variant="fourthiary">
                     Cancel
                   </Button>
+                  </Link>
                   <Button onClick={handleSubmit} variant="primary">
                     Save
                   </Button>

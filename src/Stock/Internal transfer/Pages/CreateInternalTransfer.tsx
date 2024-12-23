@@ -68,7 +68,7 @@ const CreateInternalTransfer: React.FC = () => {
         <Table
           columns={columns}
           data={allTransfer}
-          searchPlaceholder={"Search All Transfer"}
+          searchPlaceholder={"Search Transfer"}
           loading={loading.skeleton}
           searchableFields={["transferNumber", "fromRoute","toRoute"]}
           showAction={false} // Explicitly disable the action column
