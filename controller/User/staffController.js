@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const { log } = require("console");
 const key = Buffer.from(process.env.ENCRYPTION_KEY, 'utf8'); 
 const iv = Buffer.from(process.env.ENCRYPTION_IV, 'utf8'); 
+const ride = require("../../Models/ride");
 
 
 
@@ -192,6 +193,10 @@ exports.deleteStaff = async (req, res) => {
 
 
 // Login for Sales staff
+// Import necessary modules
+// const Ride = require('../models/Ride'); // Ensure this is the correct path for your Ride model
+
+// Login for Sales staff
 exports.loginSalesStaff = async (req, res) => {
   try {    
     const { username, password } = req.body;
@@ -209,37 +214,40 @@ exports.loginSalesStaff = async (req, res) => {
       return res.status(404).json({ message: 'Staff not found.' });
     }    
 
-    const oldpasword = decrypt(staff.password);
-    const isMatch = password === oldpasword;
+    const oldPassword = decrypt(staff.password);
+    const isMatch = password === oldPassword;
     
     // Match the password
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid Password!' });
     }
 
-    else {
-      const token = jwt.sign(
-        {
-          id: staff._id,
-          userName: staff.username,
+    // Check if the salesman has an ongoing ride
+    const activeRide = await ride.findOne({ salesmanId: staff._id, status: 'active' });
 
-        },
-        process.env.JWT_SECRET, 
-        { expiresIn: '12h' }
-      );
+    const token = jwt.sign(
+      {
+        id: staff._id,
+        userName: staff.username,
+      },
+      process.env.JWT_SECRET, 
+      { expiresIn: '12h' }
+    );
 
-      // Send response with user data (excluding organizationId)
-      console.log(`${staff.username} logged in successfully`);
-      
-      res.status(200).json({
-        success: true,
-        token: `Bearer ${token}`,
-        data: staff
-      });
-    }
+    // Log successful login
+    console.log(`${staff.username} logged in successfully`);
+
+    // Send response with user data, token, and ride status
+    res.status(200).json({
+      success: true,
+      token: `Bearer ${token}`,
+      data: staff,
+      hasActiveRide: !!activeRide, // Boolean indicating if the salesman has an ongoing ride
+      activeRideId: activeRide ? activeRide._id : null // Optional: Provide the active ride ID if available
+    });
 
   } catch (error) {
-    console.log(error);    
+    console.error('Error during login:', error);    
     res.status(500).json({ message: "Internal server error." });
   }
 };
