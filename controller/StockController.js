@@ -531,6 +531,7 @@ exports.addStock = async (req, res) => {
         itemId: item.itemId,
         itemName: item.itemName,
         quantity: item.quantity,
+        sellingPrice: item.sellingPrice,
         status: isResalable ? "Filled" : undefined // Set status based on resaleable property
       };
 
@@ -793,7 +794,7 @@ exports.internalTransfer = async (req, res) => {
 
 exports.getAllTransfers = async (req, res) => {
     try {
-      const tranfers = await TransferLog.find();
+      const tranfers = await TransferLog.find().sort(-1);
       res.status(200).json(tranfers);
     } catch (error) {
       console.error('Error fetching unloads:', error);

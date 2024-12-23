@@ -17,6 +17,7 @@ const stockSchema = new mongoose.Schema({
     itemId: { type: String },
     itemName: { type: String },
     quantity: { type: Number },
+    sellingPrice: {type:Number},
     status: { type: String, default: undefined }     
   }],
 
