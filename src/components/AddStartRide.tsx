@@ -316,8 +316,11 @@ const AddStartRide: React.FC = () => {
       if (response) {
         console.log("Start Ride Response:", response);
         toast.success("Ride started successfully!");
-        const StartRide = localStorage.setItem("StartRide", JSON.stringify(response.data))
-        console.log(StartRide);      
+        const StartRide = localStorage.setItem(
+          "StartRide",
+          JSON.stringify(response.data)
+        );
+        console.log(StartRide);
         setTimeout(() => {
           navigate("/customers"); // Navigate to rides page or any other page
         }, 2000);
@@ -393,6 +396,7 @@ const AddStartRide: React.FC = () => {
             <select
               onChange={handleSubRouteChange}
               className="w-full p-2 border border-gray-300 rounded-lg"
+              required
             >
               <option value="">Select Sub Route</option>
               {filteredSubRoutes.map((subRoute) => (
@@ -414,6 +418,7 @@ const AddStartRide: React.FC = () => {
               id="helper"
               className="w-full p-2 border border-gray-300 rounded-lg"
               onChange={handleHelperChange}
+              required
             >
               <option value="">Select Helper</option>
               {staffList
@@ -437,6 +442,7 @@ const AddStartRide: React.FC = () => {
               id="helper"
               className="w-full p-2 border border-gray-300 rounded-lg"
               onChange={handleDriverChange}
+              required
             >
               <option value="">Select Driver</option>
               {staffList
@@ -459,6 +465,7 @@ const AddStartRide: React.FC = () => {
             <select
               id="vehicle"
               className="w-full p-2 border border-gray-300 rounded-lg"
+              required
             >
               <option value="">Select Vehicle No</option>
               {vehicleList?.map((vehicle) => (
