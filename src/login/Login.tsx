@@ -44,10 +44,16 @@ const Login: React.FC = () => {
         localStorage.setItem("profile", JSON.stringify(profile || {})) // Convert to string
         localStorage.setItem("_id", JSON.stringify(_id || {})) // Convert to string
 
-        setTimeout(() => {
-          navigate("/start")
-          
-        }, 1000)
+        if(response.response.data.hasActiveRide === true){
+          setTimeout(() => {
+            navigate("/home")            
+          }, 1000)
+        }else{        
+          setTimeout(() => {
+            navigate("/start")
+          }, 1000)
+        }
+        console.log(response.response.data.hasActiveRide,"hasride");      
       } else {
         const errorMessage = response.response?.data.message || "Invalid username or password"
         setError(errorMessage)
