@@ -531,7 +531,7 @@ exports.addStock = async (req, res) => {
         itemId: item.itemId,
         itemName: item.itemName,
         quantity: item.quantity,
-        sellingPrice: item.sellingPrice,
+        sellingPrice: itemDetails.sellingPrice,
         status: isResalable ? "Filled" : undefined // Set status based on resaleable property
       };
 

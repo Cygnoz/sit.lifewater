@@ -7,6 +7,7 @@ const stockSchema = new Schema({
   itemName: { type: String },
   quantity: { type: Number },
   status: { type: String },
+  sellingPrice : {type: Number},
   returnBottle: {type :Number}
 }, { _id: false });
 
