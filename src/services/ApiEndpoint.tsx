@@ -24,4 +24,5 @@ export const endpoints = {
     ADD_ORDER: `orders`,
     GET_ALL_ORDER: `orders`,
     VIEW_A_ORDER: `orders`,
+    RIDE_ORDERS:`today`,
 }

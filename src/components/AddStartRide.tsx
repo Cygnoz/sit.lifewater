@@ -242,6 +242,8 @@ const AddStartRide: React.FC = () => {
     itemId: item.itemId, // Replace with the actual field
     itemName: item.itemName || "Unknown Item", // Replace with the actual field
     quantity: item.quantity || 1, // Replace with the actual field
+    sellingPrice:item.sellingPrice,
+    status:item?.status || "NA",
   }));
   const { request: addStartRide } = useApi("post", 4000);
 
@@ -265,6 +267,8 @@ const AddStartRide: React.FC = () => {
       itemId: item.itemId, // Replace with the actual field
       itemName: item.itemName || "Unknown Item", // Replace with the actual field
       quantity: item.quantity || 1, // Replace with the actual field
+      sellingPrice:item.sellingPrice,
+      status:item?.status || "NA",
     }));
 
     // Create payload
