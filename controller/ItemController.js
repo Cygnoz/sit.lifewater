@@ -1,4 +1,5 @@
 const Item = require('../Models/ItemSchema'); 
+const SubRoute = require('../Models/SubrouteSchema');
 const Warehouse = require('../Models/WarehouseSchema');
 
 // Create a new item
@@ -107,15 +108,33 @@ exports.updateItem = async (req, res) => {
 // Delete an item by ID
 exports.deleteItem = async (req, res) => {
   try {
-    const item = await Item.findByIdAndDelete(req.params.id); // Find and delete the item
+    const itemId = req.params.id;
 
-    if (!item) return res.status(404).json({ message: 'Item not found' });
+    // Check if the item exists in the warehouse
+    const warehouseExists = await Warehouse.findOne({ "items.itemId": itemId });
+    if (warehouseExists) {
+      return res.status(400).json({ message: 'Item exists in a warehouse. Cannot delete.' });
+    }
+
+    // Check if the item exists in a subroute
+    const subrouteExists = await SubRoute.findOne({ "stock.itemId": itemId });
+    if (subrouteExists) {
+      return res.status(400).json({ message: 'Item exists in a subroute. Cannot delete.' });
+    }
+
+    // Find and delete the item
+    const item = await Item.findByIdAndDelete(itemId);
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
 
     res.status(200).json({ message: 'Item deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error." });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
 
 
 
