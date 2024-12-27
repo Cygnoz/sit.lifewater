@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import dot from "../../assets/ellipsis-vertical.svg";
+
 import plus from "../../assets/circle-plus.svg";
 import { useContext, useEffect, useState } from "react";
 import { TableResponseContext } from "../../assets/Context/ContextShare"
@@ -106,9 +106,7 @@ function SubRoute({}: Props) {
           <h3 className="text-[#303F58] text-[20px] font-bold">
             Create Sub Route
           </h3>
-          <p className="text-[#4B5C79]">
-            Lorem ipsum dolor sit amet consectetur{" "}
-          </p>
+          
         </div>
         <div className="flex justify-between">
           <button
@@ -118,9 +116,7 @@ function SubRoute({}: Props) {
             <img src={plus} alt="" />
             <p>Add New Sub Route</p>
           </button>
-          <button className="ms-2 me-4">
-            <img src={dot} alt="" />
-          </button>
+          
         </div>
       </div>
 
