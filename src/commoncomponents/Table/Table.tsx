@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import SearchBar from "../Searchbar";
 import NoDataFoundTable from "./NoDataFoundTable";
 import Eye from "../../assets/icons/Eye";
@@ -16,14 +16,14 @@ interface TableProps {
   columns: Column[];
   data: any[];
   onRowClick?: (id: string) => void;
-  onViewClick?: (id: string) => void; // For view action
-  onEditClick?: (id: string) => void; // For edit action
-  onDeleteClick?: (id: string) => void; // For delete action
+  onViewClick?: (id: string) => void;
+  onEditClick?: (id: string) => void;
+  onDeleteClick?: (id: string) => void;
   renderColumnContent?: (colId: string, item: any) => JSX.Element;
   searchPlaceholder: string;
   loading: boolean;
   searchableFields: string[];
-  showAction?: boolean; // New prop to toggle the Action column
+  showAction?: boolean;
 }
 
 const PurchaseTable: React.FC<TableProps> = ({
@@ -36,7 +36,7 @@ const PurchaseTable: React.FC<TableProps> = ({
   searchPlaceholder,
   loading,
   searchableFields,
-  showAction = true, // Default to true if not provided
+  showAction = true,
 }) => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -55,6 +55,18 @@ const PurchaseTable: React.FC<TableProps> = ({
     ? [...visibleColumns, {}, {}, {}]
     : [...visibleColumns];
 
+  const totalPages = Math.ceil((filteredData?.length || 0) / rowsPerPage);
+  const currentData = filteredData?.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center gap-4 justify-between">
@@ -68,7 +80,7 @@ const PurchaseTable: React.FC<TableProps> = ({
         />
       </div>
 
-      <div className="overflow-x-auto mt-3 max-h-[25rem]">
+      <div className="overflow-x-auto mt-3 max-h-[34rem]">
         <table className="min-w-full bg-white mb-5">
           <thead className="text-[12px] text-center text-dropdownText text-Text">
             <tr style={{ backgroundColor: "#F9F7F0" }}>
@@ -96,8 +108,8 @@ const PurchaseTable: React.FC<TableProps> = ({
               [...Array(rowsPerPage)].map((_, idx) => (
                 <TableSkelton key={idx} columns={skeletonColumns} />
               ))
-            ) : filteredData && filteredData.length > 0 ? (
-              filteredData.map((item, rowIndex) => (
+            ) : currentData && currentData.length > 0 ? (
+              currentData.map((item, rowIndex) => (
                 <tr key={item._id} className="relative cursor-pointer">
                   <td className="py-2.5 px-4 border-y border-tableBorder">
                     {(currentPage - 1) * rowsPerPage + rowIndex + 1}
@@ -145,6 +157,26 @@ const PurchaseTable: React.FC<TableProps> = ({
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="flex justify-between items-center mt-4">
+        <button
+          className="px-4 py-2 text-sm bg-gray-200 rounded"
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span className="text-sm">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className="px-4 py-2 text-sm bg-gray-200 rounded"
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
       </div>
     </div>
   );

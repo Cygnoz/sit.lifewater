@@ -51,7 +51,16 @@ const ActiveRoute: React.FC = () => {
   const sortedRoutes = [...activeRoutes]
     .filter((route) =>
       searchTerm
-        ? route?.driverName?.toLowerCase().includes(searchTerm.toLowerCase())
+        ? [
+          route?.driverName,
+          route?.helperName,
+          route?.mainRouteName,
+          route?.salesmanName,
+          route?.subRouteName,
+          route?.vehicleNumber,
+        ]
+          .map((field) => field?.toLowerCase() || "")
+          .some((fieldValue) => fieldValue.includes(searchTerm.toLowerCase()))
         : true
     )
     .sort((a, b) => {
@@ -62,6 +71,7 @@ const ActiveRoute: React.FC = () => {
       if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
       return 0;
     });
+
 
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -95,7 +105,7 @@ const ActiveRoute: React.FC = () => {
             </div>
             <input
               className="pl-9 text-sm w-full rounded-md text-gray-800 h-10 p-2 border-0 focus:ring-1 focus:ring-gray-400"
-              placeholder="Search by Driver Name"
+              placeholder="Search by active route"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -107,7 +117,7 @@ const ActiveRoute: React.FC = () => {
                 setSortOrder(order);
               }}
             />
-            <button className="flex border text-[14px] text-[#565148] border-[#565148] px-4 py-2 rounded-lg">
+            <button className=" hidden border text-[14px] text-[#565148] border-[#565148] px-4 py-2 rounded-lg">
               <img src={printer} className="mt-1 me-1" alt="Print" />
               Print
             </button>
@@ -158,7 +168,7 @@ const ActiveRoute: React.FC = () => {
                       onClick={() => handleView(route._id)}
                       className="text-blue-500"
                     >
-                       <Eye color={"#569FBC"} />
+                      <Eye color={"#569FBC"} />
                     </button>
                   </td>
                 </tr>
