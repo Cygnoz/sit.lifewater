@@ -13,13 +13,13 @@ const InformationStatus = ({ }: Props) => {
     const Card = [
         {
             title: "Today Route",
-            value: "Kochi",
-            amount: "NA",
+            value: ".",
+            amount: "",
         },
         {
             title: "Deposit Amount",
             value: "AED",
-            amount: "NA",
+            amount: "",
         }, {
             title: "Insurance Amount",
             value: "AED",

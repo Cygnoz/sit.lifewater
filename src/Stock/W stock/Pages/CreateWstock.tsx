@@ -46,7 +46,6 @@ const CreateWStock: React.FC = () => {
   }, []);
 
   const columns = [
- 
     { id: "date", label: "Date", visible: true },
     { id: "items", label: "Items", visible: true },
     { id: "warehouse", label: "Warehouse", visible: true },
@@ -104,7 +103,7 @@ const CreateWStock: React.FC = () => {
               data={stocks}
               loading={loading}
               searchPlaceholder="Search Stock"
-              searchableFields={["warehouse", "transferNumber"]}
+              searchableFields={["warehouse", "transferNumber","date"]}
               renderColumnContent={renderColumnContent}
               showAction={false}
             />

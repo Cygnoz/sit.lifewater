@@ -6,7 +6,7 @@ import NoDataFoundTable from "../../commoncomponents/Table/NoDataFoundTable";
 
 interface RideData {
     _id: string;
-    createdAt?: string;
+    createdDate?: string;
     salesmanName: string;
     driverName: string;
     vehicleNumber: string;
@@ -114,9 +114,10 @@ const SubRouteRideHostory = ({ SubRoute }: Props) => {
                                 {(currentPage - 1) * itemsPerPage + index + 1}
                             </td>
                             <td className="p-2 text-[14] text-center text-[#4B5C79]">
-                                {ride.createdAt
-                                    ? new Date(ride.createdAt).toLocaleDateString()
+                                {ride.createdDate 
+                                    ? new Date(ride.createdDate).toLocaleDateString("en-GB")
                                     : "N/A"}
+                                    
                             </td>
                             <td className="p-2 text-[14] text-center text-[#4B5C79]">
                                 {ride.salesmanName}

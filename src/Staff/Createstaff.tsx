@@ -126,7 +126,7 @@ const CreateStaff: React.FC = () => {
           <div className="flex justify-between items-center">
             <div>
               <h3 className="text-[#303F58] text-[20px] font-bold">Create Staff</h3>
-              <p className="text-[#4B5C79] ">Lorem ipsum dolor sit amet consectetur</p>
+              <p className="text-[#4B5C79] ">Efficiently manage and organize your team with ease.</p>
             </div>
             <div className="flex justify-between">
               <Link to={"/addstaff"}>

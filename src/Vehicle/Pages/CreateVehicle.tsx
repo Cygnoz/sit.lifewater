@@ -79,7 +79,7 @@ const CreateVehicle: React.FC = () => {
           <div className="flex justify-between items-center">
             <div>
               <h3 className="text-[#303F58] text-[20px] font-bold">Create Vehicle Details</h3>
-              <p className="text-[#4B5C79]">Lorem ipsum dolor sit amet consectetur</p>
+              <p className="text-[#4B5C79]">Stay on top of your vehicle details.</p>
             </div>
             <div className="flex justify-between">
             <Link to={"/vehicle/addvehicle"}>
@@ -99,7 +99,7 @@ const CreateVehicle: React.FC = () => {
                 <img src={vehicle} alt="Vehicle Icon" className="w-8 h-8 mt-2" />
                   <div>
                     <p className="font-bold text-[#303F58] text-[17px] leading-normal">Total Vehicle</p>
-                    <p className="text-[#4B5C79] text-[12px]">Lorem ipsum dolor sit amet</p>
+                    <p className="text-[#4B5C79] text-[12px]">Overview of all vehicles in your fleet. </p>
                   </div>
                 </div>
                 <p className=" justify-end text-end text-[#303F58] text-[18px] leading-normal font-bold">{vehicleList.length}</p>

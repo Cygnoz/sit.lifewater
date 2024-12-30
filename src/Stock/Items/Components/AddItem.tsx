@@ -74,7 +74,7 @@ const AddItem: React.FC = () => {
         }, 3000)
       } else {
         // Handle any API errors
-        toast.error(error?.message || "Failed to add item. Please try again.")
+        toast.error(error?.response?.data?.message || "An error occurred");
       }
     } catch (err) {
       console.error("Error adding item:", err)
@@ -115,7 +115,7 @@ const AddItem: React.FC = () => {
                   </div>
                   <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                 </label>
-                <h2 className="text-gray-800 font-bold mt-2">Upload Company Logo</h2>
+                <h2 className="text-gray-800 font-bold mt-2">Upload Item Image</h2>
                 <p className="text-gray-500 text-sm">Support: JPG, PNG</p>
               </div>
 
@@ -128,6 +128,7 @@ const AddItem: React.FC = () => {
                     onChange={handleInputChange} 
                     className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500 bg-white" 
                     placeholder="Enter item name"
+                    required
                   />
                 </div>
 
@@ -159,6 +160,7 @@ const AddItem: React.FC = () => {
                     onChange={handleInputChange} 
                     placeholder="Enter SKU" 
                     className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500" 
+                    required
                   />
                 </div>
 
@@ -171,6 +173,7 @@ const AddItem: React.FC = () => {
                     onChange={handleInputChange} 
                     placeholder="Enter selling Price" 
                     className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500" 
+                    required
                   />
                 </div>
               </div>
@@ -186,6 +189,7 @@ const AddItem: React.FC = () => {
                   onChange={handleInputChange} 
                   placeholder="Enter cost price" 
                   className="w-full px-3 py-2 border border-gray-200 rounded-md text-gray-500" 
+                  required
                 />
               </div>
 

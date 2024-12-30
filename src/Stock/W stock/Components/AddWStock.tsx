@@ -552,7 +552,9 @@ useEffect(() => {
 
                 {/* Total and Actions */}
                 <div className="flex justify-end space-x-4 mt-3">
+                  <Link to={"/warstock"}>
                   <Button variant="fourthiary">Cancel</Button>
+                  </Link>
                   <Button variant="primary" onClick={handleSubmit}>
                     Save
                   </Button>

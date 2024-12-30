@@ -192,7 +192,7 @@ const ViewCustmor: React.FC = () => {
           {/* Right Side - Stats */}
           <div className="md:col-span-2 bg-white shadow-md rounded-lg p-6 mx-4">
             {/* Stats Header */}
-            <h2 className="text-2xl font-bold text-gray-700 mb-6">Stats</h2>
+            <h2 className="text-2xl font-bold text-gray-700 mb-6">Status</h2>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-3 gap-4 mb-6">

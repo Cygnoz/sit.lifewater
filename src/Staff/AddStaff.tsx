@@ -350,7 +350,7 @@ function AddStaff({ }: Props) {
                     value={initialStaffData.visaStatus} // Controlled input
                     onChange={handleInputChange}
                   >
-                    <option value="">Enter Visa Status</option>
+                    <option value="">Choose Visa Status</option>
                     <option value="Valid">Valid</option>
                     <option value="Expired">Expired</option>
                     <option value="In Process">In Process</option>
