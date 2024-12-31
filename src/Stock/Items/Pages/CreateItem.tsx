@@ -51,6 +51,8 @@ const CreateItem: React.FC = () => {
       if (!error && response) {
         toast.success(response.data.message);
         fetchItems(); // Refresh the list
+      }else {
+        toast.error(error?.response?.data?.message || "An error occurred");
       }
     } catch (error) {
       toast.error("Error occurred while deleting the item.");
@@ -93,3 +95,4 @@ const CreateItem: React.FC = () => {
 };
 
 export default CreateItem;
+

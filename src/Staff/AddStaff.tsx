@@ -297,9 +297,9 @@ function AddStaff({ }: Props) {
                       }
                     }}
                     className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
-                    maxLength={15}
+                    maxLength={10}
                     placeholder="Enter Mobile"
-                    title="Please enter exactly 15 digits"
+                    // title="Please enter exactly 15 digits"
                   />
                 </div>
 
@@ -334,8 +334,8 @@ function AddStaff({ }: Props) {
                     className="mt-1 p-2 h-[36px] border border-gray-300 rounded-lg w-full"
                     placeholder="Enter WhatsApp number"
                     disabled={isSameAsPhone}
-                    maxLength={15}
-                    title="Please enter exactly 15 digits"
+                    maxLength={10}                  
+                    // title="Please enter exactly 15 digits"
                   />
                 </div>
 
