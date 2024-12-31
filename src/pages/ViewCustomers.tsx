@@ -137,7 +137,7 @@ const ViewCustomers: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <button className="ml-4 p-3 bg-green-200 text-white rounded-full">
+                <button className="ml-4 p-3 hidden bg-green-200 text-white rounded-full">
                   <img
                     src={phone}
                     alt="Action Icon"
