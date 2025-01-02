@@ -332,7 +332,6 @@ exports.getCustomerById = async (req, res) => {
 
 
 
-// Update a customer by ID
 exports.updateCustomerById = async (req, res) => {
   try {
     console.log("Update Customer:", req.body);
@@ -418,6 +417,7 @@ exports.updateCustomerById = async (req, res) => {
 
     // Update customerDisplayName in associated Account documents
     if (cleanedData.fullName && cleanedData.fullName !== existingCustomer.fullName) {
+      // Update Accounts
       const updatedAccount = await Account.updateMany(
         { accountName: existingCustomer.fullName },
         { $set: { accountName: cleanedData.fullName } }
@@ -425,6 +425,17 @@ exports.updateCustomerById = async (req, res) => {
       console.log(
         `${updatedAccount.modifiedCount} account(s) associated with the accountName have been updated.`
       );
+
+      // Update TrialBalances
+      console.log("existingCustomer.fullName:", existingCustomer.fullName);
+      const updatedTrialBalance = await TrialBalance.updateMany(
+        { operationId: id }, // Use the customer ID as the operationId
+        { $set: { accountName: cleanedData.fullName } }
+      );
+      console.log(
+        `${updatedTrialBalance.modifiedCount} trial balance record(s) associated with the accountName have been updated.`
+      );
+  
     }
 
     res.status(200).json({ 
