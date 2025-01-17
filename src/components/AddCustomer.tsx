@@ -232,10 +232,6 @@ export default function Component() {
     ) {
       newErrors.ratePerBottle = "Rate must be a positive number";
     }
-    if (formData.mobileNo.length < 10)
-      newErrors.mobileNo = "Mobile number must be at least 10 digits";
-    if (formData.whatsappNumber.length < 10)
-      newErrors.whatsappNumber = "WhatsApp number must be at least 10 digits";
     if (
       isNaN(Number(formData.depositAmount)) ||
       Number(formData.depositAmount) < 0
@@ -546,8 +542,7 @@ export default function Component() {
               value={formData.mobileNo}
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
-              placeholder="Enter Mobile Number"
-              maxLength={10}
+              placeholder="Enter Mobile Number" 
             />
             {errors.mobileNumber && (
               <p className="text-red-500 text-sm">{errors.mobileNumber}</p>
@@ -563,7 +558,6 @@ export default function Component() {
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter WhatsApp Number"
-              maxLength={10}
             />
             {errors.whatsappNumber && (
               <p className="text-red-500 text-sm">{errors.whatsappNumber}</p>
