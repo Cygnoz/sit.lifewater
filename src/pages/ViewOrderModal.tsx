@@ -14,6 +14,7 @@ interface OrderData {
     ReturnBottle: string,
     paymentMode: string,
     customerName: string,
+    totalAmount: string
 }
 const ViewOrderModal = ({ id }: Props) => {
     const [orderData, setOrderData] = useState<OrderData | null>(null);
@@ -33,13 +34,13 @@ const ViewOrderModal = ({ id }: Props) => {
             }
         } catch (error) {
             console.log(error);
-        }finally {
+        } finally {
             setLoading(false); // Stop loading
-          }
+        }
     };
     useEffect(() => {
         getOrder();
-    }, []);   
+    }, []);
     return (
         <div className="">
             <button onClick={() => setModalOpen(true)} className="bg-[#F6F6F6] h-6 text-[13px] rounded-md px-3 border border-[#820000]">
@@ -52,8 +53,11 @@ const ViewOrderModal = ({ id }: Props) => {
 
 
                 <div className="bg-gradient-to-l from-[#E3E6D5] mx-5 to-[#F7E7CE] mt-[50%] px-5 pb-5 rounded-xl" >
-                {loading ? (
-                        <p className="text-center mt-2">Loading...</p>
+                    {loading ? (
+                        <div>
+                            <p className="text-center pt-5">Loading...</p>
+
+                        </div>
                     ) : (
                         <>
                             <div
@@ -64,9 +68,13 @@ const ViewOrderModal = ({ id }: Props) => {
                             </div>
                             <div className="flex justify-between">
                                 <p className="text-[#303F58]">Customer</p>
-                                <p className="text-[#303F58]">
-                                    {orderData?.date ? orderData.date.slice(0, 10) : ""}
-                                </p>
+
+                                {orderData && orderData.date
+                                    ? new Date(orderData.date).toLocaleTimeString("en-GB", {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                    })
+                                    : "N/A"}
                             </div>
                             <p className="text-[#303F58] text-[16px] font-bold">
                                 {orderData?.customerName}
@@ -87,14 +95,18 @@ const ViewOrderModal = ({ id }: Props) => {
                                         ))}
                                     </p>
                                     <p className="text-[#303F58]">: {orderData?.ratePerItem}</p>
-                                    <p className="text-[#303F58]">: {orderData?.ReturnBottle} Bottle</p>
+                                    <p className="text-[#303F58]">: {orderData?.ReturnBottle ? orderData.ReturnBottle : "0"}</p>
                                 </div>
                             </div>
                             <div className="flex bg-[#FFFFFF] px-2 py-1.5 gap-2 mt-2 rounded-md items-center">
                                 <p className="text-[14px] text-[#303F58]">Payment Mode</p>
                                 <span className="h-3 w-[2px] bg-[#9EA9BB]"></span>
+                                <p className="text-[12px] text-[#303F58] font-semibold">
+                                    {orderData?.paymentMode} :
+                                </p>
                                 <p className="text-[12px] text-[#303F58] font-bold">
-                                    {orderData?.paymentMode}
+                                    {orderData?.totalAmount}.00 AED
+
                                 </p>
                             </div>
                         </>

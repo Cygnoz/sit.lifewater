@@ -15,14 +15,15 @@ const Orders = ({ }: Props) => {
   const { setOrderResponse } = useContext(AllOrderResponseContext)!
   const [loading, setLoading] = useState<boolean>(false);
   const { request: getALLOrders } = useApi("get", 4001)
+
   const getALLOrderss = async () => {
     setLoading(true);
     try {
       const url = `${endpoints.GET_ALL_ORDER}`
       const { response, error } = await getALLOrders(url)
       if (!error && response) {
-        setOrders(response.data)
-        console.log("API RESPONSE :", response.data)
+        // setOrders(response.data)
+        // console.log("API RESPONSE :", response.data)
         setOrderResponse(response.data)
       }
     } catch (error) {
@@ -32,8 +33,33 @@ const Orders = ({ }: Props) => {
     }
   }
 
+  const { request: getRideOrders } = useApi("get", 4001)
+
+  const RideId = JSON.parse(localStorage.getItem("StartRide") || "{}");
+  const Id = RideId?.data?._id; // Use optional chaining for safety
+
+  const getOrders = async () => {
+    setLoading(true);
+    try {
+      const url = `${endpoints.RIDE_ORDERS}/${Id}`
+      const { response, error } = await getRideOrders(url)
+      if (!error && response) {
+        setOrders(response?.data.data)
+        console.log("Ride Orders :", response)
+
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  }
+
+
   useEffect(() => {
-    getALLOrderss()
+    getALLOrderss(),
+      getOrders()
+
   }, [])
 
   return (
@@ -61,7 +87,15 @@ const Orders = ({ }: Props) => {
             <div className="bg-gradient-to-l from-[#E3E6D5] to-[#F7E7CE] my-3 p-5 rounded-xl" key={order.id || Math.random()}>
               <div className="flex justify-between">
                 <div>
+              <div className="text-[#303F58]  ">
+              <div className="flex text-[12px] gap-1">
+              <p>{new Date(order.date).toLocaleDateString("en-GB")}</p>
+              
+              <p>{new Date(order.date).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' })}</p>
+
+              </div>
                   <p className="text-[#303F58]">Customer</p>
+              </div>
                   <p className="text-[#303F58] text-[16px] font-bold ms-1">{order.customerName || "NA"}</p>
                 </div>
                 <ViewOrderModal id={order._id} />
@@ -85,9 +119,6 @@ const Orders = ({ }: Props) => {
             <span className="text-gray-500 text-sm">No Orders Found</span>
           </div>
         )}
-
-
-
       </div>
 
     </div>

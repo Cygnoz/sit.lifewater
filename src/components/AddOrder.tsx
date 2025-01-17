@@ -48,6 +48,11 @@ const AddOrder = ({ }: Props) => {
     const [quantity, setQuantity] = useState(Number);
     const navigate = useNavigate()
     const [loading, setLoading] = useState<boolean>(false);
+    const [selectedItem, setSelectedItem] = useState<{ itemId: string; itemName: string, status:string, sellingPrice:number } | null>(null);
+    const [isOpen, setIsOpen] = useState(false); // Control dropdown visibility
+    const [subRoutes, setSubRoutes] = useState<any>({
+        stock: [], // Initialize with an empty array to avoid undefined
+    });
     const [orderData, setOrderData] = useState<OrdrerData>({
         orderNumber: "",
         mainRouteName: "",
@@ -163,33 +168,54 @@ const AddOrder = ({ }: Props) => {
     };
 
     useEffect(() => {
-        // Perform calculation whenever stock or ratePerCustomer changes
-        const ratePerBottle: any = orderData.ratePerItem || 0;
 
-        const newTotalAmount: any = orderData.stock.reduce(
-            (total, item) => total + item.quantity * ratePerBottle,
-            0
-        );
+        if(selectedItem?.status === "Filled" ){
 
-        setOrderData((prevState) => ({
-            ...prevState,
-            totalAmount: newTotalAmount.toString(),
-        }));
+            // Perform calculation whenever stock or ratePerCustomer changes
+            const ratePerBottle: any = orderData.ratePerItem || 0;
+    
+            const newTotalAmount: any = orderData.stock.reduce(
+                (total, item) => total + item.quantity * ratePerBottle,
+                0
+            );
+    
+            setOrderData((prevState) => ({
+                ...prevState,
+                totalAmount: newTotalAmount.toString(),
+            }));
+        }
+        else{
+            // Perform calculation whenever stock or ratePerCustomer changes
+            const ratePerBottle: any = selectedItem?.sellingPrice || orderData.ratePerItem || 0;
+    
+            const newTotalAmount: any = orderData.stock.reduce(
+                (total, item) => total + item.quantity * ratePerBottle,
+                0
+            );
+    
+            setOrderData((prevState) => ({
+                ...prevState,
+                totalAmount: newTotalAmount.toString(),
+            }));
+        }
+
     }, [orderData.stock, orderData.ratePerItem]); // Dependencies to trigger recalculation
 
 
 
-    const handleItemClick = (itemId: any, itemName: any, quantity: any) => {
+    const handleItemClick = (itemId: any, itemName: any, quantity: any, status: any, sellingPrice: any) => {
 
         setOrderData((prevState) => ({
             ...prevState,
             stock: [{ itemId, itemName, quantity: 1 }], // Use the quantity from the input          
         }));
         setQuantity(quantity)
-        setSelectedItem({ itemId, itemName });
+        setSelectedItem({ itemId, itemName, status, sellingPrice });
         setIsOpen(false); // Close dropdown on selection
     };
     console.log(quantity, "quantit");
+    console.log(selectedItem,"selectedItem");
+    
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -202,6 +228,7 @@ const AddOrder = ({ }: Props) => {
             [name]: value,
         }));
     };
+
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSearchValue(value);
@@ -227,11 +254,6 @@ const AddOrder = ({ }: Props) => {
         setSearchValue(customers.fullName); // Set the selected customer's name in the input
         setFilteredCustomers([]); // Clear the dropdown
     };
-
-    const [selectedItem, setSelectedItem] = useState<{ itemId: string; itemName: string } | null>(null);
-    const [isOpen, setIsOpen] = useState(false); // Control dropdown visibility
-
-
 
     const { request: getAllCustomers } = useApi("get", 4000);
     // Get All customer 
@@ -261,9 +283,6 @@ const AddOrder = ({ }: Props) => {
         }
     };
 
-    const [subRoutes, setSubRoutes] = useState<any>({
-        stock: [], // Initialize with an empty array to avoid undefined
-    });
 
     const { request: getSubRoutes } = useApi("get", 4000)
     const id = activeRoute?.subRouteId;
@@ -298,6 +317,7 @@ useEffect(() => {
 
 
     const { request: AddOrder } = useApi("post", 4001);
+
     const handleSubmit = async () => {
         if (!orderData.customerId) {
             toast.error("Select a customer.");
@@ -441,6 +461,8 @@ useEffect(() => {
                                                         item.itemId,
                                                         item.itemName,
                                                         item.quantity,
+                                                        item.status,
+                                                        item.sellingPrice,
                                                     )
                                                 }
                                                 className="p-2 m-2 border-2 rounded-lg text-left cursor-pointer hover:bg-gray-100"
