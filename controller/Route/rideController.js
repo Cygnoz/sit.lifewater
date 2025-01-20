@@ -73,7 +73,7 @@ exports.startRide = async (req, res) => {
       // Validate ride assignments
       try {
           await validateRideAssignments(
-              cleanedData.helperId,
+              // cleanedData.helperId,
               cleanedData.driverId,
               cleanedData.salesmanId,
               cleanedData.vehicleNumber
