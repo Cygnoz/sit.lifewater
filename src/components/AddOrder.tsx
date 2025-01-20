@@ -236,7 +236,11 @@ const AddOrder = ({ }: Props) => {
 
         // Filter customers based on the search input
         const filtered = customers.filter((customer: any) =>
-            customer.fullName.toLowerCase().includes(value.toLowerCase())
+            customer.fullName.toLowerCase().includes(value.toLowerCase()) ||
+            customer.customerID.toLowerCase().includes(value.toLowerCase()) ||
+            customer.city.toLowerCase().includes(value.toLowerCase()) ||
+            customer.mobileNo.toString().includes(searchValue) || // Convert to string for matching
+            customer.whatsappNumber.toString().includes(searchValue)
         );
         setFilteredCustomers(filtered);
     };
@@ -275,7 +279,7 @@ const AddOrder = ({ }: Props) => {
                 );
 
                 setCustomers(filteredCustomers);
-                console.log(filteredCustomers, "filtered customers");
+                console.log("filtered customers", filteredCustomers);
             }
         } catch (error) {
             console.log(error);
