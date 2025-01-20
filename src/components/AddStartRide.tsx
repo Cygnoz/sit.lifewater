@@ -255,8 +255,8 @@ const AddStartRide: React.FC = () => {
       !selectedMainRoute ||
       !selectedSubRoute ||
       !startingKm ||
-      !selectedDriver ||
-      !selectedHelper
+      !selectedDriver 
+      // !selectedHelper
     ) {
       toast.error("Please fill all required fields.");
       return;
@@ -446,7 +446,7 @@ const AddStartRide: React.FC = () => {
               id="helper"
               className="w-full p-2 border border-gray-300 rounded-lg"
               onChange={handleDriverChange}
-              required
+              // required
             >
               <option value="">Select Driver</option>
               {staffList
