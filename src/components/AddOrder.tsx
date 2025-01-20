@@ -48,7 +48,7 @@ const AddOrder = ({ }: Props) => {
     const [quantity, setQuantity] = useState(Number);
     const navigate = useNavigate()
     const [loading, setLoading] = useState<boolean>(false);
-    const [selectedItem, setSelectedItem] = useState<{ itemId: string; itemName: string, status:string, sellingPrice:number } | null>(null);
+    const [selectedItem, setSelectedItem] = useState<{ itemId: string; itemName: string, status: string, sellingPrice: number } | null>(null);
     const [isOpen, setIsOpen] = useState(false); // Control dropdown visibility
     const [subRoutes, setSubRoutes] = useState<any>({
         stock: [], // Initialize with an empty array to avoid undefined
@@ -89,13 +89,13 @@ const AddOrder = ({ }: Props) => {
     useEffect(() => {
         const RouteDetails = JSON.parse(localStorage.getItem("activeRoute") || "{}");
         console.log(RouteDetails, "Route Details");
-    
+
         // Set activeRoute state
         setActiveRoute(RouteDetails);
-    
+
         const RideId = JSON.parse(localStorage.getItem("StartRide") || "{}");
         const Id = RideId?.data?._id; // Use optional chaining for safety
-    
+
         // Check if Id is present and RouteDetails has valid values
         if (Id && RouteDetails && Object.keys(RouteDetails).length > 0) {
             setOrderData((prevData) => ({
@@ -109,7 +109,7 @@ const AddOrder = ({ }: Props) => {
             }));
         }
     }, []);
-    
+
 
     // Fetch localStorage data on mount
     useEffect(() => {
@@ -127,7 +127,7 @@ const AddOrder = ({ }: Props) => {
         setFilteredCustomers(customers);
     };
 
-   
+
     const handleReturnBottleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         // Convert value to a number or set to 0 if empty
@@ -168,36 +168,37 @@ const AddOrder = ({ }: Props) => {
     };
 
     useEffect(() => {
+        const ratePerBottle: any = orderData.ratePerItem || 0;
 
-        if(selectedItem?.status === "Filled" ){
+        const newTotalAmount: any = orderData.stock.reduce(
+            (total, item) => total + item.quantity * ratePerBottle,
+            0
+        );
 
-            // Perform calculation whenever stock or ratePerCustomer changes
-            const ratePerBottle: any = orderData.ratePerItem || 0;
-    
-            const newTotalAmount: any = orderData.stock.reduce(
-                (total, item) => total + item.quantity * ratePerBottle,
-                0
-            );
-    
-            setOrderData((prevState) => ({
-                ...prevState,
-                totalAmount: newTotalAmount.toString(),
-            }));
-        }
-        else{
-            // Perform calculation whenever stock or ratePerCustomer changes
-            const ratePerBottle: any = selectedItem?.sellingPrice || orderData.ratePerItem || 0;
-    
-            const newTotalAmount: any = orderData.stock.reduce(
-                (total, item) => total + item.quantity * ratePerBottle,
-                0
-            );
-    
-            setOrderData((prevState) => ({
-                ...prevState,
-                totalAmount: newTotalAmount.toString(),
-            }));
-        }
+        setOrderData((prevState) => ({
+            ...prevState,
+            totalAmount: newTotalAmount.toString(),
+        }));
+
+        // if (selectedItem?.status === "Filled") {
+
+        //     // Perform calculation whenever stock or ratePerCustomer changes
+
+        // }
+        // else {
+        //     // Perform calculation whenever stock or ratePerCustomer changes
+        //     const ratePerBottle: any = selectedItem?.sellingPrice || orderData.ratePerItem || 0;
+
+        //     const newTotalAmount: any = orderData.stock.reduce(
+        //         (total, item) => total + item.quantity * ratePerBottle,
+        //         0
+        //     );
+
+        //     setOrderData((prevState) => ({
+        //         ...prevState,
+        //         totalAmount: newTotalAmount.toString(),
+        //     }));
+        // }
 
     }, [orderData.stock, orderData.ratePerItem]); // Dependencies to trigger recalculation
 
@@ -214,8 +215,8 @@ const AddOrder = ({ }: Props) => {
         setIsOpen(false); // Close dropdown on selection
     };
     console.log(quantity, "quantit");
-    console.log(selectedItem,"selectedItem");
-    
+    console.log(selectedItem, "selectedItem");
+
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -309,11 +310,11 @@ const AddOrder = ({ }: Props) => {
     }, [])
 
 
-useEffect(() => {
-    const now = new Date();
-    const formattedDateTime = format(now, 'yyyy-MM-dd HH:mm:ss'); // Format: YYYY-MM-DD HH:MM:SS
-    setOrderData((prevData) => ({ ...prevData, date: formattedDateTime }));
-}, []);
+    useEffect(() => {
+        const now = new Date();
+        const formattedDateTime = format(now, 'yyyy-MM-dd HH:mm:ss'); // Format: YYYY-MM-DD HH:MM:SS
+        setOrderData((prevData) => ({ ...prevData, date: formattedDateTime }));
+    }, []);
 
 
     const { request: AddOrder } = useApi("post", 4001);
@@ -537,15 +538,41 @@ useEffect(() => {
                     <div className="pt-2">
                         <label className="block text-gray-700">Rate Per Item</label>
                         <input
-                            type="number"
+                            type="text" // Change to "text" to handle decimals
                             name="ratePerItem"
                             value={orderData.ratePerItem}
                             onChange={(e) => {
                                 const value = e.target.value;
-                                if (/^\d*$/.test(value)) { // Only allow numbers
+                                // Allow numbers and at most one decimal point
+                                if (/^\d*\.?\d*$/.test(value)) {
                                     handleInputChange(e); // Update state if the input is valid
                                 }
                             }}
+                            onKeyDown={(e) => {
+                                if (
+                                    e.key === "e" || // Prevent 'e' for exponential notation
+                                    e.key === "+" || // Prevent '+'
+                                    e.key === "-" || // Prevent '-'
+                                    e.key === " "    // Prevent space
+                                ) {
+                                    e.preventDefault();
+                                }
+                            }}
+                            className="w-full p-2 mt-1 border rounded-md"
+                            placeholder="Enter Rate"
+                        />
+
+
+                    </div>
+
+                    {/* Return  Empty Bottle */}
+                    <div className="pt-2">
+                        <label className="block text-gray-700">Return  Empty Bottle</label>
+                        <input
+                            type="number"
+                            name="returnBottle"
+                            value={orderData.returnBottle || ''} // Use `|| ''` to handle undefined
+                            onChange={handleReturnBottleChange} // Call directly to handle input change
                             onKeyDown={(e) => {
                                 if (
                                     e.key === "e" || // Prevent 'e' for exponential notation
@@ -558,33 +585,8 @@ useEffect(() => {
                                 }
                             }}
                             className="w-full p-2 mt-1 border rounded-md"
-                            placeholder="Rate Rate"
+                            placeholder="Empty Return Bottle Number"
                         />
-
-                    </div>
-
-                    {/* Return  Empty Bottle */}
-                    <div className="pt-2">
-                        <label className="block text-gray-700">Return  Empty Bottle</label>
-                        <input
-            type="number"
-            name="returnBottle"
-            value={orderData.returnBottle || ''} // Use `|| ''` to handle undefined
-            onChange={handleReturnBottleChange} // Call directly to handle input change
-            onKeyDown={(e) => {
-                if (
-                    e.key === "e" || // Prevent 'e' for exponential notation
-                    e.key === "+" || // Prevent '+'
-                    e.key === "-" || // Prevent '-'
-                    e.key === "." || // Prevent '.'
-                    e.key === " "    // Prevent space
-                ) {
-                    e.preventDefault();
-                }
-            }}
-            className="w-full p-2 mt-1 border rounded-md"
-            placeholder="Empty Return Bottle Number"
-        />
                     </div>
 
 

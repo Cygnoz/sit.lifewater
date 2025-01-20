@@ -422,7 +422,7 @@ const AddStartRide: React.FC = () => {
               id="helper"
               className="w-full p-2 border border-gray-300 rounded-lg"
               onChange={handleHelperChange}
-              required
+              // required
             >
               <option value="">Select Helper</option>
               {staffList
