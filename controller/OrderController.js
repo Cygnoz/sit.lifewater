@@ -486,3 +486,67 @@ exports.deleteOrder = async (req, res) => {
       return acc;
     }, {});
   }
+
+
+  async function journal( savedInvoice, defAcc, customerAccount ) {  
+
+    const sale = {
+      organizationId: savedInvoice.organizationId,
+      operationId: savedInvoice._id,
+      transactionId: savedInvoice.salesInvoice,
+      date: savedInvoice.createdDate,
+      accountId: defAcc.salesAccount || undefined,
+      action: "Sales Invoice",
+      debitAmount: 0,
+      creditAmount: savedInvoice.saleAmount,
+      remark: savedInvoice.note,
+    };
+
+
+    const vat = {
+      organizationId: savedInvoice.organizationId,
+      operationId: savedInvoice._id,
+      transactionId: savedInvoice.salesInvoice,
+      date: savedInvoice.createdDate,
+      accountId: defAcc.outputVat || undefined,
+      action: "Sales Invoice",
+      debitAmount: 0,
+      creditAmount: savedInvoice.vat || 0,
+      remark: savedInvoice.note,
+    };
+
+
+    const customer = {
+      organizationId: savedInvoice.organizationId,
+      operationId: savedInvoice._id,
+      transactionId: savedInvoice.salesInvoice,
+      date: savedInvoice.createdDate,
+      accountId: customerAccount._id || undefined,
+      action: "Sales Invoice",
+      debitAmount: savedInvoice.totalAmount || 0,
+      creditAmount: 0,
+      remark: savedInvoice.note,
+    };
+    const customerPaid = {
+      organizationId: savedInvoice.organizationId,
+      operationId: savedInvoice._id,
+      transactionId: savedInvoice.salesInvoice,
+      date: savedInvoice.createdDate,
+      accountId: customerAccount._id || undefined,
+      action: "Receipt",
+      debitAmount: 0,
+      creditAmount: savedInvoice.paidAmount || 0,
+      remark: savedInvoice.note,
+    };
+    const depositAccount = {
+      organizationId: savedInvoice.organizationId,
+      operationId: savedInvoice._id,
+      transactionId: savedInvoice.salesInvoice,
+      date: savedInvoice.createdDate,
+      accountId: defAcc.depositAccountId || undefined,
+      action: "Receipt",
+      debitAmount: savedInvoice.paidAmount || 0,
+      creditAmount: 0,
+      remark: savedInvoice.note,
+    };
+  }
