@@ -1,8 +1,8 @@
-import React from 'react';
-import img from '../assets/images/banking-image 1.png';
-import { Link } from 'react-router-dom';
-import plus from '../assets/images/pluscircle.svg'
-import search from '../assets/images/search (2).svg';
+import React from "react";
+import img from "../assets/images/banking-image 1.png";
+import { Link } from "react-router-dom";
+import plus from "../assets/images/pluscircle.svg";
+import search from "../assets/images/search (2).svg";
 
 // PaymentCollection component with TypeScript
 const PaymentCollection: React.FC = () => {
@@ -11,7 +11,6 @@ const PaymentCollection: React.FC = () => {
       {/* Search bar and Add button */}
       <div className="w-full max-w-md flex items-center justify-between px-4 mb-8">
         <div className="relative w-full flex items-center">
-
           {/* Search Input */}
           <input
             type="text"
@@ -20,11 +19,15 @@ const PaymentCollection: React.FC = () => {
           />
           {/* Search Icon */}
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-            <img src={search} alt="Search Icon" className="w-4 h-4 text-gray-500" />
+            <img
+              src={search}
+              alt="Search Icon"
+              className="w-4 h-4 text-gray-500"
+            />
           </div>
         </div>
         <Link to="/creditcollection">
-          <img className='m-2' src={plus} alt="" />
+          <img className="m-2" src={plus} alt="" />
         </Link>
       </div>
 
@@ -38,7 +41,9 @@ const PaymentCollection: React.FC = () => {
         />
 
         {/* No Payment Collection Text */}
-        <span className="text-[#787A7D] text-sm font-medium">No Payment Collection</span>
+        <span className="text-[#787A7D] text-sm font-medium">
+          No Payment Collection
+        </span>
       </div>
     </div>
   );

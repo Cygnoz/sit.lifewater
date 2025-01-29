@@ -33,10 +33,10 @@ const menuItems = [
   { title: "End Ride", icon: endride, path: "/endride" },
 ];
 
-const Sidebar: React.FC<{ isSidebarOpen: boolean; handleToggleSidebar: () => void }> = ({
-  isSidebarOpen,
-  handleToggleSidebar,
-}) => {
+const Sidebar: React.FC<{
+  isSidebarOpen: boolean;
+  handleToggleSidebar: () => void;
+}> = ({ isSidebarOpen, handleToggleSidebar }) => {
   const navigate = useNavigate();
   const [storedUsername, setStoredUsername] = useState<any | null>(null);
   const [pagetitle, setPageTitle] = useState("");
@@ -47,7 +47,11 @@ const Sidebar: React.FC<{ isSidebarOpen: boolean; handleToggleSidebar: () => voi
   // Close sidebar on outside click
   useEffect(() => {
     const handleMouseDown = (event: MouseEvent) => {
-      if (sidebarRef.current && isSidebarOpen && !sidebarRef.current.contains(event.target as Node)) {
+      if (
+        sidebarRef.current &&
+        isSidebarOpen &&
+        !sidebarRef.current.contains(event.target as Node)
+      ) {
         handleToggleSidebar(); // Close sidebar if clicked outside
       }
     };
@@ -75,8 +79,7 @@ const Sidebar: React.FC<{ isSidebarOpen: boolean; handleToggleSidebar: () => voi
     localStorage.clear();
     navigate("/");
   };
- console.log("response",storedUsername);
- 
+  console.log("response", storedUsername);
 
   return (
     <div>
@@ -94,16 +97,14 @@ const Sidebar: React.FC<{ isSidebarOpen: boolean; handleToggleSidebar: () => voi
             {pagetitle === "Home" && (
               <div>
                 <p className="text-sm font-semibold">
-                {(storedUsername?.data.firstname)}
-                {/* {`Hello, ${storedUsername || "User"}!`} */}
-              </p>
-
-                
+                  {storedUsername?.data.firstname}
+                  {/* {`Hello, ${storedUsername || "User"}!`} */}
+                </p>
               </div>
             )}
           </div>
           <img
-            src={(storedUsername?.data.profile) }
+            src={storedUsername?.data.profile}
             alt="Profile"
             className="w-10 h-10 rounded-full object-cover cursor-pointer"
             onClick={() => setOpen(true)}
@@ -114,8 +115,9 @@ const Sidebar: React.FC<{ isSidebarOpen: boolean; handleToggleSidebar: () => voi
       {/* Sidebar */}
       <div
         ref={sidebarRef} // Attach ref to sidebar
-        className={`fixed left-0 h-screen bg-white shadow-lg transform transition-transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } w-64 z-40`}
+        className={`fixed left-0 h-screen bg-white shadow-lg transform transition-transform ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } w-64 z-40`}
       >
         <div className="p-4 flex justify-between">
           <h2 className="text-xl font-bold">Menu</h2>
@@ -131,17 +133,23 @@ const Sidebar: React.FC<{ isSidebarOpen: boolean; handleToggleSidebar: () => voi
               key={title}
               onClick={() => handleNavigation(path, title)}
               className={`flex items-center p-3 gap-3 cursor-pointer 
-                ${activeItem === title ? "bg-gradient-to-l from-[#820000] to-[#2C353B] rounded-2xl text-white font-semibold" : "hover:bg-gray-200"}`}
+                ${
+                  activeItem === title
+                    ? "bg-gradient-to-l from-[#820000] to-[#2C353B] rounded-2xl text-white font-semibold"
+                    : "hover:bg-gray-200"
+                }`}
             >
               <img
                 src={icon}
                 alt={title}
-                className={`w-6 h-6 ${activeItem === title ? "rounded-lg p-0.5 bg-white" : ""}`}
+                className={`w-6 h-6 ${
+                  activeItem === title ? "rounded-lg p-0.5 bg-white" : ""
+                }`}
               />
               <span>{title}</span>
             </li>
           ))}
-          <li >
+          <li>
             <div className="mx-[5%] my-2">
               <Button size="xl" variant="primary" onClick={() => setOpen(true)}>
                 Log out
