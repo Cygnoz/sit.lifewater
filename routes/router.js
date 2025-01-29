@@ -94,6 +94,9 @@ router.get('/rides/completed/:mainRouteId', startRideController.getCompletedRide
 router.post('/addaccounts', verifyToken, AccountsController.addAccount); // add account
 router.get('/getallaccounts', verifyToken, AccountsController.getAllAccount); // get all accounts
 
+//addaccount
+router.post('/add-autogenerateaccount', AccountsController.autoGenerateAccount); // add account
+
 //Journal
 router.post('/add-journal-entry', verifyToken,journalController.addJournalEntry); // add journal entry
 router.get('/get-all-journal', verifyToken,journalController.getAllJournal); // get all journal entries
@@ -104,7 +107,7 @@ router.get('/get-one-trial-balance/:accountId', verifyToken,AccountsController.g
 //Admin
 router.post('/login', AdminController.login) // login admin
 
-router.post('/add-admin', verifyToken, AdminController.addAdmin); // add admin
+router.post('/add-admin', AdminController.addAdmin); // add admin
 
 
 
