@@ -2,6 +2,13 @@ const Order = require('../Models/OrderSchema');
 const Customer = require('../Models/CustomerSchema')
 const SubRoute = require('../Models/SubrouteSchema');
 const Item = require('../Models/ItemSchema');
+
+const Account = require('../Models/account');
+const TrialBalance = require('../Models/trialBalance');
+
+
+
+
  
 // exports.createOrder = async (req, res) => {
 //   console.log("Create Order Request:", req.body);
@@ -161,6 +168,24 @@ const Item = require('../Models/ItemSchema');
 // Function to view a single order by ID
 
 
+
+
+
+// Fetch existing data
+const dataExist = async ( customerId , depositAccountId ) => {
+    const [ customerAccount, saleAccount, depositAccount ] = await Promise.all([
+      Account.findOne({ organizationId , accountId:customerId }),
+      Account.findOne({ organizationId , accountName:"Sales" }),
+      Account.findOne({ organizationId , accountId:depositAccountId }),
+    ]);
+    return { customerAccount, saleAccount, depositAccount};
+};
+
+
+
+
+
+
 exports.createOrder = async (req, res) => {
   console.log("Create Order Request:", req.body);
 
@@ -186,6 +211,13 @@ exports.createOrder = async (req, res) => {
     if (!cleanedData.stock || cleanedData.stock.length === 0) {
       return res.status(400).json({ success: false, message: 'Select an item' });
     }
+
+    const { customerAccount, saleAccount, depositAccount } = await dataExist( cleanedData.customerId, cleanedData.depositAccountId  );
+    if (!customerAccount) {
+        res.status(404).json({ message: "Customer Account not found" });
+        return false;
+      }   
+
 
     // Fetch subroute and customer
     const subRoute = await SubRoute.findById(cleanedData.subRouteId);
@@ -340,6 +372,9 @@ exports.createOrder = async (req, res) => {
 
     await order.save();
 
+     //Journal
+     await journal( order, customerAccount, saleAccount, depositAccount );
+
     // Send success response
     res.status(200).json({ success: true, message: 'Order created successfully' });
 
@@ -488,65 +523,91 @@ exports.deleteOrder = async (req, res) => {
   }
 
 
-  async function journal( savedInvoice, defAcc, customerAccount ) {  
+  async function journal( order, customerAccount, saleAccount, depositAccounts ) {  
 
     const sale = {
-      organizationId: savedInvoice.organizationId,
-      operationId: savedInvoice._id,
-      transactionId: savedInvoice.salesInvoice,
-      date: savedInvoice.createdDate,
-      accountId: defAcc.salesAccount || undefined,
+      operationId: order._id,
+      transactionId: order.orderNumber,
+      date: order.createdDate,
+      accountId: saleAccount._id || undefined,
       action: "Sales Invoice",
       debitAmount: 0,
-      creditAmount: savedInvoice.saleAmount,
-      remark: savedInvoice.note,
-    };
-
-
-    const vat = {
-      organizationId: savedInvoice.organizationId,
-      operationId: savedInvoice._id,
-      transactionId: savedInvoice.salesInvoice,
-      date: savedInvoice.createdDate,
-      accountId: defAcc.outputVat || undefined,
-      action: "Sales Invoice",
-      debitAmount: 0,
-      creditAmount: savedInvoice.vat || 0,
-      remark: savedInvoice.note,
+      creditAmount: order.saleAmount,
+      remark: order.note,
     };
 
 
     const customer = {
-      organizationId: savedInvoice.organizationId,
-      operationId: savedInvoice._id,
-      transactionId: savedInvoice.salesInvoice,
-      date: savedInvoice.createdDate,
+      operationId: order._id,
+      transactionId: order.orderNumber,
+      date: order.createdDate,
       accountId: customerAccount._id || undefined,
       action: "Sales Invoice",
-      debitAmount: savedInvoice.totalAmount || 0,
+      debitAmount: order.totalAmount || 0,
       creditAmount: 0,
-      remark: savedInvoice.note,
+      remark: order.note,
     };
     const customerPaid = {
-      organizationId: savedInvoice.organizationId,
-      operationId: savedInvoice._id,
-      transactionId: savedInvoice.salesInvoice,
-      date: savedInvoice.createdDate,
+      operationId: order._id,
+      transactionId: order.orderNumber,
+      date: order.createdDate,
       accountId: customerAccount._id || undefined,
       action: "Receipt",
       debitAmount: 0,
-      creditAmount: savedInvoice.paidAmount || 0,
-      remark: savedInvoice.note,
+      creditAmount: order.paidAmount || 0,
+      remark: order.note,
     };
     const depositAccount = {
-      organizationId: savedInvoice.organizationId,
-      operationId: savedInvoice._id,
-      transactionId: savedInvoice.salesInvoice,
-      date: savedInvoice.createdDate,
-      accountId: defAcc.depositAccountId || undefined,
+      operationId: order._id,
+      transactionId: order.orderNumber,
+      date: order.createdDate,
+      accountId: depositAccounts._id || undefined,
       action: "Receipt",
-      debitAmount: savedInvoice.paidAmount || 0,
+      debitAmount: order.paidAmount || 0,
       creditAmount: 0,
-      remark: savedInvoice.note,
+      remark: order.note,
     };
+
+    console.log("sale", sale.debitAmount,  sale.creditAmount);
+    console.log("customer", customer.debitAmount,  customer.creditAmount);
+    console.log("customerPaid", customerPaid.debitAmount,  customerPaid.creditAmount);
+    console.log("depositAccount", depositAccount.debitAmount,  depositAccount.creditAmount);
+
+    const  debitAmount =  sale.debitAmount  + customer.debitAmount + customerPaid.debitAmount +  depositAccount.debitAmount;
+    const  creditAmount = sale.creditAmount  + customer.creditAmount + customerPaid.creditAmount +  depositAccount.creditAmount ;
+  
+    console.log("Total Debit Amount: ", debitAmount );
+    console.log("Total Credit Amount: ", creditAmount );
+
+    //credit
+    createTrialEntry( sale )
+    createTrialEntry( customer )
+
+    if(order.paymentMode === 'Cash'){
+        createTrialEntry( customerPaid )
+        createTrialEntry( depositAccount )
+    }
+
+  }
+
+
+
+
+  async function createTrialEntry( data ) {
+    const newTrialEntry = new TrialBalance({
+        organizationId:data.organizationId,
+        operationId:data.operationId,
+        transactionId: data.transactionId,
+        date:data.date,
+        accountId: data.accountId,
+        action: data.action,
+        debitAmount: data.debitAmount,
+        creditAmount: data.creditAmount,
+        remark: data.remark
+  });
+
+  console.log(newTrialEntry); 
+  
+  await newTrialEntry.save();
+  
   }

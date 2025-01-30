@@ -33,7 +33,6 @@ const { Schema } = mongoose;
  
  
 const trialBalanceSchema = new Schema({
-    organizationId: {type:String},
     operationId: {type:String},
     transactionId: {type:String}, //prefix
    

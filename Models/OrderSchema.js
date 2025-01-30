@@ -56,7 +56,7 @@ const orderSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  ReturnBottle: {
+  returnBottle: {
     type:Number
   },
   ratePerItem: {

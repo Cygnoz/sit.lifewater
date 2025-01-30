@@ -35,14 +35,11 @@ const accountSchema = new Schema({
     accountSubhead: {type:String},
     accountHead: {type:String},
     accountGroup: {type:String},
- 
-    parentAccountId: {type: mongoose.Schema.Types.ObjectId, ref: 'Accounts'},
- 
     description: {type:String},
  
-    bankAccNum: {type:String},
-    bankIfsc: {type:String},
-    bankCurrency: {type:String},
+    // bankAccNum: {type:String},
+    // bankIfsc: {type:String},
+    // bankCurrency: {type:String},
  
     systemAccounts: { type: Boolean }, // false: edit and deletable(non - system accounts), true: non-edit and non-deletable(system accounts)
  
