@@ -2,7 +2,7 @@ const Order = require('../Models/OrderSchema');
 const Customer = require('../Models/CustomerSchema')
 const SubRoute = require('../Models/SubrouteSchema');
 const Item = require('../Models/ItemSchema');
-
+const moment = require('moment-timezone');
 const Account = require('../Models/account');
 const TrialBalance = require('../Models/trialBalance');
 
@@ -174,9 +174,9 @@ const TrialBalance = require('../Models/trialBalance');
 // Fetch existing data
 const dataExist = async ( customerId , depositAccountId ) => {
     const [ customerAccount, saleAccount, depositAccount ] = await Promise.all([
-      Account.findOne({ organizationId , accountId:customerId }),
-      Account.findOne({ organizationId , accountName:"Sales" }),
-      Account.findOne({ organizationId , accountId:depositAccountId }),
+      Account.findOne({  accountId:customerId }),
+      Account.findOne({  accountName:"Sales" }),
+      Account.findOne({  _id:depositAccountId }),
     ]);
     return { customerAccount, saleAccount, depositAccount};
 };
@@ -362,6 +362,7 @@ exports.createOrder = async (req, res) => {
     // Create an order record
     const order = new Order({
       ...cleanedData,
+      balanceAmount: cleanedData.totalAmount - cleanedData.paidAmount,
       stock: cleanedData.stock.map(item => ({
         itemId: item.itemId,
         itemName: item.itemName,
@@ -511,6 +512,42 @@ exports.deleteOrder = async (req, res) => {
   }
 };
 
+  // Function to generate time and date for storing in the database
+function generateTimeAndDateForDB(
+  timeZone,
+  dateFormat,
+  dateSplit,
+  baseTime = new Date(),
+  timeFormat = "HH:mm:ss",
+  timeSplit = ":"
+) {
+  // Convert the base time to the desired time zone
+  const localDate = moment.tz(baseTime, timeZone);
+
+  // Format date and time according to the specified formats
+  let formattedDate = localDate.format(dateFormat);
+
+  // Handle date split if specified
+  if (dateSplit) {
+    // Replace default split characters with specified split characters
+    formattedDate = formattedDate.replace(/[-/]/g, dateSplit); // Adjust regex based on your date format separators
+  }
+
+  const formattedTime = localDate.format(timeFormat);
+  const timeZoneName = localDate.format("z"); // Get time zone abbreviation
+
+  // Combine the formatted date and time with the split characters and time zone
+  const dateTime = `${formattedDate} ${formattedTime
+    .split(":")
+    .join(timeSplit)}`;
+
+  return {
+    date: formattedDate,
+    time: `${formattedTime} (${timeZoneName})`,
+    dateTime: dateTime,
+  };
+}
+
 
 
   //Clean Data 
@@ -525,6 +562,12 @@ exports.deleteOrder = async (req, res) => {
 
   async function journal( order, customerAccount, saleAccount, depositAccounts ) {  
 
+    console.log('customeracc:',customerAccount);
+    console.log('orderdepositid:',order.depositAccountId);
+    console.log('saleaccount:',saleAccount);
+    console.log('depositacc:',depositAccounts);
+    
+
     const sale = {
       operationId: order._id,
       transactionId: order.orderNumber,
@@ -532,7 +575,7 @@ exports.deleteOrder = async (req, res) => {
       accountId: saleAccount._id || undefined,
       action: "Sales Invoice",
       debitAmount: 0,
-      creditAmount: order.saleAmount,
+      creditAmount: order.totalAmount,
       remark: order.note,
     };
 
@@ -579,13 +622,16 @@ exports.deleteOrder = async (req, res) => {
     console.log("Total Debit Amount: ", debitAmount );
     console.log("Total Credit Amount: ", creditAmount );
 
+    const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai","DD/MM/YY","/");
+    const openingDate = generatedDateTime.dateTime; 
+
     //credit
-    createTrialEntry( sale )
-    createTrialEntry( customer )
+    createTrialEntry( sale ,openingDate )
+    createTrialEntry( customer,openingDate )
 
     if(order.paymentMode === 'Cash'){
-        createTrialEntry( customerPaid )
-        createTrialEntry( depositAccount )
+        createTrialEntry( customerPaid,openingDate )
+        createTrialEntry( depositAccount,openingDate )
     }
 
   }
@@ -593,21 +639,23 @@ exports.deleteOrder = async (req, res) => {
 
 
 
-  async function createTrialEntry( data ) {
+  async function createTrialEntry( data,openingDate ) {
     const newTrialEntry = new TrialBalance({
         organizationId:data.organizationId,
         operationId:data.operationId,
         transactionId: data.transactionId,
-        date:data.date,
+        date:openingDate,
         accountId: data.accountId,
         action: data.action,
         debitAmount: data.debitAmount,
         creditAmount: data.creditAmount,
         remark: data.remark
   });
+ const trial =  await newTrialEntry.save();
 
-  console.log(newTrialEntry); 
+
+
   
-  await newTrialEntry.save();
+  console.log('output:',trial); 
   
   }

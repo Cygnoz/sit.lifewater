@@ -71,6 +71,10 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     // required: true,
   },
+  balanceAmount : {
+    type: Number,
+    // required: true,
+  },
   depositAccountId: {
     type: String,
   },
