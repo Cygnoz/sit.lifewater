@@ -8,7 +8,7 @@ export const endpoints = {
     GET_ALL_VEHICLES: `viewVehicles`,
 
     // End Ride
-    END_Ride:`/complete-ride`,
+    END_Ride: `/complete-ride`,
 
     // Subroute
     GET_ALL_SUBROUTE: `viewSRoute`,
@@ -24,5 +24,12 @@ export const endpoints = {
     ADD_ORDER: `orders`,
     GET_ALL_ORDER: `orders`,
     VIEW_A_ORDER: `orders`,
-    RIDE_ORDERS:`today`,
+    RIDE_ORDERS: `today`,
+
+    // Active routes
+    GET_ALL_ACTIVE_ROUTE: `active-rides`,
+    GET_AN_ACTIVE_ROUTE: `viewActiveRoute`,
+
+    // Account
+    GET_ALL_ACCOUNTS: `getallaccounts`,
 }

@@ -36,6 +36,7 @@ interface OrdrerData {
     ratePerItem: string,
     rideId: string,
     stock: Item[];
+    depositAccount:string
 }
 
 const AddOrder = ({ }: Props) => {
@@ -70,8 +71,55 @@ const AddOrder = ({ }: Props) => {
         ratePerItem: "", // Initialized as a number
         rideId: "",
         stock: [],
+        depositAccount: ""
     });
     console.log("Input Data", orderData);
+
+    const [filteredAccounts, setFilteredAccounts] = useState<any[]>([]); // All accounts
+
+    // Fetch accounts from the API
+    const { request: getallaccounts } = useApi("get", 4000);
+    const fetchAccounts = async () => {
+        try {
+            const url = `${endpoints.GET_ALL_ACCOUNTS}`;
+            const { response, error } = await getallaccounts(url);
+            console.log("API RESPONSE :", response);
+
+            if (!error && response) {
+                setLoading(false);
+                console.log(loading);
+                const filtered = response.data.filter(
+                    (account: any) => account.accountSubhead === "Bank"
+                );
+                setFilteredAccounts(filtered);
+                console.log("filteredAccounts", filtered);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+
+    useEffect(() => {
+        fetchAccounts();
+    }, []);
+
+    const handleDepositeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+        setOrderData((prevData) => ({
+            ...prevData,
+            depositAccount: value,
+        }));
+    };
+
+    useEffect(() => {
+        if (orderData.paymentMode !== "Cash") {
+            setOrderData((prevData) => ({
+                ...prevData,
+                depositAccount: "",
+            }));
+        }
+    }, [orderData.paymentMode]);
 
     console.log(orderData.stock[0]?.quantity, "qnt");
     // Generate unique order number on component mount
@@ -537,7 +585,27 @@ const AddOrder = ({ }: Props) => {
                             </select>
                         </div>
                     </div>
-
+                    {orderData.paymentMode === "Cash" && (
+                        <div className="flex pt-2">
+                            <div className="w-full">
+                                <label className="block text-gray-700">Deposit Account</label>
+                                <select
+                                    name="depositAccount"
+                                    className="w-full p-2 mt-1 border rounded-md"
+                                    value={orderData.depositAccount}
+                                    onChange={handleDepositeChange} // Pass function reference
+                                    required
+                                >
+                                    <option value="">Select Account</option>
+                                    {filteredAccounts.map((account: any) => (
+                                        <option key={account._id} value={account.accountName}>
+                                            {account.accountName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    )}
                     {/* Rate per Item */}
                     <div className="pt-2">
                         <label className="block text-gray-700">Rate Per Item</label>
