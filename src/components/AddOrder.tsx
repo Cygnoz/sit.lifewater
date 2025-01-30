@@ -117,6 +117,7 @@ const AddOrder = ({ }: Props) => {
             setOrderData((prevData) => ({
                 ...prevData,
                 depositAccountId: "",
+                paidAmount:0,
             }));
         }
     }, [orderData.paymentMode]);
@@ -138,7 +139,6 @@ const AddOrder = ({ }: Props) => {
         } else {
             setPaidAmountError(""); // Clear error if valid
         }
-
         setOrderData((prevData) => ({
             ...prevData,
             paidAmount: numericValue, // Ensuring it's always a number
@@ -721,6 +721,7 @@ const AddOrder = ({ }: Props) => {
                             />
                         </div>
                     </div>
+                    {orderData.paymentMode === "Cash" && (
                     <div className="pt-2">
                         <label className="block text-gray-700">Paid Amount</label>
                         <input
@@ -731,8 +732,9 @@ const AddOrder = ({ }: Props) => {
                             className="w-full p-2 mt-1 border rounded-md"
                             placeholder="Enter Paid Amount"
                         />
-                    </div>
                     {paidAmounterror && <div className="text-red-500 text-center text-sm mt-1">{paidAmounterror}</div>}
+                    </div>
+                    )}
 
                     <div className=" py-3 ">
                         <Button size="xl" onClick={handleSubmit}>
