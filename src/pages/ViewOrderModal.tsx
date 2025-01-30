@@ -11,7 +11,7 @@ interface OrderData {
         itemName: string
     }],
     ratePerItem: string,
-    ReturnBottle: string,
+    returnBottle: string,
     paymentMode: string,
     customerName: string,
     totalAmount: string
@@ -95,7 +95,7 @@ const ViewOrderModal = ({ id }: Props) => {
                                         ))}
                                     </p>
                                     <p className="text-[#303F58]">: {orderData?.ratePerItem}</p>
-                                    <p className="text-[#303F58]">: {orderData?.ReturnBottle ? orderData.ReturnBottle : "0"}</p>
+                                    <p className="text-[#303F58]">: {orderData?.returnBottle ? orderData.returnBottle : "0"}</p>
                                 </div>
                             </div>
                             <div className="flex bg-[#FFFFFF] px-2 py-1.5 gap-2 mt-2 rounded-md items-center">

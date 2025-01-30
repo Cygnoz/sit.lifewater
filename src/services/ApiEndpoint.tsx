@@ -1,5 +1,5 @@
 export const endpoints = {
-    //lofin
+    //login
     LOGIN: `staff/login`,
 
     // For Active Route only 
