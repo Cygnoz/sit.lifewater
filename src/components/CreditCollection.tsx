@@ -1,145 +1,144 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { endpoints } from "../services/ApiEndpoint";
+import useApi from "../Hook/UseApi";
 
 const CreditCollection: React.FC = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const { request: Addpaymentcollection } = useApi("post", 4001);
+  const { request: getAllCustomers } = useApi("get", 4000);
+
   const [formData, setFormData] = useState({
-    date: '',
-    customer: '',
-    invoiceNumber: '',
-    invoiceAmount: '',
-    remainingAmount: '',
-    collectAmount: '',
+    date: "",
+    customer: "",
+    invoiceNumber: "",
+    collectAmount: "",
   });
+
+  const [customers, setCustomers] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const url = `${endpoints.GET_ALL_CUSTOMERS}`;
+        const { response, error } = await getAllCustomers(url);
+        if (!error && response) {
+          setCustomers(response.data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchCustomers();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({ ...prevState, [name]: value }));
+    setFormData((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = () => {
+    if (!formData.date || !formData.customer || !formData.invoiceNumber || !formData.collectAmount) {
+      toast.error("Please fill in all required fields.");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
-    // Handle form submission logic here
+    if (!validateForm()) return;
+    setLoading(true);
+    try {
+      const payload = { ...formData };
+      const url = `${endpoints}`;
+      const { response, error } = await Addpaymentcollection(url, payload);
+      console.log(response);
+      
+      if (error) {
+        toast.error(error.response?.data?.message || "Failed to save");
+      } else {
+        toast.success("Payment collected successfully.");
+        setTimeout(() => {
+          navigate("/viewcustomers");
+        }, 2000);
+      }
+    } catch (err: any) {
+      console.error("Error adding customer:", err);
+      toast.error(err.message || "Failed to save");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="flex justify-center items-start min-h-screen bg-gray-100 p-5">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-md rounded-lg p-6 w-full max-w-md space-y-4"
-      >
-        <div className="mb-4">
-          <label htmlFor="date" className="block text-sm font-medium text-[#484A4D] text-left">
-            Date
-          </label>
+      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6 w-full max-w-md space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Date</label>
           <input
             type="date"
-            id="date"
             name="date"
             value={formData.date}
             onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
           />
         </div>
 
-        <div className="mb-4">
-          <label htmlFor="customer" className="block text-sm font-medium text-[#484A4D] text-left">
-            Search For Customer
-          </label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Select Customer</label>
           <select
-            id="customer"
             name="customer"
             value={formData.customer}
             onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="w-full p-2 mt-1 border rounded-md"
           >
-            <option value="" disabled>
-             Search customer
-            </option>
-            {/* Add options dynamically */}
-            <option value="customer1">felecia</option>
-            <option value="customer2">kim</option>
-            <option value="customer3">bom</option>
-
+            <option value="">Select a customer</option>
+            {customers.map((customer) => (
+              <option key={customer.customerID} value={customer.fullName}>
+                {customer.fullName}
+              </option>
+            ))}
           </select>
+          <Link to="/addcustomers">
+            <div className="flex gap-1 my-1 cursor-pointer">
+              <p className="text-[#820000] text-[14px] font-semibold">Add New Customer</p>
+            </div>
+          </Link>
         </div>
 
-        <div className="mb-4">
-          <label htmlFor="invoiceNumber" className="block text-sm font-medium text-[#484A4D] text-left">
-            Invoice Number
-          </label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Invoice Number</label>
           <input
             type="number"
-            id="invoiceNumber"
             name="invoiceNumber"
-            placeholder="Enter the quantity"
             value={formData.invoiceNumber}
             onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
           />
         </div>
 
-        <div className="mb-4">
-          <label htmlFor="invoiceAmount" className="block text-sm font-medium text-[#484A4D] text-left">
-            Invoice Amount
-          </label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Collect Amount</label>
           <input
             type="number"
-            id="invoiceAmount"
-            name="invoiceAmount"
-            placeholder="Enter the Invoice amount"
-            value={formData.invoiceAmount}
-            onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label htmlFor="remainingAmount" className="block text-sm font-medium text-[#484A4D] text-left">
-            Remaining Amount
-          </label>
-          <input
-            type="number"
-            id="remainingAmount"
-            name="remainingAmount"
-            placeholder="Enter the remaining amount"
-            value={formData.remainingAmount}
-            onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label htmlFor="collectAmount" className="block text-sm font-medium text-[#484A4D]  text-left">
-            Collect Amount
-          </label>
-          <input
-            type="number"
-            id="collectAmount"
             name="collectAmount"
-            placeholder="Enter the Collect amount"
             value={formData.collectAmount}
             onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm "
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
           />
         </div>
 
-          {/* Total Outstanding Amount with border */}
-        <div className="border border-gray-300 rounded-lg p-1 mt-6 text-center">
-          <p className="text-[#787A7D] font-medium">Total Outstanding Amount</p>
-          <p className="text-[#820000] font-bold text-xl">0</p>
-        </div>
-
-         {/* Buttons */}
-         <div className="flex justify-between mt-5">
-          <Link to={'/collection'}>
-          <button className=" py-1 px-8 bg-[#F6F6F6] text-[#820000] border border-red-500 rounded-lg hover:bg-gray-100 m-2">
-            Cancel
-          </button>
+        <div className="flex justify-between mt-5">
+          <Link to="/collection">
+            <button className="py-1 px-8 bg-gray-200 text-red-600 border border-red-500 rounded-lg hover:bg-gray-300">
+              Cancel
+            </button>
           </Link>
-          <button className="py-1 px-8 bg-[#820000] text-[#FEFDF9] rounded-lg m-2">
-            Submit
+          <button type="submit" className="py-1 px-8 bg-red-600 text-white rounded-lg" disabled={loading}>
+            {loading ? "Submitting..." : "Submit"}
           </button>
         </div>
       </form>
