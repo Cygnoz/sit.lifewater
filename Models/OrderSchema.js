@@ -67,6 +67,13 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     // required: true,
   },
+  paidAmount: {
+    type: Number,
+    // required: true,
+  },
+  depositAccountId: {
+    type: String,
+  },
   stock: { type: [stockSchema], default: undefined }
 });
 
