@@ -181,11 +181,6 @@ const dataExist = async ( customerId , depositAccountId ) => {
     return { customerAccount, saleAccount, depositAccount};
 };
 
-
-
-
-
-
 exports.createOrder = async (req, res) => {
   console.log("Create Order Request:", req.body);
 
@@ -212,7 +207,7 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Select an item' });
     }
 
-    const { customerAccount, saleAccount, depositAccount } = await dataExist( cleanedData.customerId, cleanedData.depositAccountId  );
+    const { customerAccount, saleAccount, depositAccount } = await dataExist( cleanedData.customerId, cleanedData.depositAccountId );
     if (!customerAccount) {
         res.status(404).json({ message: "Customer Account not found" });
         return false;
@@ -362,7 +357,7 @@ exports.createOrder = async (req, res) => {
     // Create an order record
     const order = new Order({
       ...cleanedData,
-      balanceAmount: cleanedData.totalAmount - cleanedData.paidAmount,
+      balanceAmount: (cleanedData.totalAmount - cleanedData.paidAmount) || 0,
       stock: cleanedData.stock.map(item => ({
         itemId: item.itemId,
         itemName: item.itemName,
@@ -372,6 +367,9 @@ exports.createOrder = async (req, res) => {
     });
 
     await order.save();
+
+    console.log('Order Created:', order);
+    
 
      //Journal
      await journal( order, customerAccount, saleAccount, depositAccount );
