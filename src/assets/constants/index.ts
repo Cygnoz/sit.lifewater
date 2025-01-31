@@ -4,7 +4,7 @@ import order from '../images/orders2.svg';
 import staff from '../images/staff.svg'
 import supply from '../images/supply.svg';
 import customer from '../images/customer.svg';
-import sale from '../images/sale.svg';
+// import sale from '../images/sale.svg';
 // import purchase from '../images/purchase.svg';
 // import reports from '../images/reports.svg';
 import accountant from '../images/sale.svg';
@@ -29,6 +29,10 @@ const navlist = [
       {
         headName: "Orders",
         subRoute: "/orders",
+      },
+      {
+        headName: "Reciept",
+        subRoute: "/reciept",
       },
     ],
   },
@@ -136,20 +140,20 @@ const navlist = [
       
     ],
   },
-  {
-    nav: "Sales",
-    icon:sale,
-    route: "/invoice",
-    subhead: [
-      { headName: "Invoice", subRoute: "/invoice" },
-      { headName: "Reciept", subRoute: "/reciept" },
-      // { headName: "Credit Notes", subRoute: "/creditnote" },
-      // { headName: "Bottles", subRoute: "/bottles" },
-      // { headName: "Coupon", subRoute: "/coupon" },
-      // { headName: "SalesmanSDr.", subRoute: "/salesman" },
+  // {
+  //   nav: "Sales",
+  //   icon:sale,
+  //   route: "/invoice",
+  //   subhead: [
+  //     { headName: "Invoice", subRoute: "/invoice" },
+  //     { headName: "Reciept", subRoute: "/reciept" },
+  //     { headName: "Credit Notes", subRoute: "/creditnote" },
+  //     { headName: "Bottles", subRoute: "/bottles" },
+  //     { headName: "Coupon", subRoute: "/coupon" },
+  //     { headName: "SalesmanSDr.", subRoute: "/salesman" },
      
-    ],
-  },
+  //   ],
+  // },
   // {
   //   nav: "Purchase",
   //   icon:purchase,
