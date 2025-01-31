@@ -401,6 +401,9 @@ exports.viewOrder = async (req, res) => {
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
+
+    console.log('Orderbalanceamt:', order.balanceAmount);
+    
     
     const customer = await Customer.findById(order.customerId).select('fullName mobileNo');
     
