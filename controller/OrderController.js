@@ -601,27 +601,31 @@ function generateTimeAndDateForDB(
       creditAmount: order.paidAmount || 0,
       remark: order.note,
     };
-    const depositAccount = {
-      operationId: order._id,
-      transactionId: order.orderNumber,
-      date: order.createdDate,
-      accountId: depositAccounts._id || undefined,
-      action: "Receipt",
-      debitAmount: order.paidAmount || 0,
-      creditAmount: 0,
-      remark: order.note,
-    };
+    let depositAccount 
+   
+    if(depositAccounts){
+       depositAccount = {
+        operationId: order._id,
+        transactionId: order.orderNumber,
+        date: order.createdDate,
+        accountId: depositAccounts._id || undefined,
+        action: "Receipt",
+        debitAmount: order.paidAmount || 0,
+        creditAmount: 0,
+        remark: order.note,
+      };
+    }
 
-    console.log("sale", sale.debitAmount,  sale.creditAmount);
-    console.log("customer", customer.debitAmount,  customer.creditAmount);
-    console.log("customerPaid", customerPaid.debitAmount,  customerPaid.creditAmount);
-    console.log("depositAccount", depositAccount.debitAmount,  depositAccount.creditAmount);
+    // console.log("sale", sale.debitAmount,  sale.creditAmount);
+    // console.log("customer", customer.debitAmount,  customer.creditAmount);
+    // console.log("customerPaid", customerPaid.debitAmount,  customerPaid.creditAmount);
+    // console.log("depositAccount", depositAccount.debitAmount,  depositAccount.creditAmount);
 
-    const  debitAmount =  sale.debitAmount  + customer.debitAmount + customerPaid.debitAmount +  depositAccount.debitAmount;
-    const  creditAmount = sale.creditAmount  + customer.creditAmount + customerPaid.creditAmount +  depositAccount.creditAmount ;
+    // const  debitAmount =  sale.debitAmount  + customer.debitAmount + customerPaid.debitAmount +  depositAccount.debitAmount;
+    // const  creditAmount = sale.creditAmount  + customer.creditAmount + customerPaid.creditAmount +  depositAccount.creditAmount ;
   
-    console.log("Total Debit Amount: ", debitAmount );
-    console.log("Total Credit Amount: ", creditAmount );
+    // console.log("Total Debit Amount: ", debitAmount );
+    // console.log("Total Credit Amount: ", creditAmount );
 
     const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai","DD/MM/YY","/");
     const openingDate = generatedDateTime.dateTime; 
