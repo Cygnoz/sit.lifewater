@@ -6,6 +6,7 @@ const warehouseController = require('../controller/WarehouseController');
 const wStockController = require('../controller/WstockController');
 const orderController = require('../controller/OrderController');
 const unloadController = require('../controller/UnloadController');
+const ReceiptController = require('../controller/ReceiptController');
 
 const { verifyToken } = require('../middleware/auth');
 
@@ -40,6 +41,7 @@ router.get('/orders/:id', verifyToken,  orderController.viewOrder);
 router.get('/orders', verifyToken,  orderController.viewAllOrders);
 router.delete('/orders/:id', verifyToken,  orderController.deleteOrder);
 router.get('/today/:rideId', verifyToken,orderController.getTodayOrders);
+router.post('/order-receipt', verifyToken, ReceiptController.createReceipt );
 
 //Unloading
 router.post('/addunload', verifyToken,  unloadController.unloadStock);
