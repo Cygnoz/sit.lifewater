@@ -421,6 +421,12 @@ const AddOrder = ({ }: Props) => {
             toast.error("Select a payment mode.");
             return;
         }
+        if (orderData.paymentMode === "Cash") {
+            if(!orderData.depositAccountId){
+                toast.error("Select a Deposite Account.");
+                return;
+            }
+        }
         try {
             const orderWithDefaults = {
                 ...orderData,
