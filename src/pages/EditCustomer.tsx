@@ -613,6 +613,7 @@ const EditCustomer: React.FC = () => {
             />
           </div>
 
+
           {/* Deposit Amount */}
           <div>
             <label className="block text-gray-700">Deposit Amount</label>
