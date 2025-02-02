@@ -116,7 +116,25 @@ exports.createReceipt = async (req, res) => {
 };
 
 
+exports.getAllReceipts = async (req, res) => {
+  try {
+    // Fetch all receipts from the database
+    const receipts = await Receipt.find().sort({ createdAt: -1 });
 
+    // Check if receipts exist
+    if (!receipts.length) {
+      return res.status(404).json({ message: 'No receipts found.' });
+    }
+
+    return res.status(200).json({
+      message: 'Receipts retrieved successfully.',
+      data: receipts,
+    });
+  } catch (error) {
+    console.error('Error retrieving receipts:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+};
 
 
 

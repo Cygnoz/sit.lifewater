@@ -42,6 +42,7 @@ router.get('/orders', verifyToken,  orderController.viewAllOrders);
 router.delete('/orders/:id', verifyToken,  orderController.deleteOrder);
 router.get('/today/:rideId', verifyToken,orderController.getTodayOrders);
 router.post('/order-receipt', verifyToken, ReceiptController.createReceipt );
+router.get('/receipts', verifyToken,ReceiptController.getAllReceipts);
 
 //Unloading
 router.post('/addunload', verifyToken,  unloadController.unloadStock);
