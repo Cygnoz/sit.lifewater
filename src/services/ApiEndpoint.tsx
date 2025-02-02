@@ -25,6 +25,8 @@ export const endpoints = {
     GET_ALL_ORDER: `orders`,
     VIEW_A_ORDER: `orders`,
     RIDE_ORDERS: `today`,
+    ORDER_RECIEPT:`order-receipt`,
+    GET_ALL_RECIEPT:`receipts`,
 
     // Active routes
     GET_ALL_ACTIVE_ROUTE: `active-rides`,

@@ -553,7 +553,7 @@ const EditCustomer: React.FC = () => {
               <label className="block text-gray-700">Number of Bottles</label>
               <input
                 type="number"
-                name="noOfBottles"
+                name="numberOfBottles"
                 value={customerData.numberOfBottles}
                 onChange={handleInputChange}
                 className="w-full p-2 mt-1 border rounded-md"
