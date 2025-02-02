@@ -2,7 +2,9 @@ const Receipt = require('../Models/receiptSchema');
 const Order = require('../Models/OrderSchema');
 const Customer = require('../Models/CustomerSchema');
 const TrialBalance = require('../Models/trialBalance');
+const moment = require('moment-timezone');
 const Account = require('../Models/account');
+
 
 // Helper function to clean incoming data
 const cleanData = (data) => {
@@ -22,6 +24,27 @@ const dataExist = async ( customerId , depositAccountId ) => {
     Account.findOne({  _id:depositAccountId }),
   ]);
   return { customerAccount, depositAccount};
+};
+
+
+exports.getAllReceipts = async (req, res) => {
+  try {
+    // Fetch all receipts from the database
+    const receipts = await Receipt.find().sort({ createdAt: -1 });
+
+    // Check if receipts exist
+    if (!receipts.length) {
+      return res.status(404).json({ message: 'No receipts found.' });
+    }
+
+    return res.status(200).json({
+      message: 'Receipts retrieved successfully.',
+      data: receipts,
+    });
+  } catch (error) {
+    console.error('Error retrieving receipts:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
 };
 
 
@@ -87,6 +110,8 @@ exports.createReceipt = async (req, res) => {
     const receiptNumber = `CP-${nextId}`;
 
 
+ 
+
 
 
     // Create a new receipt entry
@@ -115,26 +140,45 @@ exports.createReceipt = async (req, res) => {
   }
 };
 
-
-exports.getAllReceipts = async (req, res) => {
-  try {
-    // Fetch all receipts from the database
-    const receipts = await Receipt.find().sort({ createdAt: -1 });
-
-    // Check if receipts exist
-    if (!receipts.length) {
-      return res.status(404).json({ message: 'No receipts found.' });
+     // Function to generate time and date for storing in the database
+     function generateTimeAndDateForDB(
+      timeZone,
+      dateFormat,
+      dateSplit,
+      baseTime = new Date(),
+      timeFormat = "HH:mm:ss",
+      timeSplit = ":"
+    ) {
+      // Convert the base time to the desired time zone
+      const localDate = moment.tz(baseTime, timeZone);
+    
+      // Format date and time according to the specified formats
+      let formattedDate = localDate.format(dateFormat);
+    
+      // Handle date split if specified
+      if (dateSplit) {
+        // Replace default split characters with specified split characters
+        formattedDate = formattedDate.replace(/[-/]/g, dateSplit); // Adjust regex based on your date format separators
+      }
+    
+      const formattedTime = localDate.format(timeFormat);
+      const timeZoneName = localDate.format("z"); // Get time zone abbreviation
+    
+      // Combine the formatted date and time with the split characters and time zone
+      const dateTime = `${formattedDate} ${formattedTime
+        .split(":")
+        .join(timeSplit)}`;
+    
+      return {
+        date: formattedDate,
+        time: `${formattedTime} (${timeZoneName})`,
+        dateTime: dateTime,
+      };
     }
+    
 
-    return res.status(200).json({
-      message: 'Receipts retrieved successfully.',
-      data: receipts,
-    });
-  } catch (error) {
-    console.error('Error retrieving receipts:', error);
-    return res.status(500).json({ message: 'Internal server error.' });
-  }
-};
+
+
 
 
 
