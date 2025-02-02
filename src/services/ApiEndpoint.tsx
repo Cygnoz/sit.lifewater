@@ -94,6 +94,10 @@ export const endpoints = {
 
   ADD_NEW_JOURNEL_ENTRY: `add-journal-entry`,
   GET_ALL_JOURNALS: `get-all-journal`,
-  GET_ONE_JOURNAL: `get-one-journal`
+  GET_ONE_JOURNAL: `get-one-journal`,
+
+
+  // receipt 
+  GET_ALL_RECIEPT:`receipts`,
 }
 

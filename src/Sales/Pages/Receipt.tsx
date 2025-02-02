@@ -14,13 +14,13 @@ const Receipt: React.FC = () => {
   const { request: getALLOrders } = useApi("get", 4001)
   const getALLOrderss = async () => {
     try {
-      const url = `${endpoints.GET_ALL_ORDERS}`
+      const url = `${endpoints.GET_ALL_RECIEPT}`
       const { response, error } = await getALLOrders(url)
       console.log("API RESPONSE :",response)
 
       if (!error && response) {
         setLoading(false)
-        setOrders(response.data)
+        setOrders(response.data?.data)
       }
     } catch (error) {
       console.log(error)
@@ -31,26 +31,21 @@ const Receipt: React.FC = () => {
   }, [])
 
 
-  const filteredOrders = orders.filter(
-    (order) => order.paymentMode  === "Cash" && order.balanceAmount > 0
-  );
-  
-console.log("Filtered Orders:", filteredOrders);
 
   // Define columns for the table
   const columns = [
-    { id: "date", label: "Date", visible: true },
+    { id: "createdAt", label: "Date", visible: true },
+    { id: "fullName", label: "Customer", visible: true },
+    { id: "receiptNumber", label: "Receipt Number", visible: true },
     { id: "orderNumber", label: "Number", visible: true },
-    { id: "customerName", label: "Customer Name", visible: true },
-    { id: "totalAmount", label: "Total Amount", visible: true },
     { id: "paidAmount", label: "Amount Received", visible: true },
-    { id: "balanceAmount", label: "Balance Amount", visible: true },
+
   ];
 
   // Handle row click
-  const handleRowClick = (id: string) => {
-    navigate(`/viewreceipt/${id}`);
-  };
+  // const handleRowClick = (id: string) => {
+  //   navigate(`/viewreceipt/${id}`);
+  // };
 
   // Handle view action
   const handleView = (id: string) => {
@@ -58,15 +53,15 @@ console.log("Filtered Orders:", filteredOrders);
   };
 
   // Handle edit action
-  const handleEdit = (id: string) => {
-    navigate(`/editreceipt/${id}`);
-  };
+  // const handleEdit = (id: string) => {
+  //   navigate(`/editreceipt/${id}`);
+  // };
 
   const renderColumnContent = (colId: string, item: any) => {
-    if (colId === "date") {
+    if (colId === "createdAt") {
       return (
         <div className="flex justify-center text-center items-center">
-          {new Date(item.date).toLocaleDateString("en-GB")}{" "}
+          {new Date(item.createdAt).toLocaleDateString("en-GB")}{" "}
         </div>
       );
     }
@@ -89,10 +84,10 @@ console.log("Filtered Orders:", filteredOrders);
       <div className="bg-white shadow-md rounded-lg p-6 mx-3 my-2">
       <Table 
           columns={columns} 
-          data={filteredOrders} 
+          data={orders} 
           searchPlaceholder="Search Customer" 
           loading={loading.skeleton} 
-          searchableFields={[ "subRouteName", "subrouteCode"]}
+          searchableFields={[ "orderNumber", "receiptNumber"]}
           onViewClick={handleView} // Add this prop
           // onEditClick={handleEdit}
           // onDeleteClick={handleDelete}
