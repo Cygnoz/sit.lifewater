@@ -560,6 +560,7 @@ const EditCustomer: React.FC = () => {
                 placeholder="Number of Bottles"
               />
             </div>
+            
             <div className="w-1/2">
               <label className="block text-gray-700">Rate per Bottle</label>
               <input
