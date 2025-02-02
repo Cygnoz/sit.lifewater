@@ -14,7 +14,9 @@ interface OrderData {
     returnBottle: string,
     paymentMode: string,
     customerName: string,
-    totalAmount: string
+    totalAmount: string,
+    balanceAmount:number,
+    paidAmount:number
 }
 const ViewOrderModal = ({ id }: Props) => {
     const [orderData, setOrderData] = useState<OrderData | null>(null);
@@ -30,7 +32,7 @@ const ViewOrderModal = ({ id }: Props) => {
 
             if (!error && response) {
                 setOrderData(response.data);
-                console.log("API RESPONSE :", response.data);
+                // console.log("API RESPONSE :", response.data);
             }
         } catch (error) {
             console.log(error);
@@ -98,16 +100,37 @@ const ViewOrderModal = ({ id }: Props) => {
                                     <p className="text-[#303F58]">: {orderData?.returnBottle ? orderData.returnBottle : "0"}</p>
                                 </div>
                             </div>
-                            <div className="flex bg-[#FFFFFF] px-2 py-1.5 gap-2 mt-2 rounded-md items-center">
-                                <p className="text-[14px] text-[#303F58]">Payment Mode</p>
-                                <span className="h-3 w-[2px] bg-[#9EA9BB]"></span>
-                                <p className="text-[12px] text-[#303F58] font-semibold">
-                                    {orderData?.paymentMode} :
-                                </p>
-                                <p className="text-[12px] text-[#303F58] font-bold">
-                                    {orderData?.totalAmount}.00 AED
-
-                                </p>
+                            <div className=" bg-[#FFFFFF] px-2 py-1.5 gap-2 mt-2 rounded-md items-center">
+                                <div className="grid grid-cols-2 ">
+                                    <div className="">
+                                        <p className="text-[14px] text-[#303F58]">Payment Mode</p>
+                                        <p className="text-[14px] text-[#303F58]">Total Amount</p>
+                                        {
+                                            orderData?.paymentMode === "Cash" && (
+                                                <div>
+                                                    <p className="text-[14px] text-[#303F58]">Paid Amount</p>
+                                                    <p className="text-[14px] text-[#303F58]">Balance Amount</p>
+                                                </div>
+                                            )
+                                        }
+                                    </div>
+                                    <div className="">
+                                        <p className="text-[14px] text-[#303F58] font-semibold">
+                                            : {orderData?.paymentMode}
+                                        </p>
+                                        <p className="text-[14px] text-[#303F58] font-bold">
+                                            : {orderData?.totalAmount}.00 AED
+                                        </p>
+                                        {
+                                            orderData?.paymentMode === "Cash" && (
+                                                <div>
+                                                    <p className="text-[14px] text-[#303F58] font-semibold">: {orderData?.paidAmount}.00 AED</p>
+                                                    <p className="text-[14px] text-[#303F58] font-semibold">: {orderData?.balanceAmount}.00 AED</p>
+                                                </div>
+                                            )
+                                        }
+                                    </div>
+                                </div>
                             </div>
                         </>
                     )}
