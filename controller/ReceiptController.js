@@ -32,20 +32,30 @@ exports.getAllReceipts = async (req, res) => {
     // Fetch all receipts from the database
     const receipts = await Receipt.find().sort({ createdAt: -1 });
 
+    // Map through receipts to fetch customer fullNames manually
+    const result = await Promise.all(receipts.map(async (receipt) => {
+      const customer = await Customer.findById(receipt.customerId).select('fullName');
+      return {
+        ...receipt.toObject(),
+        fullName: customer ? customer.fullName : 'Unknown Customer'
+      };
+    }));
+
     // Check if receipts exist
-    if (!receipts.length) {
+    if (!result.length) {
       return res.status(404).json({ message: 'No receipts found.' });
     }
 
     return res.status(200).json({
       message: 'Receipts retrieved successfully.',
-      data: receipts,
+      data: result,
     });
   } catch (error) {
     console.error('Error retrieving receipts:', error);
     return res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
 
 
 exports.createReceipt = async (req, res) => {
