@@ -15,6 +15,16 @@ const cleanData = (data) => {
   return cleanedData;
 };
 
+// Fetch existing data
+const dataExist = async ( customerId , depositAccountId ) => {
+  const [ customerAccount, depositAccount ] = await Promise.all([
+    Account.findOne({  accountId:customerId }),
+    Account.findOne({  _id:depositAccountId }),
+  ]);
+  return { customerAccount, depositAccount};
+};
+
+
 exports.createReceipt = async (req, res) => {
   try {
     let { customerId, orderId, paidAmount, depositAccountId } = cleanData(req.body);
@@ -36,6 +46,16 @@ exports.createReceipt = async (req, res) => {
       return res.status(400).json({ message: 'Deposit account ID is required.' });
     }
 
+    const { customerAccount, depositAccount } = await dataExist( customerId, depositAccountId );
+    if (!customerAccount) {
+        res.status(404).json({ message: "Customer Account not found" });
+        return false;
+      } 
+    if (!depositAccount) {
+        res.status(404).json({ message: "Customer Account not found" });
+        return false;
+    } 
+
     // Check if order exists
     const order = await Order.findById(orderId);
     if (!order) {
@@ -56,17 +76,34 @@ exports.createReceipt = async (req, res) => {
     order.balanceAmount -= paidAmount;
     await order.save();
 
+
+    //prefix
+    let nextId = 1;
+    const lastPrefix = await Receipt.findOne().sort({ _id: -1 }); 
+    if (lastPrefix) {
+      const lastId = parseInt(lastPrefix.receiptNumber.slice(3)); 
+      nextId = lastId + 1; 
+    }    
+    const receiptNumber = `CP-${nextId}`;
+
+
+
+
     // Create a new receipt entry
     const receipt = new Receipt({
       customerName: order.customerName,
       customerId,
       orderId,
+      receiptNumber:receiptNumber,
       orderNumber: order.orderNumber,
       depositAccountId,
       paidAmount,
     });
 
     await receipt.save();
+
+     //Journal
+     await journal( receipt, customerAccount, depositAccount );
 
     return res.status(201).json({
       message: 'Receipt created successfully.',
@@ -77,3 +114,81 @@ exports.createReceipt = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function journal( receipt, customerAccount, depositAccounts ) {  
+
+  const customerPaid = {
+    operationId: receipt._id,
+    transactionId: receipt.receiptNumber,
+    date: receipt.createdDate,
+    accountId: customerAccount._id || undefined,
+    action: "Receipt",
+    debitAmount: 0,
+    creditAmount: receipt.paidAmount || 0,
+    remark: receipt.note,
+  };
+  let depositAccount 
+ 
+  if(depositAccounts){
+     depositAccount = {
+      operationId: receipt._id,
+      transactionId: receipt.receiptNumber,
+      date: receipt.createdDate,
+      accountId: depositAccounts._id || undefined,
+      action: "Receipt",
+      debitAmount: receipt.paidAmount || 0,
+      creditAmount: 0,
+      remark: receipt.note,
+    };
+  }
+
+  // console.log("sale", sale.debitAmount,  sale.creditAmount);
+  // console.log("customer", customer.debitAmount,  customer.creditAmount);
+  // console.log("customerPaid", customerPaid.debitAmount,  customerPaid.creditAmount);
+  // console.log("depositAccount", depositAccount.debitAmount,  depositAccount.creditAmount);
+
+  // const  debitAmount =  sale.debitAmount  + customer.debitAmount + customerPaid.debitAmount +  depositAccount.debitAmount;
+  // const  creditAmount = sale.creditAmount  + customer.creditAmount + customerPaid.creditAmount +  depositAccount.creditAmount ;
+
+  // console.log("Total Debit Amount: ", debitAmount );
+  // console.log("Total Credit Amount: ", creditAmount );
+
+  const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai","DD/MM/YY","/");
+  const openingDate = generatedDateTime.dateTime; 
+
+  createTrialEntry( customerPaid,openingDate )
+  createTrialEntry( depositAccount,openingDate )
+  
+
+}
+
+
+
+
+async function createTrialEntry( data,openingDate ) {
+  const newTrialEntry = new TrialBalance({
+      organizationId:data.organizationId,
+      operationId:data.operationId,
+      transactionId: data.transactionId,
+      date:openingDate,
+      accountId: data.accountId,
+      action: data.action,
+      debitAmount: data.debitAmount,
+      creditAmount: data.creditAmount,
+      remark: data.remark
+});
+    const trial =  await newTrialEntry.save();
+    console.log('output:',trial); 
+}
