@@ -79,6 +79,7 @@ import AddStaff from '../Staff/AddStaff';
 import StaffView from '../Staff/VieStaff/StaffView';
 import ViewOrder from '../Orders/components/ViewOrder';
 import ViewWarehouse from '../Stock/Warehouse/Components/ViewWarehouse';
+import { ViewReciept } from '../Sales/Components/ViewReciept';
 
 const App: React.FC = () => {
   const [selectedNav, setSelectedNav] = useState<string>(() => localStorage.getItem('selectedNav') || '');
@@ -228,6 +229,7 @@ const App: React.FC = () => {
               <Route path='/invoice' element={<Invoice/>}/>
               <Route path='/reciept' element={<Receipt/>}/>
               <Route path='/addreciept' element={<AddReceipt/>}/>
+              <Route path='/receipts/:id' element={<ViewReciept/>}/>
               {/* <Route path='/salesman' element={<Salesman/>}/> */}
 
               {/* ACCOUNTS */}

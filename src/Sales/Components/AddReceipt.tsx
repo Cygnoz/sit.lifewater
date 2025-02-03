@@ -112,7 +112,7 @@ const AddReceipt: React.FC = () => {
         formData
       );
       console.log(response);
-      
+
       if (error) {
         toast.error(error.response?.data?.message || "Failed to save receipt");
       } else {

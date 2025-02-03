@@ -51,7 +51,7 @@ const Receipt: React.FC = () => {
 
   // Handle view action
   const handleView = (id: string) => {
-    navigate(`/viewreceipt/${id}`);
+    navigate(`/receipts/${id}`);
   };
 
   // Handle edit action
