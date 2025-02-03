@@ -57,6 +57,42 @@ exports.getAllReceipts = async (req, res) => {
 };
 
 
+exports.getOneReceipt = async (req, res) => {
+  try {
+    const { receiptId } = req.params;
+
+    // Validate receiptId
+    if (!receiptId) {
+      return res.status(400).json({ message: 'Receipt ID is required.' });
+    }
+
+    // Fetch the receipt by ID
+    const receipt = await Receipt.findById(receiptId);
+    
+    if (!receipt) {
+      return res.status(404).json({ message: 'Receipt not found.' });
+    }
+
+    // Fetch the associated customer's full name
+    const customer = await Customer.findById(receipt.customerId).select('fullName');
+
+    const result = {
+      ...receipt.toObject(),
+      fullName: customer ? customer.fullName : 'Unknown Customer',
+    };
+
+    return res.status(200).json({
+      message: 'Receipt retrieved successfully.',
+      data: result,
+    });
+
+  } catch (error) {
+    console.error('Error retrieving the receipt:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+
 
 exports.createReceipt = async (req, res) => {
   try {
