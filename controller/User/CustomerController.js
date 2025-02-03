@@ -26,12 +26,12 @@ exports.createCustomer = async (req, res) => {
     }
     
 
-    if(cleanedData.whatsappNumber){
-    const existingWhatsappNumber = await Customer.findOne({ whatsappNumber });
-    if (existingWhatsappNumber) {
-      return res.status(400).json({ message: 'A customer with this WhatsApp number already exists.' });
-      }
-    }
+    // if(cleanedData.whatsappNumber){
+    // const existingWhatsappNumber = await Customer.findOne({ whatsappNumber });
+    // if (existingWhatsappNumber) {
+    //   return res.status(400).json({ message: 'A customer with this WhatsApp number already exists.' });
+    //   }
+    // }
 
     if(cleanedData.email){
       const existingEmail = await Customer.findOne({ email : cleanedData.email });
