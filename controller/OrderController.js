@@ -357,10 +357,16 @@ let nextId = 1;
 const lastPrefix = await Order.findOne().sort({ _id: -1 });
 
 if (lastPrefix && lastPrefix.orderNumber) {
-  const lastId = parseInt(lastPrefix.orderNumber.replace("ORDER-", "")); // Extract number part
-  nextId = lastId + 1;
+  const lastIdString = lastPrefix.orderNumber.replace("ORDER-", ""); // Extract the number part
+  const lastId = parseInt(lastIdString, 10); // Convert to number
+
+  // Check if lastId is a valid number
+  if (!isNaN(lastId)) {
+    nextId = lastId + 1;
+  }
 }
-const orderNumber = `ORDER-${nextId}`;
+
+const orderNumber = `ORD-${nextId}`;
 
 // Create an order record
 const order = new Order({
@@ -376,6 +382,7 @@ const order = new Order({
 });
 
 await order.save();
+
 
     console.log('Order Created:', order);
     
