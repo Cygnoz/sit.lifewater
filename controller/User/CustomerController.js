@@ -207,7 +207,7 @@ exports.getCustomerById = async (req, res) => {
 
 exports.getCustomersBySubroute = async (req, res) => {
   try {
-    const subRoute = req.params.subRoute;
+    const subRoute = req.params.subroute;
     const customers = await Customer.find({ subRoute });
 
     if (customers.length === 0) {
