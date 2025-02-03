@@ -128,6 +128,34 @@ exports.getActiveRides = async (req, res) => {
   };
 
 
+  exports.getActiveRidesBySalesmanId = async (req, res) => {
+    try {
+      const { salesmanId } = req.params;
+  
+      // Validate salesmanId
+      if (!salesmanId) {
+        return res.status(400).json({ message: 'Salesman ID is required.' });
+      }
+  
+      // Fetch active rides for the given salesmanId
+      const activeRides = await Ride.find({ salesmanId, status: 'active' });
+  
+      if (activeRides.length === 0) {
+        return res.status(404).json({ message: 'No active rides found for this salesman.' });
+      }
+  
+      return res.status(200).json({
+        message: 'Active rides fetched successfully!',
+        data: activeRides,
+      });
+  
+    } catch (error) {
+      console.error('Error fetching active rides by salesmanId:', error);
+      return res.status(500).json({ message: 'Internal server error.' });
+    }
+  };
+
+
   exports.completeRide = async (req, res) => {
     const { rideId, endingKM, travelledKM, expenses } = req.body;
   

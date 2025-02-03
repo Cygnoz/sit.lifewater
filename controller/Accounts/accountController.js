@@ -217,6 +217,8 @@ exports.getOneTrailBalance = async (req, res) => {
       }
 
       res.status(200).json(trialBalance);
+      console.log(trialBalance);
+      
   } catch (error) {
       console.error("Error fetching account:", error);
       res.status(500).json({ message: "Internal server error." });
