@@ -200,9 +200,6 @@ exports.createOrder = async (req, res) => {
     if (!cleanedData.customerId) {
       return res.status(400).json({ success: false, message: 'Select a Customer' });
     }
-    if (!cleanedData.orderNumber) {
-      return res.status(400).json({ success: false, message: 'Enter Order Number' });
-    }
     if (!cleanedData.stock || cleanedData.stock.length === 0) {
       return res.status(400).json({ success: false, message: 'Select an item' });
     }
@@ -354,9 +351,20 @@ exports.createOrder = async (req, res) => {
     console.log('Updated SubRoute Stock:', subRouteStock);
     console.log('Updated Customer Stock:', customerStock);
 
+
+    //prefix
+        let nextId = 1;
+        const lastPrefix = await Order.findOne().sort({ _id: -1 }); 
+        if (lastPrefix) {
+          const lastId = parseInt(lastPrefix.receiptNumber.slice(3)); 
+          nextId = lastId + 1; 
+        }    
+        const orderNumber = `ORDER-${nextId}`;
+
     // Create an order record
     const order = new Order({
       ...cleanedData,
+      orderNumber: orderNumber,
       balanceAmount: (cleanedData.totalAmount - cleanedData.paidAmount) || 0,
       stock: cleanedData.stock.map(item => ({
         itemId: item.itemId,
