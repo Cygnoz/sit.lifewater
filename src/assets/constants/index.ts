@@ -31,7 +31,7 @@ const navlist = [
         subRoute: "/orders",
       },
       {
-        headName: "Reciept",
+        headName: "Receipt ",
         subRoute: "/reciept",
       },
     ],
