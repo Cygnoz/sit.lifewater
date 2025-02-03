@@ -2,65 +2,87 @@ import { Link } from "react-router-dom";
 import searchIcon from "../assets/images/search (2).svg";
 import plusIcon from "../assets/images/pluscircle.svg";
 import order from "../assets/images/order.png";
-import { useContext, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import useApi from "../Hook/UseApi";
 import { endpoints } from "../services/ApiEndpoint";
-import { AllOrderResponseContext } from "../Context/ContextShare";
 import ViewOrderModal from "./ViewOrderModal";
 
 type Props = {}
 
 const Orders = ({ }: Props) => {
   const [orders, setOrders] = useState([])
-  const { setOrderResponse } = useContext(AllOrderResponseContext)!
+  // const { setOrderResponse } = useContext(AllOrderResponseContext)!
   const [loading, setLoading] = useState<boolean>(false);
-  const { request: getALLOrders } = useApi("get", 4001)
+  // const { request: getALLOrders } = useApi("get", 4001)
+  const [rideId, setRideId] = useState(null);
+  // const getALLOrderss = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const url = `${endpoints.GET_ALL_ORDER}`
+  //     const { response, error } = await getALLOrders(url)
+  //     if (!error && response) {
+  //       // setOrders(response.data)
+  //       // console.log("API RESPONSE :", response.data)
+  //       setOrderResponse(response.data)
+  //     }
+  //   } catch (error) {
+  //     console.log(error)
+  //   } finally {
+  //     setLoading(false); // Stop loading
+  //   }
+  // }
 
-  const getALLOrderss = async () => {
-    setLoading(true);
+  // Fetch activeroute with sales id
+  const { request: getActiveRoute } = useApi("get", 4000);
+  const SalesManId = localStorage.getItem("SalesManId");
+  const fetchActiveRoute = async () => {
     try {
-      const url = `${endpoints.GET_ALL_ORDER}`
-      const { response, error } = await getALLOrders(url)
+      const url = `${endpoints.GET_AN_ACTIVE_ROUTE_WITH_SALESMEN_ID}/${SalesManId}`;
+      const { response, error } = await getActiveRoute(url);
+      console.log("Active route with sales id:", response?.data?.activeRide);
+
       if (!error && response) {
-        // setOrders(response.data)
-        // console.log("API RESPONSE :", response.data)
-        setOrderResponse(response.data)
+        const activeRide = response?.data?.activeRide;
+        if (activeRide) {
+          setRideId(activeRide?._id); // Set rideId correctly
+        }
       }
     } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false); // Stop loading
+      console.log(error);
     }
-  }
+  };
+
+
+  // Fetch ride orders only when `rideId` is updated
+  useEffect(() => {
+    if (rideId) {
+      getOrders();
+    }
+  }, [rideId]);
 
   const { request: getRideOrders } = useApi("get", 4001)
-
-  const RideId = JSON.parse(localStorage.getItem("StartRide") || "{}");
-  const Id = RideId?.data?._id; // Use optional chaining for safety
-
   const getOrders = async () => {
+    if (!rideId) return; // Prevent API call if rideId is null
     setLoading(true);
     try {
-      const url = `${endpoints.RIDE_ORDERS}/${Id}`
-      const { response, error } = await getRideOrders(url)
-      if (!error && response) {
-        setOrders(response?.data.data)
-        console.log("Ride Orders :", response)
+      const url = `${endpoints.RIDE_ORDERS}/${rideId}`;
+      const { response, error } = await getRideOrders(url);
 
+      if (!error && response) {
+        setOrders(response?.data?.data);
+        console.log("Ride Orders:", response);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
       setLoading(false); // Stop loading
     }
-  }
+  };
 
-
+  // Fetch active route on component mount
   useEffect(() => {
-    getALLOrderss(),
-      getOrders()
-
-  }, [])
+    fetchActiveRoute();
+  }, []);
 
   return (
     <div className="min-h-screen p-4 bg-gray-100">
@@ -87,15 +109,15 @@ const Orders = ({ }: Props) => {
             <div className="bg-gradient-to-l from-[#E3E6D5] to-[#F7E7CE] my-3 p-5 rounded-xl" key={order.id || Math.random()}>
               <div className="flex justify-between">
                 <div>
-              <div className="text-[#303F58]  ">
-              <div className="flex text-[12px] gap-1">
-              <p>{new Date(order.date).toLocaleDateString("en-GB")}</p>
-              
-              <p>{new Date(order.date).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' })}</p>
+                  <div className="text-[#303F58]  ">
+                    <div className="flex text-[12px] gap-1">
+                      <p>{new Date(order.date).toLocaleDateString("en-GB")}</p>
 
-              </div>
-                  <p className="text-[#303F58]">Customer</p>
-              </div>
+                      <p>{new Date(order.date).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' })}</p>
+
+                    </div>
+                    <p className="text-[#303F58]">Customer</p>
+                  </div>
                   <p className="text-[#303F58] text-[16px] font-bold ms-1">{order.customerName || "NA"}</p>
                 </div>
                 <ViewOrderModal id={order._id} />

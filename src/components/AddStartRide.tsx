@@ -292,14 +292,14 @@ const AddStartRide: React.FC = () => {
     console.log("Payload to be sent:", newActiveRoute);
 
     // Save to local storage
-    try {
-      localStorage.setItem("activeRoute", JSON.stringify(newActiveRoute));
-      console.log("Data saved to local storage.");
-    } catch (error) {
-      console.error("Error saving to local storage:", error);
-      toast.error("Failed to save data to local storage.");
-      return;
-    }
+    // try {
+    //   localStorage.setItem("activeRoute", JSON.stringify(newActiveRoute));
+    //   console.log("Data saved to local storage.");
+    // } catch (error) {
+    //   console.error("Error saving to local storage:", error);
+    //   toast.error("Failed to save data to local storage.");
+    //   return;
+    // }
 
     try {
       const url = `${endpoints.ADD_ACTIVE_ROUTE}`;

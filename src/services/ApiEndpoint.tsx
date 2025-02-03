@@ -19,6 +19,7 @@ export const endpoints = {
     GET_ALL_CUSTOMERS: `customer`,
     GET_A_CUSTOMER: `customer`,
     UPDATE_CUSTOMER: `editcustomer`,
+    GET_CUSTOMER_BY_SUBROUTE :`customerbysubroute`,
 
     // Order
     ADD_ORDER: `orders`,
@@ -31,6 +32,7 @@ export const endpoints = {
     // Active routes
     GET_ALL_ACTIVE_ROUTE: `active-rides`,
     GET_AN_ACTIVE_ROUTE: `viewActiveRoute`,
+    GET_AN_ACTIVE_ROUTE_WITH_SALESMEN_ID: `active-rides`,
 
     // Account
     GET_ALL_ACCOUNTS: `getallaccounts`,

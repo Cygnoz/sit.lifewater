@@ -22,6 +22,7 @@ type Props = {}
 
 const EndRide = ({ }: Props) => {
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [startingKM, setStartingKM] = useState<any | null>(null);
   const [endRideData, setEndRideData] = useState<EndRideData>({
     rideId: "",
@@ -107,27 +108,45 @@ const EndRide = ({ }: Props) => {
     });
   };
 
-  useEffect(() => {
-    const RouteDetails = JSON.parse(localStorage.getItem("activeRoute") || "{}");
-    const RideId = JSON.parse(localStorage.getItem("StartRide") || "{}");
-    const Id = (RideId?.data?._id)
-    if (RideId && RouteDetails) {
-      setStartingKM(RouteDetails?.startingKm);
-      setEndRideData((prevData) => ({
-        ...prevData,
-        rideId: Id,
-      }));
+  // Fetch activeroute with sales id
+  const { request: getActiveRoute } = useApi("get", 4000);
+  const SalesManId = localStorage.getItem("SalesManId");
+
+  const fetchActiveRoute = async () => {
+    setLoading(true); // Start loading
+    try {
+      const url = `${endpoints.GET_AN_ACTIVE_ROUTE_WITH_SALESMEN_ID}/${SalesManId}`;
+      const { response, error } = await getActiveRoute(url);
+      console.log("Active route with sales id:", response?.data?.activeRide);
+
+      if (!error && response) {
+        const activeRide = response?.data?.activeRide;
+        if (activeRide) {
+          setStartingKM(activeRide?.startingKm);
+          setEndRideData((prevData) => ({
+            ...prevData,
+            rideId: activeRide?._id,
+          }));
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false); // Stop loading
     }
-    console.log(startingKM);
-  }, [startingKM]);
+  };
+
+  useEffect(() => {
+    fetchActiveRoute();
+  }, []);
 
   const { request: EndRide } = useApi("put", 4000);
   const handleSubmit = async () => {
-    if(error){
+    if (error) {
       toast.error(error)
       return;
     }
-    if(!endRideData.endingKM){
+    if (!endRideData.endingKM) {
       toast.error("Please fill the fields")
       return;
     }
@@ -137,11 +156,11 @@ const EndRide = ({ }: Props) => {
       if (!error && response) {
         console.log("Response", response);
         toast.success(response?.data.message || "End Ride Successfull...");
-        setTimeout(()=>{
+        setTimeout(() => {
           navigate('/home')
 
         }, 1000)
-      }else{
+      } else {
         toast.error(error.response?.data?.message || error.message || "Failed to save");
       }
       // toast.error(error.response.data.message);
@@ -158,7 +177,7 @@ const EndRide = ({ }: Props) => {
         <form className="bg-white p-6 rounded-lg shadow-lg">
           <div className="mb-4">
             <h1 className="py-3">
-              Starting KM : <span className="font-semibold">{startingKM? startingKM : "N/A"}</span>
+              Starting KM : <span className="font-semibold">{startingKM ? startingKM : "N/A"}</span>
             </h1>
             <label className="block text-gray-700">Ending Kilometer</label>
             <input
@@ -222,9 +241,18 @@ const EndRide = ({ }: Props) => {
             ))}
           </div>
         </form>
-        <Button onClick={handleSubmit} type="submit" size="xl">
-          Submit
-        </Button>
+        {loading ? (
+          <div className="text-center p-4">
+            <p>Loading data, please wait...</p>
+          </div>
+        ) : (
+          <div className="py-5">
+            <Button onClick={handleSubmit} type="submit" size="xl">
+              Submit
+            </Button>
+          </div>
+        )}
+
       </div>
     </div>
   )

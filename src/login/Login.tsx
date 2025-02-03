@@ -38,6 +38,8 @@ const Login: React.FC = () => {
         const firstname = response.response?.data
         const profile = response.response?.data
         const _id = response.response?.data
+        const SalesManId = response.response?.data?.salesmanId
+        localStorage.setItem("SalesManId", SalesManId)
         localStorage.setItem("authToken", token)
         localStorage.setItem("userName", username)
         localStorage.setItem("firstname", JSON.stringify(firstname || "")) // Convert to string

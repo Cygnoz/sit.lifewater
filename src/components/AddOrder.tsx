@@ -2,13 +2,11 @@ import { Link, useNavigate } from "react-router-dom"
 import backbutton from "../assets/images/nav-item.png";
 import plus from "../assets/images/Icons/circle-plus.svg";
 import minus from "../assets/images/Icons/circle-minus.svg";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { endpoints } from "../services/ApiEndpoint";
 import useApi from "../Hook/UseApi";
 import Button from "../CommonComponents/Button";
 import { toast, ToastContainer } from "react-toastify";
-import { AllOrderResponseContext } from "../Context/ContextShare";
-import UniqueOrderNumber from "./UniqueOrderNumber";
 import user from '../assets/images/Icons/user-round-plus.svg'
 import { format } from 'date-fns';
 type Props = {}
@@ -17,10 +15,9 @@ interface Item {
     itemName: string;
     quantity: number;
     _id?: string;
-
 }
 interface OrdrerData {
-    orderNumber: string,
+    // orderNumber: string,
     mainRouteName: string,
     mainRouteId: string,
     subRouteName: string,
@@ -41,7 +38,6 @@ interface OrdrerData {
 }
 
 const AddOrder = ({ }: Props) => {
-    const { orderResponse } = useContext(AllOrderResponseContext)!
     const [customers, setCustomers] = useState([]);
     const [filteredCustomers, setFilteredCustomers] = useState([]);
     const [searchValue, setSearchValue] = useState("");
@@ -57,7 +53,7 @@ const AddOrder = ({ }: Props) => {
         stock: [], // Initialize with an empty array to avoid undefined
     });
     const [orderData, setOrderData] = useState<OrdrerData>({
-        orderNumber: "",
+        // orderNumber: "",
         mainRouteName: "",
         mainRouteId: "",
         subRouteName: "",
@@ -78,8 +74,42 @@ const AddOrder = ({ }: Props) => {
     });
     console.log("Input Data", orderData);
 
-    const [filteredAccounts, setFilteredAccounts] = useState<any[]>([]); // All accounts
+    const [filteredAccounts, setFilteredAccounts] = useState<any>(""); // All accounts
 
+    // Fetch activeroute with sales id
+    const { request: getActiveRoute } = useApi("get", 4000);
+    const SalesManId = localStorage.getItem("SalesManId");
+    const fetchActiveRoute = async () => {
+        try {
+            const url = `${endpoints.GET_AN_ACTIVE_ROUTE_WITH_SALESMEN_ID}/${SalesManId}`;
+            const { response, error } = await getActiveRoute(url);
+            console.log("Active route with sales id:", response?.data?.activeRide);
+
+            if (!error && response) {
+                setLoading(false);
+                const activeRide = response?.data?.activeRide;
+
+                if (activeRide) {
+                    setOrderData((prevData) => ({
+                        ...prevData,
+                        rideId: activeRide._id,
+                        mainRouteId: activeRide.mainRouteId,
+                        mainRouteName: activeRide.mainRouteName,
+                        subRouteId: activeRide.subRouteId,
+                        subRouteName: activeRide.subRouteName,
+                        salesman: activeRide.salesmanName,
+                    }));
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    useEffect(() => {
+        if (orderData?.subRouteName) {
+            getALLCustomersBySubRoute(orderData.subRouteName);
+        }
+    }, [orderData?.subRouteName]);
 
     // Fetch accounts from the API
     const { request: getallaccounts } = useApi("get", 4000);
@@ -87,11 +117,11 @@ const AddOrder = ({ }: Props) => {
         try {
             const url = `${endpoints.GET_ALL_ACCOUNTS}`;
             const { response, error } = await getallaccounts(url);
-            console.log("API RESPONSE :", response);
+            // console.log("API RESPONSE :", response);
 
             if (!error && response) {
                 setLoading(false);
-                console.log(loading);
+                // console.log(loading);
                 const filtered = response.data.filter(
                     (account: any) => account.accountSubhead === "Cash"
                 );
@@ -104,6 +134,7 @@ const AddOrder = ({ }: Props) => {
     };
     useEffect(() => {
         fetchAccounts();
+        fetchActiveRoute();
     }, []);
     const handleDepositeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
@@ -117,7 +148,7 @@ const AddOrder = ({ }: Props) => {
             setOrderData((prevData) => ({
                 ...prevData,
                 depositAccountId: "",
-                paidAmount:0,
+                paidAmount: 0,
             }));
         }
     }, [orderData.paymentMode]);
@@ -126,10 +157,8 @@ const AddOrder = ({ }: Props) => {
     // Paid Amount change 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let value = e.target.value;
-
         // Ensure only numbers are entered
         if (!/^\d*\.?\d*$/.test(value)) return;
-
         const numericValue = value === "" ? 0 : parseFloat(value); // Ensure numeric type
 
         // Check if entered amount is greater than totalAmount
@@ -153,55 +182,6 @@ const AddOrder = ({ }: Props) => {
             }));
         }
     }, [orderData.totalAmount]);
-
-
-    // Generate unique order number on component mount
-    useEffect(() => {
-        if (orderResponse) {
-            const newOrderNumber = UniqueOrderNumber(orderResponse);
-            setOrderData((prevData) => ({
-                ...prevData,
-                orderNumber: newOrderNumber,
-            }));
-        }
-    }, [orderResponse]);
-
-    const [activeRoute, setActiveRoute] = useState<any | null>(null);
-    useEffect(() => {
-        const RouteDetails = JSON.parse(localStorage.getItem("activeRoute") || "{}");
-        console.log(RouteDetails, "Route Details");
-
-        // Set activeRoute state
-        setActiveRoute(RouteDetails);
-
-        const RideId = JSON.parse(localStorage.getItem("StartRide") || "{}");
-        const Id = RideId?.data?._id; // Use optional chaining for safety
-
-        // Check if Id is present and RouteDetails has valid values
-        if (Id && RouteDetails && Object.keys(RouteDetails).length > 0) {
-            setOrderData((prevData) => ({
-                ...prevData,
-                rideId: Id,
-                mainRouteId: RouteDetails?.mainRouteId,
-                mainRouteName: RouteDetails?.mainRouteName,
-                subRouteId: RouteDetails?.subRouteId,
-                subRouteName: RouteDetails?.subRouteName,
-                salesman: RouteDetails?.salesmanName,
-            }));
-        }
-    }, []);
-
-
-    // Fetch localStorage data on mount
-    useEffect(() => {
-        // Only call getALLCustomers when activeRoute is set
-        if (activeRoute) {
-            getASubroute(),
-                getALLCustomers();
-        }
-    }, [activeRoute]);
-
-    console.log("route Dettails", activeRoute);
 
     const handleInputFocus = () => {
         // Show all customers when the input is focused
@@ -261,29 +241,7 @@ const AddOrder = ({ }: Props) => {
             totalAmount: newTotalAmount.toString(),
         }));
 
-        // if (selectedItem?.status === "Filled") {
-
-        //     // Perform calculation whenever stock or ratePerCustomer changes
-
-        // }
-        // else {
-        //     // Perform calculation whenever stock or ratePerCustomer changes
-        //     const ratePerBottle: any = selectedItem?.sellingPrice || orderData.ratePerItem || 0;
-
-        //     const newTotalAmount: any = orderData.stock.reduce(
-        //         (total, item) => total + item.quantity * ratePerBottle,
-        //         0
-        //     );
-
-        //     setOrderData((prevState) => ({
-        //         ...prevState,
-        //         totalAmount: newTotalAmount.toString(),
-        //     }));
-        // }
-
     }, [orderData.stock, orderData.ratePerItem]); // Dependencies to trigger recalculation
-
-
 
     const handleItemClick = (itemId: any, itemName: any, quantity: any, status: any, sellingPrice: any) => {
 
@@ -295,8 +253,8 @@ const AddOrder = ({ }: Props) => {
         setSelectedItem({ itemId, itemName, status, sellingPrice });
         setIsOpen(false); // Close dropdown on selection
     };
-    console.log(quantity, "quantit");
-    console.log(selectedItem, "selectedItem");
+    // console.log(quantity, "quantit");
+    // console.log(selectedItem, "selectedItem");
 
 
     const handleInputChange = (
@@ -335,64 +293,60 @@ const AddOrder = ({ }: Props) => {
         }));
         //
         setRatePerCustomer(customers.ratePerBottle)
-        console.log(customers.ratePerBottle, "rate");
-
         setSearchValue(customers.fullName); // Set the selected customer's name in the input
         setFilteredCustomers([]); // Clear the dropdown
     };
 
     const { request: getAllCustomers } = useApi("get", 4000);
     // Get All customer 
+    const getALLCustomersBySubRoute = async (subRoute: any) => {
+        if (!subRoute) return; // Prevent API call if subRoute is undefined
 
-    const getALLCustomers = async () => {
         setLoading(true);
         try {
-            const url = `${endpoints.GET_ALL_CUSTOMERS}`;
+            const url = `${endpoints.GET_CUSTOMER_BY_SUBROUTE}/${subRoute}`;
             const { response, error } = await getAllCustomers(url);
+            console.log("Get All customer SubRoute", response);
 
             if (!error && response) {
-                const subRoute = activeRoute?.subRouteName;
-                console.log(subRoute, "subRoute");
-
-                // Filter customers based on subRoute
-                const filteredCustomers = response.data.filter(
-                    (customer: any) => customer.subRoute === subRoute
-                );
-
-                setCustomers(filteredCustomers);
-                console.log("filtered customers", filteredCustomers);
+                setCustomers(response?.data);
             }
         } catch (error) {
             console.log(error);
         } finally {
-            setLoading(false); // Stop loading
+            setLoading(false);
         }
     };
 
 
     const { request: getSubRoutes } = useApi("get", 4000)
-    const id = activeRoute?.subRouteId;
-    console.log(id);
+    const id = orderData?.subRouteId;
+    // console.log(id);
     const getASubroute = async () => {
+        if (!id) return;  // Prevent API call if id is undefined
+
         try {
-            const url = `${endpoints.VIEW_A_SUBROUTE}/${id}`
-            const { response, error } = await getSubRoutes(url)
+            const url = `${endpoints.VIEW_A_SUBROUTE}/${id}`;
+            const { response, error } = await getSubRoutes(url);
 
             if (!error && response) {
-                setSubRoutes(response.data)
-                console.log("API RESPONSE :", response.data)
+                setSubRoutes(response.data);
+                console.log("SubRoute Response:", response.data);
             }
         } catch (error) {
-            setError("An error occured")
-            console.log(error)
+            setError("An error occurred");
+            console.log(error);
+        } finally {
+            setLoading(false);
         }
-    }
+    };
 
+    // Run API call only when `orderData?.subRouteId` is available
     useEffect(() => {
-        getASubroute(),
-            getALLCustomers();
-
-    }, [])
+        if (id) {
+            getASubroute();
+        }
+    }, [id]);
 
 
     useEffect(() => {
@@ -409,10 +363,7 @@ const AddOrder = ({ }: Props) => {
             toast.error("Select a customer.");
             return;
         }
-        if (!orderData.orderNumber.trim()) {
-            toast.error("Enter an order number.");
-            return;
-        }
+
         if (orderData.stock.length === 0) {
             toast.error("Add at least one stock item.");
             return;
@@ -422,7 +373,7 @@ const AddOrder = ({ }: Props) => {
             return;
         }
         if (orderData.paymentMode === "Cash") {
-            if(!orderData.depositAccountId){
+            if (!orderData.depositAccountId) {
                 toast.error("Select a Deposite Account.");
                 return;
             }
@@ -519,18 +470,6 @@ const AddOrder = ({ }: Props) => {
                             </div>
                         </Link>
                     </div>
-
-                    <div className="pt-2">
-                        <label className="block text-gray-700">Order Number</label>
-                        <input
-                            type="text"
-                            name="orderNumber"
-                            value={orderData.orderNumber}
-                            onChange={handleInputChange}
-                            className="w-full p-2 mt-1 border rounded-md"
-                            readOnly
-                        />
-                    </div>
                     <div className="pt-2 flex">
                         <div className="relative w-[70%] gap-2  mb-2"> {/* Ensure full width and margin for spacing */}
                             {/* Selected Item Display */}
@@ -544,8 +483,12 @@ const AddOrder = ({ }: Props) => {
                             {/* Dropdown List */}
                             {isOpen && (
                                 <div className="absolute z-10 w-full mt-2 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                    {
-                                        subRoutes?.stock?.map((item: any) => (
+                                    {loading ? (
+                                        <p className="p-2 text-center">Loading...</p>
+                                    ) : error ? (
+                                        <p className="p-2 text-center text-red-500">{error}</p>
+                                    ) : subRoutes?.stock?.length > 0 ? (
+                                        subRoutes?.stock?.map((item:any) => (
                                             <div
                                                 key={item.itemId}
                                                 onClick={() =>
@@ -554,7 +497,7 @@ const AddOrder = ({ }: Props) => {
                                                         item.itemName,
                                                         item.quantity,
                                                         item.status,
-                                                        item.sellingPrice,
+                                                        item.sellingPrice
                                                     )
                                                 }
                                                 className="p-2 m-2 border-2 rounded-lg text-left cursor-pointer hover:bg-gray-100"
@@ -562,8 +505,9 @@ const AddOrder = ({ }: Props) => {
                                                 {item.itemName}
                                             </div>
                                         ))
-
-                                    }
+                                    ) : (
+                                        <p className="p-2 text-center">No items available</p>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -728,18 +672,18 @@ const AddOrder = ({ }: Props) => {
                         </div>
                     </div>
                     {orderData.paymentMode === "Cash" && (
-                    <div className="pt-2">
-                        <label className="block text-gray-700">Paid Amount</label>
-                        <input
-                            type="text"
-                            name="paidAmount"
-                            value={orderData.paidAmount}
-                            onChange={handleAmountChange}
-                            className="w-full p-2 mt-1 border rounded-md"
-                            placeholder="Enter Paid Amount"
-                        />
-                    {paidAmounterror && <div className="text-red-500 text-center text-sm mt-1">{paidAmounterror}</div>}
-                    </div>
+                        <div className="pt-2">
+                            <label className="block text-gray-700">Paid Amount</label>
+                            <input
+                                type="text"
+                                name="paidAmount"
+                                value={orderData.paidAmount}
+                                onChange={handleAmountChange}
+                                className="w-full p-2 mt-1 border rounded-md"
+                                placeholder="Enter Paid Amount"
+                            />
+                            {paidAmounterror && <div className="text-red-500 text-center text-sm mt-1">{paidAmounterror}</div>}
+                        </div>
                     )}
 
                     <div className=" py-3 ">

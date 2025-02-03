@@ -76,7 +76,6 @@ const Sidebar: React.FC<{
   };
 
   const handleLogout = () => {
-    localStorage.clear();
     navigate("/");
   };
   console.log("response", storedUsername);
