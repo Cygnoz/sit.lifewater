@@ -352,29 +352,30 @@ exports.createOrder = async (req, res) => {
     console.log('Updated Customer Stock:', customerStock);
 
 
-    //prefix
-        let nextId = 1;
-        const lastPrefix = await Order.findOne().sort({ _id: -1 }); 
-        if (lastPrefix) {
-          const lastId = parseInt(lastPrefix.receiptNumber.slice(3)); 
-          nextId = lastId + 1; 
-        }    
-        const orderNumber = `ORDER-${nextId}`;
+// Prefix generation
+let nextId = 1;
+const lastPrefix = await Order.findOne().sort({ _id: -1 });
 
-    // Create an order record
-    const order = new Order({
-      ...cleanedData,
-      orderNumber: orderNumber,
-      balanceAmount: (cleanedData.totalAmount - cleanedData.paidAmount) || 0,
-      stock: cleanedData.stock.map(item => ({
-        itemId: item.itemId,
-        itemName: item.itemName,
-        quantity: item.quantity,
-        status: "Sold",
-      })),
-    });
+if (lastPrefix && lastPrefix.orderNumber) {
+  const lastId = parseInt(lastPrefix.orderNumber.replace("ORDER-", "")); // Extract number part
+  nextId = lastId + 1;
+}
+const orderNumber = `ORDER-${nextId}`;
 
-    await order.save();
+// Create an order record
+const order = new Order({
+  ...cleanedData,
+  orderNumber: orderNumber,
+  balanceAmount: (cleanedData.totalAmount - cleanedData.paidAmount) || 0,
+  stock: cleanedData.stock.map(item => ({
+    itemId: item.itemId,
+    itemName: item.itemName,
+    quantity: item.quantity,
+    status: "Sold",
+  })),
+});
+
+await order.save();
 
     console.log('Order Created:', order);
     
