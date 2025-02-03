@@ -26,7 +26,7 @@ const menuItems = [
   { title: "Summary", icon: summary, path: "/summary" },
   { title: "Return", icon: ret, path: "/return" },
   { title: "Payment Collection", icon: pay, path: "/collection" },
-  { title: "Credit Issued", icon: credit, path: "/creditcollection" },
+  // { title: "Credit Issued", icon: credit, path: "/creditcollection" },
   { title: "Coupon Customers", icon: coup, path: "/couponcustomer" },
   { title: "Route", icon: rout, path: "/route" },
   { title: "Visit History", icon: hstory, path: "/visithistory" },
