@@ -87,6 +87,8 @@ const CreditCollection: React.FC = () => {
     setLoading(true);
     try {
       const { response, error } = await Addpaymentcollection(endpoints.ORDER_RECIEPT, formData);
+      console.log(response);
+      
       if (error) {
         toast.error(error.response?.data?.message || "Failed to save");
       } else {

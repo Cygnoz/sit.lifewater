@@ -10,7 +10,7 @@ import users from "../assets/images/users.svg";
 import close from "../assets/images/x-mark.svg";
 import bars from "../assets/images/bars-4.svg";
 import coup from "../assets/images/coup.svg";
-import credit from "../assets/images/credit.svg";
+
 import pay from "../assets/images/pay.svg";
 import endride from "../assets/images/endride.svg";
 import hstory from "../assets/images/history.svg";
