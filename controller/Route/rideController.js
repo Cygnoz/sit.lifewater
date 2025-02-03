@@ -140,14 +140,17 @@ exports.getActiveRides = async (req, res) => {
       // Fetch active rides for the given salesmanId
       const activeRides = await Ride.find({ salesmanId, status: 'active' });
   
+      console.log("Active Rides:", activeRides);
       if (activeRides.length === 0) {
         return res.status(404).json({ message: 'No active rides found for this salesman.' });
       }
   
       return res.status(200).json({
         message: 'Active rides fetched successfully!',
-        data: activeRides,
-      });
+        activeRide:activeRides[0] || null,
+        });
+        
+      
   
     } catch (error) {
       console.error('Error fetching active rides by salesmanId:', error);
