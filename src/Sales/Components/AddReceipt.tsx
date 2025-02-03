@@ -1,54 +1,101 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-
-import back from "../../assets/images/backbutton.svg";
-import settings from "../../assets/images/settings.svg";
-import printer from "../../assets/images/printer.svg";
+import { toast, ToastContainer } from "react-toastify";
 import useApi from "../../Hook/UseApi";
 import { endpoints } from "../../services/ApiEndpoint";
+import back from "../../assets/images/backbutton.svg";
 
 const AddReceipt: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { request: addReceipt } = useApi("post", 4001);
   const { request: getAllCustomers } = useApi("get", 4000);
-  
+  const { request: getALLOrders } = useApi("get", 4001);
+  const { request: getAllAccounts } = useApi("get", 4000);
+
   const [formData, setFormData] = useState({
-    customer: "",
-    type: "Purchase Payment",
-    receiptNumber: "PAY 00002",
-    receiptMethod: "",
-    saleNumber: "",
-    referenceNumber: "",
-    receiptDate: "",
-    account: "",
+    date: "",
+    customerId: "",
+    orderId: "",
+    orderNumber: "",
+    paidAmount: "",
+    depositAccountId: "",
   });
-  
+
   const [customers, setCustomers] = useState<any[]>([]);
-  
+  const [orders, setOrders] = useState<any[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
+  const [filteredAccounts, setFilteredAccounts] = useState<any[]>([]);
+
   useEffect(() => {
     const fetchCustomers = async () => {
-      try {
-        const url = `${endpoints}`;
-        const { response, error } = await getAllCustomers(url);
-        if (!error && response) {
-          setCustomers(response.data);
-        }
-      } catch (error) {
-        console.log(error);
-      }
+      const { response, error } = await getAllCustomers(
+        endpoints.GET_ALL_CUSTOMERS
+      );
+      if (!error && response) setCustomers(response.data);
     };
     fetchCustomers();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const { response, error } = await getALLOrders(endpoints.GET_ALL_ORDERS);
+      if (!error && response) setOrders(response.data);
+    };
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      const { response, error } = await getAllAccounts(
+        endpoints.GET_ALL_ACCOUNTS
+      );
+      if (!error && response) {
+        const filtered = response.data.filter(
+          (account: any) => account.accountSubhead === "Cash"
+        );
+        setFilteredAccounts(filtered);
+      }
+    };
+    fetchAccounts();
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({ ...prevState, [name]: value }));
+
+    if (name === "customerId") {
+      const customerOrders = orders.filter(
+        (order) =>
+          order.customerId === value &&
+          order.paymentMode === "Cash" &&
+          order.balanceAmount > 0
+      );
+      setFilteredOrders(customerOrders);
+      setFormData((prev) => ({ ...prev, orderId: "", orderNumber: "" })); // Reset order selection
+    }
+  };
+
+  const handleOrderSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedOrder = filteredOrders.find(
+      (order) => order._id === e.target.value
+    );
+    setFormData((prev) => ({
+      ...prev,
+      orderId: selectedOrder?._id || "",
+      orderNumber: selectedOrder?.orderNumber || "",
+    }));
   };
 
   const validateForm = () => {
-    if (!formData.customer || !formData.receiptMethod || !formData.account) {
+    if (
+      !formData.date ||
+      !formData.customerId ||
+      !formData.orderId ||
+      !formData.paidAmount
+    ) {
       toast.error("Please fill in all required fields.");
       return false;
     }
@@ -60,18 +107,19 @@ const AddReceipt: React.FC = () => {
     if (!validateForm()) return;
     setLoading(true);
     try {
-      const url = `${endpoints}`;
-      const { response, error } = await addReceipt(url, formData);
+      const { response, error } = await addReceipt(
+        endpoints.ORDER_RECIEPT,
+        formData
+      );
       console.log(response);
       
       if (error) {
         toast.error(error.response?.data?.message || "Failed to save receipt");
       } else {
         toast.success("Receipt saved successfully.");
-        setTimeout(() => navigate("/receipt"), 2000);
+        setTimeout(() => navigate("/reciept"), 2000);
       }
     } catch (err: any) {
-      console.error("Error saving receipt:", err);
       toast.error(err.message || "Failed to save receipt");
     } finally {
       setLoading(false);
@@ -79,64 +127,119 @@ const AddReceipt: React.FC = () => {
   };
 
   return (
-    <div className='p-2'>
-      <div className="flex gap-3 items-center w-full max-w-8xl mb-4">
-        <Link to={'/receipt'}>
-          <img className='bg-gray-200 rounded-full p-2' src={back} alt="Back" />
+    <div className="p-5 bg-white shadow-md rounded-lg mt-3">
+      <button>
+        <Link to={"/reciept"} className="mb-4">
+          <div className="icon-placeholder">
+            <img
+              className="bg-gray-200 rounded-full p-2"
+              src={back}
+              alt="Back"
+            />
+          </div>
         </Link>
-        <h2 className="text-[20px] text-[#303F58] font-bold">Receipts</h2>
-      </div>
-      <div className="w-full mx-auto p-5 bg-white rounded-lg shadow-md">
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-2 gap-x-5" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-[#303F58] font-normal mb-1">Customer</label>
-            <select name="customer" value={formData.customer} onChange={handleChange} className="w-full px-3 py-2 border rounded-md">
-              <option value="">Select Customer</option>
-              {customers.map((customer) => (
-                <option key={customer.id} value={customer.name}>{customer.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-[#303F58] font-normal mb-1">Type</label>
-            <input type="text" value={formData.type} readOnly className="w-full px-3 py-2 border rounded-md" />
-          </div>
-          <div>
-            <label className="block text-[#303F58] font-normal mb-1">Receipt #</label>
-            <div className="flex items-center border rounded-md">
-              <input type="text" value={formData.receiptNumber} readOnly className="w-full px-3 py-2" />
-              <img src={settings} alt="Settings Icon" className="w-5 h-5 px-2" />
-            </div>
-          </div>
-          <div>
-            <label className="block text-[#303F58] font-normal mb-1">Receipt Method</label>
-            <select name="receiptMethod" value={formData.receiptMethod} onChange={handleChange} className="w-full px-3 py-2 border rounded-md">
-              <option value="">Select Payment Method</option>
-              <option value="Cash">Cash</option>
-              <option value="Bank Transfer">Bank Transfer</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-[#303F58] font-normal mb-1">Account</label>
-            <select name="account" value={formData.account} onChange={handleChange} className="w-full px-3 py-2 border rounded-md">
-              <option value="">Select Account</option>
-            </select>
-          </div>
-          <div className="flex justify-end mt-6 space-x-4">
-            <button type="button" className="px-3 py-1 bg-gray-200 border-2 border-gray-500 text-gray-600 rounded-md">
-              <img src={printer} alt="Print" className="w-4 h-4 mr-2 inline" /> Print
-            </button>
-            <Link to={'/receipt'}>
-              <button type="button" className="px-3 py-1 bg-gray-200 border-2 border-gray-500 text-gray-600 rounded-md">
-                Cancel
-              </button>
-            </Link>
-            <button type="submit" className="px-3 py-1 bg-[#820000] text-white rounded-md" disabled={loading}>
-              {loading ? "Saving..." : "Save"}
-            </button>
-          </div>
-        </form>
-      </div>
+      </button>
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+
+      <h2 className="text-xl font-bold text-gray-700 mb-4">Add Receipt</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input
+            type="date"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-md"
+          />
+          <select
+            name="customerId"
+            value={formData.customerId}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-md"
+          >
+            <option value="">Select Customer</option>
+            {customers.map((customer) => (
+              <option key={customer._id} value={customer._id}>
+                {customer.fullName}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <select
+            name="orderId"
+            value={formData.orderId}
+            onChange={handleOrderSelection}
+            className="w-full p-2 border rounded-md"
+          >
+            <option value="">Select Order</option>
+            {filteredOrders.map((order) => (
+              <option key={order._id} value={order._id}>
+                {order.orderNumber}
+              </option>
+            ))}
+          </select>
+          <input
+            type="text"
+            name="orderNumber"
+            value={formData.orderNumber}
+            readOnly
+            className="w-full p-2 border rounded-md bg-gray-100"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input
+            type="number"
+            name="paidAmount"
+            value={formData.paidAmount}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-md placeholder:text-gray-600"
+            placeholder="Collected Amount"
+          />
+          <select
+            name="depositAccountId"
+            value={formData.depositAccountId}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-md"
+          >
+            <option value="">Select Account</option>
+            {filteredAccounts.map((account) => (
+              <option key={account._id} value={account._id}>
+                {account.accountName}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex justify-between mt-4">
+          <Link
+            to="/reciept"
+            className="py-1 px-8 bg-gray-100 text-red-900 border border-red-900 rounded-lg hover:bg-gray-300"
+          >
+            Cancel
+          </Link>
+          <button
+            type="submit"
+            className="py-1 px-8 bg-red-900 text-white rounded-lg"
+            disabled={loading}
+          >
+            {loading ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

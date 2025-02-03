@@ -1,10 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { endpoints } from "../../services/ApiEndpoint";
 
 import useApi from "../../Hook/UseApi";
 import { TableResponseContext } from "../../assets/Context/ContextShare";
 import Table from "../../commoncomponents/Table/Table"
+import PlusCircle from "../../assets/icons/PlusCircle";
+
 
 const Receipt: React.FC = () => {
   const navigate = useNavigate();
@@ -78,6 +80,21 @@ const Receipt: React.FC = () => {
             Lorem ipsum dolor sit amet consectetur commondo enim odio
           </p>
         </div>
+        <div className="flex justify-between">
+     
+        <Link to={'/addreciept'}>
+        <button
+          className="justify-between items-center gap-2 bg-[#820000] text-white flex px-4 py-2 rounded-md"
+        >
+          <PlusCircle/>
+          <p>New Reciept</p>
+        </button>
+        </Link>
+       
+      
+       
+          
+        </div>
       </div>
 
       {/* Table Section */}
@@ -87,7 +104,7 @@ const Receipt: React.FC = () => {
           data={orders} 
           searchPlaceholder="Search Customer" 
           loading={loading.skeleton} 
-          searchableFields={[ "orderNumber", "receiptNumber"]}
+          searchableFields={[ "orderNumber", "receiptNumber","fullName"]}
           onViewClick={handleView} // Add this prop
           // onEditClick={handleEdit}
           // onDeleteClick={handleDelete}

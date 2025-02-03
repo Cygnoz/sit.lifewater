@@ -99,5 +99,6 @@ export const endpoints = {
 
   // receipt 
   GET_ALL_RECIEPT:`receipts`,
+  ORDER_RECIEPT:`order-receipt`,
 }
 
