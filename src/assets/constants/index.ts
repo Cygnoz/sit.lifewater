@@ -168,7 +168,7 @@ const navlist = [
   //   ],
   // },
   {
-    nav: "Accountant",
+    nav: "Accounts",
     icon:accountant,
     route: "/chartofaccount",
     subhead: [
