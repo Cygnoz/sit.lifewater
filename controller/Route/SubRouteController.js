@@ -3,44 +3,53 @@ const MainRoute = require('../../Models/MainRouteSchema');
 
 // Add a new subroute
 exports.addSubroute = async (req, res) => {
-    try {
-      console.log("Add Sub Route:", req.body);
-      const cleanedData = cleanCustomerData(req.body);
+  try {
+    console.log("Add Sub Route:", req.body);
+    const cleanedData = cleanCustomerData(req.body);
 
-      
-      if (!cleanedData.subRouteName) {
-        return res.status(400).json({ message: 'Sub Route Name is required' });
-      }
-      if (!cleanedData.subrouteCode) {
-        return res.status(400).json({ message: 'Sub Route Code is required' });
-      }
-      if (!cleanedData.mainRouteId) {
-        return res.status(400).json({ message: 'Select a Main Route' });
-      }
-  
-      // Check if a subroute with the same subrouteCode already exists
-      const existingSubrouteCode = await Subroute.findOne({ subrouteCode: cleanedData.subrouteCode });
-      if (existingSubrouteCode) {
-        return res.status(400).json({ message: 'Sub Route with this code already exists.' });
-      }
-      const existingSubrouteName = await Subroute.findOne({ subRouteName: cleanedData.subRouteName });
-      if (existingSubrouteName) {
-        return res.status(400).json({ message: 'Sub Route with this name already exists.' });
-      }
-  
-      // Create a new subroute
-      const newSubroute = new Subroute({ ...cleanedData });
-      const savedSubroute = await newSubroute.save();
-  
-      // Send success response
-      res.status(200).json({ 
-        message: 'Sub Route added successfully',
-        data: savedSubroute,
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error." });
+    // Validate required fields
+    if (!cleanedData.subRouteName) {
+      return res.status(400).json({ message: 'Sub Route Name is required.' });
     }
-};  
+    if (!cleanedData.subrouteCode) {
+      return res.status(400).json({ message: 'Sub Route Code is required.' });
+    }
+    if (!cleanedData.mainRouteId) {
+      return res.status(400).json({ message: 'Select a Main Route.' });
+    }
+
+    // Check for existing subroute by name or code (case-insensitive)
+    const existingSubroute = await Subroute.findOne({
+      $or: [
+        { subRouteName: { $regex: `^${cleanedData.subRouteName}$`, $options: 'i' } },
+        { subrouteCode: { $regex: `^${cleanedData.subrouteCode}$`, $options: 'i' } }
+      ]
+    });
+
+    if (existingSubroute) {
+      const message =
+        existingSubroute.subRouteName.toLowerCase() === cleanedData.subRouteName.toLowerCase()
+          ? 'Sub Route with this name already exists.'
+          : 'Sub Route with this code already exists.';
+      return res.status(400).json({ message });
+    }
+
+    // Create a new subroute
+    const newSubroute = new Subroute({ ...cleanedData });
+    const savedSubroute = await newSubroute.save();
+
+    // Send success response
+    res.status(200).json({
+      message: 'Sub Route added successfully.',
+      data: savedSubroute,
+    });
+
+  } catch (error) {
+    console.error('Error adding subroute:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
 
 // Edit an existing subroute by ID
 exports.editSubroute = async (req, res) => {
