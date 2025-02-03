@@ -204,6 +204,20 @@ exports.getCustomerById = async (req, res) => {
     res.status(500).json({ message: 'Error fetching business customer', error });
   }
 };
+
+exports.getCustomersBySubroute = async (req, res) => {
+  try {
+    const subroute = req.params.subroute;
+    const customers = await Customer.find({ subroute });
+
+    if (customers.length === 0) {
+      return res.status(404).json({ message: 'No customers found for this subroute' });
+    }
+    res.status(200).json(customers);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching customers by subroute', error });
+  }
+};
  
 
 // Update a customer by ID

@@ -68,6 +68,7 @@ router.post("/addcustomer", verifyToken, CustomerController.createCustomer) // a
 router.get("/customer", verifyToken, CustomerController.getAllCustomers) // get all customers
 router.put("/editcustomer/:id", verifyToken, CustomerController.updateCustomerById) // edit customer
 router.get("/customer/:id",  verifyToken, CustomerController.getCustomerById) // get customer by ID
+router.get('/customerbysubroute/:subroute', CustomerController.getCustomersBySubroute);//get customer by subroute
 router.delete("/customer/:id", verifyToken, CustomerController.deleteCustomerById) // delete customer
 
 // // Active Route
@@ -81,7 +82,7 @@ router.get('/active-rides',verifyToken, startRideController.getActiveRides)
 router.get("/viewActiveRoute/:rideId", verifyToken, startRideController.viewSingleActiveRoute) // view active route by ID
 router.put('/complete-ride', verifyToken, startRideController.completeRide)
 router.get('/completedride', verifyToken, startRideController.getAllCompletedRides)
-router.get('/active-rides/:salesmanId', verifyToken,startRideController.getActiveRidesBySalesmanId);
+router.get('/active-rides/:salesmanId',startRideController.getActiveRidesBySalesmanId);
 
 //endride
 router.post('/end-ride', verifyToken, EndRideController.endRide); // end ride
