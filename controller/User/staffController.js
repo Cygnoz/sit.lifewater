@@ -243,7 +243,8 @@ exports.loginSalesStaff = async (req, res) => {
       token: `Bearer ${token}`,
       data: staff,
       hasActiveRide: !!activeRide, // Boolean indicating if the salesman has an ongoing ride
-      activeRideId: activeRide ? activeRide._id : null // Optional: Provide the active ride ID if available
+      activeRideId: activeRide ? activeRide._id : null, // Optional: Provide the active ride ID if available
+      salesmanId: staff._id,
     });
 
   } catch (error) {
