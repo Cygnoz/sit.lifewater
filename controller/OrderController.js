@@ -169,6 +169,11 @@ const TrialBalance = require('../Models/trialBalance');
 
 
 // Fetch existing data
+
+
+
+
+
 const dataExist = async ( customerId , depositAccountId ) => {
     const [ customerAccount, saleAccount, depositAccount ] = await Promise.all([
       Account.findOne({  accountId:customerId }),
@@ -570,26 +575,42 @@ exports.createOrder = async (req, res) => {
     console.log('Updated SubRoute Stock:', subRouteStock);
     console.log('Updated Customer Stock:', customerStock);
 
-    // Prefix generation
+    // // Prefix generation
+    // let nextId = 1;
+    // const lastPrefix = await Order.findOne().sort({ _id: -1 }); 
+    // console.log('Last Prefix:----------------------------------------------', lastPrefix.orderNumber.slice(6));
+    
+    // if (lastPrefix) {
+    //   const lastId = parseInt(lastPrefix.orderNumber.slice(6)); 
+    //   nextId = lastId + 1; 
+    // }    
+    // const orderNumber = `ORDER-${nextId}`;
+
     let nextId = 1;
-    const lastPrefix = await Order.findOne().sort({ _id: -1 });
-
-    if (lastPrefix && lastPrefix.orderNumber) {
-      const lastIdString = lastPrefix.orderNumber.replace("ORD-", "");
-      const lastId = parseInt(lastIdString, 10);
-
-      if (!isNaN(lastId)) {
-        nextId = lastId + 1;
+    let orderNumber = ''; // Declare outside to avoid scoping issues
+    
+    try {
+      const lastPrefix = await Order.findOne().sort({ _id: -1 });
+    
+      if (lastPrefix?.orderNumber?.startsWith('ORDER-')) {
+        const lastId = parseInt(lastPrefix.orderNumber.split('-')[1]);
+        if (!isNaN(lastId)) {
+          nextId = lastId + 1;
+        }
       }
+    
+      orderNumber = `ORDER-${String(nextId).padStart(3, '0')}`; // e.g., ORDER-001
+      console.log('Generated Order Number:', orderNumber);
+    } catch (error) {
+      console.error('Error generating order number:', error);
     }
-
-    const orderNumber = `ORD-${nextId}`;
-
+    
     // Create an order record
     const order = new Order({
       ...cleanedData,
-      orderNumber: orderNumber,
-      balanceAmount: (cleanedData.totalAmount - cleanedData.paidAmount) || 0,
+      orderNumber,
+      balanceAmount: cleanedData.paymentMode === 'Credit' ? cleanedData.totalAmount : (cleanedData.totalAmount - cleanedData.paidAmount) || 0,
+      paidAmount: cleanedData.paymentMode === 'Credit' ? 0 : cleanedData.paidAmount,
       stock: cleanedData.stock.map(item => ({
         itemId: item.itemId,
         itemName: item.itemName,
@@ -597,8 +618,10 @@ exports.createOrder = async (req, res) => {
         status: "Sold",
       })),
     });
-
+    
+    
     await order.save();
+    
 
     console.log('Order Created:', order);
 
@@ -960,86 +983,154 @@ function generateTimeAndDateForDB(
   }
 
 
-  async function journal( order, customerAccount, saleAccount, depositAccounts ) {  
+//   async function journal( order, customerAccount, saleAccount, depositAccounts ) {  
 
-    console.log('customeracc:',customerAccount);
-    console.log('orderdepositid:',order.depositAccountId);
-    console.log('saleaccount:',saleAccount);
-    console.log('depositacc:',depositAccounts);
+//     console.log('customeracc:',customerAccount);
+//     console.log('orderdepositid:',order.depositAccountId);
+//     console.log('saleaccount:',saleAccount);
+//     console.log('depositacc:',depositAccounts);
     
 
-    const sale = {
+//     const sale = {
+//       operationId: order._id,
+//       transactionId: order.orderNumber,
+//       date: order.createdDate,
+//       accountId: saleAccount._id || undefined,
+//       action: "Sales Invoice",
+//       debitAmount: 0,
+//       creditAmount: order.totalAmount,
+//       remark: order.note,
+//     };
+
+
+//     const customer = {
+//       operationId: order._id,
+//       transactionId: order.orderNumber,
+//       date: order.createdDate,
+//       accountId: customerAccount._id || undefined,
+//       action: "Sales Invoice",
+//       debitAmount: order.totalAmount || 0,
+//       creditAmount: 0,
+//       remark: order.note,
+//     };
+//     const customerPaid = {
+//       operationId: order._id,
+//       transactionId: order.orderNumber,
+//       date: order.createdDate,
+//       accountId: customerAccount._id || undefined,
+//       action: "Receipt",
+//       debitAmount: 0,
+//       creditAmount: order.paidAmount || 0,
+//       remark: order.note,
+//     };
+//     let depositAccount 
+   
+//     if(depositAccounts){
+//        depositAccount = {
+//         operationId: order._id,
+//         transactionId: order.orderNumber,
+//         date: order.createdDate,
+//         accountId: depositAccounts._id || undefined,
+//         action: "Receipt",
+//         debitAmount: order.paidAmount || 0,
+//         creditAmount: 0,
+//         remark: order.note,
+//       };
+//     }
+
+//     // console.log("sale", sale.debitAmount,  sale.creditAmount);
+//     // console.log("customer", customer.debitAmount,  customer.creditAmount);
+//     // console.log("customerPaid", customerPaid.debitAmount,  customerPaid.creditAmount);
+//     // console.log("depositAccount", depositAccount.debitAmount,  depositAccount.creditAmount);
+
+//     // const  debitAmount =  sale.debitAmount  + customer.debitAmount + customerPaid.debitAmount +  depositAccount.debitAmount;
+//     // const  creditAmount = sale.creditAmount  + customer.creditAmount + customerPaid.creditAmount +  depositAccount.creditAmount ;
+  
+//     // console.log("Total Debit Amount: ", debitAmount );
+//     // console.log("Total Credit Amount: ", creditAmount );
+
+//     const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai","DD/MM/YY","/");
+//     const openingDate = generatedDateTime.dateTime; 
+
+//     //credit
+    
+//     if(order.paymentMode === 'Cash'){
+//       createTrialEntry( sale ,openingDate )
+//       createTrialEntry( customer,openingDate )
+//         createTrialEntry( customerPaid,openingDate )
+//         createTrialEntry( depositAccount,openingDate )
+//     }
+// if(order.paymentMode === 'Credit'){
+//   createTrialEntry( sale ,openingDate )
+//   createTrialEntry( customer,openingDate )
+//   }
+// }
+
+
+async function journal(order, customerAccount, saleAccount, depositAccounts) {
+  const sale = {
+    operationId: order._id,
+    transactionId: order.orderNumber,
+    date: order.createdDate,
+    accountId: saleAccount._id || undefined,
+    action: "Sales Invoice",
+    debitAmount: 0,
+    creditAmount: order.totalAmount,
+    remark: order.note,
+  };
+
+  const customer = {
+    operationId: order._id,
+    transactionId: order.orderNumber,
+    date: order.createdDate,
+    accountId: customerAccount._id || undefined,
+    action: "Sales Invoice",
+    debitAmount: order.paymentMode === 'Credit' ? order.totalAmount : order.totalAmount || 0,
+    creditAmount: 0,
+    remark: order.note,
+  };
+
+  const customerPaid = {
+    operationId: order._id,
+    transactionId: order.orderNumber,
+    date: order.createdDate,
+    accountId: customerAccount._id || undefined,
+    action: "Receipt",
+    debitAmount: 0,
+    creditAmount: order.paymentMode === 'Credit' ? 0 : order.paidAmount || 0,
+    remark: order.note,
+  };
+
+  let depositAccount;
+  if (depositAccounts && order.paymentMode !== 'Credit') {
+    depositAccount = {
       operationId: order._id,
       transactionId: order.orderNumber,
       date: order.createdDate,
-      accountId: saleAccount._id || undefined,
-      action: "Sales Invoice",
-      debitAmount: 0,
-      creditAmount: order.totalAmount,
-      remark: order.note,
-    };
-
-
-    const customer = {
-      operationId: order._id,
-      transactionId: order.orderNumber,
-      date: order.createdDate,
-      accountId: customerAccount._id || undefined,
-      action: "Sales Invoice",
-      debitAmount: order.totalAmount || 0,
+      accountId: depositAccounts._id || undefined,
+      action: "Receipt",
+      debitAmount: order.paidAmount || 0,
       creditAmount: 0,
       remark: order.note,
     };
-    const customerPaid = {
-      operationId: order._id,
-      transactionId: order.orderNumber,
-      date: order.createdDate,
-      accountId: customerAccount._id || undefined,
-      action: "Receipt",
-      debitAmount: 0,
-      creditAmount: order.paidAmount || 0,
-      remark: order.note,
-    };
-    let depositAccount 
-   
-    if(depositAccounts){
-       depositAccount = {
-        operationId: order._id,
-        transactionId: order.orderNumber,
-        date: order.createdDate,
-        accountId: depositAccounts._id || undefined,
-        action: "Receipt",
-        debitAmount: order.paidAmount || 0,
-        creditAmount: 0,
-        remark: order.note,
-      };
-    }
-
-    // console.log("sale", sale.debitAmount,  sale.creditAmount);
-    // console.log("customer", customer.debitAmount,  customer.creditAmount);
-    // console.log("customerPaid", customerPaid.debitAmount,  customerPaid.creditAmount);
-    // console.log("depositAccount", depositAccount.debitAmount,  depositAccount.creditAmount);
-
-    // const  debitAmount =  sale.debitAmount  + customer.debitAmount + customerPaid.debitAmount +  depositAccount.debitAmount;
-    // const  creditAmount = sale.creditAmount  + customer.creditAmount + customerPaid.creditAmount +  depositAccount.creditAmount ;
-  
-    // console.log("Total Debit Amount: ", debitAmount );
-    // console.log("Total Credit Amount: ", creditAmount );
-
-    const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai","DD/MM/YY","/");
-    const openingDate = generatedDateTime.dateTime; 
-
-    //credit
-    createTrialEntry( sale ,openingDate )
-    createTrialEntry( customer,openingDate )
-
-    if(order.paymentMode === 'Cash'){
-        createTrialEntry( customerPaid,openingDate )
-        createTrialEntry( depositAccount,openingDate )
-    }
-
   }
 
+  const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai", "DD/MM/YY", "/");
+  const openingDate = generatedDateTime.dateTime;
+
+  // Handle journal entries based on payment mode
+  if (order.paymentMode === 'Cash') {
+    createTrialEntry(sale, openingDate);
+    createTrialEntry(customer, openingDate);
+    createTrialEntry(customerPaid, openingDate);
+    if (depositAccount) createTrialEntry(depositAccount, openingDate);
+  } else if (order.paymentMode === 'Credit') {
+    createTrialEntry(sale, openingDate);
+    createTrialEntry(customer, openingDate);
+  }
+}
+
+  
 
 
 
