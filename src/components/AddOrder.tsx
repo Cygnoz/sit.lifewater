@@ -125,6 +125,7 @@ const AddOrder = ({ }: Props) => {
                 const filtered = response.data.filter(
                     (account: any) => ["Cash", "Bank"].includes(account.accountSubhead)
                 );
+                
                 setFilteredAccounts(filtered);
                 console.log("filteredAccounts", filtered);
             }
