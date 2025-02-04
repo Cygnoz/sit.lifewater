@@ -57,24 +57,27 @@ exports.addRoute = async (req, res) => {
 exports.deleteRoute = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("ID received for deletion:", id); 
-    
-    const subRoute = await SubRoute.findOne({mainRouteId:id});
-    if (!subRoute) {
-      return res.status(404).json({ message: 'Cannot delete the route as it is associated with a subroute.' });
+    console.log("ID received for deletion:", id);
+
+    // Check if any subroutes are associated with the main route
+    const subRoutes = await SubRoute.find({ mainRouteId: id });
+    if (subRoutes.length > 0) {
+      await SubRoute.deleteMany({ mainRouteId: id }); // Delete all subroutes
+      console.log(`Deleted ${subRoutes.length} subroutes associated with the route.`);
     }
- 
+
     const deletedRoute = await MainRoute.findByIdAndDelete(id);
     if (!deletedRoute) {
       return res.status(404).json({ message: 'Route not found' });
     }
- 
-    return res.status(200).json({ message: 'Route deleted successfully' });
+
+    return res.status(200).json({ message: 'Route and associated subroutes deleted successfully' });
   } catch (error) {
     console.error('Error deleting route:', error.message);
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+
  
  
 
