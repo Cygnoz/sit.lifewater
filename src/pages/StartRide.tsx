@@ -44,9 +44,7 @@ const StartRide: React.FC = () => {
 
         {/* Text Content */}
         <p className="text-center text-gray-600 mb-6">
-          Lorem ipsum dolor sit amet consectetur. Vulputate phasellus
-          condimentum. Cursus nisl quisque.
-        </p>
+        Bringing Life, One Drop at a Time.  </p>
 
         {/* Button */}
         <Link to={"/addstart"}>
