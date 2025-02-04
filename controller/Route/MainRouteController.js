@@ -61,6 +61,13 @@ exports.deleteRoute = async (req, res) => {
 
     // Check if any subroutes are associated with the main route
     const subRoutes = await SubRoute.find({ mainRouteId: id });
+
+    // Verify if any subroute has stock loaded
+    const subRouteWithStock = subRoutes.find(subRoute => subRoute.stock && subRoute.stock > 0);
+    if (subRouteWithStock) {
+      return res.status(400).json({ message: 'Cannot delete the route as a subroute has stock loaded.' });
+    }
+
     if (subRoutes.length > 0) {
       await SubRoute.deleteMany({ mainRouteId: id }); // Delete all subroutes
       console.log(`Deleted ${subRoutes.length} subroutes associated with the route.`);
@@ -77,6 +84,7 @@ exports.deleteRoute = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+
 
  
  
