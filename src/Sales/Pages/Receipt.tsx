@@ -49,16 +49,16 @@ const Receipt: React.FC = () => {
   //   navigate(`/viewreceipt/${id}`);
   // };
 
-  // Handle view action
-  const handleView = (id: string) => {
-    navigate(`/receipts/${id}`);
-  };
+
 
   // Handle edit action
   // const handleEdit = (id: string) => {
   //   navigate(`/editreceipt/${id}`);
   // };
-
+  // Handle view action
+  const handleView = (id: string) => {
+    navigate(`/receipts/${id}`);
+  };
   const renderColumnContent = (colId: string, item: any) => {
     if (colId === "createdAt") {
       return (
