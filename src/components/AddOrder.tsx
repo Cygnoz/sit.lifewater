@@ -1,4 +1,5 @@
-import { Link, useNavigate } from "react-router-dom"
+
+import { Link, useNavigate, useParams } from "react-router-dom"
 import backbutton from "../assets/images/nav-item.png";
 import plus from "../assets/images/Icons/circle-plus.svg";
 import minus from "../assets/images/Icons/circle-minus.svg";
@@ -35,6 +36,7 @@ interface OrdrerData {
     stock: Item[];
     depositAccountId: string
     paidAmount: number
+    customerName: string
 }
 
 const AddOrder = ({ }: Props) => {
@@ -70,11 +72,74 @@ const AddOrder = ({ }: Props) => {
         rideId: "",
         stock: [],
         depositAccountId: "",
-        paidAmount: 0
+        paidAmount: 0,
+        customerName: ""
     });
     console.log("Input Data", orderData);
+    const { editId } = useParams()
 
-    const [filteredAccounts, setFilteredAccounts] = useState<any>(""); // All accounts
+    const [filteredAccounts, setFilteredAccounts] = useState<any[]>([]);
+    // fetch a order for editing
+    const { request: getAOrder } = useApi("get", 4001);
+    const getOrder = async () => {
+        if (!editId) return; // Ensure editId is available
+
+        setLoading(true);
+        try {
+            const url = `${endpoints.VIEW_A_ORDER}/${editId}`;
+            const { response, error } = await getAOrder(url);
+            if (!error && response) {
+                console.log("One Order RESPONSE:", response?.data);
+                setOrderData({
+                    mainRouteName: response?.data.mainRouteName || "",
+                    mainRouteId: response?.data.mainRouteId || "",
+                    subRouteName: response?.data.subRouteName || "",
+                    subRouteId: response?.data.subRouteId || "",
+                    customerId: response?.data.customerId || "",
+                    customerName: response?.data.customerName || "",
+                    salesman: response?.data.salesman || "",
+                    date: response?.data.date || "",
+                    paymentMode: response?.data.paymentMode || "",
+                    notes: response?.data.notes || "",
+                    termsAndCondition: response?.data.termsAndCondition || "",
+                    totalAmount: response?.data.totalAmount || 0,
+                    returnBottle: response?.data.returnBottle || 0,
+                    ratePerItem: response?.data.ratePerItem || "",
+                    rideId: response?.data.rideId || "",
+                    stock: response?.data.stock || [],
+                    depositAccountId: response?.data.depositAccountId || "",
+                    paidAmount: response?.data.paidAmount || 0
+                });
+                setSearchValue(response?.data.customerName || ""); // Set customer name
+                setRatePerCustomer(response?.data.ratePerItem || ""); // Set rate per item
+
+                // Set the selected item if available
+                if (response.data.stock?.length > 0) {
+                    const selected = response.data.stock[0]; // Assuming single item
+                    setSelectedItem({
+                        itemId: selected.itemId,
+                        itemName: selected.itemName,
+                        status: selected.status,
+                        sellingPrice: selected.ratePerItem,
+                    });
+                }
+
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fetch order details when editId is available
+    useEffect(() => {
+        if (editId) {
+            getOrder();
+        }
+    }, [editId]); // Runs whenever editId changes
+
+
 
     // Fetch activeroute with sales id
     const { request: getActiveRoute } = useApi("get", 4000);
@@ -122,10 +187,9 @@ const AddOrder = ({ }: Props) => {
             if (!error && response) {
                 setLoading(false);
                 // console.log(loading);
-                const filtered = response.data.filter(
+                const filtered = response?.data.filter(
                     (account: any) => ["Cash", "Bank"].includes(account.accountSubhead)
                 );
-                
                 setFilteredAccounts(filtered);
                 console.log("filteredAccounts", filtered);
             }
@@ -390,16 +454,15 @@ const AddOrder = ({ }: Props) => {
             const { response, error } = await AddOrder(url, orderWithDefaults)
             if (!error && response) {
                 console.log('Order', response);
-                toast.success(response.data.message);
+                toast.success(response?.data.message);
                 setTimeout(() => {
                     navigate("/orders")
                 }, 1000)
             }
             console.log(error);
-            toast.error(error.response.data.message);
         } catch (error: any) {
             console.error(error);
-            toast.error(error?.data.message);
+            toast.error(error?.response?.data?.message || error?.message || "Failed to save order");
         }
     };
 
@@ -424,7 +487,16 @@ const AddOrder = ({ }: Props) => {
                     </button>
                 </Link>
                 <h2 className="text-lg font-semibold text-center ms-[25%]">
-                    New Order
+                    {
+                        editId ?
+                            <div>
+                                Edit Order
+                            </div> :
+                            <div>
+                                New Order
+                            </div>
+                    }
+
                 </h2>
             </div>
             <form className="space-y-4">
@@ -489,7 +561,7 @@ const AddOrder = ({ }: Props) => {
                                     ) : error ? (
                                         <p className="p-2 text-center text-red-500">{error}</p>
                                     ) : subRoutes?.stock?.length > 0 ? (
-                                        subRoutes?.stock?.map((item:any) => (
+                                        subRoutes?.stock?.map((item: any) => (
                                             <div
                                                 key={item.itemId}
                                                 onClick={() =>
@@ -581,11 +653,15 @@ const AddOrder = ({ }: Props) => {
                                     required
                                 >
                                     <option value="">Select Account</option>
-                                    {filteredAccounts.map((account: any) => (
-                                        <option key={account._id} value={account._id}>
-                                            {account.accountName}
-                                        </option>
-                                    ))}
+                                    {Array.isArray(filteredAccounts) && filteredAccounts.length > 0 ? (
+                                        filteredAccounts.map((account: any) => (
+                                            <option key={account._id} value={account._id}>
+                                                {account.accountName}
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option disabled>No accounts available</option>
+                                    )}
                                 </select>
                             </div>
                         </div>
@@ -617,10 +693,7 @@ const AddOrder = ({ }: Props) => {
                             className="w-full p-2 mt-1 border rounded-md"
                             placeholder="Enter Rate"
                         />
-
-
                     </div>
-
                     {/* Return  Empty Bottle */}
                     <div className="pt-2">
                         <label className="block text-gray-700">Return  Empty Bottle</label>
@@ -688,9 +761,16 @@ const AddOrder = ({ }: Props) => {
                     )}
 
                     <div className=" py-3 ">
-                        <Button size="xl" onClick={handleSubmit}>
-                            Submit
-                        </Button>
+                        {
+                            editId ?
+                                <Button size="xl" onClick={handleSubmit}>
+                                    Submit
+                                </Button>
+                                :
+                                <Button size="xl" >
+                                    Submit
+                                </Button>
+                        }
                     </div>
                 </div>
             </form>

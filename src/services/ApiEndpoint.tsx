@@ -28,7 +28,7 @@ export const endpoints = {
     RIDE_ORDERS: `today`,
     ORDER_RECIEPT:`order-receipt`,
     GET_ALL_RECIEPT:`receipts`,
-
+    EDIT_ORDER : `editorder`,
     // Active routes
     GET_ALL_ACTIVE_ROUTE: `active-rides`,
     GET_AN_ACTIVE_ROUTE: `viewActiveRoute`,

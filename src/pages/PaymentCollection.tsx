@@ -22,7 +22,7 @@ const PaymentCollection: React.FC = () => {
   const { request: getALLOrders } = useApi("get", 4001);
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchReceipt = async () => {
       try {
         const url = `${endpoints.GET_ALL_RECIEPT}`;
         const { response, error } = await getALLOrders(url);
@@ -34,7 +34,7 @@ const PaymentCollection: React.FC = () => {
         console.log(error);
       }
     };
-    fetchOrders();
+    fetchReceipt();
   }, []);
 
   // Filter orders by customer name or order number

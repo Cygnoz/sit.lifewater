@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import searchIcon from "../assets/images/search (2).svg";
 import plusIcon from "../assets/images/pluscircle.svg";
 import order from "../assets/images/order.png";
-import {  useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import useApi from "../Hook/UseApi";
 import { endpoints } from "../services/ApiEndpoint";
 import ViewOrderModal from "./ViewOrderModal";
@@ -12,9 +12,12 @@ type Props = {}
 const Orders = ({ }: Props) => {
   const [orders, setOrders] = useState([])
   // const { setOrderResponse } = useContext(AllOrderResponseContext)!
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState<boolean>(false);
   // const { request: getALLOrders } = useApi("get", 4001)
   const [rideId, setRideId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   // const getALLOrderss = async () => {
   //   setLoading(true);
   //   try {
@@ -84,6 +87,17 @@ const Orders = ({ }: Props) => {
     fetchActiveRoute();
   }, []);
 
+  // Filter orders based on searchTerm
+  const filteredOrders = orders.filter((order: any) =>
+    [order.customerName, order.orderNumber, order.paymentMode]
+      .some((field) => field?.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+  const handleEdit = () => {
+    filteredOrders.map((orders: any) => {
+      navigate(`/editorder/${orders?._id}`);
+    })
+  };
+
   return (
     <div className="min-h-screen p-4 bg-gray-100">
       <div className=" w-full max-w-md flex items-center justify-between px-4 mb-8">
@@ -92,6 +106,8 @@ const Orders = ({ }: Props) => {
             type="text"
             placeholder="Search Orders"
             className="pl-10 pr-4 text-sm w-full rounded-xl text-[#8F99A9] h-10 border-0 bg-[#FFFFFF] focus:ring-1 focus:ring-gray-100 focus:outline-none"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
             <img src={searchIcon} alt="Search Icon" className="w-4 h-4" />
@@ -105,7 +121,7 @@ const Orders = ({ }: Props) => {
         <div className="p-2 text-center text-gray-500">Loading...</div>
       )
         : orders.length > 0 ? (
-          orders.map((order: any) => (
+          filteredOrders.map((order: any) => (
             <div className="bg-gradient-to-l from-[#E3E6D5] to-[#F7E7CE] my-3 p-5 rounded-xl" key={order.id || Math.random()}>
               <div className="flex justify-between">
                 <div>
@@ -120,7 +136,19 @@ const Orders = ({ }: Props) => {
                   </div>
                   <p className="text-[#303F58] text-[16px] font-bold ms-1">{order.customerName || "NA"}</p>
                 </div>
-                <ViewOrderModal id={order._id} />
+                <div className="space-y-1">
+
+                  <ViewOrderModal id={order._id} />
+
+                  <button
+                    onClick={() => {
+                      navigate(`/editorder/${order?._id}`);
+                    }}
+                    className="bg-[#F6F6F6] h-6 w-12 text-[13px] rounded-md border border-[#820000]"
+                  >
+                    Edit
+                  </button>
+                </div>
               </div>
               <p className="text-[#303F58] pt-1">Item</p>
               <p className="text-[#303F58] font-semibold ms-1">

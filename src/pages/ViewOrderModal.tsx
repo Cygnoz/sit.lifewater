@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import useApi from "../Hook/UseApi";
 import { endpoints } from "../services/ApiEndpoint";
 import { Modal } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 type Props = { id: any }
 interface OrderData {
@@ -15,8 +16,9 @@ interface OrderData {
     paymentMode: string,
     customerName: string,
     totalAmount: string,
-    balanceAmount:number,
-    paidAmount:number
+    balanceAmount: number,
+    paidAmount: number,
+    _id:string
 }
 const ViewOrderModal = ({ id }: Props) => {
     const [orderData, setOrderData] = useState<OrderData | null>(null);
@@ -43,9 +45,14 @@ const ViewOrderModal = ({ id }: Props) => {
     useEffect(() => {
         getOrder();
     }, []);
+    const navigate = useNavigate();
+
+    const handleEdit = () => {
+        navigate(`/editorder/${orderData?._id}`);
+    };
     return (
         <div className="">
-            <button onClick={() => setModalOpen(true)} className="bg-[#F6F6F6] h-6 text-[13px] rounded-md px-3 border border-[#820000]">
+            <button onClick={() => setModalOpen(true)} className="bg-[#F6F6F6] h-6 w-12 text-[13px] rounded-md  border border-[#820000]">
                 View
             </button>
             <Modal
@@ -62,21 +69,21 @@ const ViewOrderModal = ({ id }: Props) => {
                         </div>
                     ) : (
                         <>
+
                             <div
                                 className="ms-auto text-end text-3xl cursor-pointer"
                                 onClick={() => setModalOpen(false)}
                             >
                                 &times;
                             </div>
+
                             <div className="flex justify-between">
                                 <p className="text-[#303F58]">Customer</p>
-
-                                {orderData && orderData.date
-                                    ? new Date(orderData.date).toLocaleTimeString("en-GB", {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                    })
-                                    : "N/A"}
+                                <div>
+                                    <button onClick={handleEdit} className="bg-[#F6F6F6] ms-1 h-5 w-12 text-[13px] rounded-md  border border-[#820000]">
+                                        Edit
+                                    </button>
+                                </div>
                             </div>
                             <p className="text-[#303F58] text-[16px] font-bold">
                                 {orderData?.customerName}
