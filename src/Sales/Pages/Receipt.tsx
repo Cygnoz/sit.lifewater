@@ -70,7 +70,7 @@ const Receipt: React.FC = () => {
         <div>
           <h3 className="text-[#303F58] text-[20px] font-bold">Receipt</h3>
           <p className="text-[#4B5C79]">
-            Lorem ipsum dolor sit amet consectetur commondo enim odio
+          You can show the collection of the reciept here
           </p>
         </div>
         <div className="flex justify-between">

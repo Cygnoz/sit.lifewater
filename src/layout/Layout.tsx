@@ -224,7 +224,7 @@ const App: React.FC = () => {
               {/* <Route path='/addcreditnote' element={<AddCreditNote/>}/> */}
               {/* <Route path='/bottles' element={<Bottles/>}/> */}
               <Route path='/coupon' element={<Coupon/>}/>
-              <Route path='/editcoupon' element={<EditCoupon/>}/>
+              <Route path='/editcoupon/:id' element={<EditCoupon/>}/>
               {/* <Route path='/creditnote' element={<CreditNotes/>}/> */}
               <Route path='/invoice' element={<Invoice/>}/>
               <Route path='/reciept' element={<Receipt/>}/>

@@ -1,43 +1,92 @@
-import React from "react";
-import { Link } from "react-router-dom";
+// Coupon.tsx
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import plus from "../../assets/circle-plus.svg";
 import PurchaseTable from "../../commoncomponents/Table/Table";
-
+import useApi from "../../Hook/UseApi";
+import { endpoints } from "../../services/ApiEndpoint";
+import { toast, ToastContainer } from "react-toastify";
 
 const Coupon: React.FC = () => {
+  const { request: deleteCoupon } = useApi("delete", 4000);
+  const navigate = useNavigate(); // Initialize useNavigate
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const { request: getCoupons } = useApi("get", 4000);
+
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      try {
+        const url = `${endpoints.GET_ALL_COUPON}`;
+        const { response, error } = await getCoupons(url);
+
+        if (!error && response) {
+          setCoupons(response.data);
+          console.log(response.data);
+        } else {
+          console.error("Failed to fetch coupons:", error);
+        }
+      } catch (err) {
+        console.error("Error fetching coupons:", err);
+      }
+    };
+
+    fetchCoupons();
+  }, []);
+
+  // Handle coupon deletion
+  const handleDelete = async (couponId: string) => {
+    const confirmation = window.confirm("Are you sure you want to delete this coupon?");
+    if (!confirmation) return;
+
+    try {
+      const url = `${endpoints.DELETE_COUPON}/${couponId}`;
+      const { response, error } = await deleteCoupon(url);
+
+      if (!error && response) {
+        setCoupons((prevCoupons) =>
+          prevCoupons.filter((coupon) => coupon._id !== couponId)
+        );
+        toast.success("Coupon deleted successfully");
+      } else {
+        toast.error("Failed to delete coupon. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error deleting coupon:", err);
+      toast.error("An unexpected error occurred. Please try again.");
+    }
+  };
+
   const columns = [
-    { id: "slNo", label: "Sl.NO", visible: true },
+    { id: "updatedAt", label: "Date", visible: true },
     { id: "couponName", label: "Coupon Name", visible: true },
-    { id: "bottle", label: "Bottle", visible: true },
-    { id: "amount", label: "Amount", visible: true },
-    { id: "description", label: "Description", visible: true },
+    { id: "numberOfBottles", label: "Total Bottle", visible: true },
+    { id: "price", label: "Coupon Price", visible: true },
   ];
 
-  const data = [
-    {
-      _id: "1",
-      slNo: "122024",
-      couponName: "PAY001",
-      bottle: "33",
-      amount: "AED111",
-      description: "wwwwww",
-    },
-    {
-      _id: "2",
-      slNo: "132024",
-      couponName: "PAY434",
-      bottle: "98",
-      amount: "AED222",
-      description: "ppppp",
-    },
-  ];
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB");
+  };
 
   return (
     <div>
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+
       <div className="flex justify-between items-center p-2">
         <div>
           <h3 className="text-[#303F58] text-[20px] font-bold">Coupon</h3>
-          <p className="text-[#4B5C79]">Lorem ipsum dolor sit amet consectetur commondo enim odio</p>
+          <p className="text-[#4B5C79]">You can create a coupon here and sell from saleman </p>
         </div>
         <div>
           <Link to={"/addcoupon"}>
@@ -52,14 +101,20 @@ const Coupon: React.FC = () => {
       <div className="bg-white shadow-md rounded-lg p-6 mx-3 my-2">
         <PurchaseTable
           columns={columns}
-          data={data}
+          data={coupons.map((coupon) => ({
+            ...coupon,
+            updatedAt: formatDate(coupon.updatedAt),
+          }))}
           searchPlaceholder="Search Coupon"
           loading={false}
-          searchableFields={["couponName", "amount", "description"]}
+          searchableFields={["couponName", "price", "numberOfBottles"]}
           showAction={true}
-          onViewClick={(id) => console.log("View", id)}
-          onEditClick={(id) => console.log("Edit", id)}
-          onDeleteClick={(id) => console.log("Delete", id)}
+          // onViewClick={(id) => console.log("View", id)}
+          onEditClick={(id) => {
+            // Navigate to EditCoupon page using the couponId in the URL
+            navigate(`/editcoupon/${id}`);
+          }}
+          onDeleteClick={handleDelete}
         />
       </div>
     </div>
