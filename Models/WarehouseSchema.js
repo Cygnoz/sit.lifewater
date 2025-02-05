@@ -15,7 +15,10 @@ const warehouseSchema = new mongoose.Schema({
     warehouseName: { type: String },
     contactNo: { type: String },
     address: { type: String },
-    stock:[stockSchema]
+    stock:[stockSchema],
+    returnBottle: {
+        type:Number
+    },
 });
 
 const Warehouse = mongoose.model('Warehouse', warehouseSchema);
