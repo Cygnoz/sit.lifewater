@@ -28,7 +28,8 @@ const AddCoupon: React.FC = () => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === "price" || name === "numberOfBottles" ? Number(value) : value,
+      [name]:
+        name === "price" || name === "numberOfBottles" ? Number(value) : value,
     });
   };
 
@@ -76,9 +77,14 @@ const AddCoupon: React.FC = () => {
       </div>
 
       <div className="w-full mx-auto p-5 bg-white rounded-lg shadow-md">
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleSubmit}>
+        <form
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          onSubmit={handleSubmit}
+        >
           <div>
-            <label className="block text-[#303F58] font-normal mb-1">Coupon Name</label>
+            <label className="block text-[#303F58] font-normal mb-1">
+              Coupon Name
+            </label>
             <input
               type="text"
               name="couponName"
@@ -88,21 +94,25 @@ const AddCoupon: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block text-[#303F58] font-normal mb-1">Price</label>
+            <label className="block text-[#303F58] font-normal mb-1">
+              Price
+            </label>
             <input
               type="number"
               name="price"
-              value={formData.price}
+              value={formData.price === 0 ? "" : formData.price} // If value is 0, show as empty string
               onChange={handleInputChange}
               className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label className="block text-[#303F58] font-normal mb-1">Bottles</label>
+            <label className="block text-[#303F58] font-normal mb-1">
+              Bottles
+            </label>
             <input
               type="number"
               name="numberOfBottles"
-              value={formData.numberOfBottles}
+              value={formData.numberOfBottles === 0 ? "" : formData.numberOfBottles} // If value is 0, show as empty string
               onChange={handleInputChange}
               className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
             />
