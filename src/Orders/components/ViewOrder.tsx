@@ -122,7 +122,7 @@ const ViewOrder: React.FC = () => {
               <p className="font-semibold">
                 {`${order.totalAmount} AED` || "N/A"}
               </p>
-              {order.paymentMode === "Cash" && (
+             
                 <>
                   {" "}
                   <p className="text-sm text-gray-500 mt-4 mb-1">
@@ -138,7 +138,7 @@ const ViewOrder: React.FC = () => {
                     {`${order.balanceAmount} AED` || "N/A"}
                   </p>
                 </>
-              )}
+             
             </div>
           </div>
         </div>
