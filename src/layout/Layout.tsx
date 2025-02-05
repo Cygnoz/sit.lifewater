@@ -48,12 +48,12 @@ import EditMainRoute from '../Route/Pages/EditMainRoute';
 // import PurchaseOrder from '../Purchase/Pages/PurchaseOrder';
 // import Suppliers from '../Purchase/Pages/Suppliers';
 // import AddCollection from '../Sales/Components/AddCollection';
-// import AddCoupon from '../Sales/Components/AddCoupon';
+import AddCoupon from '../Sales/Components/AddCoupon';
 // import AddCreditNote from '../Sales/Components/AddCreditNote';
 // import Bottles from '../Sales/Pages/Bottles';
-// import Coupon from '../Sales/Pages/Coupon';
+import Coupon from '../Sales/Pages/Coupon';
 // import CreditNotes from '../Sales/Pages/CreditNotes';
-// import EditCoupon from '../Sales/Pages/EditCoupon';
+import EditCoupon from '../Sales/Pages/EditCoupon';
 // import Salesman from '../Sales/Pages/Salesman';
 import Invoice from '../Sales/Pages/Invoice';
 import Receipt from '../Sales/Pages/Receipt';
@@ -219,13 +219,13 @@ const App: React.FC = () => {
               <Route path='/suppliers' element={<Suppliers/>}/> */}
 
               {/* SALES */}
-              {/* <Route path='/addcollection' element={<AddCollection/>}/>
+              {/* <Route path='/addcollection' element={<AddCollection/>}/> */}
               <Route path='/addcoupon' element={<AddCoupon/>}/>
-              <Route path='/addcreditnote' element={<AddCreditNote/>}/>
-              <Route path='/bottles' element={<Bottles/>}/>
+              {/* <Route path='/addcreditnote' element={<AddCreditNote/>}/> */}
+              {/* <Route path='/bottles' element={<Bottles/>}/> */}
               <Route path='/coupon' element={<Coupon/>}/>
               <Route path='/editcoupon' element={<EditCoupon/>}/>
-              <Route path='/creditnote' element={<CreditNotes/>}/> */}
+              {/* <Route path='/creditnote' element={<CreditNotes/>}/> */}
               <Route path='/invoice' element={<Invoice/>}/>
               <Route path='/reciept' element={<Receipt/>}/>
               <Route path='/addreciept' element={<AddReceipt/>}/>
