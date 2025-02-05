@@ -31,6 +31,9 @@ const customerSchema = new mongoose.Schema({
   ratePerBottle:{ type: Number },
   paymentMode: { type: String, enum: ['Cash','Credit','Coupon'] },
   resaleItemQuantity:{type:Number},
+  CouponBottle:{
+    type:Number
+  },
   location: {
     address: {
       type: String,

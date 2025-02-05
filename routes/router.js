@@ -15,8 +15,25 @@ const vehicleController = require("../controller/Route/VehicleController")
 const AdminController = require('../controller/User/admin')
 const CustomerController = require("../controller/User/CustomerController")
 const staffController = require("../controller/User/staffController")
+const couponController = require('../controller/Coupon/couponController')
 
 const { verifyToken } = require('../middleware/auth');
+
+
+
+router.post('/coupons', verifyToken,couponController.createCoupon);
+
+// Route to get all coupons
+router.get('/coupons', verifyToken,couponController.getCoupons);
+
+// Route to get a specific coupon by ID
+router.get('/coupons/:id', verifyToken,couponController.getCouponById);
+
+// Route to update a coupon by ID
+router.put('/coupons/:id', verifyToken,couponController.updateCoupon);
+
+// Route to delete a coupon by ID
+router.delete('/coupons/:id', verifyToken,couponController.deleteCoupon);
 
 
 
