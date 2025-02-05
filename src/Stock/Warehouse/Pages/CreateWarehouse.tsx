@@ -88,6 +88,7 @@ const CreateWarehouse: React.FC = () => {
         pauseOnHover
         theme="colored"
       />
+
       {/* Header Section */}
       <div className="flex justify-between items-center p-2">
         <div>
@@ -104,7 +105,7 @@ const CreateWarehouse: React.FC = () => {
       </div>
 
       {/* Table Section */}
-      <div className="bg-white shadow-md rounded-lg p-4">
+      <div className="bg-white shadow-md rounded-lg p-5">
 
         <Table columns={columns}
           data={warehouses}

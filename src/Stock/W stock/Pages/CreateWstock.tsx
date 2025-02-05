@@ -97,7 +97,7 @@ const CreateWStock: React.FC = () => {
           </div>
 
           {/* Table Section */}
-          <div className="bg-white shadow-md rounded-lg p-6 my-2">
+          <div className="bg-white shadow-md rounded-lg p-5 mt-2">
             <PurchaseTable
               columns={columns}
               data={stocks}

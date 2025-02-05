@@ -49,10 +49,11 @@ const CreateInternalTransfer: React.FC = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center my-2">
+      <div className="flex justify-between items-center p-2">
         <div>
-          <h1 className="text-xl ml-2 font-bold">Internal Transfer</h1>
-          <p className="text-gray-500 ms-2 my-2">Lorem ipsum dolor sit amet</p>
+          <h1 className="text-[#303F58] text-[20px] font-bold">Internal Transfer</h1>
+          <p className="text-[#4B5C79]">Lorem ipsum dolor sit amet</p>
+
         </div>
         <div className="flex justify-between">
           <Link to={"/addinternaltransfer"}>
@@ -64,7 +65,7 @@ const CreateInternalTransfer: React.FC = () => {
       </div>
 
       {/* Table Section */}
-      <div className="bg-white shadow-md rounded-lg p-4">
+      <div className="bg-white shadow-md rounded-lg p-5">
         <Table
           columns={columns}
           data={allTransfer}
