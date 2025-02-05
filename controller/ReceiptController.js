@@ -142,7 +142,9 @@ exports.createReceipt = async (req, res) => {
     }
 
     // Decrement the balance amount from the order
-    order.balanceAmount -= paidAmount;
+    order.balanceAmount -= Number(paidAmount) || 0;
+    order.paidAmount += Number(paidAmount) || 0;
+
     await order.save();
 
 
@@ -168,7 +170,7 @@ exports.createReceipt = async (req, res) => {
       receiptNumber:receiptNumber,
       orderNumber: order.orderNumber,
       depositAccountId,
-      paidAmount,
+      paidAmount: Number(paidAmount), // Ensure it's a number
     });
 
     await receipt.save();

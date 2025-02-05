@@ -605,12 +605,15 @@ exports.createOrder = async (req, res) => {
       console.error('Error generating order number:', error);
     }
     
-    // Create an order record
     const order = new Order({
       ...cleanedData,
       orderNumber,
-      balanceAmount: cleanedData.paymentMode === 'Credit' ? cleanedData.totalAmount : (cleanedData.totalAmount - cleanedData.paidAmount) || 0,
-      paidAmount: cleanedData.paymentMode === 'Credit' ? 0 : cleanedData.paidAmount,
+      balanceAmount: cleanedData.paymentMode === 'Credit' 
+        ? Number(cleanedData.totalAmount) 
+        : (Number(cleanedData.totalAmount) - Number(cleanedData.paidAmount)) || 0,
+      paidAmount: cleanedData.paymentMode === 'Credit' 
+        ? 0 
+        : Number(cleanedData.paidAmount),
       stock: cleanedData.stock.map(item => ({
         itemId: item.itemId,
         itemName: item.itemName,
@@ -619,11 +622,14 @@ exports.createOrder = async (req, res) => {
       })),
     });
     
+    console.log("Debug - Balance Amount:", order.balanceAmount);
+    console.log("Debug - Paid Amount:", order.paidAmount);
+    
     
     await order.save();
     
 
-    console.log('Order Created:', order);
+    console.log("Order created:", JSON.stringify(order, null, 2));
 
     // Journal
     await journal(order, customerAccount, saleAccount, depositAccount);
