@@ -78,7 +78,7 @@ const CreateItem: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white shadow-md rounded-lg p-4">
+        <div className="bg-white shadow-md rounded-lg p-5">
           <PurchaseTable
             columns={columns}
             data={items}

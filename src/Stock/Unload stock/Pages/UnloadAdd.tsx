@@ -65,10 +65,10 @@ console.log(setSearchTerm);
 
   return (
     <div>
-      <div className="flex justify-between items-center my-2">
+      <div className="flex justify-between items-center  p-2">
         <div>
-          <h1 className="text-xl ml-2 font-bold">Unload</h1>
-          <p className="text-gray-500 ms-2 my-2">Lorem ipsum dolor sit amet</p>
+          <h1 className="text-[#303F58] text-[20px] font-bold">Unload</h1>
+          <p className="text-[#4B5C79]">Lorem ipsum dolor sit amet</p>
         </div>
         <div className="flex justify-between">
           <Link to={"/addunloadstock"}>
@@ -80,6 +80,8 @@ console.log(setSearchTerm);
       </div>
 
       {/* Reusable Table */}
+      <div className="bg-white p-5  rounded-lg">
+
       <PurchaseTable
         columns={columns}
         data={tableData}
@@ -122,6 +124,7 @@ console.log(setSearchTerm);
         >
           Next
         </button>
+      </div>
       </div>
     </div>
   );

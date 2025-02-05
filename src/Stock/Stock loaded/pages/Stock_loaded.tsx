@@ -19,7 +19,7 @@ const StockLoaded: React.FC = () => {
     { id: "transferNumber", label: "Transfer No", visible: true },
     { id: "mainRouteName", label: "Main Route", visible: true },
     { id: "subRouteName", label: "Sub Route", visible: true },
-  
+
   ]);
 
   const getStock = async () => {
@@ -62,14 +62,15 @@ const StockLoaded: React.FC = () => {
 
   return (
     <div>
-      <div className="min-h-screen w-full mt-2">
+      <div className="min-h-screen w-full p-2 ">
         {/* Header Section */}
         <div className="flex justify-between items-center">
           <div>
             <h3 className="text-[#303F58] text-[20px] font-bold">Stock Loaded</h3>
-            <p className="text-[#4B5C79] text-sm">
+            <p className="text-[#4B5C79] ">
               View detailed information about all stock items loaded across various periods{" "}
             </p>
+
           </div>
           <div className="flex justify-between">
             <Link to={"/addstockloaded"}>
@@ -80,15 +81,15 @@ const StockLoaded: React.FC = () => {
             </Link>
           </div>
         </div>
-        <div className="bg-white p-5 mt-5 rounded-lg">
-        <Table
-  columns={columns}
-  data={stockload}
-  searchPlaceholder={"Search Stock"}
-  loading={loading.skeleton}
-  searchableFields={["transferNumber", "mainRouteName"]}
-  showAction={false} // Explicitly disable the action column
-/>
+        <div className="bg-white p-5 mt-2 rounded-lg">
+          <Table
+            columns={columns}
+            data={stockload}
+            searchPlaceholder={"Search Stock"}
+            loading={loading.skeleton}
+            searchableFields={["transferNumber", "mainRouteName"]}
+            showAction={false} // Explicitly disable the action column
+          />
 
         </div>
       </div>
