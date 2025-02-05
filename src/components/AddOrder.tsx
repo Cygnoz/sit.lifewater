@@ -761,7 +761,7 @@ const AddOrder = ({ }: Props) => {
                     )}
 
                     <div className=" py-3 ">
-                        {
+                        {/* {
                             editId ?
                                 <Button size="xl" onClick={handleSubmit}>
                                     Submit
@@ -770,7 +770,10 @@ const AddOrder = ({ }: Props) => {
                                 <Button size="xl" >
                                     Submit
                                 </Button>
-                        }
+                        } */}
+                            <Button size="xl" onClick={handleSubmit}>
+                                    Submit
+                                </Button>
                     </div>
                 </div>
             </form>

@@ -1,22 +1,15 @@
 import React from "react";
 
 const fields: string[] = [
-  "Opening",
-  "Loaded from Plant",
+  "Opening Stock",
   "Additional Adding",
   "Total",
-  "Bottle Leak",
-  "Cap Leak",
-  "Water Damage",
-  "FOC",
-  "Net Total",
-  "Empty Bottle",
   "Balance Stock",
 ];
 
 const Summary: React.FC = () => {
   return (
-   <div> <div className="min-h-screen bg-gray-100 flex  justify-center p-2">
+   <div> <div className=" bg-gray-100 flex  justify-center p-5">
    <div className="bg-white p-6 rounded-lg shadow-lg w-full ">
      <h2 className="text-lg font-bold text-gray-800 mb-6 text-center">Summary</h2>
 
@@ -25,10 +18,10 @@ const Summary: React.FC = () => {
        {fields.map((field, index) => (
          <div
            key={index}
-           className="flex justify-between items-center space-x-2"
+           className="flex justify-between items-center"
          >
            <label
-             className="text-gray-700 text-sm font-semibold flex-shrink-0 w-1/2"
+             className="text-gray-700 text-sm font-semibold"
            >
              {field}
            </label>
@@ -36,7 +29,7 @@ const Summary: React.FC = () => {
              type="number"
              value="20"
              readOnly
-             className="flex-grow px-3 py-1 bg-gray-100 border border-gray-300 rounded-lg text-center text-gray-700"
+             className=" px-3 py-1 bg-gray-100 border border-gray-300 rounded-lg text-center text-gray-700"
            />
          </div>
        ))}

@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 import useApi from "../Hook/UseApi";
 import { endpoints } from "../services/ApiEndpoint";
 import ViewOrderModal from "./ViewOrderModal";
+import { toast, ToastContainer } from "react-toastify";
 
-type Props = {}
+type Props = {};
 
-const Orders = ({ }: Props) => {
-  const [orders, setOrders] = useState([])
+const Orders = ({}: Props) => {
+  const [orders, setOrders] = useState([]);
   // const { setOrderResponse } = useContext(AllOrderResponseContext)!
   const navigate = useNavigate();
 
@@ -55,7 +56,6 @@ const Orders = ({ }: Props) => {
     }
   };
 
-
   // Fetch ride orders only when `rideId` is updated
   useEffect(() => {
     if (rideId) {
@@ -63,7 +63,7 @@ const Orders = ({ }: Props) => {
     }
   }, [rideId]);
 
-  const { request: getRideOrders } = useApi("get", 4001)
+  const { request: getRideOrders } = useApi("get", 4001);
   const getOrders = async () => {
     if (!rideId) return; // Prevent API call if rideId is null
     setLoading(true);
@@ -89,17 +89,82 @@ const Orders = ({ }: Props) => {
 
   // Filter orders based on searchTerm
   const filteredOrders = orders.filter((order: any) =>
-    [order.customerName, order.orderNumber, order.paymentMode]
-      .some((field) => field?.toLowerCase().includes(searchTerm.toLowerCase()))
+    [order.customerName, order.orderNumber, order.paymentMode].some((field) =>
+      field?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
-  const handleEdit = () => {
-    filteredOrders.map((orders: any) => {
-      navigate(`/editorder/${orders?._id}`);
-    })
+
+  // };
+  // Delete order function
+  const { request: deleteOrder } = useApi("delete", 4001);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const confirmDelete = (id: string) => {
+    setDeleteId(id);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setLoading(true);
+    setIsModalOpen(false);
+    try {
+      const url = `${endpoints.DELETE_AN_ORDER}/${deleteId}`;
+      const { response, error } = await deleteOrder(url);
+      if (!error && response) {
+        toast.success(response?.data?.message);
+        setOrders((prev) =>
+          prev.filter((order: any) => order._id !== deleteId)
+        );
+      }
+    } catch (error) {
+      toast.error("Error occurred while deleting Order.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen p-4 bg-gray-100">
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-lg font-semibold text-gray-800">
+              Confirm Delete
+            </h2>
+            <p className="text-sm text-gray-600 my-4">
+              Are you sure you want to delete this order?
+            </p>
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 bg-gray-200 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-900 text-white rounded-md"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className=" w-full max-w-md flex items-center justify-between px-4 mb-8">
         <div className="relative w-full flex items-center">
           <input
@@ -117,62 +182,87 @@ const Orders = ({ }: Props) => {
           <img className="m-2" src={plusIcon} alt="Add Customer" width={30} />
         </Link>
       </div>
-      <div>{loading ? (
-        <div className="p-2 text-center text-gray-500">Loading...</div>
-      )
-        : orders.length > 0 ? (
+      <div>
+        {loading ? (
+          <div className="p-2 text-center text-gray-500">Loading...</div>
+        ) : orders.length > 0 ? (
           filteredOrders.map((order: any) => (
-            <div className="bg-gradient-to-l from-[#E3E6D5] to-[#F7E7CE] my-3 p-5 rounded-xl" key={order.id || Math.random()}>
+            <div
+              className="bg-gradient-to-l from-[#E3E6D5] to-[#F7E7CE] my-3 p-5 rounded-xl"
+              key={order.id || Math.random()}
+            >
               <div className="flex justify-between">
                 <div>
                   <div className="text-[#303F58]  ">
                     <div className="flex text-[12px] gap-1">
                       <p>{new Date(order.date).toLocaleDateString("en-GB")}</p>
 
-                      <p>{new Date(order.date).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' })}</p>
-
+                      <p>
+                        {new Date(order.date).toLocaleTimeString("en-GB", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
                     </div>
                     <p className="text-[#303F58]">Customer</p>
                   </div>
-                  <p className="text-[#303F58] text-[16px] font-bold ms-1">{order.customerName || "NA"}</p>
+                  <p className="text-[#303F58] text-[16px] font-bold ms-1">
+                    {order.customerName || "NA"}
+                  </p>
                 </div>
-                <div className="space-y-1">
-
+                <div className="flex flex-col space-y-4">
                   <ViewOrderModal id={order._id} />
 
                   <button
                     onClick={() => {
                       navigate(`/editorder/${order?._id}`);
                     }}
-                    className="bg-[#F6F6F6] h-6 w-12 text-[13px] rounded-md border border-[#820000]"
+                    className="bg-[#F6F6F6] h-6 w-12 text-[13px] rounded-md border border-[#820000] "
                   >
                     Edit
                   </button>
                 </div>
               </div>
-              <p className="text-[#303F58] pt-1">Item</p>
+              <div className="flex justify-between items-center">
+                {" "}
+               
+                <p className="text-[#303F58] pt-1">Item</p>
+                <button
+                  onClick={() => confirmDelete(order._id)}
+                  className="bg-[#F6F6F6] h-6 w-12 text-sm rounded-md border border-red-900 mt-3 p-1 flex items-center"
+                >
+                  Delete
+                </button>
+              </div>
               <p className="text-[#303F58] font-semibold ms-1">
-                {order.stock.map((item: any) => item.itemName || "NA").join(", ")}
+                {order.stock
+                  .map((item: any) => item.itemName || "NA")
+                  .join(", ")}
               </p>
               <div className="flex bg-[#FFFFFF] px-2 py-1 gap-2 mt-2 rounded-md items-center">
                 <p className="text-[12px] text-[#303F58]">Payment Mode</p>
                 <span className="h-3 w-[2px] bg-[#9EA9BB]"></span>
-                <p className="text-[12px] text-[#303F58] font-bold">{order.paymentMode || "NA"}</p>
+                <p className="text-[12px] text-[#303F58] font-bold">
+                  {order.paymentMode || "NA"}
+                </p>
               </div>
             </div>
           ))
         ) : (
           <div className="flex flex-col items-center p-8 m-8">
             {/* Illustration Image */}
-            <img src={order} alt="Illustration" className="w-64 object-cover mb-4" />
+            <img
+              src={order}
+              alt="Illustration"
+              className="w-64 object-cover mb-4"
+            />
             {/* No Return Customers Text */}
             <span className="text-gray-500 text-sm">No Orders Found</span>
           </div>
         )}
       </div>
-
     </div>
-  )
-}
+  );
+};
 
-export default Orders
+export default Orders;
