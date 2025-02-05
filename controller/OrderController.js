@@ -458,7 +458,7 @@ exports.createOrder = async (req, res) => {
     for (const item of cleanedData.stock) {
       const subRouteItem = subRouteStock.find(stock => stock.itemId === item.itemId);
 
-      if (!subRouteItem || subRouteItem.quantity <= 0) { 
+      if (!subRouteItem) { 
         return res.status(400).json({
           success: false,
           message: `Item ${item.itemName} is not available in the subroute`
