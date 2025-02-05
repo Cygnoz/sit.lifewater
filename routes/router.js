@@ -87,6 +87,7 @@ router.put("/editcustomer/:id", verifyToken, CustomerController.updateCustomerBy
 router.get("/customer/:id",  verifyToken, CustomerController.getCustomerById) // get customer by ID
 router.get('/customerbysubroute/:subroute', CustomerController.getCustomersBySubroute);//get customer by subroute
 router.delete("/customer/:id", verifyToken, CustomerController.deleteCustomerById) // delete customer
+router.post('/coupon-customer', CustomerController.createCouponCustomer); // add coupon customer
 
 // // Active Route
 // router.post("/activroutes", verifyToken, ActiveRouteController.createActiveRoute) // add active route

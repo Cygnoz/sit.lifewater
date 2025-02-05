@@ -11,7 +11,6 @@ const CouponSchema = new mongoose.Schema({
   },
   numberOfBottles: {
     type: Number,
-
   }
 }, {
   timestamps: true

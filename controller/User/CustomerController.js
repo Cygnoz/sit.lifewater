@@ -1,8 +1,22 @@
 // const BusinessCustomer = require('../Models/BussinessCustomerSchema');
+const Coupon = require('../../Models/CouponSchema');
 const Customer = require('../../Models/CustomerSchema');
+const Accounts = require('../../Models/account');
 const Account = require('../../Models/account');
+const couponCustomer = require('../../Models/couponCustomerSchema');
 const TrialBalance = require('../../Models/trialBalance');
 const moment = require('moment-timezone')
+
+
+
+const dataExist = async ( customerId , depositAccountId ) => {
+  const [ customerAccount, saleAccount, depositAccount ] = await Promise.all([
+    Account.findOne({  accountId:customerId }),
+    Account.findOne({  accountName:"Sales" }),
+    Account.findOne({  _id:depositAccountId }),
+  ]);
+  return { customerAccount, saleAccount, depositAccount};
+};
 
  
 //Add Customer
@@ -497,8 +511,166 @@ exports.deleteCustomerById = async (req, res) => {
 };
 
 
+// exports.createCouponCustomer = async (req, res) => {
+//   try {
+//     const { customerId, couponId,depositAccountId, paidAmount} = req.body;
+
+
+//     if (!customerId || !couponId || !depositAccountId || !paidAmount) {
+//       return res.status(400).json({ message: 'All fields are required.' });
+//     }
+
+//     const Customer = await Customer.findById(customerId)
+
+//     if (!Customer) {
+//       return res.status(404).json({ message: "Customer not found" })
+//     }
+//     const coupon = await Coupon.findById(couponId)
+
+//     if (!coupon) {
+//       return res.status(404).json({ message: "Coupon not found" })
+//     }
+//     const Accounts = await Accounts.findById(depositAccountId)
+
+//     if (!Accounts) {
+//       return res.status(404).json({ message: "Accounts not found" })
+//     }
+
+
+//     if(coupon.price!==paidAmount){
+//       return res.status(400).json({ message: "Paid amount must be equal to coupon price" })
+//     }
+
+//     const { customerAccount, saleAccount, depositAccount } = await dataExist(customerId, depositAccountId);
+//     if (!customerAccount) {
+//       return res.status(404).json({ message: "Customer Account not found" });
+//     }
+
+
+//     let nextId = 1;
+//     const lastPrefix = await couponCustomer.findOne().sort({ _id: -1 }); 
+//     if (lastPrefix) {
+//       const lastId = parseInt(lastPrefix.couponNumber.slice(7)); 
+//       nextId = lastId + 1; 
+//     }    
+//     const couponNumber = `COUPON-${nextId}`;
+
+//     const newCouponCustomer = new couponCustomer({ customerId, couponId,depositAccountId, paidAmount, couponNumber });
+//     await newCouponCustomer.save();
+
+//     await journal(newCouponCustomer, customerAccount, saleAccount, depositAccount);
+
+//   }catch (error) {
+//     console.error('Error creating coupon customer:', error);
+//     res.status(500).json({ message: "Internal server error." });
+//   }
+// }
   
   //Clean Data 
+  
+  
+  
+  
+  
+  
+  exports.createCouponCustomer = async (req, res) => {
+    try {
+      const { customerId, couponId, depositAccountId, paidAmount } = req.body;
+  
+      // Validate required fields
+      if (!customerId || !couponId || !depositAccountId || !paidAmount) {
+        return res.status(400).json({ message: 'All fields are required.' });
+      }
+  
+      // Find customer, coupon, and deposit account (using your respective models)
+      const customer = await Customer.findById(customerId);
+      if (!customer) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+  
+      const coupon = await Coupon.findById(couponId);
+      if (!coupon) {
+        return res.status(404).json({ message: "Coupon not found" });
+      }
+  
+      const accounts = await Accounts.findById(depositAccountId);
+      if (!accounts) {
+        return res.status(404).json({ message: "Accounts not found" });
+      }
+  
+      // Check that the paid amount matches the coupon price
+      if (coupon.price !== paidAmount) {
+        return res.status(400).json({ message: "Paid amount must be equal to coupon price" });
+      }
+  
+      // Validate and retrieve additional account details (if needed)
+      const { customerAccount, saleAccount, depositAccount } = await dataExist(customerId, depositAccountId);
+      if (!customerAccount) {
+        return res.status(404).json({ message: "Customer Account not found" });
+      }
+  
+      // Generate the coupon number
+      let nextId = 1;
+      const lastPrefix = await couponCustomer.findOne().sort({ _id: -1 });
+      if (lastPrefix && lastPrefix.couponNumber) {
+        // Assuming couponNumber is in the format "COUPON-<number>"
+        const lastId = parseInt(lastPrefix.couponNumber.slice(7));
+        nextId = lastId + 1;
+      }
+      const couponNumber = `COUPON-${nextId}`;
+  
+      // Create a new couponCustomer document
+      const newCouponCustomer = new couponCustomer({ 
+        customerId, 
+        couponId, 
+        depositAccountId, 
+        paidAmount, 
+        couponNumber 
+      });
+      await newCouponCustomer.save();
+      console.log("Coupon customer record created:", newCouponCustomer);
+  
+      // --- New Code Block ---
+      // Update the customer's CouponBottle field by adding coupon.numberOfBottles.
+      // If CouponBottle is not set, default to 0.
+      const bottlesToAdd = coupon.numberOfBottles || 0;
+      customer.CouponBottle = (customer.CouponBottle || 0) + bottlesToAdd;
+      await customer.save();
+      console.log(`Updated customer ${customer._id} CouponBottle by adding ${bottlesToAdd}. New value: ${customer.CouponBottle}`);
+      // -----------------------
+  
+      // Update journal entries (assuming journal is a function that handles this)
+      await journal(newCouponCustomer, customerAccount, saleAccount, depositAccount);
+  
+      res.status(201).json({ 
+        message: "Coupon customer created successfully", 
+        couponCustomer: newCouponCustomer 
+      });
+    } catch (error) {
+      console.error('Error creating coupon customer:', error);
+      res.status(500).json({ message: "Internal server error." });
+    }
+  };
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   function cleanCustomerData(data) {
     const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
     return Object.keys(data).reduce((acc, key) => {
@@ -506,10 +678,6 @@ exports.deleteCustomerById = async (req, res) => {
       return acc;
     }, {});
   }
-
-
-
-
     // Function to generate time and date for storing in the database
 function generateTimeAndDateForDB(
   timeZone,
@@ -545,3 +713,89 @@ function generateTimeAndDateForDB(
     dateTime: dateTime,
   };
 }
+
+
+
+
+
+async function journal(newCouponCustomer, customerAccount, saleAccount, depositAccounts) {
+  const sale = {
+    operationId: newCouponCustomer._id,
+    transactionId: newCouponCustomer.couponNumber,
+    date: newCouponCustomer.createdDate,
+    accountId: saleAccount._id || undefined,
+    action: "Coupon Invoice",
+    debitAmount: 0,
+    creditAmount: newCouponCustomer.paidAmount || 0,
+    remark: newCouponCustomer.note,
+  };
+
+  const customer = {
+    operationId: newCouponCustomer._id,
+    transactionId: newCouponCustomer.couponNumber,
+    date: newCouponCustomer.createdDate,
+    accountId: customerAccount._id || undefined,
+    action: "Coupon Invoice",
+    debitAmount: newCouponCustomer.paidAmount || 0,
+    creditAmount: 0,
+    remark: newCouponCustomer.note,
+  };
+
+  const customerPaid = {
+    operationId: newCouponCustomer._id,
+    transactionId: newCouponCustomer.couponNumber,
+    date: newCouponCustomer.createdDate,
+    accountId: customerAccount._id || undefined,
+    action: "Receipt",
+    debitAmount: 0,
+    creditAmount: newCouponCustomer.paidAmount || 0,
+    remark: newCouponCustomer.note,
+  };
+
+  const depositAccount = {
+      operationId: newCouponCustomer._id,
+      transactionId: newCouponCustomer.couponNumber,
+      date: newCouponCustomer.createdDate,
+      accountId: depositAccounts._id || undefined,
+      action: "Receipt",
+      debitAmount: newCouponCustomer.paidAmount || 0,
+      creditAmount: 0,
+      remark: newCouponCustomer.note,
+    };
+  
+
+  const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai", "DD/MM/YY", "/");
+  const openingDate = generatedDateTime.dateTime;
+
+
+    createTrialEntry(sale, openingDate);
+    createTrialEntry(customer, openingDate);
+    createTrialEntry(customerPaid, openingDate);
+    createTrialEntry(depositAccount, openingDate);
+
+}
+
+  
+
+
+
+  async function createTrialEntry( data,openingDate ) {
+    const newTrialEntry = new TrialBalance({
+        organizationId:data.organizationId,
+        operationId:data.operationId,
+        transactionId: data.transactionId,
+        date:openingDate,
+        accountId: data.accountId,
+        action: data.action,
+        debitAmount: data.debitAmount,
+        creditAmount: data.creditAmount,
+        remark: data.remark
+  });
+ const trial =  await newTrialEntry.save();
+
+
+
+  
+  console.log('output:',trial); 
+  
+  }
