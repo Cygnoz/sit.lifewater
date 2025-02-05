@@ -30,10 +30,7 @@ const navlist = [
         headName: "Orders",
         subRoute: "/orders",
       },
-      {
-        headName: "Receipt ",
-        subRoute: "/reciept",
-      },
+    
     ],
   },
   {
@@ -143,7 +140,7 @@ const navlist = [
   {
     nav: "Sales",
     icon:sale,
-    route: "/invoice",
+    route: "/reciept",
     subhead: [
       // { headName: "Invoice", subRoute: "/invoice" },
       // { headName: "Reciept", subRoute: "/reciept" },
@@ -151,6 +148,10 @@ const navlist = [
       // { headName: "Bottles", subRoute: "/bottles" },
       { headName: "Coupon", subRoute: "/coupon" },
       // { headName: "SalesmanSDr.", subRoute: "/salesman" },
+      {
+        headName: "Receipt ",
+        subRoute: "/reciept",
+      },
      
     ],
   },

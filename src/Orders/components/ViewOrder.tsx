@@ -94,7 +94,9 @@ const ViewOrder: React.FC = () => {
 
           {/* Summary */}
           <div className="grid grid-cols-2 gap-4 mt-6">
+         
             <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="font-semibold underline underline-offset-8">Order Details</p>
               <p className="text-sm text-gray-500 mt-4">Ordered By</p>
               <p className="font-semibold">{order.customerName || "N/A"}</p>
               <p className="text-sm text-gray-500 mt-4">Delivered By</p>
@@ -116,6 +118,7 @@ const ViewOrder: React.FC = () => {
             {/* Render payment details only if paymentMode is "Cash" */}
 
             <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="font-semibold underline underline-offset-8">Sale Invoice</p>
               <p className="text-sm text-gray-500 mt-4">Payment Mode </p>
               <p className="font-semibold ">{order.paymentMode || "N/A"}</p>
               <p className="text-sm text-gray-500 mt-4 mb-1">Total Amount</p>
