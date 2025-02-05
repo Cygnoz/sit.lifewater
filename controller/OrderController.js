@@ -484,9 +484,10 @@ exports.createOrder = async (req, res) => {
         subRouteItem.quantity -= item.quantity;
 
         // Remove the item from subroute stock if quantity becomes 0
-        if (subRouteItem.quantity <= 0) {
-          subRouteStock.splice(subRouteItemIndex, 1);
-        }
+// Set the quantity to 0 instead of removing the item if quantity becomes 0
+if (subRouteItem.quantity <= 0) {
+  subRouteItem.quantity = 0;
+}
       }
 
       // Fetch item details from Item schema
