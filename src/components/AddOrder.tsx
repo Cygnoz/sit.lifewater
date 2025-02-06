@@ -18,7 +18,6 @@ interface Item {
     _id?: string;
 }
 interface OrdrerData {
-    // orderNumber: string,
     mainRouteName: string,
     mainRouteId: string,
     subRouteName: string,
@@ -36,7 +35,6 @@ interface OrdrerData {
     stock: Item[];
     depositAccountId: string
     paidAmount: number
-    customerName: string
 }
 
 const AddOrder = ({ }: Props) => {
@@ -55,7 +53,6 @@ const AddOrder = ({ }: Props) => {
         stock: [], // Initialize with an empty array to avoid undefined
     });
     const [orderData, setOrderData] = useState<OrdrerData>({
-        // orderNumber: "",
         mainRouteName: "",
         mainRouteId: "",
         subRouteName: "",
@@ -73,7 +70,6 @@ const AddOrder = ({ }: Props) => {
         stock: [],
         depositAccountId: "",
         paidAmount: 0,
-        customerName: ""
     });
     console.log("Input Data", orderData);
     const { editId } = useParams()
@@ -96,7 +92,6 @@ const AddOrder = ({ }: Props) => {
                     subRouteName: response?.data.subRouteName || "",
                     subRouteId: response?.data.subRouteId || "",
                     customerId: response?.data.customerId || "",
-                    customerName: response?.data.customerName || "",
                     salesman: response?.data.salesman || "",
                     date: response?.data.date || "",
                     paymentMode: response?.data.paymentMode || "",
@@ -314,7 +309,7 @@ const AddOrder = ({ }: Props) => {
             ...prevState,
             stock: [{ itemId, itemName, quantity: 1 }], // Use the quantity from the input          
         }));
-        setQuantity(quantity)
+        setQuantity(quantity || 0)
         setSelectedItem({ itemId, itemName, status, sellingPrice });
         setIsOpen(false); // Close dropdown on selection
     };
@@ -338,14 +333,20 @@ const AddOrder = ({ }: Props) => {
         const value = e.target.value;
         setSearchValue(value);
 
-        // Filter customers based on the search input
-        const filtered = customers.filter((customer: any) =>
-            customer.fullName.toLowerCase().includes(value.toLowerCase()) ||
-            customer.customerID.toLowerCase().includes(value.toLowerCase()) ||
-            customer.city.toLowerCase().includes(value.toLowerCase()) ||
-            customer.mobileNo.toString().includes(searchValue) || // Convert to string for matching
-            customer.whatsappNumber.toString().includes(searchValue)
-        );
+        if (!value.trim()) {
+            setFilteredCustomers(customers);
+            return;
+        }
+        const filtered = customers.filter((customer: any) => {
+            return (
+                customer?.fullName?.toLowerCase().includes(value.toLowerCase()) ||
+                customer?.customerID?.toLowerCase().includes(value.toLowerCase()) ||
+                customer?.city?.toLowerCase().includes(value.toLowerCase()) ||
+                customer?.mobileNo?.toString().includes(value) || // Convert number to string
+                customer?.whatsappNumber?.toString().includes(value) // Convert number to string
+            );
+        });
+
         setFilteredCustomers(filtered);
     };
 
@@ -363,7 +364,7 @@ const AddOrder = ({ }: Props) => {
     };
 
     const { request: getAllCustomers } = useApi("get", 4000);
-    // Get All customer 
+    // Get All customer in the subroute
     const getALLCustomersBySubRoute = async (subRoute: any) => {
         if (!subRoute) return; // Prevent API call if subRoute is undefined
 
@@ -371,7 +372,7 @@ const AddOrder = ({ }: Props) => {
         try {
             const url = `${endpoints.GET_CUSTOMER_BY_SUBROUTE}/${subRoute}`;
             const { response, error } = await getAllCustomers(url);
-            console.log("Get All customer SubRoute", response);
+            console.log("Get all customer in SubRoute", response);
 
             if (!error && response) {
                 setCustomers(response?.data);
@@ -383,10 +384,9 @@ const AddOrder = ({ }: Props) => {
         }
     };
 
-
+    // gat a sub route
     const { request: getSubRoutes } = useApi("get", 4000)
     const id = orderData?.subRouteId;
-    // console.log(id);
     const getASubroute = async () => {
         if (!id) return;  // Prevent API call if id is undefined
 
@@ -422,7 +422,51 @@ const AddOrder = ({ }: Props) => {
 
 
     const { request: AddOrder } = useApi("post", 4001);
+    const { request: EditOrder } = useApi("put", 4001);
 
+    //     if (!orderData.customerId) {
+    //         toast.error("Select a customer.");
+    //         return;
+    //     }
+
+    //     if (orderData.stock.length === 0) {
+    //         toast.error("Add at least one stock item.");
+    //         return;
+    //     }
+    //     if (!orderData.paymentMode) {
+    //         toast.error("Select a payment mode.");
+    //         return;
+    //     }
+    //     if (orderData.paymentMode === "Cash") {
+    //         if (!orderData.depositAccountId) {
+    //             toast.error("Select a Deposite Account.");
+    //             return;
+    //         }
+    //     }
+    //     try {
+    //         const orderWithDefaults = {
+    //             ...orderData,
+    //             stock: orderData.stock.map(item => ({
+    //                 ...item,
+    //             })),
+    //         };
+    //         const url = editId ?
+    //             `${endpoints.ADD_ORDER}` :
+    //             `${endpoints.EDIT_ORDER}/${editId}`;
+    //         const { response, error } = await AddOrder(url, orderWithDefaults)
+    //         if (!error && response) {
+    //             console.log('Order', response);
+    //             toast.success(response?.data.message);
+    //             setTimeout(() => {
+    //                 navigate("/orders")
+    //             }, 1000)
+    //         }
+    //         console.log(error);
+    //     } catch (error: any) {
+    //         console.error(error);
+    //         toast.error(error?.response?.data?.message || error?.message || "Failed to save order");
+    //     }
+    // };
     const handleSubmit = async () => {
         if (!orderData.customerId) {
             toast.error("Select a customer.");
@@ -433,16 +477,19 @@ const AddOrder = ({ }: Props) => {
             toast.error("Add at least one stock item.");
             return;
         }
+
         if (!orderData.paymentMode) {
             toast.error("Select a payment mode.");
             return;
         }
-        if (orderData.paymentMode === "Cash") {
-            if (!orderData.depositAccountId) {
-                toast.error("Select a Deposite Account.");
-                return;
-            }
+
+        if (orderData.paymentMode === "Cash" && !orderData.depositAccountId) {
+            toast.error("Select a Deposit Account.");
+            return;
         }
+
+        const url = editId ? `${endpoints.EDIT_ORDER}/${editId}` : `${endpoints.ADD_ORDER}`;
+
         try {
             const orderWithDefaults = {
                 ...orderData,
@@ -450,19 +497,45 @@ const AddOrder = ({ }: Props) => {
                     ...item,
                 })),
             };
-            const url = `${endpoints.ADD_ORDER}`;
-            const { response, error } = await AddOrder(url, orderWithDefaults)
+            const { response, error } = editId
+                ? await EditOrder(url, orderWithDefaults)
+                : await AddOrder(url, orderWithDefaults);
+
+
             if (!error && response) {
-                console.log('Order', response);
-                toast.success(response?.data.message);
+                toast.success(response.data.message);
+
+                if (!editId) {
+                    setOrderData({
+                        mainRouteName: "",
+                        mainRouteId: "",
+                        subRouteName: "",
+                        subRouteId: "",
+                        customerId: "",
+                        salesman: "",
+                        date: "",
+                        paymentMode: "",
+                        notes: "",
+                        termsAndCondition: "",
+                        totalAmount: 0, // Initialized as a number
+                        returnBottle: 0, // Initialized as a number
+                        ratePerItem: "", // Initialized as a number
+                        rideId: "",
+                        stock: [],
+                        depositAccountId: "",
+                        paidAmount: 0,
+                    });
+                }
                 setTimeout(() => {
-                    navigate("/orders")
-                }, 1000)
+                    navigate("/orders"); // Navigate to orders page after 1 second
+                }, 1000);
+
+            } else {
+                toast.error(error?.response?.data?.message || "An error occurred");
             }
-            console.log(error);
-        } catch (error: any) {
-            console.error(error);
-            toast.error(error?.response?.data?.message || error?.message || "Failed to save order");
+        } catch (error) {
+            toast.error("An unexpected error occurred.");
+            console.error("Error submitting order data:", error);
         }
     };
 
@@ -660,7 +733,7 @@ const AddOrder = ({ }: Props) => {
                                             </option>
                                         ))
                                     ) : (
-                                        <option disabled>No accounts available</option>
+                                        <option >No accounts available</option>
                                     )}
                                 </select>
                             </div>
@@ -761,19 +834,11 @@ const AddOrder = ({ }: Props) => {
                     )}
 
                     <div className=" py-3 ">
-                        {/* {
-                            editId ?
-                                <Button size="xl" onClick={handleSubmit}>
-                                    Submit
-                                </Button>
-                                :
-                                <Button size="xl" >
-                                    Submit
-                                </Button>
-                        } */}
-                            <Button size="xl" onClick={handleSubmit}>
-                                    Submit
-                                </Button>
+
+                        <Button size="xl" onClick={handleSubmit}>
+                            Submit
+                        </Button>
+
                     </div>
                 </div>
             </form>

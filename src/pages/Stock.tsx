@@ -78,34 +78,42 @@ const Stock: React.FC = () => {
             {/* Main Container */}
             <div className="w-full max-w-lg  p-4">
               {/* Top Section: Stock balance, Damage Stock, Internal Order */}
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-6">
                 {/* Stock balance */}
-                <div className="bg-[#FFFFFF] shadow p-3 rounded-lg  flex flex-col ">
+                <div className="bg-[#FFFFFF] shadow p-3 rounded-lg items-center justify-center  flex flex-col ">
                   <span className=" rounded-full">
                     <img src={frame} alt="Icon" className="w-9 h-9 mb-1" />
                   </span>
                   <span className="text-3xl  font-bold text-left text-[#820000]">
-                    {subRouteStock.length}
+                    {subRouteStock.length || 0} 
                   </span>
 
                   <span className="text-[11px] font-bold leading-[13.31px] text-[#787A7D] text-left">
-                    Stock In Hand
+                    Items In Hand
                   </span>
                 </div>
                 {/* Damage Stock */}
-                <div className="bg-[#FFFFFF] shadow p-3 rounded-lg flex flex-col ">
+                <div className="bg-[#FFFFFF] shadow p-3 items-center justify-center rounded-lg flex flex-col ">
                   <span className="rounded-full">
-                    <img src={damage} alt="Icon" className="w-9 h-9" />
+                  <img src={frame} alt="Icon" className="w-9 h-9 mb-1" />
                   </span>
                   <span className="text-3xl  font-bold text-left text-[#820000]">
-                    -
+                    {
+                      subRouteStock.map((stock:any)=>(
+                        <span>
+                          {
+                            stock?.returnBottle || 0
+                          }
+                        </span>
+                      ))
+                    }
                   </span>
                   <span className="text-[11px] font-bold leading-[13.31px] text-left text-[#787A7D] ">
-                    Damage Stock
+                    Empty Bottles 
                   </span>
                 </div>
                 {/* Internal Order */}
-                <div className="bg-[#FFFFFF] shadow p-3 rounded-lg flex flex-col ">
+                {/* <div className="bg-[#FFFFFF] shadow p-3 rounded-lg flex flex-col ">
                   <span className="rounded-full">
                     <img src={fram} alt="Icon" className="w-9 h-9" />
                   </span>
@@ -115,7 +123,7 @@ const Stock: React.FC = () => {
                   <span className="text-[11px] font-bold leading-[13.31px] text-left text-[#787A7D] ">
                     Internal Order
                   </span>
-                </div>
+                </div> */}
               </div>
               <div className="overflow-x-auto mt-5">
                 <table className="min-w-full table-auto border-collapse border border-gray-300">

@@ -238,6 +238,9 @@ const Orders = ({}: Props) => {
                 {order.stock
                   .map((item: any) => item.itemName || "NA")
                   .join(", ")}
+                   <p className="text-[#303F58] font-semibold ms-1">
+                {order.stock.map((item: any) => item.itemName || "NA").join(", ")}  : {order.stock.map((item: any) => item.quantity || "NA").join(", ")}
+              </p>
               </p>
               <div className="flex bg-[#FFFFFF] px-2 py-1 gap-2 mt-2 rounded-md items-center">
                 <p className="text-[12px] text-[#303F58]">Payment Mode</p>

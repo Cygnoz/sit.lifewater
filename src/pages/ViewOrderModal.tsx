@@ -92,6 +92,7 @@ const ViewOrderModal = ({ id }: Props) => {
                                 <div>
                                     <p className="text-[#303F58]">Order Number</p>
                                     <p className="text-[#303F58]">Item</p>
+                                    <p className="text-[#303F58]">Quantity</p>
                                     <p className="text-[#303F58]">Rate Per Item</p>
                                     <p className="text-[#303F58]">Return Empty Bottle</p>
                                 </div>
@@ -101,6 +102,12 @@ const ViewOrderModal = ({ id }: Props) => {
                                         :{" "}
                                         {orderData?.stock?.map((item: any, index: number) => (
                                             <span key={index}>{item.itemName}</span>
+                                        ))}
+                                    </p>
+                                    <p className="text-[#303F58]">
+                                        :{" "}
+                                        {orderData?.stock?.map((item: any, index: number) => (
+                                            <span key={index}>{item.quantity}</span>
                                         ))}
                                     </p>
                                     <p className="text-[#303F58]">: {orderData?.ratePerItem}</p>

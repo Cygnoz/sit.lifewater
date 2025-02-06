@@ -37,4 +37,8 @@ export const endpoints = {
 
     // Account
     GET_ALL_ACCOUNTS: `getallaccounts`,
+
+    //Coupon
+    GET_ALL_COUPON:`coupons`,
+    ADD_COUPON_CUSTOMER:`coupon-customer`,
 }
