@@ -92,9 +92,9 @@ const Customers: React.FC = () => {
     },
     {
       icon: <Receipt_ndian_rupee />,
-      title: "FOC Customers",
+      title: "Coupon Customers",
       amount: focSales,
-      mode: "FOC",
+      mode: "Coupon",
     },
   ];
 
@@ -148,8 +148,14 @@ const Customers: React.FC = () => {
         </div>
       )}
 
-      {/* All Customers Button */}
+      {/* Customers Button */}
       <div className="mt-6">
+        <div className="mb-2">
+
+        <Link to={"/addcustomers"}>
+          <Button size="xl" variant="primary">Add Customer</Button>
+        </Link>
+        </div>
         <Link to={"/viewcustomers"}>
           <Button size="xl" variant="primary">All Customers</Button>
         </Link>

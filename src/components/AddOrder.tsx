@@ -356,9 +356,10 @@ const AddOrder = ({ }: Props) => {
             ...prevData,
             customerId: customers._id,
             ratePerItem: customers.ratePerBottle || "",
+            paymentMode:customers?.paymentMode || "",
         }));
         //
-        setRatePerCustomer(customers.ratePerBottle)
+        setRatePerCustomer(customers?.ratePerBottle)
         setSearchValue(customers.fullName); // Set the selected customer's name in the input
         setFilteredCustomers([]); // Clear the dropdown
     };
@@ -710,7 +711,7 @@ const AddOrder = ({ }: Props) => {
                                 <option value="">Select Payment Mode</option>
                                 <option value="Cash">Cash</option>
                                 <option value="Credit">Credit</option>
-                                <option value="FOC">FOC</option>
+                                <option value="Coupon">Coupon</option>
                             </select>
                         </div>
                     </div>

@@ -10,8 +10,11 @@ import { toast, ToastContainer } from "react-toastify";
 
 type Props = {};
 
+interface OrderDetails {
+  date:string
+}
 const Orders = ({ }: Props) => {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<OrderDetails[]>([]);
   // const { setOrderResponse } = useContext(AllOrderResponseContext)!
   const navigate = useNavigate();
 
@@ -72,7 +75,11 @@ const Orders = ({ }: Props) => {
       const { response, error } = await getRideOrders(url);
 
       if (!error && response) {
-        setOrders(response?.data?.data);
+        const OrderDetails = response?.data?.data.sort(
+          (a: OrderDetails, b: OrderDetails) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        setOrders(OrderDetails);
         console.log("Ride Orders:", response);
       }
     } catch (error) {

@@ -117,12 +117,11 @@ const Couponsale: React.FC = () => {
   //   }
   // };
   const getALLCustomers = async () => {
-
     setLoading(true);
     try {
-      const url = `${endpoints.GET_ALL_CUSTOMERS}`;
+      const url = `${endpoints.GET_ALL_COUPON_CUSTOMER}`;
       const { response, error } = await getAllCustomers(url);
-      console.log("Get all customers", response);
+      console.log("Get all coupon customers", response);
 
       if (!error && response) {
         setCustomers(response?.data);
@@ -242,7 +241,7 @@ const Couponsale: React.FC = () => {
             <img src={backbutton} alt="Back" className="w-full h-full" />
           </button>
         </Link>
-        <h2 className="text-lg font-semibold text-center ms-[18%]">
+        <h2 className="text-lg font-semibold text-center ms-[15%]">
           Add Coupon Customer
         </h2>
       </div>

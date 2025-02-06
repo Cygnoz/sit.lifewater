@@ -20,6 +20,8 @@ export const endpoints = {
     GET_A_CUSTOMER: `customer`,
     UPDATE_CUSTOMER: `editcustomer`,
     GET_CUSTOMER_BY_SUBROUTE :`customerbysubroute`,
+    GET_ALL_COUPON_CUSTOMER:`getcouponcustomers`,
+
 
     // Order
     ADD_ORDER: `orders`,
@@ -41,4 +43,7 @@ export const endpoints = {
     //Coupon
     GET_ALL_COUPON:`coupons`,
     ADD_COUPON_CUSTOMER:`coupon-customer`,
+    GET_ALL_COUPON_CUSTOMER_DETAILS:`coupon-customer`,
+    
+
 }
