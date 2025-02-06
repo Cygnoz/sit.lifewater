@@ -577,45 +577,58 @@ exports.deleteCustomerById = async (req, res) => {
     try {
       const { customerId, couponId, depositAccountId, paidAmount } = req.body;
   
+      console.log("Request Body:", req.body);
+  
       // Validate required fields
       if (!customerId || !couponId || !depositAccountId || !paidAmount) {
+        console.warn("Validation failed: Missing required fields");
         return res.status(400).json({ message: 'All fields are required.' });
       }
   
       // Find customer, coupon, and deposit account (using your respective models)
       const customer = await Customer.findById(customerId);
+      console.log("Customer fetched:", customer);
       if (!customer) {
+        console.warn("Customer not found for ID:", customerId);
         return res.status(404).json({ message: "Customer not found" });
       }
   
       const coupon = await Coupon.findById(couponId);
+      console.log("Coupon fetched:", coupon);
       if (!coupon) {
+        console.warn("Coupon not found for ID:", couponId);
         return res.status(404).json({ message: "Coupon not found" });
       }
   
       const accounts = await Accounts.findById(depositAccountId);
+      console.log("Accounts fetched:", accounts);
       if (!accounts) {
+        console.warn("Accounts not found for ID:", depositAccountId);
         return res.status(404).json({ message: "Accounts not found" });
       }
   
       // Check that the paid amount matches the coupon price
       if (coupon.price !== paidAmount) {
+        console.warn("Paid amount mismatch. Expected:", coupon.price, "Received:", paidAmount);
         return res.status(400).json({ message: "Paid amount must be equal to coupon price" });
       }
   
-      // Validate and retrieve additional account details (if needed)
+      // Validate and retrieve additional account details
       const { customerAccount, saleAccount, depositAccount } = await dataExist(customerId, depositAccountId);
+      console.log("Account Details:", { customerAccount, saleAccount, depositAccount });
       if (!customerAccount) {
+        console.warn("Customer account not found for ID:", customerId);
         return res.status(404).json({ message: "Customer Account not found" });
       }
   
       // Generate the coupon number
       let nextId = 1;
       const lastPrefix = await couponCustomer.findOne().sort({ _id: -1 });
+      console.log("Last CouponCustomer Prefix:", lastPrefix);
       if (lastPrefix && lastPrefix.couponNumber) {
-        // Assuming couponNumber is in the format "COUPON-<number>"
         const lastId = parseInt(lastPrefix.couponNumber.slice(7));
         nextId = lastId + 1;
+        console.log("Next Coupon Number ID:", nextId);
       }
       const couponNumber = `COUPON-${nextId}`;
   
@@ -630,17 +643,16 @@ exports.deleteCustomerById = async (req, res) => {
       await newCouponCustomer.save();
       console.log("Coupon customer record created:", newCouponCustomer);
   
-      // --- New Code Block ---
       // Update the customer's CouponBottle field by adding coupon.numberOfBottles.
-      // If CouponBottle is not set, default to 0.
       const bottlesToAdd = coupon.numberOfBottles || 0;
+      console.log("Bottles to add to customer:", bottlesToAdd);
       customer.CouponBottle = (customer.CouponBottle || 0) + bottlesToAdd;
       await customer.save();
       console.log(`Updated customer ${customer._id} CouponBottle by adding ${bottlesToAdd}. New value: ${customer.CouponBottle}`);
-      // -----------------------
   
-      // Update journal entries (assuming journal is a function that handles this)
+      // Update journal entries
       await journal(newCouponCustomer, customerAccount, saleAccount, depositAccount);
+      console.log("Journal updated successfully");
   
       res.status(201).json({ 
         message: "Coupon customer created successfully", 
@@ -652,7 +664,48 @@ exports.deleteCustomerById = async (req, res) => {
     }
   };
   
+
+
+  exports.getAllUniqueCouponCustomers = async (req, res) => {
+    try {
+      const couponCustomers = await couponCustomer.find();
   
+      const customerDataMap = new Map();
+  
+      for (const entry of couponCustomers) {
+        const customer = await Customer.findById(entry.customerId, 'fullName');
+        const coupon = await Coupon.findById(entry.couponId);
+  
+        if (customer) {
+          if (!customerDataMap.has(customer._id.toString())) {
+            customerDataMap.set(customer._id.toString(), {
+              customerFullName: customer.fullName,
+              coupons: [],
+            });
+          }
+          customerDataMap.get(customer._id.toString()).coupons.push({
+            couponDetails: coupon || {},
+            paidAmount: entry.paidAmount,
+            couponNumber: entry.couponNumber,
+            createdAt: entry.createdAt,
+          });
+        }
+      }
+  
+      const result = Array.from(customerDataMap.values());
+  
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching coupon customer data',
+        error: error.message,
+      });
+    }
+  };
   
   
   

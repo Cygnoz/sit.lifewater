@@ -85,9 +85,10 @@ router.post("/addcustomer", verifyToken, CustomerController.createCustomer) // a
 router.get("/customer", verifyToken, CustomerController.getAllCustomers) // get all customers
 router.put("/editcustomer/:id", verifyToken, CustomerController.updateCustomerById) // edit customer
 router.get("/customer/:id",  verifyToken, CustomerController.getCustomerById) // get customer by ID
-router.get('/customerbysubroute/:subroute', CustomerController.getCustomersBySubroute);//get customer by subroute
+router.get('/customerbysubroute/:subroute', verifyToken,CustomerController.getCustomersBySubroute);//get customer by subroute
 router.delete("/customer/:id", verifyToken, CustomerController.deleteCustomerById) // delete customer
-router.post('/coupon-customer', CustomerController.createCouponCustomer); // add coupon customer
+router.post('/coupon-customer',verifyToken, CustomerController.createCouponCustomer); // add coupon customer
+router.get('/coupon-customer',verifyToken, CustomerController.getAllUniqueCouponCustomers); // get all coupon customer
 
 // // Active Route
 // router.post("/activroutes", verifyToken, ActiveRouteController.createActiveRoute) // add active route
