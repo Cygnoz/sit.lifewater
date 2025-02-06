@@ -668,31 +668,23 @@ exports.deleteCustomerById = async (req, res) => {
 
   exports.getAllUniqueCouponCustomers = async (req, res) => {
     try {
-      const couponCustomers = await couponCustomer.find();
+      // Fetch all coupon-customer records
+      const couponCustomers = await CouponCustomer.find();
   
-      const customerDataMap = new Map();
+      const result = await Promise.all(
+        couponCustomers.map(async (entry) => {
+          const customer = await Customer.findById(entry.customerId, 'fullName');
+          const coupon = await Coupon.findById(entry.couponId);
   
-      for (const entry of couponCustomers) {
-        const customer = await Customer.findById(entry.customerId, 'fullName');
-        const coupon = await Coupon.findById(entry.couponId);
-  
-        if (customer) {
-          if (!customerDataMap.has(customer._id.toString())) {
-            customerDataMap.set(customer._id.toString(), {
-              customerFullName: customer.fullName,
-              coupons: [],
-            });
-          }
-          customerDataMap.get(customer._id.toString()).coupons.push({
+          return {
+            customerFullName: customer ? customer.fullName : 'N/A',
             couponDetails: coupon || {},
             paidAmount: entry.paidAmount,
             couponNumber: entry.couponNumber,
             createdAt: entry.createdAt,
-          });
-        }
-      }
-  
-      const result = Array.from(customerDataMap.values());
+          };
+        })
+      );
   
       res.status(200).json({
         success: true,
@@ -706,6 +698,7 @@ exports.deleteCustomerById = async (req, res) => {
       });
     }
   };
+  
   
   
   
