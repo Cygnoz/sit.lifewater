@@ -702,17 +702,22 @@ exports.createOrder = async (req, res) => {
     console.log("Total Order Quantity:", cleanedData.totalQuantity);
     console.log("Customer Available Coupons:", customerCoupons);
 
-    // Validate coupon availability
-    if (customerCoupons < cleanedData.totalQuantity) {
-      return res.status(400).json({
-        success: false,
-        message: "Coupons for this customer are finished"
-      });
-    }
+    // Validate coupon availability only for customers who use coupons
+    if (cleanedData.paymentMode === 'Coupon') {
+      if (customerCoupons < cleanedData.totalQuantity) {
+        return res.status(400).json({
+          success: false,
+          message: "Coupons for this customer are finished"
+        });
+      }
 
-    // Deduct the coupon bottles
-    customer.CouponBottle -= cleanedData.totalQuantity;
-    console.log(`Customer coupon bottles updated: ${customer.CouponBottle}`);
+      // Deduct the coupon bottles
+      customer.CouponBottle -= cleanedData.totalQuantity;
+      console.log(`Customer coupon bottles updated: ${customer.CouponBottle}`);
+    } else {
+      // No coupon validation needed for non-coupon customers (e.g., Cash or Credit)
+      console.log("No coupon validation required for this customer.");
+    }
 
     const subRouteStock = subRoute.stock || [];
     const customerStock = customer.stock || [];
