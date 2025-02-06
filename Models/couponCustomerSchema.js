@@ -4,17 +4,17 @@ const couponCustomerSchema = new mongoose.Schema({
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Customer',
-    required: true
+    // required: true
   },
   couponId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Coupon',
-    required: true
+    // required: true
   },
-  depositAccId: {
+  depositAccountId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Accounts',
-    required: true
+    // required: true
   },
   paidAmount: {
     type: Number,
