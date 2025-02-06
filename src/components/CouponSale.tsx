@@ -5,11 +5,11 @@ import { Link } from "react-router-dom";
 import { endpoints } from "../services/ApiEndpoint";
 import useApi from "../Hook/UseApi";
 import Button from "../CommonComponents/Button";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 const Couponsale: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [activeSubRoute, setActiveSubRoute] = useState("");
+  // const [activeSubRoute, setActiveSubRoute] = useState("");
   const [customers, setCustomers] = useState([]);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [searchValue, setSearchValue] = useState("");
@@ -18,7 +18,7 @@ const Couponsale: React.FC = () => {
     couponId: "",
     paidAmount: "",
     customerId: "",
-    depositAccId: ""
+    depositAccountId: ""
   });
   console.log(formData);
 
@@ -51,7 +51,7 @@ const Couponsale: React.FC = () => {
     };
 
     fetchCoupons();
-    fetchActiveRoute();
+    // fetchActiveRoute();
   }, []);
 
   const handleCouponChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -68,43 +68,61 @@ const Couponsale: React.FC = () => {
   };
 
   // Fetch activeroute with sales id
-  const { request: getActiveRoute } = useApi("get", 4000);
-  const SalesManId = localStorage.getItem("SalesManId");
-  const fetchActiveRoute = async () => {
-    try {
-      const url = `${endpoints.GET_AN_ACTIVE_ROUTE_WITH_SALESMEN_ID}/${SalesManId}`;
-      const { response, error } = await getActiveRoute(url);
-      console.log("Active route with sales id:", response?.data?.activeRide);
+  // const { request: getActiveRoute } = useApi("get", 4000);
+  // const SalesManId = localStorage.getItem("SalesManId");
+  // const fetchActiveRoute = async () => {
+  //   try {
+  //     const url = `${endpoints.GET_AN_ACTIVE_ROUTE_WITH_SALESMEN_ID}/${SalesManId}`;
+  //     const { response, error } = await getActiveRoute(url);
+  //     console.log("Active route with sales id:", response?.data?.activeRide);
 
-      if (!error && response) {
-        setLoading(false);
-        const activeRide = response?.data?.activeRide;
+  //     if (!error && response) {
+  //       setLoading(false);
+  //       const activeRide = response?.data?.activeRide;
 
-        if (activeRide) {
+  //       if (activeRide) {
 
-          setActiveSubRoute(activeRide.subRouteName)
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  useEffect(() => {
-    if (activeSubRoute) {
-      getALLCustomersBySubRoute(activeSubRoute);
-    }
-  }, [activeSubRoute]);
+  //         setActiveSubRoute(activeRide.subRouteName)
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+  // useEffect(() => {
+  //   if (activeSubRoute) {
+  //     getALLCustomersBySubRoute(activeSubRoute);
+  //   };
+
+  // }, [activeSubRoute]);
 
   // Get All customer in the subroute
   const { request: getAllCustomers } = useApi("get", 4000);
-  const getALLCustomersBySubRoute = async (subRoute: any) => {
-    if (!subRoute) return; // Prevent API call if subRoute is undefined
+  // const getALLCustomersBySubRoute = async (subRoute: any) => {
+  //   if (!subRoute) return; // Prevent API call if subRoute is undefined
+
+  //   setLoading(true);
+  //   try {
+  //     const url = `${endpoints.GET_CUSTOMER_BY_SUBROUTE}/${subRoute}`;
+  //     const { response, error } = await getAllCustomers(url);
+  //     console.log("Get all customer in SubRoute", response);
+
+  //     if (!error && response) {
+  //       setCustomers(response?.data);
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const getALLCustomers = async () => {
 
     setLoading(true);
     try {
-      const url = `${endpoints.GET_CUSTOMER_BY_SUBROUTE}/${subRoute}`;
+      const url = `${endpoints.GET_ALL_CUSTOMERS}`;
       const { response, error } = await getAllCustomers(url);
-      console.log("Get all customer in SubRoute", response);
+      console.log("Get all customers", response);
 
       if (!error && response) {
         setCustomers(response?.data);
@@ -115,6 +133,7 @@ const Couponsale: React.FC = () => {
       setLoading(false);
     }
   };
+
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -174,20 +193,21 @@ const Couponsale: React.FC = () => {
     }
   };
   useEffect(() => {
-    fetchAccounts();
+    fetchAccounts(),
+      getALLCustomers()
   }, []);
   const handleDepositeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setFormData((prevData) => ({
       ...prevData,
-      depositAccId: value,
+      depositAccountId: value,
     }));
   };
 
-  const { request: AddCouponCustomer } = useApi("post", 4000  );
+  const { request: AddCouponCustomer } = useApi("post", 4000);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();  
+    e.preventDefault();
     const url = `${endpoints.ADD_COUPON_CUSTOMER}`;
     try {
       const { response, error } = await AddCouponCustomer(url, formData);
@@ -204,6 +224,18 @@ const Couponsale: React.FC = () => {
 
   return (
     <div className="max-h-screen">
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       <div className="flex items-center my-1 mx-3">
         <Link to="/couponcustomer">
           <button className="w-10 rounded-full flex items-center justify-center">
@@ -298,9 +330,9 @@ const Couponsale: React.FC = () => {
               <div className="w-full">
                 <label className="block text-[#484A4D] font-semibold text-left mb-2">Deposit Account</label>
                 <select
-                  name="depositAccount"
+                  name="depositAccountId"
                   className="w-full p-2 mt-1 border rounded-md"
-                  value={formData.paidAmount}
+                  value={formData.depositAccountId}
                   onChange={handleDepositeChange} // Pass function reference
                   required
                 >
