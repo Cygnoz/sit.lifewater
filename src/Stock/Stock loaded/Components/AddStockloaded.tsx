@@ -70,6 +70,7 @@ const AddStockloaded: React.FC = () => {
     termsAndConditions: "",
   });
   console.log(orderDetails);
+  const [availableQuantity, setAvailableQuantity] = useState(Number);
 
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const [openDropdownType, setOpenDropdownType] = useState<string | null>(null);
@@ -224,6 +225,7 @@ const AddStockloaded: React.FC = () => {
         itemName: selectedItem.itemName, // Set itemName
         quantity: selectedItem.quantity, // Set quantity
       };
+      setAvailableQuantity(selectedItem.quantity)
       return { ...prev, stock: updatedStock };
     });
     setOpenDropdownId(null); // Close the dropdown
@@ -285,10 +287,52 @@ const AddStockloaded: React.FC = () => {
     setOpenDropdownId(index === openDropdownId ? null : index);
     setOpenDropdownType(type);
   };
+
+  console.log("Loading stock details : ", orderDetails);
+  // auto generating transfer number
+
+  const [stocks, setStocks] = useState([]);
+  console.log(stocks);
+
+
+  const { request: getStockData } = useApi("get", 4001);
+  useEffect(() => {
+    const getAllStock = async () => {
+      try {
+        const url = `${endpoints.GET_ALL_LOADED_STOCK}`;
+        const { response, error } = await getStockData(url);
+        if (!error && response) {
+          setStocks(response.data);
+
+
+
+          // Auto-generate the transfer number
+          const count = response.data.length; // Current number of stocks
+          const newTransferNumber = `TN-${count + 1}`; // Auto-generate with prefix TN-
+          setOrderDetails((prev) => ({
+            ...prev,
+            transferNumber: newTransferNumber,
+          })); // Update transfer number
+        } else {
+          console.log(error);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getAllStock();
+  }, []); // Add dependencies if necessary
   const { request: AddStockLoad } = useApi("post", 4001);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
+    if (availableQuantity < orderDetails.stock[0].quantity) {
+      toast.error(
+        `Insufficient quantity! Available: ${availableQuantity}, Required: ${orderDetails.stock[0].quantity}`,
+      )
+      return;
+    }
     try {
       const url = `${endpoints.ADD_STOCK_LOAD}`;
       const { response, error } = await AddStockLoad(url, orderDetails);
@@ -306,42 +350,6 @@ const AddStockloaded: React.FC = () => {
       toast.error(error.data.message);
     }
   };
-  console.log("Loading stock details : ", orderDetails);
-// auto generating transfer number
-
-const [stocks, setStocks] = useState([]);
-console.log(stocks);
-
-
-const { request: getStockData } = useApi("get", 4001);
-useEffect(() => {
-  const getAllStock = async () => {
-    try {
-      const url = `${endpoints.GET_ALL_LOADED_STOCK}`;
-      const { response, error } = await getStockData(url);
-      if (!error && response) {
-        setStocks(response.data);
-        
-        
-
-        // Auto-generate the transfer number
-        const count = response.data.length; // Current number of stocks
-        const newTransferNumber = `TN-${count + 1}`; // Auto-generate with prefix TN-
-        setOrderDetails((prev) => ({
-          ...prev,
-          transferNumber: newTransferNumber,
-        })); // Update transfer number
-      } else {
-        console.log(error);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  getAllStock();
-}, []); // Add dependencies if necessary
-
   return (
     <div>
       <ToastContainer
@@ -445,7 +453,7 @@ useEffect(() => {
                       className="w-full p-2 border rounded-md  text-[#000000] text-[14px] font-normal"
                     />
                   </div>
-          
+
 
                 </div>
 
@@ -551,7 +559,8 @@ useEffect(() => {
                                 </div>
                               )}
                           </td>
-                          <td className="py-2.5 px-4 border-y border-tableBorder">
+                          <td className="py-2.5 px-4 border-y border-tableBorder flex-row">
+
                             <input
                               type="number"
                               value={item.quantity}
@@ -565,6 +574,9 @@ useEffect(() => {
                               className="text-center w-20"
                               placeholder="0"
                             />
+                            {
+                              availableQuantity ? <p className="text-[#77726a] text-[11px]">Quantity : {availableQuantity}</p> : ""
+                            }
                           </td>
 
                           <td className="py-2.5 px-4 border-y border-tableBorder text-center">
@@ -615,11 +627,11 @@ useEffect(() => {
                   ></textarea>
                   <div className="flex justify-end gap-10 mt-5">
                     <div>
-                     <Link to={'/stockloaded'}>
-                     <button className="bg-[#FEFDFA] rounded-lg text-[#565148] text-[14px] py-2 px-4 mx-1 mt-2 w-[74px] h-[38px] border border-[#565148]">
-                        Cancel
-                      </button>
-                     </Link>
+                      <Link to={'/stockloaded'}>
+                        <button className="bg-[#FEFDFA] rounded-lg text-[#565148] text-[14px] py-2 px-4 mx-1 mt-2 w-[74px] h-[38px] border border-[#565148]">
+                          Cancel
+                        </button>
+                      </Link>
                     </div>
                     <div>
                       <button

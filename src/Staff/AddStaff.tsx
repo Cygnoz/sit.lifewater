@@ -63,7 +63,6 @@ function AddStaff({ }: Props) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
   const toggleConfirmPasswordVisibility = () => setShowConfirmPassword((prev) => !prev);
-
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -81,7 +80,51 @@ function AddStaff({ }: Props) {
         updatedPassword !== updatedConfirmPassword ? "Passwords do not match" : ""
       );
     }
+    if (name === "visaStatus") {
+      // Reset visaValidity and error message when visa status changes
+      setInitialStaffData((prevData) => ({
+        ...prevData,
+        visaStatus: value,
+        visaValidity: "", // Reset date field
+      }));
+      setErrorMessage("");
+    } else if (name === "visaValidity") {
+      validateVisaValidity(value);
+    } else {
+      setInitialStaffData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
+
+  // Function to validate visa validity date
+  const validateVisaValidity = (selectedDate: string) => {
+    const today = new Date().toISOString().split("T")[0]; // Today's date in YYYY-MM-DD format
+    const selectedDateObj = new Date(selectedDate);
+    const todayDateObj = new Date(today);
+
+    let error = "";
+
+    if (initialStaffData.visaStatus === "Valid" || initialStaffData.visaStatus === "In Process") {
+      if (selectedDateObj <= todayDateObj) {
+        error = "For 'Valid' or 'In Process', choose a future date.";
+      }
+    } else if (initialStaffData.visaStatus === "Expired") {
+      if (selectedDateObj >= todayDateObj) {
+        error = "For 'Expired', choose a past date.";
+      }
+    }
+    if (!error) {
+      // Update state only if there's no error
+      setInitialStaffData((prevData) => ({
+        ...prevData,
+        visaValidity: selectedDate,
+      }));
+    }
+  };
+   // Get today's date for min/max values
+   const today = new Date().toISOString().split("T")[0];
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -299,7 +342,7 @@ function AddStaff({ }: Props) {
                     className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
                     maxLength={10}
                     placeholder="Enter Mobile"
-                    // title="Please enter exactly 15 digits"
+                  // title="Please enter exactly 15 digits"
                   />
                 </div>
 
@@ -334,8 +377,8 @@ function AddStaff({ }: Props) {
                     className="mt-1 p-2 h-[36px] border border-gray-300 rounded-lg w-full"
                     placeholder="Enter WhatsApp number"
                     disabled={isSameAsPhone}
-                    maxLength={10}                  
-                    // title="Please enter exactly 15 digits"
+                    maxLength={10}
+                  // title="Please enter exactly 15 digits"
                   />
                 </div>
 
@@ -593,10 +636,11 @@ function AddStaff({ }: Props) {
                     name="visaValidity"
                     value={initialStaffData.visaValidity}
                     onChange={handleInputChange}
-                    className="mt-1 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
+                    className="mt-2 h-[36px] p-2 border border-gray-300 rounded-lg w-full"
+                    min={initialStaffData.visaStatus === "Valid" || initialStaffData.visaStatus === "In Process" ? today : ""}
+                    max={initialStaffData.visaStatus === "Expired" ? today : ""}
                   />
                 </div>
-
                 {/* Nationality */}
                 <div>
                   <label className="block  text-sm font-medium text-gray-700">

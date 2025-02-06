@@ -85,11 +85,53 @@ const AddVehicle: React.FC<Props> = () => {
     }
   }, [isEditing, id]);
 
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = event.target;
-    SetInitialVehicleData({ ...initialVehicleData, [name]: value });
+
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+
+    if (name === "insuranceStatus") {
+      // Reset insuranceValidity and error message when insurance status changes
+      SetInitialVehicleData((prevData) => ({
+        ...prevData,
+        insuranceStatus: value,
+        insuranceValidity: "", // Reset date field
+      }));
+    } else if (name === "insuranceValidity") {
+      validateInsuranceValidity(value);
+    } else {
+      SetInitialVehicleData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
+  };
+
+  // Function to validate insurance validity date
+  const validateInsuranceValidity = (selectedDate: string) => {
+    const today = new Date().toISOString().split("T")[0]; // Today's date in YYYY-MM-DD format
+    const selectedDateObj = new Date(selectedDate);
+    const todayDateObj = new Date(today);
+
+    let error = "";
+
+    if (initialVehicleData.insuranceStatus === "Valid") {
+      if (selectedDateObj <= todayDateObj) {
+        error = "For 'Valid' insurance, choose a future date.";
+      }
+    } else if (initialVehicleData.insuranceStatus === "Expired") {
+      if (selectedDateObj >= todayDateObj) {
+        error = "For 'Expired' insurance, choose a past date.";
+      }
+    }
+
+    if (!error) {
+      // Update state only if there's no error
+      SetInitialVehicleData((prevData) => ({
+        ...prevData,
+        insuranceValidity: selectedDate,
+      }));
+    }
   };
   const { request: editVehicle } = useApi("put", 4000);
   const { request: addVehicle } = useApi("post", 4000);
@@ -244,8 +286,10 @@ const AddVehicle: React.FC<Props> = () => {
               type="date"
               value={initialVehicleData.insuranceValidity}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              name='insuranceValidity'
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2"
+              name="insuranceValidity"
+              min={initialVehicleData.insuranceStatus === "Valid" ? new Date().toISOString().split("T")[0] : ""}
+              max={initialVehicleData.insuranceStatus === "Expired" ? new Date().toISOString().split("T")[0] : ""}
             />
           </div>
           {/* Starting Kilometer */}
