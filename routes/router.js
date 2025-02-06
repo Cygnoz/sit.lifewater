@@ -89,6 +89,7 @@ router.get('/customerbysubroute/:subroute', verifyToken,CustomerController.getCu
 router.delete("/customer/:id", verifyToken, CustomerController.deleteCustomerById) // delete customer
 router.post('/coupon-customer',verifyToken, CustomerController.createCouponCustomer); // add coupon customer
 router.get('/coupon-customer',verifyToken, CustomerController.getAllUniqueCouponCustomers); // get all coupon customer
+router.get('/getcouponcustomers',verifyToken, CustomerController.getAllCouponCustomers)
 
 // // Active Route
 // router.post("/activroutes", verifyToken, ActiveRouteController.createActiveRoute) // add active route

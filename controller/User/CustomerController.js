@@ -710,7 +710,17 @@ exports.deleteCustomerById = async (req, res) => {
   
   
   
+  exports.getAllCouponCustomers = async (req, res) => {
+    try {
+      const couponCustomers = await Customer.find({ paymentMode: 'Coupon' });
+      res.status(200).json(couponCustomers);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching coupon customers', error });
+    }
+  };
   
+
+ 
   
   
   
