@@ -76,7 +76,6 @@ const ViewOrderModal = ({ id }: Props) => {
                             >
                                 &times;
                             </div>
-
                             <div className="flex justify-between">
                                 <p className="text-[#303F58]">Customer</p>
                                 <div>

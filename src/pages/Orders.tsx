@@ -225,7 +225,6 @@ const Orders = ({}: Props) => {
               </div>
               <div className="flex justify-between items-center">
                 {" "}
-               
                 <p className="text-[#303F58] pt-1">Item</p>
                 <button
                   onClick={() => confirmDelete(order._id)}
