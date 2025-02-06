@@ -669,7 +669,7 @@ exports.deleteCustomerById = async (req, res) => {
   exports.getAllUniqueCouponCustomers = async (req, res) => {
     try {
       // Fetch all coupon-customer records
-      const couponCustomers = await CouponCustomer.find();
+      const couponCustomers = await couponCustomer.find();
   
       const result = await Promise.all(
         couponCustomers.map(async (entry) => {
