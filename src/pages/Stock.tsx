@@ -1,7 +1,7 @@
 
 import frame from "../assets/images/Frame 629279.svg";
-import damage from "../assets/images/Frame 629278.svg";
-import fram from "../assets/images/rupeeframe.svg";
+// import damage from "../assets/images/Frame 629278.svg";
+// import fram from "../assets/images/rupeeframe.svg";
 import { useEffect, useState } from "react";
 import { endpoints } from "../services/ApiEndpoint";
 import useApi from "../Hook/UseApi";
