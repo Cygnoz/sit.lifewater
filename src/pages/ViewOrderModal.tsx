@@ -80,7 +80,7 @@ const ViewOrderModal = ({ id }: Props) => {
                             <div className="flex justify-between">
                                 <p className="text-[#303F58]">Customer</p>
                                 <div>
-                                    <button onClick={handleEdit} className="bg-[#F6F6F6] ms-1 h-5 w-12 text-[13px] rounded-md  border border-[#820000]">
+                                    <button onClick={handleEdit} className="bg-[#F6F6F6] hidden ms-1 h-5 w-12 text-[13px] rounded-md  border border-[#820000]">
                                         Edit
                                     </button>
                                 </div>

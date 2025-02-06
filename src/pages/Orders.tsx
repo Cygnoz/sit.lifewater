@@ -185,7 +185,7 @@ const Orders = ({}: Props) => {
       <div>
         {loading ? (
           <div className="p-2 text-center text-gray-500">Loading...</div>
-        ) : orders.length > 0 ? (
+        ) : filteredOrders.length > 0 ? (
           filteredOrders.map((order: any) => (
             <div
               className="bg-gradient-to-l from-[#E3E6D5] to-[#F7E7CE] my-3 p-5 rounded-xl"
@@ -217,7 +217,7 @@ const Orders = ({}: Props) => {
                     onClick={() => {
                       navigate(`/editorder/${order?._id}`);
                     }}
-                    className="bg-[#F6F6F6] h-6 w-12 text-[13px] rounded-md border border-[#820000] "
+                    className="bg-[#F6F6F6] h-6 w-12 text-[13px] hidden rounded-md border border-[#820000] "
                   >
                     Edit
                   </button>
@@ -229,7 +229,7 @@ const Orders = ({}: Props) => {
                 <p className="text-[#303F58] pt-1">Item</p>
                 <button
                   onClick={() => confirmDelete(order._id)}
-                  className="bg-[#F6F6F6] h-6 w-12 text-sm rounded-md border border-red-900 mt-3 p-1 flex items-center"
+                  className="bg-[#F6F6F6] h-6 w-12 hidden text-sm rounded-md border border-red-900 mt-3 p-1  items-center"
                 >
                   Delete
                 </button>
