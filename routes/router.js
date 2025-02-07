@@ -14,7 +14,7 @@ const { verifyToken } = require('../middleware/auth');
 router.post('/stock', verifyToken, stockController.addStock);
 router.get('/stock', verifyToken,  stockController.getAllStock);
 router.get('/stockstats', verifyToken,  stockController.getStockStats);
-router.delete('/stock/:id', verifyToken, stockController.deleteStock);
+router.delete('/deletestock/:id', stockController.deleteStock);
 router.put('/internaltransfer', verifyToken,  stockController.internalTransfer);
 router.get('/getalltransfers',verifyToken, stockController.getAllTransfers)
 router.delete('/internaltransfer/:id',verifyToken, stockController.deleteInternalTransfer);
