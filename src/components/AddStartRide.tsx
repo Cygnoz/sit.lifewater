@@ -50,6 +50,10 @@ const AddStartRide: React.FC = () => {
     name: string;
     id: string | null;
   } | null>(null);
+  const [selectedVehicle, setSelectedVehicle] = useState<{
+    vehicleNo: string;
+    id: string | null;
+  } | null>(null);  
 
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [openingStock, setOpeningStock] = useState<number | "">("");
@@ -221,8 +225,24 @@ const AddStartRide: React.FC = () => {
     });
   };
 
+  const handleVehicleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const vehicleId = event.target.value;
+  
+    const selectedVehicle = vehicleList.find((vehicle) => vehicle._id === vehicleId);
+  
+    if (selectedVehicle) {
+      setSelectedVehicle({
+        vehicleNo: selectedVehicle.vehicleNo, 
+        id: selectedVehicle._id,
+      });
+    }
+  };
+  
+
   console.log("Selected helper", selectedHelper?.name); // "John Doe"
   console.log("Selected helper", selectedHelper?.id); // "abcd1234"
+  console.log("Selected vehicle", selectedVehicle?.vehicleNo); // "abcd1234"
+  console.log("Selected vehicle id", selectedVehicle?.id); // "abcd1234"
 
   const handleDriverChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const driverId = event.target.value;
@@ -242,8 +262,8 @@ const AddStartRide: React.FC = () => {
     itemId: item.itemId, // Replace with the actual field
     itemName: item.itemName || "Unknown Item", // Replace with the actual field
     quantity: item.quantity || 1, // Replace with the actual field
-    sellingPrice:item.sellingPrice,
-    status:item?.status || "NA",
+    sellingPrice: item.sellingPrice,
+    status: item?.status || "NA",
   }));
   const { request: addStartRide } = useApi("post", 4000);
 
@@ -255,7 +275,7 @@ const AddStartRide: React.FC = () => {
       !selectedMainRoute ||
       !selectedSubRoute ||
       !startingKm ||
-      !selectedDriver 
+      !selectedDriver
       // !selectedHelper
     ) {
       toast.error("Please fill all required fields.");
@@ -267,8 +287,8 @@ const AddStartRide: React.FC = () => {
       itemId: item.itemId, // Replace with the actual field
       itemName: item.itemName || "Unknown Item", // Replace with the actual field
       quantity: item.quantity || 1, // Replace with the actual field
-      sellingPrice:item.sellingPrice,
-      status:item?.status || "NA",
+      sellingPrice: item.sellingPrice,
+      status: item?.status || "NA",
     }));
 
     // Create payload
@@ -281,8 +301,8 @@ const AddStartRide: React.FC = () => {
       helperId: selectedHelper?.id,
       driverName: selectedDriver?.name,
       driverId: selectedDriver?.id,
-      vehicleNumber: (document.getElementById("vehicle") as HTMLSelectElement)
-        ?.value,
+      vehicleId: selectedVehicle?.id, // Ensure _id is used
+      vehicleNumber: selectedVehicle?.vehicleNo, // Ensure vehicle number is stored correctly
       stock: formattedStock || [],
       startingKm,
       salesmanName: storedUsername?.data.firstname,
@@ -290,16 +310,6 @@ const AddStartRide: React.FC = () => {
     };
 
     console.log("Payload to be sent:", newActiveRoute);
-
-    // Save to local storage
-    // try {
-    //   localStorage.setItem("activeRoute", JSON.stringify(newActiveRoute));
-    //   console.log("Data saved to local storage.");
-    // } catch (error) {
-    //   console.error("Error saving to local storage:", error);
-    //   toast.error("Failed to save data to local storage.");
-    //   return;
-    // }
 
     try {
       const url = `${endpoints.ADD_ACTIVE_ROUTE}`;
@@ -320,11 +330,11 @@ const AddStartRide: React.FC = () => {
       if (response) {
         console.log("Start Ride Response:", response);
         toast.success("Ride started successfully!");
-        const StartRide = localStorage.setItem(
-          "StartRide",
-          JSON.stringify(response.data)
-        );
-        console.log(StartRide);
+        // const StartRide = localStorage.setItem(
+        //   "StartRide",
+        //   JSON.stringify(response.data)
+        // );
+        // console.log(StartRide);
         setTimeout(() => {
           navigate("/customers"); // Navigate to rides page or any other page
         }, 2000);
@@ -467,17 +477,19 @@ const AddStartRide: React.FC = () => {
               Select Vehicle Number
             </label>
             <select
-              id="vehicle"
-              className="w-full p-2 border border-gray-300 rounded-lg"
-              required
-            >
-              <option value="">Select Vehicle No</option>
-              {vehicleList?.map((vehicle) => (
-                <option key={vehicle._id} value={vehicle.vehicleNo}>
-                  {vehicle.vehicleNo}
-                </option>
-              ))}
-            </select>
+  id="vehicle"
+  className="w-full p-2 border border-gray-300 rounded-lg"
+  required
+  onChange={handleVehicleChange} // Add this
+>
+  <option value="">Select Vehicle No</option>
+  {vehicleList.map((vehicle) => (
+    <option key={vehicle._id} value={vehicle._id}> 
+      {vehicle.vehicleNo}
+    </option>
+  ))}
+</select>
+
           </div>
 
           {/* Stock Section */}
