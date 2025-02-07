@@ -45,7 +45,7 @@ const ChartOfAccounts = () => {
       if (!error && response) {
         setLoading(false);
         console.log(loading);
-        
+
         setAccounts(response.data);
         setFilteredAccounts(response.data); // Initialize sorted items
       }
@@ -58,10 +58,9 @@ const ChartOfAccounts = () => {
     fetchAccounts();
   }, []);
 
-  // Update filtered accounts when searchQuery changes
   useEffect(() => {
     const filtered = accounts.filter((account) =>
-      account.accountName.toLowerCase().includes(searchQuery.toLowerCase())
+      account.accountName && account.accountName.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredAccounts(filtered);
     setCurrentPage(1); // Reset to the first page when search changes
@@ -132,8 +131,7 @@ const ChartOfAccounts = () => {
         {/* Accounts Table */}
         <div className="overflow-auto">
           <table className="w-full border-collapse">
-          <thead className="text-[12px] text-center text-dropdownText sticky top-0 z-10">
-
+            <thead className="text-[12px] text-center text-dropdownText sticky top-0 z-10">
               <tr className="bg-[#fdf8f0]">
                 <th className="p-3">Sl No</th>
                 <th className="p-3">Account Name</th>
@@ -168,31 +166,79 @@ const ChartOfAccounts = () => {
         {/* Pagination */}
         <div className="flex justify-center mt-4">
           <button
-            onClick={() => handlePageChange(currentPage - 1)}
+            onClick={() => handlePageChange(1)} // Go to first page
+            disabled={currentPage === 1}
+            className="px-2 py-1 mx-1 text-sm font-medium text-gray-700 border rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {"<<"}
+          </button>
+          <button
+            onClick={() => handlePageChange(currentPage - 1)} // Go to previous page
             disabled={currentPage === 1}
             className="px-2 py-1 mx-1 text-sm font-medium text-gray-700 border rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {"<"}
           </button>
-          {[...Array(totalPages)].map((_, index) => (
+
+          {/* Only show the first two pages and last two pages */}
+          {totalPages > 5 && currentPage > 3 && (
             <button
-              key={index}
-              onClick={() => handlePageChange(index + 1)}
-              className={`px-2 py-1 mx-1 text-sm font-medium border rounded ${
-                currentPage === index + 1
-                  ? "bg-red-800 text-white"
-                  : "text-gray-700 hover:bg-gray-200"
-              }`}
+              onClick={() => handlePageChange(1)}
+              className="px-2 py-1 mx-1 text-sm font-medium text-gray-700 border rounded hover:bg-gray-200"
             >
-              {index + 1}
+              1
             </button>
-          ))}
+          )}
+
+          {totalPages > 5 && currentPage > 4 && (
+            <span className="px-2 py-1 text-sm text-gray-700">...</span>
+          )}
+
+          {/* Middle pages */}
+          {[...Array(totalPages)].map((_, index) => {
+            const page = index + 1;
+            if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
+              return (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`px-2 py-1 mx-1 text-sm font-medium border rounded ${
+                    currentPage === page ? "bg-red-800 text-white" : "text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            }
+            return null;
+          })}
+
+          {totalPages > 5 && currentPage < totalPages - 3 && (
+            <span className="px-2 py-1 text-sm text-gray-700">...</span>
+          )}
+
+          {totalPages > 5 && currentPage < totalPages - 2 && (
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              className="px-2 py-1 mx-1 text-sm font-medium text-gray-700 border rounded hover:bg-gray-200"
+            >
+              {totalPages}
+            </button>
+          )}
+
           <button
-            onClick={() => handlePageChange(currentPage + 1)}
+            onClick={() => handlePageChange(currentPage + 1)} // Go to next page
             disabled={currentPage === totalPages}
             className="px-2 py-1 mx-1 text-sm font-medium text-gray-700 border rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {">"}
+          </button>
+          <button
+            onClick={() => handlePageChange(totalPages)} // Go to last page
+            disabled={currentPage === totalPages}
+            className="px-2 py-1 mx-1 text-sm font-medium text-gray-700 border rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {">>"}
           </button>
         </div>
       </div>

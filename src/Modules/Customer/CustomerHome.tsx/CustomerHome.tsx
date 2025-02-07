@@ -108,8 +108,8 @@ const CustomerHome = () => {
       imageSrc: foc,
       title: "FOC Customers",
       description: "Lorem ipsum dolor sit amet consectetur",
-      count: getCustomerCountByPaymentMode("FOC"), // Dynamically calculated count
-      filterMode: "FOC"
+      count: getCustomerCountByPaymentMode("Coupon"), // Dynamically calculated count
+      filterMode: "Coupon"
     },
     {
       imageSrc: cash,

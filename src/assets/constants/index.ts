@@ -7,7 +7,7 @@ import customer from '../images/customer.svg';
 import sale from '../images/sale.svg';
 // import purchase from '../images/purchase.svg';
 // import reports from '../images/reports.svg';
-import accountant from '../images/sale.svg';
+import accountant from '../images/payroll.svg';
 import vehicle from '../images/vehicle.svg';
 import ride from '../images/ride.png'
 import stock from '../images/stock.png'
