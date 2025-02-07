@@ -1,5 +1,7 @@
 
 import frame from "../assets/images/Frame 629279.svg";
+import stocklimit from "../assets/images/Icons/stock1.svg";
+
 // import damage from "../assets/images/Frame 629278.svg";
 // import fram from "../assets/images/rupeeframe.svg";
 import { useEffect, useState } from "react";
@@ -82,7 +84,7 @@ const Stock: React.FC = () => {
                 {/* Stock balance */}
                 <div className="bg-[#FFFFFF] shadow p-3 rounded-lg items-center justify-center  flex flex-col ">
                   <span className=" rounded-full">
-                    <img src={frame} alt="Icon" className="w-9 h-9 mb-1" />
+                    <img src={stocklimit} alt="Icon" className="w-9 h-9 mb-1" />
                   </span>
                   <span className="text-3xl  font-bold text-left text-[#820000]">
                     {subRouteStock.length || 0} 

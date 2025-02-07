@@ -11,7 +11,7 @@ const CreditCollection: React.FC = () => {
   const { request: getAllCustomers } = useApi("get", 4000);
   const { request: getALLOrders } = useApi("get", 4001);
   const { request: getAllAccounts } = useApi("get", 4000);
-
+  const SalesManId = localStorage.getItem("SalesManId");
   const [formData, setFormData] = useState({
     date: "",
     customerId: "",
@@ -20,7 +20,10 @@ const CreditCollection: React.FC = () => {
     paidAmount: "",
     depositAccountId: "",
     balanceAmount: "", // Added balanceAmount
+    salesmanId:SalesManId
+    
   });
+console.log("formData",formData);
 
   const [customers, setCustomers] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
@@ -212,7 +215,6 @@ const CreditCollection: React.FC = () => {
           value={`${formData.balanceAmount} AED `}
           readOnly
           className="w-full p-2 border rounded-md bg-gray-100"
-          placeholder="Balance Amount"
         />
 
         <label className="block text-sm font-medium text-gray-700">
@@ -224,15 +226,17 @@ const CreditCollection: React.FC = () => {
           value={formData.paidAmount}
           onChange={handleChange}
           className="w-full p-2 border rounded-md"
+          placeholder="Enter Amount"
+
         />
 
         <div>
-          <label className="block text-gray-700">Deposit Account</label>
+          <label className="block text-sm font-medium text-gray-700">Deposit Account</label>
           <select
             name="depositAccountId"
             value={formData.depositAccountId}
             onChange={handleChange}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 mt-3 border rounded-md"
           >
             <option value="">Select Account</option>
             {filteredAccounts.map((account) => (

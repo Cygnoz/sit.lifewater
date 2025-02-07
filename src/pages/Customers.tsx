@@ -60,11 +60,11 @@ const Customers: React.FC = () => {
   useEffect(() => {
     const cashFiltered = customers.filter((customer) => customer.paymentMode === "Cash");
     const creditFiltered = customers.filter((customer) => customer.paymentMode === "Credit");
-    const focFiltered = customers.filter((customer) => customer.paymentMode === "FOC");
+    const CouponFiltered = customers.filter((customer) => customer.paymentMode === "Coupon");
 
     setCashSales(cashFiltered.length);
     setCreditSales(creditFiltered.length);
-    setFocSales(focFiltered.length);
+    setFocSales(CouponFiltered.length);
   }, [customers]);
 
   // Function to handle category click

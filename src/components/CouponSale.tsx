@@ -1,7 +1,7 @@
 import backbutton from "../assets/images/nav-item.png";
 import user from '../assets/images/Icons/user-round-plus.svg'
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { endpoints } from "../services/ApiEndpoint";
 import useApi from "../Hook/UseApi";
 import Button from "../CommonComponents/Button";
@@ -14,6 +14,7 @@ const Couponsale: React.FC = () => {
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [filteredAccounts, setFilteredAccounts] = useState<any[]>([]);
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     couponId: "",
     paidAmount: "",
@@ -204,7 +205,6 @@ const Couponsale: React.FC = () => {
   };
 
   const { request: AddCouponCustomer } = useApi("post", 4000);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const url = `${endpoints.ADD_COUPON_CUSTOMER}`;
@@ -212,6 +212,9 @@ const Couponsale: React.FC = () => {
       const { response, error } = await AddCouponCustomer(url, formData);
       if (!error && response) {
         toast.success(response.data.message);
+        setTimeout(() => {
+          navigate("/couponcustomer"); // Navigate to couponcustomer page after 1 second
+        }, 1000);
       } else {
         toast.error(error?.response?.data?.message || "An error occurred");
       }
@@ -310,7 +313,7 @@ const Couponsale: React.FC = () => {
                 {/* Add options here */}
                 {
                   coupons.map((coupon) => (
-                    <option value={coupon._id}>{coupon.couponName}1</option>
+                    <option value={coupon._id}>{coupon.couponName}</option>
                   ))
                 }
               </select>

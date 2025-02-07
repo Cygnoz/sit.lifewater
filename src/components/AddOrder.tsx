@@ -607,7 +607,7 @@ const AddOrder = ({ }: Props) => {
 
                             ) :
                                 (
-                                    <div className="p-2">No customers found</div>
+                                    <div className="p-2">No customers found in this sub route</div>
                                 )}
                         </div>
                         <Link to={'/addcustomers'}>

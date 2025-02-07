@@ -473,13 +473,13 @@ export default function Component() {
             )} */}
           </div>
           <div>
-            <label className="block text-gray-700">flat Number</label>
+            <label className="block text-gray-700">Flat Number</label>
             <input
               type="text"
               name="flatNumber"
               value={formData.flatNumber}
               onChange={handleInputChange}
-              className="w-full p-2 mt-1 border rounded-md uppercase"
+              className="w-full p-2 mt-1 border rounded-md "
               placeholder="Enter flat number"
             />
             {/* {errors.email && (

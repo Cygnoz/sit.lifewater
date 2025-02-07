@@ -157,7 +157,7 @@ const EndRide = ({ }: Props) => {
         console.log("Response", response);
         toast.success(response?.data.message || "End Ride Successfull...");
         setTimeout(() => {
-          navigate('/home')
+          navigate('/')
 
         }, 1000)
       } else {
