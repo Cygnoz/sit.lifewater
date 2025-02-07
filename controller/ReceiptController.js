@@ -96,7 +96,7 @@ exports.getOneReceipt = async (req, res) => {
 
 exports.createReceipt = async (req, res) => {
   try {
-    let { customerId, orderId, paidAmount, depositAccountId } = cleanData(req.body);
+    let { customerId, orderId, paidAmount, depositAccountId,salesmanId } = cleanData(req.body);
 
     // Validate essential fields with specific error messages
     if (!customerId) {
@@ -167,6 +167,7 @@ exports.createReceipt = async (req, res) => {
       customerName: order.customerName,
       customerId,
       orderId,
+      salesmanId,
       receiptNumber:receiptNumber,
       orderNumber: order.orderNumber,
       depositAccountId,

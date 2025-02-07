@@ -28,7 +28,11 @@ const receiptSchema = new mongoose.Schema({
   receiptNumber :{
     type: String,
     // required: true,
-  }
+  },
+  salesmanId: {
+    type: String,
+    // required: true,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Receipt', receiptSchema);
