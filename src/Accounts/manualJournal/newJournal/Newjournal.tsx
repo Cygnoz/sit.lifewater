@@ -6,17 +6,17 @@ import CheveronLeftIcon from "../../../assets/icons/CheveronLeft";
 import TrashCan from "../../Components/Trashcan";
 import Button from "../../Components/Button";
 import PlusIcon from "../../Components/PlusIcon";
-import {  toast, ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 // import { addJournalEntryAPI,  } from "../../../services/AccountsAPI/Journal";
 // import { getAllAccountsAPI } from "../../../services/AccountsAPI/accounts";
 import { endpoints } from "../../../services/ApiEndpoint";
 import useApi from "../../../Hook/UseApi";
 type Props = {};
 
-function NewJournal({ }: Props) {
+function NewJournal({}: Props) {
   const navigate = useNavigate();
   const { request: NewJournalAdd } = useApi("post", 4000);
- 
+
   // Initialize with two non-deletable rows
   const initialTransactions = [
     {
@@ -26,7 +26,6 @@ function NewJournal({ }: Props) {
       debitAmount: 0,
       creditAmount: 0,
       description: "",
-     
     },
     {
       accountId: "",
@@ -35,10 +34,8 @@ function NewJournal({ }: Props) {
       debitAmount: 0,
       creditAmount: 0,
       description: "",
-   
     },
   ];
-
 
   const [accountOptions, setAccountOptions] = useState(null);
   const [totalResult, setTotalResult] = useState({
@@ -83,38 +80,37 @@ function NewJournal({ }: Props) {
 
   // Auto generate Journal id
 
-const { request: getJournalData } = useApi("get", 4000);
+  const { request: getJournalData } = useApi("get", 4000);
 
-useEffect(() => {
-  const fetchAllJournals = async () => {
-    try {
-      const url = `${endpoints.GET_ALL_JOURNALS}`;
-      const { response, error } = await getJournalData(url);
+  useEffect(() => {
+    const fetchAllJournals = async () => {
+      try {
+        const url = `${endpoints.GET_ALL_JOURNALS}`;
+        const { response, error } = await getJournalData(url);
 
-      if (!error && response) {
-        const allJournals = response.data;
-        console.log("here is:",allJournals);
-        
+        if (!error && response) {
+          const allJournals = response.data;
+          console.log("here is:", allJournals);
 
-        // Auto-generate the journalId
-        const count = allJournals.length; // Current number of journals
-        const newJournalId = `JN-${count + 1}`; // Auto-generate with prefix JN-
+          // Auto-generate the journalId
+          const count = allJournals.length; // Current number of journals
+          const newJournalId = `JN-${count + 1}`; // Auto-generate with prefix JN-
 
-        // Update newJournalDatas with the generated journalId
-        setNewJournelDatas((prev) => ({
-          ...prev,
-          journalId: newJournalId,
-        }));
-      } else {
-        console.log("Error fetching journals:", error);
+          // Update newJournalDatas with the generated journalId
+          setNewJournelDatas((prev) => ({
+            ...prev,
+            journalId: newJournalId,
+          }));
+        } else {
+          console.log("Error fetching journals:", error);
+        }
+      } catch (error) {
+        console.error("Something went wrong:", error);
       }
-    } catch (error) {
-      console.error("Something went wrong:", error);
-    }
-  };
+    };
 
-  fetchAllJournals();
-}, []); // Add dependencies if necessary
+    fetchAllJournals();
+  }, []); // Add dependencies if necessary
 
   const addRow = () => {
     const newRow = {
@@ -192,30 +188,28 @@ useEffect(() => {
   //   }
   // };
 
- // Fetch accounts from the API
- const [loading, setLoading] = useState(false);
- const { request: getallaccounts } = useApi("get", 4000)
- const fetchAccounts = async () => {
-   try {
-     const url = `${endpoints.GET_ALL_ACCOUNTS}`
-     const { response, error } = await getallaccounts(url)
-     console.log("API RESPONSE :",response)
+  // Fetch accounts from the API
+  const [loading, setLoading] = useState(false);
+  const { request: getallaccounts } = useApi("get", 4000);
+  const fetchAccounts = async () => {
+    try {
+      const url = `${endpoints.GET_ALL_ACCOUNTS}`;
+      const { response, error } = await getallaccounts(url);
+      console.log("API RESPONSE :", response);
 
-     if (!error && response) {
-       setLoading(false)
-       console.log(loading);
-       
-       setAccountOptions(response.data)
-     
-     }
-   } catch (error) {
-     console.log(error)
-   }
- }
- useEffect(() => {
-   fetchAccounts()
- }, [])
+      if (!error && response) {
+        setLoading(false);
+        console.log(loading);
 
+        setAccountOptions(response.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
 
   useEffect(() => {
     if (!Array.isArray(newJournalDatas.transaction)) {
@@ -230,8 +224,8 @@ useEffect(() => {
           typeof transaction.debitAmount === "string"
             ? parseFloat(transaction.debitAmount)
             : typeof transaction.debitAmount === "number"
-              ? transaction.debitAmount
-              : 0;
+            ? transaction.debitAmount
+            : 0;
         return total + (isNaN(debitAmount) ? 0 : debitAmount);
       },
       0
@@ -244,8 +238,8 @@ useEffect(() => {
           typeof transaction.creditAmount === "string"
             ? parseFloat(transaction.creditAmount)
             : typeof transaction.creditAmount === "number"
-              ? transaction.creditAmount
-              : 0;
+            ? transaction.creditAmount
+            : 0;
         return total + (isNaN(creditAmount) ? 0 : creditAmount);
       },
       0
@@ -270,7 +264,7 @@ useEffect(() => {
   const handleAddNewJournel = async () => {
     const {
       journalId,
-     
+
       date,
       reference,
       note,
@@ -279,11 +273,11 @@ useEffect(() => {
       totalDebitAmount,
       totalCreditAmount,
     } = newJournalDatas;
-  
+
     console.log(newJournalDatas);
-  
+
     let errors = [];
-  
+
     // Validate required fields
     if (!journalId) errors.push("Journal");
     if (!date) errors.push("Date");
@@ -296,31 +290,28 @@ useEffect(() => {
     if (totalResult && totalResult.difference) {
       errors.push("Ensure that the debit and credits are equal!");
     }
-    
-  
+
     // Validate minimum two transactions and fields in transactions
     if (transaction.length < 2) {
       errors.push("At least two transactions");
     }
-  
+
     transaction.forEach((txn, index) => {
       if (!txn.accountId) errors.push(`Transaction ${index + 1}: Account ID`);
       if (txn.debitAmount === undefined && txn.creditAmount === undefined) {
         errors.push(`Transaction ${index + 1}: Debit or Credit Amount`);
       }
-      
     });
-  
+
     // Show detailed toast message if there are errors
     console.log(errors); // Check the content of errors
-if (errors.length > 0) {
-  toast.error(`Please fill the following fields: ${errors.join(", ")}`, {
-    position: "top-right",
-    autoClose: 5000,
-  });
-}
- else {
-  try {
+    if (errors.length > 0) {
+      toast.error(`Please fill the following fields: ${errors.join(", ")}`, {
+        position: "top-right",
+        autoClose: 5000,
+      });
+    } else {
+      try {
         const url = `${endpoints.ADD_NEW_JOURNEL_ENTRY}`;
         const apiResponse = await NewJournalAdd(url, newJournalDatas);
         console.log("api response", apiResponse);
@@ -348,8 +339,8 @@ if (errors.length > 0) {
       } catch (error) {
         console.log("Error during API call", error);
       }
- }  
-  }
+    }
+  };
 
   const handleAccountSelect = (index: number, account: any) => {
     const newTransaction = [...newJournalDatas.transaction];
@@ -446,7 +437,12 @@ if (errors.length > 0) {
 
   return (
     <div className="p-2">
-            <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} theme="colored" />
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        theme="colored"
+      />
 
       <div className="flex items-center gap-5">
         <Link to={"/journals"}>
@@ -494,7 +490,7 @@ if (errors.length > 0) {
                 }
               />
             </div> */}
-             <div className="w-[26%]">
+            <div className="w-[26%]">
               <label className="block text-sm text-textColor">
                 Journal Type
               </label>
@@ -515,7 +511,7 @@ if (errors.length > 0) {
                 </label>
               </div>
             </div>
-            
+
             <div className="w-[40%]">
               <label className="block text-sm text-textColor">Reference#</label>
               <input
@@ -532,8 +528,6 @@ if (errors.length > 0) {
               />
             </div>
           </div>
-         
-          
 
           <div className="flex items-center justify-between w-full gap-9">
             <div className="w-[72%]">
@@ -551,7 +545,7 @@ if (errors.length > 0) {
                 }
               />
             </div>
-           
+
             <div className="w-[50%]">
               <label className="block text-sm text-textColor">Currency</label>
               <select
@@ -592,7 +586,7 @@ if (errors.length > 0) {
                     <AccountDropdown
                       index={index}
                       account={row.accountName}
-                      accountOptions={accountOptions}
+                      accountOptions={accountOptions ?? []} // Ensure it's always an array
                       isDropdownOpen={isAccountDropdownOpen[index]}
                       search={accountSearch[index]}
                       onAccountSelect={handleAccountSelect}
@@ -600,6 +594,7 @@ if (errors.length > 0) {
                       onDropdownToggle={handleAccountDropdownToggle}
                       clearSearch={clearAccountSearch}
                     />
+
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <textarea
                         className="w-full border border-inputBorder rounded-md text-sm p-2 "
@@ -648,12 +643,12 @@ if (errors.length > 0) {
                           if (!row.creditAmount) {
                             handleInputChange(index, "debitAmount", value);
                           } else {
-                            toast.error("Clear credit before entering debit; both can’t be in one row.");
+                            toast.error(
+                              "Clear credit before entering debit; both can’t be in one row."
+                            );
                           }
                         }}
                       />
-
-
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <input
@@ -677,16 +672,18 @@ if (errors.length > 0) {
                           if (!row.debitAmount) {
                             handleInputChange(index, "creditAmount", value);
                           } else {
-                            toast.error("Clear debit before entering credit; both can’t be in one row.");
+                            toast.error(
+                              "Clear debit before entering credit; both can’t be in one row."
+                            );
                           }
                         }}
                       />
-
                     </td>
                     <td
                       onClick={() => deleteRow(index)}
-                      className={`px-6 py-6 items-center whitespace-nowrap text-sm flex justify-center cursor-pointer ${index < 2 ? "cursor-not-allowed text-gray-400" : ""
-                        }`}
+                      className={`px-6 py-6 items-center whitespace-nowrap text-sm flex justify-center cursor-pointer ${
+                        index < 2 ? "cursor-not-allowed text-gray-400" : ""
+                      }`}
                     >
                       <TrashCan color={index < 2 ? "gray" : "red"} />
                     </td>
@@ -717,16 +714,17 @@ if (errors.length > 0) {
               {totalResult.totalDebit.toFixed(2)}
             </h4>
             <span className="text-textColor font-bold text-xl">
-              {" "}{totalResult.totalDebit.toFixed(2)}
+              {" "}
+              {totalResult.totalDebit.toFixed(2)}
             </span>
           </div>
 
           <div className="col-span-3 flex flex-col w-[130px]  gap-3 me-5">
             <h4 className="text-[14px] text-[#4B5C79] text-end">
-               {totalResult.totalCredit.toFixed(2)}
+              {totalResult.totalCredit.toFixed(2)}
             </h4>
             <span className="text-textColor font-bold text-xl text-end">
-               {totalResult.totalCredit.toFixed(2)}
+              {totalResult.totalCredit.toFixed(2)}
             </span>
           </div>
           <div className="col-span-2 flex flex-col gap-1 bg-[#FEF7F7] py-[4px] px-[14px]">

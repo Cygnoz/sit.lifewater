@@ -22,6 +22,7 @@ export const endpoints = {
   GET_W_STOCK: `wstock`,
   ADD_STOCK_LOAD: `stock`,
   GET_ALL_LOADED_STOCK: `stock`,
+  DELETE_STOCK_LOAD:`deletestock`,
 
   // internal transfer
   ADD_INTERNAL_TRANSFER: `internaltransfer`,

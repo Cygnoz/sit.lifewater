@@ -5,7 +5,7 @@ import SearchDropdown from "./SearchDropdown";
 interface AccountDropdownProps {
   index: number;
   account: string;
-  accountOptions: any[];
+  accountOptions: any[] | null; // Allow null in props but handle it safely
   isDropdownOpen: boolean;
   search: string;
   onAccountSelect: (index: number, account: any) => void;
@@ -17,7 +17,7 @@ interface AccountDropdownProps {
 const AccountDropdown = ({
   index,
   account,
-  accountOptions = [], // Default empty array to prevent undefined errors
+  accountOptions = [], // Default to empty array
   isDropdownOpen,
   search,
   onAccountSelect,
@@ -25,6 +25,9 @@ const AccountDropdown = ({
   onDropdownToggle,
   clearSearch,
 }: AccountDropdownProps) => {
+  // Ensure accountOptions is always an array
+  const safeAccountOptions = accountOptions ?? [];
+
   const handleClickOutside = (event: MouseEvent) => {
     if (
       isDropdownOpen &&
@@ -41,7 +44,7 @@ const AccountDropdown = ({
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, [isDropdownOpen]); // Dependency ensures effect runs only when dropdown state changes
+  }, [isDropdownOpen]);
 
   return (
     <td className="px-6 py-4 whitespace-nowrap relative dropdown-container">
@@ -67,8 +70,8 @@ const AccountDropdown = ({
             onChange={(e) => onSearchChange(index, e.target.value)}
           />
           <ul className="overflow-y-auto text-start h-48">
-            {accountOptions
-              ?.filter(
+            {safeAccountOptions
+              .filter(
                 (option: any) =>
                   option?.accountName?.toLowerCase()?.includes(search.toLowerCase())
               )
