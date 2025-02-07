@@ -238,7 +238,7 @@ exports.loginSalesStaff = async (req, res) => {
 
     const oldPassword = decrypt(staff.password);
     const isMatch = password === oldPassword;
-    
+
     // Match the password
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid Password!' });
@@ -256,16 +256,19 @@ exports.loginSalesStaff = async (req, res) => {
       { expiresIn: '12h' }
     );
 
+    // Destructure and exclude sensitive fields
+    const { password: _, ...staffData } = staff._doc;
+
     // Log successful login
     console.log(`${staff.username} logged in successfully`);
 
-    // Send response with user data, token, and ride status
+    // Send response without the password field
     res.status(200).json({
       success: true,
       token: `Bearer ${token}`,
-      data: staff,
-      hasActiveRide: !!activeRide, // Boolean indicating if the salesman has an ongoing ride
-      activeRideId: activeRide ? activeRide._id : null, // Optional: Provide the active ride ID if available
+      data: staffData,
+      hasActiveRide: !!activeRide, 
+      activeRideId: activeRide ? activeRide._id : null,
       salesmanId: staff._id,
     });
 
