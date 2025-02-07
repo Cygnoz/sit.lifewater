@@ -57,6 +57,42 @@ exports.getAllReceipts = async (req, res) => {
 };
 
 
+
+exports.getReceiptsBySalesmanId = async (req, res) => {
+  try {
+    const { salesmanId } = req.params;
+
+    // Fetch receipts for the given salesmanId
+    const receipts = await Receipt.find({ salesmanId }).sort({ createdAt: -1 });
+
+    // Map through receipts to fetch customer full names
+    const result = await Promise.all(
+      receipts.map(async (receipt) => {
+        const customer = await Customer.findById(receipt.customerId).select('fullName');
+        return {
+          ...receipt.toObject(),
+          fullName: customer ? customer.fullName : 'Unknown Customer',
+        };
+      })
+    );
+
+    // Check if any receipts exist for the salesman
+    if (!result.length) {
+      return res.status(404).json({ message: 'No receipts found for the given salesman.' });
+    }
+
+    return res.status(200).json({
+      message: 'Receipts retrieved successfully.',
+      data: result,
+    });
+  } catch (error) {
+    console.error('Error retrieving receipts by salesmanId:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+
+
 exports.getOneReceipt = async (req, res) => {
   try {
     const { receiptId } = req.params;
