@@ -202,7 +202,10 @@ const ViewCustmor: React.FC = () => {
             {/* General Details */}
             <div className="bg-gray-5 p-4 rounded-lg">
               <h3 className="font-semibold text-lg text-gray-700 mb-4">
-                General Details
+              {
+                    customer?.CouponBottle &&
+                    <p className="text-gray-700 text-[13px]">Balance Coupon : {customer?.CouponBottle}</p>
+                  }         General Details
               </h3>
               <div className="space-y-2">
                 <p className="font-bold text-gray-500 text-lg text-[14px]">
