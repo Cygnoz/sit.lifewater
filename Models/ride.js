@@ -28,6 +28,7 @@ const RideSchema = new Schema({
   salesmanId: { type: String },
   salesmanName: { type: String },
   vehicleNumber: { type: String },
+  vehicleId:{type:String},
   startingKm: { type: String },
   endingKM: {type: Number},
   travelledKM: {type: Number},
