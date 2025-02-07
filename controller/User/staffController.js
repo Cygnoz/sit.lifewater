@@ -183,14 +183,18 @@ exports.editStaff = async (req, res) => {
 // Delete staff
 exports.deleteStaff = async (req, res) => {
   try {
-    // Check if the salesman has an active ride
-    const activeRide = await ride.findOne({
-      salesmanId: req.params.id,
+    // Check if the staff (salesman, driver, or helper) has an active ride
+    const activeRide = await Ride.findOne({
+      $or: [
+        { salesmanId: req.params.id },
+        { driverId: req.params.id },
+        { helperId: req.params.id }
+      ],
       status: 'active'
     });
 
     if (activeRide) {
-      return res.status(400).json({ message: 'Cannot delete staff. Salesman has an active ride.' });
+      return res.status(400).json({ message: 'Cannot delete staff. Staff member has an active ride.' });
     }
 
     // Proceed to delete the staff
@@ -205,7 +209,6 @@ exports.deleteStaff = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 
 
