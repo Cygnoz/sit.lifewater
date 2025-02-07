@@ -407,7 +407,7 @@ const dataExist = async ( customerId , depositAccountId ) => {
 // };
 
 
-
+//order without coupon
 
 // exports.createOrder = async (req, res) => {
 //   console.log("Create Order Request:", req.body);
