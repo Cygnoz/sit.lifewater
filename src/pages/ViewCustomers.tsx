@@ -23,6 +23,7 @@ interface Customer {
   subRoute: string;
   mainRoute: string;
   paymentMode: string;
+  CouponBottle:string,
   location: {
     address: string;
     coordinates: {
@@ -222,6 +223,13 @@ const ViewCustomers: React.FC = () => {
                   <strong>No of Bottles:</strong>{" "}
                   {selectedCustomer.numberOfBottles}
                 </p>
+                {
+                    selectedCustomer?.CouponBottle &&
+                    <p className="mb-2">
+                    <strong>Balance Coupons:</strong>{" "}
+                    {selectedCustomer.CouponBottle}
+                  </p>
+                  }
               </>
             )}
           </Typography>
