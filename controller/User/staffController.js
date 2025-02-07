@@ -183,13 +183,32 @@ exports.editStaff = async (req, res) => {
 // Delete staff
 exports.deleteStaff = async (req, res) => {
   try {
+    // Check if the salesman has an active ride
+    const activeRide = await ride.findOne({
+      salesmanId: req.params.id,
+      status: 'active'
+    });
+
+    if (activeRide) {
+      return res.status(400).json({ message: 'Cannot delete staff. Salesman has an active ride.' });
+    }
+
+    // Proceed to delete the staff
     const deletedStaff = await Staff.findByIdAndDelete(req.params.id);
-    if (!deletedStaff) return res.status(404).json({ message: 'Staff not found' });
+
+    if (!deletedStaff) {
+      return res.status(404).json({ message: 'Staff not found' });
+    }
+
     res.status(200).json({ message: 'Staff deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
+
 
 
 // Login for Sales staff
