@@ -6,7 +6,7 @@ const MainRoute = require('../Models/MainRouteSchema');
 const Warehouse = require('../Models/WarehouseSchema');
 const Item = require('../Models/ItemSchema');
 const TransferLog = require('../Models/TransferSchema');
-
+const mongoose = require('mongoose');
 
 
 
@@ -634,8 +634,6 @@ exports.getStockStats = async (req, res) => {
   }
 };
 
-
-
 exports.internalTransfer = async (req, res) => {
   console.log("Internal Transfer:", req.body);
 
@@ -758,6 +756,20 @@ exports.internalTransfer = async (req, res) => {
 
     console.log("Updated Destination Subroute Stock:", toRouteStock);
 
+// Auto-generate transfer number with "TN-" prefix
+let nextTransferId = 1;
+const lastTransfer = await TransferLog.findOne().sort({ _id: -1 });
+
+if (lastTransfer && lastTransfer.transferNumber) {
+  const lastId = parseInt(lastTransfer.transferNumber.replace("TN-", ""), 10); // Ensure numeric conversion
+  if (!isNaN(lastId)) {
+    nextTransferId = lastId + 1;
+  }
+}
+
+const transferNumber = `TN-${nextTransferId}`;
+cleanedData.transferNumber = transferNumber; // Assign to transfer data
+
     // Log the transfer with stock details
     const transferLog = new TransferLog({
       fromRoute: cleanedData.fromRoute,
@@ -766,7 +778,7 @@ exports.internalTransfer = async (req, res) => {
       toRouteId: cleanedData.toRouteId,
       filledBottlesTransferred: cleanedData.stock.reduce((sum, item) => sum + item.quantity, 0),
       stock: cleanedData.stock, // Include transferred stock details
-      transferNumber: cleanedData.transferNumber, // Save transfer number
+      transferNumber: cleanedData.transferNumber, // Save generated transfer number
       notes: cleanedData.notes,
       termsAndConditions: cleanedData.termsAndConditions
     });
@@ -792,15 +804,240 @@ exports.internalTransfer = async (req, res) => {
 };
 
 
+// GET ALL INTERNAL TRANSFER
+
 exports.getAllTransfers = async (req, res) => {
-    try {
-      const tranfers = await TransferLog.find().sort(-1);
-      res.status(200).json(tranfers);
-    } catch (error) {
-      console.error('Error fetching unloads:', error);
-      res.status(500).json({ message: 'Failed to fetch unloads', error });
+  try {
+    const transfers = await TransferLog.find().sort({ _id: -1 }); // Correct sorting
+    res.status(200).json(transfers);
+  } catch (error) {
+    console.error("Error fetching transfers:", error);
+    res.status(500).json({ message: "Failed to fetch transfers", error });
+  }
+};
+
+// delete 
+// DELETE Internal Transfer and return stock
+
+// DELETE Internal Transfer and adjust stock for both routes
+exports.deleteInternalTransfer = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid Transfer ID' });
     }
-  };
+
+    const transferLog = await TransferLog.findById(id);
+    if (!transferLog) {
+      return res.status(404).json({ success: false, message: `Transfer record not found for ID: ${id}` });
+    }
+
+    // Find both the source and destination routes
+    const fromRoute = await SubRoute.findById(transferLog.fromRouteId);
+    const toRoute = await SubRoute.findById(transferLog.toRouteId);
+
+    if (!fromRoute || !toRoute) {
+      return res.status(404).json({ success: false, message: 'One or both routes not found' });
+    }
+
+    // Return stock to the fromRoute
+    transferLog.stock.forEach((item) => {
+      const fromRouteItem = fromRoute.stock.find((stock) => stock.itemId.toString() === item.itemId.toString());
+      if (fromRouteItem) {
+        fromRouteItem.quantity += item.quantity;
+      } else {
+        fromRoute.stock.push({
+          itemId: item.itemId,
+          itemName: item.itemName,
+          quantity: item.quantity
+        });
+      }
+    });
+
+    // Reduce stock from the toRoute
+    transferLog.stock.forEach((item) => {
+      const toRouteItem = toRoute.stock.find((stock) => stock.itemId.toString() === item.itemId.toString());
+      if (toRouteItem) {
+        toRouteItem.quantity -= item.quantity;
+        if (toRouteItem.quantity <= 0) {
+          toRoute.stock = toRoute.stock.filter(stock => stock.itemId.toString() !== item.itemId.toString());
+        }
+      }
+    });
+
+    // Save both updated routes
+    await fromRoute.save();
+    await toRoute.save();
+
+    // Delete the transfer log
+    await TransferLog.findByIdAndDelete(id);
+
+    res.status(200).json({ success: true, message: 'Transfer deleted, stock updated in both routes' });
+  } catch (error) {
+    console.error('Error deleting transfer:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete transfer' });
+  }
+};
+
+
+
+// exports.internalTransfer = async (req, res) => {
+//   console.log("Internal Transfer:", req.body);
+
+//   try {
+//     const cleanedData = cleanCustomerData(req.body);
+//     cleanedData.stock = (cleanedData.stock || [])
+//       .map(item => cleanCustomerData(item))
+//       .filter(item => item.itemId && item.itemId.trim() !== "" && item.quantity > 0);
+
+//     // Validate required fields
+//     if (!cleanedData.fromRouteId || !cleanedData.fromRoute) {
+//       return res.status(400).json({ success: false, message: 'Select Source Sub Route' });
+//     }
+//     if (!cleanedData.toRouteId || !cleanedData.toRoute) {
+//       return res.status(400).json({ success: false, message: 'Select Destination Sub Route' });
+//     }
+//     if (!cleanedData.stock || cleanedData.stock.length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Stock must contain valid items with quantity greater than 0'
+//       });
+//     }
+
+//     // Fetch the source and destination subroutes
+//     const fromRoute = await SubRoute.findById(cleanedData.fromRouteId);
+//     if (!fromRoute) {
+//       return res.status(404).json({ success: false, message: 'Source Sub Route not found' });
+//     }
+//     const toRoute = await SubRoute.findById(cleanedData.toRouteId);
+//     if (!toRoute) {
+//       return res.status(404).json({ success: false, message: 'Destination Sub Route not found' });
+//     }
+
+//     console.log('Source SubRoute Before Update:', fromRoute);
+//     console.log('Destination SubRoute Before Update:', toRoute);
+
+//     const fromRouteStock = fromRoute.stock || [];
+//     const toRouteStock = toRoute.stock || [];
+
+//     // Validate item availability in the source subroute stock
+//     for (const item of cleanedData.stock) {
+//       const sourceItem = fromRouteStock.find(stock => stock.itemId === item.itemId);
+
+//       if (!sourceItem) {
+//         return res.status(400).json({
+//           success: false,
+//           message: `Item ${item.itemName} is not available in the source subroute`
+//         });
+//       }
+
+//       if (item.quantity > sourceItem.quantity) {
+//         return res.status(400).json({
+//           success: false,
+//           message: `Insufficient quantity for item ${item.itemName}. Available: ${sourceItem.quantity}, Requested: ${item.quantity}`
+//         });
+//       }
+//     }
+
+//     // Update source subroute stock and decrement quantities
+//     for (const item of cleanedData.stock) {
+//       if (item.quantity <= 0) {
+//         return res.status(400).json({
+//           success: false,
+//           message: `Cannot process item ${item.itemName} with quantity 0 or less`
+//         });
+//       }
+
+//       const sourceItemIndex = fromRouteStock.findIndex(stock => stock.itemId === item.itemId);
+
+//       if (sourceItemIndex >= 0) {
+//         const sourceItem = fromRouteStock[sourceItemIndex];
+
+//         // Decrement quantity in source subroute
+//         sourceItem.quantity -= item.quantity;
+
+//         // Remove the item from source stock if quantity becomes 0
+//         if (sourceItem.quantity <= 0) {
+//           fromRouteStock.splice(sourceItemIndex, 1);
+//         }
+//       }
+
+//       // Fetch item details from the Item schema to check if it's resaleable
+//       const itemDetails = await Item.findById(item.itemId);
+//       if (!itemDetails) {
+//         return res.status(404).json({ success: false, message: `Item ${item.itemName} not found in inventory` });
+//       }
+
+//       const isResalable = itemDetails.resaleable;
+
+//       // Add or update the item in the destination subroute stock
+//       const destinationItemIndex = toRouteStock.findIndex(stock => stock.itemId === item.itemId);
+
+//       const newStockItem = {
+//         itemId: item.itemId,
+//         itemName: item.itemName,
+//         quantity: item.quantity,
+//         status: isResalable ? "Filled" : undefined // Set status based on resaleable property
+//       };
+
+//       if (destinationItemIndex >= 0) {
+//         // If the item already exists in destination subroute stock, update its quantity and status
+//         toRouteStock[destinationItemIndex].quantity += item.quantity;
+//         toRouteStock[destinationItemIndex].status = isResalable ? "Filled" : undefined;
+//       } else {
+//         // Add new item to the destination subroute stock
+//         toRouteStock.push(newStockItem);
+//         console.log("New Stock Item Added:", newStockItem);
+//       }
+//     }
+
+//     // Save the updated source subroute stock
+//     fromRoute.stock = fromRouteStock;
+//     await fromRoute.save();
+
+//     console.log("Updated Source Subroute Stock:", fromRouteStock);
+
+//     // Save the updated destination subroute stock
+//     toRoute.stock = toRouteStock;
+//     await toRoute.save();
+
+//     console.log("Updated Destination Subroute Stock:", toRouteStock);
+
+//     // Log the transfer with stock details
+//     const transferLog = new TransferLog({
+//       fromRoute: cleanedData.fromRoute,
+//       fromRouteId: cleanedData.fromRouteId,
+//       toRoute: cleanedData.toRoute,
+//       toRouteId: cleanedData.toRouteId,
+//       filledBottlesTransferred: cleanedData.stock.reduce((sum, item) => sum + item.quantity, 0),
+//       stock: cleanedData.stock, // Include transferred stock details
+//       transferNumber: cleanedData.transferNumber, // Save transfer number
+//       notes: cleanedData.notes,
+//       termsAndConditions: cleanedData.termsAndConditions
+//     });
+//     await transferLog.save();
+
+//     console.log("Saved TransferLog:", transferLog);
+
+//     // Send success response
+//     res.status(200).json({
+//       success: true,
+//       message: 'Internal transfer completed successfully',
+//       data: transferLog
+//     });
+//   } catch (error) {
+//     console.error(error);
+
+//     // Send error response
+//     res.status(500).json({
+//       success: false,
+//       message: "An error occurred during the internal transfer"
+//     });
+//   }
+// };
+
+
 
 
 
@@ -942,8 +1179,6 @@ exports.getAllTransfers = async (req, res) => {
 
 
   //Clean Data 
- 
- 
  
   function cleanCustomerData(data) {
     const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
