@@ -861,6 +861,7 @@ const order = new Order({
   })),
 });
 
+
     await order.save();
     await journal(order, customerAccount, saleAccount, depositAccount);
 
