@@ -184,7 +184,7 @@ exports.editStaff = async (req, res) => {
 exports.deleteStaff = async (req, res) => {
   try {
     // Check if the staff (salesman, driver, or helper) has an active ride
-    const activeRide = await Ride.findOne({
+    const activeRide = await ride.findOne({
       $or: [
         { salesmanId: req.params.id },
         { driverId: req.params.id },
