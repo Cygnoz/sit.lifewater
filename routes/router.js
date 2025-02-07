@@ -115,6 +115,8 @@ router.get('/rides/completed/:mainRouteId', startRideController.getCompletedRide
 //acoounts
 router.post('/addaccounts', verifyToken, AccountsController.addAccount); // add account
 router.get('/getallaccounts', verifyToken, AccountsController.getAllAccount); // get all accounts
+router.put('/edit-account/:accountId',AccountsController.editAccount)
+
 
 //addaccount
 router.post('/add-autogenerateaccount', AccountsController.autoGenerateAccount); // add account

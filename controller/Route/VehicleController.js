@@ -95,23 +95,6 @@ exports.deleteVehicle = async (req, res) => {
   try {
     const { id } = req.params; // Using the vehicle's Object ID
 
-    const deletedVehicle = await Vehicle.findByIdAndDelete(id);
-    if (!deletedVehicle) {
-      return res.status(404).json({ message: 'Vehicle not found' });
-    }
-
-    return res.status(200).json({ message: 'Vehicle deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting vehicle:', error.message);
-    res.status(500).json({ message: "Internal server error." });
-  }
-};
-
-// View a particular vehicle by Object ID
-exports.deleteVehicle = async (req, res) => {
-  try {
-    const { id } = req.params; // Using the vehicle's Object ID
-
     // Check if the vehicle is associated with an active ride
     const activeRide = await ride.findOne({ vehicleId: id, status: 'active' });
 
@@ -128,6 +111,24 @@ exports.deleteVehicle = async (req, res) => {
     return res.status(200).json({ message: 'Vehicle deleted successfully' });
   } catch (error) {
     console.error('Error deleting vehicle:', error.message);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+
+// View a particular vehicle by Object ID
+exports.viewVehicleById = async (req, res) => {
+  try {
+    const { id } = req.params; // Using the vehicle's Object ID
+
+    const vehicle = await Vehicle.findById(id);
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+
+    return res.status(200).json({ vehicle });
+  } catch (error) {
+    console.error('Error fetching vehicle:', error.message);
     res.status(500).json({ message: "Internal server error." });
   }
 };

@@ -3,7 +3,7 @@
 const Account = require("../../Models/account")
 const TrialBalance = require("../../Models/trialBalance")
 const moment = require('moment-timezone');
-
+const { cleanData } = require("../../services/cleanData");
 
 
 
@@ -69,55 +69,102 @@ exports.addAccount = async (req, res) => {
 
 //Edit account
 exports.editAccount = async (req, res) => {
-  console.log("Edit Account:", req.body);
+  console.log("Edit Account Request Received:", req.body);
   try {
     const { accountId } = req.params;
+    console.log(`Editing account with ID: ${accountId}`);
 
-    const cleanedData = cleanCustomerData(req.body);
-  
+    // Fetch existing account
+    const existingAccount = await Account.findOne({ _id: accountId });
+    if (!existingAccount) {
+      console.log(`Account not found with ID: ${accountId}`);
+      return res.status(404).json({ message: "Account not found!" });
+    }
+    console.log("Existing account data:", existingAccount);
 
-    //Validate Inputs  
-    if (!validateInputs( cleanedData, currencyExists, res )) return;
-     
-     
+    // Clean incoming data
+    const cleanedData = cleanData(req.body);
+    console.log("Cleaned data for update:", cleanedData);
 
-    // Check if an account with the given  and accountId exists
-    const account = await Account.findOne({
-      _id: accountId,
+    // (Optional) Check trial balance count and handle early return
+    const trialBalanceResult = await trialBalanceCount(existingAccount, res);
+    if (trialBalanceResult) {
+      console.log("Trial balance count check failed.");
+      return;
+    }
+
+    // Prevent editing system accounts
+    if (cleanedData.systemAccounts === true) {
+      console.log(`Attempted edit on system account ID: ${accountId}`);
+      return res.status(404).json({ message: "This account cannot be edited!" });
+    }
+
+    // Validate inputs
+    if (!validateInputs(cleanedData, res)) {
+      console.log("Input validation failed for data:", cleanedData);
+      return;
+    }
+
+    // Check if an account with the same name already exists
+    const existingAccountName = await Account.findOne({
+      accountName: cleanedData.accountName,
+      _id: { $ne: accountId },
     });
-
-    if (!account) {
-      console.log("Account not found for the provided Account ID");
-      return res.status(404).json({
-        message:
-          "Account not found for the provided Account ID",
+    if (existingAccountName) {
+      console.log(`Duplicate account name found: ${cleanedData.accountName}`);
+      return res.status(409).json({
+        message: "Account with the provided Account Name already exists.",
       });
     }
 
+    // Encrypt bankAccNum if present
+    if (cleanedData.bankAccNum) {
+      cleanedData.bankAccNum = encrypt(cleanedData.bankAccNum);
+      console.log("Bank account number encrypted.");
+    }
 
-    // Update account fields
-    account.accountName = cleanedData.accountName;
-    account.accountCode = cleanedData.accountCode;
+    // Update and save the account
+    const mongooseDocument = Account.hydrate(existingAccount);
+    Object.assign(mongooseDocument, cleanedData);
+    const savedAccount = await mongooseDocument.save();
+    if (!savedAccount) {
+      console.log("Failed to save updated account.");
+      return res.status(500).json({ message: "Failed to update account!" });
+    }
+    console.log("Account updated successfully:", savedAccount);
 
-    account.accountSubhead = cleanedData.accountSubhead;
-    account.accountHead = cleanedData.accountHead;
-    account.accountGroup = cleanedData.accountGroup;
+    // Remove any existing TrialBalance entry
+    const existingTrialBalance = await TrialBalance.findOne({
+      operationId: savedAccount._id,
+    });
+    const trialDate = existingTrialBalance ? existingTrialBalance.date : undefined;
+    if (existingTrialBalance) {
+      await TrialBalance.deleteOne({ accountId: savedAccount._id });
+      console.log(`Deleted existing trial balance for account ID: ${savedAccount._id}`);
+    }
 
-    account.description = cleanedData.description;
-    account.bankAccNum = cleanedData.bankAccNum;
-    account.bankIfsc = cleanedData.bankIfsc;
-    account.bankCurrency = cleanedData.bankCurrency;
+    // Create a new TrialBalance entry
+    const trialEntry = new TrialBalance({
+      operationId: savedAccount._id,
+      date: trialDate,
+      accountId: savedAccount._id,
+      accountName: savedAccount.accountName,
+      action: "Opening Balance",
+      debitAmount: cleanedData.debitOpeningBalance || 0,
+      creditAmount: cleanedData.creditOpeningBalance || 0,
+      remark: savedAccount.remark,
+    });
+    await trialEntry.save();
+    console.log("New trial balance entry created:", trialEntry);
 
-    // Save updated account
-    await account.save();
-
-    res.status(200).json({ message: "Account updated successfully.", data: account });
-    console.log("Account updated successfully:");
+    res.status(200).json({ message: "Account updated successfully." });
   } catch (error) {
     console.error("Error updating Account:", error);
     res.status(500).json({ message: "Internal server error." });
   }
 };
+
+
 
 
 // Get all accounts for a given 
@@ -494,6 +541,21 @@ function isAlphanumeric(value) {
 
 
 
+async function trialBalanceCount(existingAccount, res) {
+  // Check if there are more than one TrialBalance entries for the account
+  const trialBalanceCount = await TrialBalance.countDocuments({
+    accountId: existingAccount._id,
+  });
+
+  // If there is more than one TrialBalance entry, account cannot be changed
+  if (trialBalanceCount > 1) {
+    console.log("Account cannot be changed as it exists in TrialBalance");
+    res.status(400).json({ message: "Account cannot be changed as it is referenced in TrialBalance!" });
+    return true; // Indicate that a response was sent
+  }
+
+  return false; // Indicate that no response was sent
+}
 
 
 
