@@ -268,10 +268,8 @@ const AddInternalStock: React.FC = () => {
       toast.error("Select a to route.");
       return;
     }
-    if (!orderDetails.transferNumber) {
-      toast.error("Enter transfer number.");
-      return;
-    }
+  
+    
     const hasValidItem = orderDetails.stock.some((item) => item.itemId.trim() !== '');
     if (!hasValidItem) {
       toast.error("Select at least one item.");
@@ -394,7 +392,7 @@ const AddInternalStock: React.FC = () => {
                     </select>
                   </div>
                 </div>
-
+{/* 
                 <div className="mb-4">
                   <label className="block mb-2 font-normal text-[#303F58] text-[14px]">Transfer Number</label>
 
@@ -406,7 +404,7 @@ const AddInternalStock: React.FC = () => {
                     onChange={handleInputChange}
                     readOnly
                   />
-                </div>
+                </div> */}
 
                 {/* Add Item Section */}
                 <div className="mb-4">

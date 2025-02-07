@@ -26,6 +26,7 @@ export const endpoints = {
   // internal transfer
   ADD_INTERNAL_TRANSFER: `internaltransfer`,
   GET_INTERNAL_TRANSFER: `getalltransfers`,
+  DELETE_INTERNAL_TRANSFER:`internaltransfer`,
 
   // unloads
   ADD_UNLOAD_STOCK: `addunload`,
