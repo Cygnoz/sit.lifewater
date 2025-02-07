@@ -61,14 +61,18 @@ const CreateStaff: React.FC = () => {
     try {
       const url = `${endpoints.DELETE_AN_STAFF}/${id}`;
       const { response, error } = await deleteStaff(url);
+  
       if (!error && response) {
         toast.success(response?.data.message);
         getAllStaff();
+      } else {
+        toast.error(error?.response?.data?.message || "Error occurred while deleting customer.");
       }
-    } catch (error) {
-      toast.error("Error occurred while deleting customer.");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Error occurred while deleting customer.");
     }
   };
+  
 
   // Count designations
   const designationCounts = (staffData || []).reduce((acc, item) => {
