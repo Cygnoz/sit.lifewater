@@ -171,9 +171,6 @@ const TrialBalance = require('../Models/trialBalance');
 // Fetch existing data
 
 
-
-
-
 const dataExist = async ( customerId , depositAccountId ) => {
     const [ customerAccount, saleAccount, depositAccount ] = await Promise.all([
       Account.findOne({  accountId:customerId }),
@@ -182,6 +179,10 @@ const dataExist = async ( customerId , depositAccountId ) => {
     ]);
     return { customerAccount, saleAccount, depositAccount};
 };
+
+
+
+
 
 // exports.createOrder = async (req, res) => {
 //   console.log("Create Order Request:", req.body);
@@ -408,7 +409,6 @@ const dataExist = async ( customerId , depositAccountId ) => {
 
 
 //order without coupon
-
 // exports.createOrder = async (req, res) => {
 //   console.log("Create Order Request:", req.body);
 
@@ -848,22 +848,18 @@ exports.createOrder = async (req, res) => {
       console.error('Error generating order number:', error);
     }
 
-    const order = new Order({
-      ...cleanedData,
-      orderNumber,
-      balanceAmount: cleanedData.paymentMode === 'Credit' 
-        ? Number(cleanedData.totalAmount) 
-        : (Number(cleanedData.totalAmount) - Number(cleanedData.paidAmount)) || 0,
-      paidAmount: cleanedData.paymentMode === 'Credit' 
-        ? 0 
-        : Number(cleanedData.paidAmount),
-      stock: cleanedData.stock.map(item => ({
-        itemId: item.itemId,
-        itemName: item.itemName,
-        quantity: item.quantity,
-        status: "Sold",
-      })),
-    });
+// Create an order record
+const order = new Order({
+  ...cleanedData,
+  orderNumber: orderNumber,
+  balanceAmount: (cleanedData.totalAmount - cleanedData.paidAmount) || 0,
+  stock: cleanedData.stock.map(item => ({
+    itemId: item.itemId,
+    itemName: item.itemName,
+    quantity: item.quantity,
+    status: "Sold",
+  })),
+});
 
     await order.save();
     await journal(order, customerAccount, saleAccount, depositAccount);
