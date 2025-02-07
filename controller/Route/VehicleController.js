@@ -93,16 +93,23 @@ exports.updateVehicle = async (req, res) => {
 // Delete vehicle by Object ID
 exports.deleteVehicle = async (req, res) => {
   try {
-    const { id } = req.params; // Using the vehicle's Object ID
+    const { id } = req.params;
+
+    console.log(`Delete request for vehicle ID: ${id}`);
 
     // Check if the vehicle is associated with an active ride
     const activeRide = await ride.findOne({ vehicleId: id, status: 'active' });
 
+    console.log(`Active ride found for vehicle: ${activeRide ? JSON.stringify(activeRide) : 'None'}`);
+
     if (activeRide) {
+      console.log('Vehicle is assigned to an active ride. Deletion blocked.');
       return res.status(400).json({ message: 'Cannot delete vehicle. Vehicle is assigned to an active ride.' });
     }
 
     const deletedVehicle = await Vehicle.findByIdAndDelete(id);
+
+    console.log(deletedVehicle ? `Vehicle deleted: ${JSON.stringify(deletedVehicle)}` : 'Vehicle not found');
 
     if (!deletedVehicle) {
       return res.status(404).json({ message: 'Vehicle not found' });
@@ -114,6 +121,7 @@ exports.deleteVehicle = async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 };
+
 
 
 // View a particular vehicle by Object ID
