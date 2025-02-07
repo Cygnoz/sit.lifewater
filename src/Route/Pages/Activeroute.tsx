@@ -141,7 +141,7 @@ const ActiveRoute: React.FC = () => {
           <tbody>
             {currentRoutes.length > 0 ? (
               currentRoutes.map((route, index) => (
-                <tr className="border-b" key={route._id}>
+                <tr className="border-b cursor-pointer hover:bg-[#F9F7F0]" key={route._id}   onClick={() => handleView(route._id)} >
                   <td className="p-2 text-[14px] text-center text-[#4B5C79]">
                     {indexOfFirstItem + index + 1}
                   </td>

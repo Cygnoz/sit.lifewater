@@ -110,7 +110,7 @@ const PurchaseTable: React.FC<TableProps> = ({
               ))
             ) : currentData && currentData.length > 0 ? (
               currentData.map((item, rowIndex) => (
-                <tr key={item._id} className="relative cursor-pointer">
+                <tr key={item._id} className="relative cursor-pointer hover:bg-[#F9F7F0]">
                   <td className="py-2.5 px-4 border-y border-tableBorder">
                     {(currentPage - 1) * rowsPerPage + rowIndex + 1}
                   </td>
@@ -120,14 +120,15 @@ const PurchaseTable: React.FC<TableProps> = ({
                         <td
                           key={col.id}
                           className="py-2.5 px-4 border-y border-tableBorder text-center"
+                          onClick={() => onViewClick && onViewClick(item._id)}
                         >
                           {renderColumnContent
                             ? renderColumnContent(col.id, item) || "-"
                             : item[col.id] !== undefined &&
                               item[col.id] !== null &&
                               item[col.id].toString().trim() !== ""
-                            ? item[col.id]
-                            : "-"}
+                              ? item[col.id]
+                              : "-"}
                         </td>
                       )
                   )}
