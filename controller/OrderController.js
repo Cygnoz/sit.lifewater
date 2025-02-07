@@ -409,6 +409,248 @@ const dataExist = async ( customerId , depositAccountId ) => {
 
 
 
+// exports.createOrder = async (req, res) => {
+//   console.log("Create Order Request:", req.body);
+
+//   try {
+//     const cleanedData = cleanCustomerData(req.body);
+//     cleanedData.stock = (cleanedData.stock || [])
+//       .map(item => cleanCustomerData(item))
+//       .filter(item => item.itemId && item.itemId.trim() !== "");
+
+//     // Validate required fields
+//     if (!cleanedData.mainRouteId || !cleanedData.mainRouteName) {
+//       return res.status(400).json({ success: false, message: 'Select Main Route' });
+//     }
+//     if (!cleanedData.subRouteId || !cleanedData.subRouteName) {
+//       return res.status(400).json({ success: false, message: 'Select Sub Route' });
+//     }
+//     if (!cleanedData.customerId) {
+//       return res.status(400).json({ success: false, message: 'Select a Customer' });
+//     }
+//     if (!cleanedData.stock || cleanedData.stock.length === 0) {
+//       return res.status(400).json({ success: false, message: 'Select an item' });
+//     }
+
+//     const { customerAccount, saleAccount, depositAccount } = await dataExist(cleanedData.customerId, cleanedData.depositAccountId);
+//     if (!customerAccount) {
+//       return res.status(404).json({ message: "Customer Account not found" });
+//     }
+
+//     // Fetch subroute and customer
+//     const subRoute = await SubRoute.findById(cleanedData.subRouteId);
+//     if (!subRoute) {
+//       return res.status(404).json({ success: false, message: 'Sub Route not found' });
+//     }
+
+//     const customer = await Customer.findById(cleanedData.customerId);
+//     if (!customer) {
+//       return res.status(404).json({ success: false, message: 'Customer not found' });
+//     }
+
+//     console.log('SubRoute Before Update:', subRoute);
+//     console.log('Customer Before Update:', customer);
+
+//     const subRouteStock = subRoute.stock || [];
+//     const customerStock = customer.stock || [];
+
+//     // Validate item availability in the subroute stock
+//     for (const item of cleanedData.stock) {
+//       const subRouteItem = subRouteStock.find(stock => stock.itemId === item.itemId);
+
+//       if (!subRouteItem) { 
+//         return res.status(400).json({
+//           success: false,
+//           message: `Item ${item.itemName} is not available in the subroute`
+//         });
+//       }
+
+//       if (item.quantity > subRouteItem.quantity) {
+//         return res.status(400).json({
+//           success: false,
+//           message: `Insufficient quantity for item ${item.itemName}. Available: ${subRouteItem.quantity}, Requested: ${item.quantity}`
+//         });
+//       }
+//     }
+
+//     // Update stocks
+//     for (const item of cleanedData.stock) {
+//       const subRouteItemIndex = subRouteStock.findIndex(stock => stock.itemId === item.itemId);
+
+//       if (subRouteItemIndex >= 0) {
+//         const subRouteItem = subRouteStock[subRouteItemIndex];
+
+//         // Decrement quantity in subroute
+//         subRouteItem.quantity -= item.quantity;
+
+//         // Remove the item from subroute stock if quantity becomes 0
+// // Set the quantity to 0 instead of removing the item if quantity becomes 0
+// if (subRouteItem.quantity <= 0) {
+//   subRouteItem.quantity = 0;
+// }
+//       }
+
+//       // Fetch item details from Item schema
+//       const itemDetails = await Item.findById(item.itemId);
+//       if (!itemDetails) {
+//         return res.status(404).json({ success: false, message: `Item ${item.itemName} not found in inventory` });
+//       }
+
+//       // Check if the item is resaleable
+//       const isResalable = itemDetails.resaleable;
+
+//       // Add or update the item in the customer's stock
+//       const customerItemIndex = customerStock.findIndex(stock => stock.itemId === item.itemId);
+
+//       if (customerItemIndex >= 0) {
+//         // If the item already exists in customer stock, update its quantity
+//         customerStock[customerItemIndex].quantity += item.quantity;
+//         customerStock[customerItemIndex].status = isResalable ? "Filled" : undefined;
+//       } else {
+//         // Add new item to the customer stock
+//         customerStock.push({
+//           itemId: item.itemId,
+//           itemName: item.itemName,
+//           quantity: item.quantity,
+//           status: isResalable ? "Filled" : undefined,
+//         });
+//       }
+//     }
+
+//     // Handle return bottles
+//     if (cleanedData.returnBottle && cleanedData.returnBottle > 0) {
+//       const returnBottleAmount = cleanedData.returnBottle;
+
+//       for (const item of cleanedData.stock || []) {
+//         // Update customer's stock to reflect the return
+//         const customerItemIndex = customerStock.findIndex(stock => stock.itemId === item.itemId);
+
+//         if (customerItemIndex >= 0) {
+//           const customerItem = customerStock[customerItemIndex];
+
+//           if (returnBottleAmount > customerItem.quantity) {
+//             return res.status(400).json({
+//               success: false,
+//               message: `Return amount for item ${item.itemName} exceeds customer's current stock. Available: ${customerItem.quantity}, Returned: ${returnBottleAmount}`
+//             });
+//           }
+
+//           // Decrement the return amount from customer's stock
+//           customerItem.quantity -= returnBottleAmount;
+
+//           // Remove the item from customer stock if quantity becomes 0
+//           if (customerItem.quantity <= 0) {
+//             customerStock.splice(customerItemIndex, 1);
+//           }
+//         } else {
+//           return res.status(400).json({
+//             success: false,
+//             message: `Customer does not have item ${item.itemName} in stock for return`
+//           });
+//         }
+
+//         // Update subroute stock to reflect the returned items
+//         const subRouteItemIndex = subRouteStock.findIndex(stock => stock.itemId === item.itemId);
+
+//         if (subRouteItemIndex >= 0) {
+//           // Only increment returnBottle count without affecting available stock
+//           subRouteStock[subRouteItemIndex].returnBottle = (subRouteStock[subRouteItemIndex].returnBottle || 0) + returnBottleAmount;
+//         } else {
+//           subRouteStock.push({
+//             itemId: item.itemId,
+//             itemName: item.itemName,
+//             returnBottle: returnBottleAmount
+//           });
+//         }
+//       }
+//     }
+
+//     // Save the updated subroute stock
+//     subRoute.stock = subRouteStock;
+//     await subRoute.save();
+
+//     // Save the updated customer stock
+//     customer.stock = customerStock;
+//     await customer.save();
+
+//     console.log('Updated SubRoute Stock:', subRouteStock);
+//     console.log('Updated Customer Stock:', customerStock);
+
+//     // // Prefix generation
+//     // let nextId = 1;
+//     // const lastPrefix = await Order.findOne().sort({ _id: -1 }); 
+//     // console.log('Last Prefix:----------------------------------------------', lastPrefix.orderNumber.slice(6));
+    
+//     // if (lastPrefix) {
+//     //   const lastId = parseInt(lastPrefix.orderNumber.slice(6)); 
+//     //   nextId = lastId + 1; 
+//     // }    
+//     // const orderNumber = `ORDER-${nextId}`;
+
+//     let nextId = 1;
+//     let orderNumber = ''; // Declare outside to avoid scoping issues
+    
+//     try {
+//       const lastPrefix = await Order.findOne().sort({ _id: -1 });
+    
+//       if (lastPrefix?.orderNumber?.startsWith('ORDER-')) {
+//         const lastId = parseInt(lastPrefix.orderNumber.split('-')[1]);
+//         if (!isNaN(lastId)) {
+//           nextId = lastId + 1;
+//         }
+//       }
+    
+//       orderNumber = `ORDER-${String(nextId).padStart(3, '0')}`; // e.g., ORDER-001
+//       console.log('Generated Order Number:', orderNumber);
+//     } catch (error) {
+//       console.error('Error generating order number:', error);
+//     }
+    
+//     const order = new Order({
+//       ...cleanedData,
+//       orderNumber,
+//       balanceAmount: cleanedData.paymentMode === 'Credit' 
+//         ? Number(cleanedData.totalAmount) 
+//         : (Number(cleanedData.totalAmount) - Number(cleanedData.paidAmount)) || 0,
+//       paidAmount: cleanedData.paymentMode === 'Credit' 
+//         ? 0 
+//         : Number(cleanedData.paidAmount),
+//       stock: cleanedData.stock.map(item => ({
+//         itemId: item.itemId,
+//         itemName: item.itemName,
+//         quantity: item.quantity,
+//         status: "Sold",
+//       })),
+//     });
+    
+//     console.log("Debug - Balance Amount:", order.balanceAmount);
+//     console.log("Debug - Paid Amount:", order.paidAmount);
+    
+    
+//     await order.save();
+    
+
+//     console.log("Order created:", JSON.stringify(order, null, 2));
+
+//     // Journal
+//     await journal(order, customerAccount, saleAccount, depositAccount);
+
+//     // Send success response
+//     res.status(200).json({ success: true, message: 'Order created successfully' });
+
+//   } catch (error) {
+//     console.error(error);
+
+//     // Send error response
+//     res.status(500).json({
+//       success: false,
+//       message: "An error occurred while creating the order"
+//     });
+//   }
+// };
+
+
+
 exports.createOrder = async (req, res) => {
   console.log("Create Order Request:", req.body);
 
@@ -432,6 +674,9 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Select an item' });
     }
 
+    // Calculate total quantity for the order
+    cleanedData.totalQuantity = cleanedData.stock.reduce((sum, item) => sum + item.quantity, 0);
+
     const { customerAccount, saleAccount, depositAccount } = await dataExist(cleanedData.customerId, cleanedData.depositAccountId);
     if (!customerAccount) {
       return res.status(404).json({ message: "Customer Account not found" });
@@ -448,8 +693,31 @@ exports.createOrder = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Customer not found' });
     }
 
-    console.log('SubRoute Before Update:', subRoute);
-    console.log('Customer Before Update:', customer);
+    // Log the customer details and CouponBottle field
+    console.log('Customer Details:', customer);
+    console.log('Customer CouponBottle:', customer.CouponBottle);
+
+    // Ensure CouponBottle is a number and default it to 0 if undefined
+    const customerCoupons = customer.CouponBottle || 0;
+    console.log("Total Order Quantity:", cleanedData.totalQuantity);
+    console.log("Customer Available Coupons:", customerCoupons);
+
+    // Validate coupon availability only for customers who use coupons
+    if (cleanedData.paymentMode === 'Coupon') {
+      if (customerCoupons < cleanedData.totalQuantity) {
+        return res.status(400).json({
+          success: false,
+          message: "Coupons for this customer are finished"
+        });
+      }
+
+      // Deduct the coupon bottles
+      customer.CouponBottle -= cleanedData.totalQuantity;
+      console.log(`Customer coupon bottles updated: ${customer.CouponBottle}`);
+    } else {
+      // No coupon validation needed for non-coupon customers (e.g., Cash or Credit)
+      console.log("No coupon validation required for this customer.");
+    }
 
     const subRouteStock = subRoute.stock || [];
     const customerStock = customer.stock || [];
@@ -458,7 +726,7 @@ exports.createOrder = async (req, res) => {
     for (const item of cleanedData.stock) {
       const subRouteItem = subRouteStock.find(stock => stock.itemId === item.itemId);
 
-      if (!subRouteItem) { 
+      if (!subRouteItem) {
         return res.status(400).json({
           success: false,
           message: `Item ${item.itemName} is not available in the subroute`
@@ -483,11 +751,10 @@ exports.createOrder = async (req, res) => {
         // Decrement quantity in subroute
         subRouteItem.quantity -= item.quantity;
 
-        // Remove the item from subroute stock if quantity becomes 0
-// Set the quantity to 0 instead of removing the item if quantity becomes 0
-if (subRouteItem.quantity <= 0) {
-  subRouteItem.quantity = 0;
-}
+        // Set quantity to 0 instead of removing the item if quantity becomes 0
+        if (subRouteItem.quantity <= 0) {
+          subRouteItem.quantity = 0;
+        }
       }
 
       // Fetch item details from Item schema
@@ -503,11 +770,9 @@ if (subRouteItem.quantity <= 0) {
       const customerItemIndex = customerStock.findIndex(stock => stock.itemId === item.itemId);
 
       if (customerItemIndex >= 0) {
-        // If the item already exists in customer stock, update its quantity
         customerStock[customerItemIndex].quantity += item.quantity;
         customerStock[customerItemIndex].status = isResalable ? "Filled" : undefined;
       } else {
-        // Add new item to the customer stock
         customerStock.push({
           itemId: item.itemId,
           itemName: item.itemName,
@@ -522,7 +787,6 @@ if (subRouteItem.quantity <= 0) {
       const returnBottleAmount = cleanedData.returnBottle;
 
       for (const item of cleanedData.stock || []) {
-        // Update customer's stock to reflect the return
         const customerItemIndex = customerStock.findIndex(stock => stock.itemId === item.itemId);
 
         if (customerItemIndex >= 0) {
@@ -535,10 +799,8 @@ if (subRouteItem.quantity <= 0) {
             });
           }
 
-          // Decrement the return amount from customer's stock
           customerItem.quantity -= returnBottleAmount;
 
-          // Remove the item from customer stock if quantity becomes 0
           if (customerItem.quantity <= 0) {
             customerStock.splice(customerItemIndex, 1);
           }
@@ -549,11 +811,9 @@ if (subRouteItem.quantity <= 0) {
           });
         }
 
-        // Update subroute stock to reflect the returned items
         const subRouteItemIndex = subRouteStock.findIndex(stock => stock.itemId === item.itemId);
 
         if (subRouteItemIndex >= 0) {
-          // Only increment returnBottle count without affecting available stock
           subRouteStock[subRouteItemIndex].returnBottle = (subRouteStock[subRouteItemIndex].returnBottle || 0) + returnBottleAmount;
         } else {
           subRouteStock.push({
@@ -565,47 +825,29 @@ if (subRouteItem.quantity <= 0) {
       }
     }
 
-    // Save the updated subroute stock
     subRoute.stock = subRouteStock;
     await subRoute.save();
 
-    // Save the updated customer stock
     customer.stock = customerStock;
     await customer.save();
 
-    console.log('Updated SubRoute Stock:', subRouteStock);
-    console.log('Updated Customer Stock:', customerStock);
-
-    // // Prefix generation
-    // let nextId = 1;
-    // const lastPrefix = await Order.findOne().sort({ _id: -1 }); 
-    // console.log('Last Prefix:----------------------------------------------', lastPrefix.orderNumber.slice(6));
-    
-    // if (lastPrefix) {
-    //   const lastId = parseInt(lastPrefix.orderNumber.slice(6)); 
-    //   nextId = lastId + 1; 
-    // }    
-    // const orderNumber = `ORDER-${nextId}`;
-
     let nextId = 1;
-    let orderNumber = ''; // Declare outside to avoid scoping issues
+    let orderNumber = ''; 
     
     try {
       const lastPrefix = await Order.findOne().sort({ _id: -1 });
-    
       if (lastPrefix?.orderNumber?.startsWith('ORDER-')) {
         const lastId = parseInt(lastPrefix.orderNumber.split('-')[1]);
         if (!isNaN(lastId)) {
           nextId = lastId + 1;
         }
       }
-    
-      orderNumber = `ORDER-${String(nextId).padStart(3, '0')}`; // e.g., ORDER-001
+      orderNumber = `ORDER-${String(nextId).padStart(3, '0')}`;
       console.log('Generated Order Number:', orderNumber);
     } catch (error) {
       console.error('Error generating order number:', error);
     }
-    
+
     const order = new Order({
       ...cleanedData,
       orderNumber,
@@ -622,32 +864,21 @@ if (subRouteItem.quantity <= 0) {
         status: "Sold",
       })),
     });
-    
-    console.log("Debug - Balance Amount:", order.balanceAmount);
-    console.log("Debug - Paid Amount:", order.paidAmount);
-    
-    
+
     await order.save();
-    
-
-    console.log("Order created:", JSON.stringify(order, null, 2));
-
-    // Journal
     await journal(order, customerAccount, saleAccount, depositAccount);
 
-    // Send success response
     res.status(200).json({ success: true, message: 'Order created successfully' });
 
   } catch (error) {
     console.error(error);
-
-    // Send error response
     res.status(500).json({
       success: false,
       message: "An error occurred while creating the order"
     });
   }
 };
+
 
 
 

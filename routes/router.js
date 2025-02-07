@@ -17,6 +17,8 @@ router.get('/stockstats', verifyToken,  stockController.getStockStats);
 router.put('/internaltransfer', verifyToken,  stockController.internalTransfer);
 router.get('/getalltransfers',verifyToken, stockController.getAllTransfers)
 router.delete('/internaltransfer/:id',verifyToken, stockController.deleteInternalTransfer);
+ 
+
 
 //Item
 router.post('/item', verifyToken,  itemController.addItem);
@@ -46,6 +48,7 @@ router.get('/today/:rideId', verifyToken,orderController.getTodayOrders);
 router.post('/order-receipt', verifyToken, ReceiptController.createReceipt );
 router.get('/receipts', verifyToken,ReceiptController.getAllReceipts);
 router.get('/receipts/:receiptId', verifyToken,ReceiptController.getOneReceipt);
+router.get('/receipts/salesman/:salesmanId', ReceiptController.getReceiptsBySalesmanId);
  
 //Unloading
 router.post('/addunload', verifyToken,  unloadController.unloadStock);

@@ -45,7 +45,7 @@ const orderSchema = new mongoose.Schema({
   paymentMode: {
     type: String,
     // required: true,
-    enum: ['Cash', 'Credit', 'FOC']
+    enum: ['Cash', 'Credit', 'Coupon'],
   },
   // Additional information
   notes: {
