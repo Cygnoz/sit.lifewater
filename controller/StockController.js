@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
 
 
 
+
 // exports.addStock = async (req, res) => {
 //   console.log("Add Stock Load:", req.body);
 
@@ -634,6 +635,89 @@ exports.getStockStats = async (req, res) => {
   }
 };
 
+
+exports.deleteStock = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { id } = req.params;
+
+    // Validate stockId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid Stock ID format" });
+    }
+
+    console.log("Stock ID received:", id);
+
+    // Find the stock record
+    const stock = await StockLoad.findById(id).session(session);
+    if (!stock) {
+      return res.status(404).json({ success: false, message: "Stock not found" });
+    }
+
+    console.log("Stock found:", stock);
+
+    // Find the subRoute and warehouse
+    const subRoute = await SubRoute.findById(stock.subRouteId).session(session);
+    const warehouse = await Warehouse.findById(stock.warehouseId).session(session);
+
+    if (!subRoute || !warehouse) {
+      return res.status(404).json({ success: false, message: "SubRoute or Warehouse not found" });
+    }
+
+    // Update subRoute stock (Decrease Quantity)
+    stock.stock.forEach((item) => {
+      const routeStockItem = subRoute.stock.find(stockItem => stockItem.itemId.toString() === item.itemId.toString());
+      if (routeStockItem) {
+        routeStockItem.quantity -= item.quantity;
+        if (routeStockItem.quantity <= 0) {
+          subRoute.stock = subRoute.stock.filter(stockItem => stockItem.itemId.toString() !== item.itemId.toString());
+        }
+      }
+    });
+
+    // Update warehouse stock (Increase Quantity)
+    stock.stock.forEach((item) => {
+      let warehouseStockItem = warehouse.stock.find(stockItem => stockItem.itemId.toString() === item.itemId.toString());
+
+      if (warehouseStockItem) {
+        warehouseStockItem.quantity += item.quantity;
+      } else {
+        warehouse.stock.push({
+          itemId: item.itemId,
+          itemName: item.itemName,
+          quantity: item.quantity
+        });
+      }
+    });
+
+    // Save updated subRoute and warehouse
+    await subRoute.save({ session });
+    await warehouse.save({ session });
+
+    // Delete stock record from StockLoad
+    await StockLoad.findByIdAndDelete(id, { session });
+
+    // Commit transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({ success: true, message: "Stock deleted from route and returned to warehouse" });
+
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
+    console.error("Error deleting stock:", error);
+    res.status(500).json({ success: false, message: "Failed to delete stock" });
+  }
+};
+
+
+
+
+
 exports.internalTransfer = async (req, res) => {
   console.log("Internal Transfer:", req.body);
 
@@ -816,8 +900,7 @@ exports.getAllTransfers = async (req, res) => {
   }
 };
 
-// delete 
-// DELETE Internal Transfer and return stock
+
 
 // DELETE Internal Transfer and adjust stock for both routes
 exports.deleteInternalTransfer = async (req, res) => {
