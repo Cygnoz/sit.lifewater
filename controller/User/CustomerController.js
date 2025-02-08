@@ -479,13 +479,14 @@ exports.updateCustomerById = async (req, res) => {
 
 
 
+
 exports.deleteCustomerById = async (req, res) => {
   try {
     const customerId = req.params.id;
 
     // Check if the customer has any unpaid balance
     const balanceResult = await Order.aggregate([
-      { $match: { customerId: mongoose.Types.ObjectId(customerId) } },
+      { $match: { customerId: customerId } },
       { $group: { _id: null, totalBalance: { $sum: '$balanceAmount' } } }
     ]);
 
@@ -524,6 +525,7 @@ exports.deleteCustomerById = async (req, res) => {
     res.status(500).json({ message: 'Error deleting customer and related data', error });
   }
 };
+
 
 
 
