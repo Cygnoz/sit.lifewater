@@ -479,8 +479,6 @@ exports.updateCustomerById = async (req, res) => {
 
 
 
-const Order = require('../../Models/OrderSchema');
-
 exports.deleteCustomerById = async (req, res) => {
   try {
     const customerId = req.params.id;
