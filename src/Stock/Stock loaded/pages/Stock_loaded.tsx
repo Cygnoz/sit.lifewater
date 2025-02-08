@@ -80,6 +80,8 @@ const StockLoaded: React.FC = () => {
       toast.error("Invalid Stock ID");
       return;
     }
+
+    
     console.log("Deleting Stock with ID:", id);
     try {
       const url = `${endpoints.DELETE_STOCK_LOAD}/${id}`;

@@ -61,6 +61,8 @@ const CreateInternalTransfer: React.FC = () => {
 
   const { request: deleteItem } = useApi("delete", 4001);
 
+
+  
     const handleDelete = async (id: string) => {
       try {
         const url = `${endpoints.DELETE_INTERNAL_TRANSFER}/${id}`;
