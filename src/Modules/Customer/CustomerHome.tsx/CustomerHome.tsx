@@ -47,15 +47,21 @@ const CustomerHome = () => {
     try {
       const url = `${endpoints.DELETE_A_CUSTOMER}/${id}`;
       const { response, error } = await deleteCustomer(url);
-      getAllCustomers()
+      
+      getAllCustomers();
+  
       if (!error && response) {
-        toast.success(response?.data.message);
+        toast.success(response.data.message);
+      } else if (error) {
+        toast.error(error.response?.data?.message || "Error occurred while deleting customer.");
       }
+  
       console.log(response);
-    } catch (error) {
-      toast.error("Error occurred while deleting brand.");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Error occurred while deleting customer.");
     }
-  }
+  };
+  
 
   const getAllCustomers = async () => {
     try {
