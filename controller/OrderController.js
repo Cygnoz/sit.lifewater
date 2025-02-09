@@ -1272,6 +1272,7 @@ exports.deleteOrder = async (req, res) => {
             console.log(`Returning old item ${existingOrderItem.itemName} to subRoute stock.`);
             subRouteOldItem.quantity += existingOrderItem.quantity;
           } else {
+            // If the item doesn't already exist in the subRoute, add it back
             subRouteStock.push({
               itemId: existingOrderItem.itemId,
               itemName: existingOrderItem.itemName,
@@ -1302,7 +1303,7 @@ exports.deleteOrder = async (req, res) => {
       existingOrder.totalAmount = cleanedData.totalAmount;
       existingOrder.paidAmount = cleanedData.paidAmount;
       existingOrder.balanceAmount = cleanedData.totalAmount - cleanedData.paidAmount;
-      existingOrder.notes = cleanedData.note;
+      existingOrder.note = cleanedData.note;
   
       await existingOrder.save();
       console.log("Order updated successfully.");
@@ -1313,6 +1314,7 @@ exports.deleteOrder = async (req, res) => {
       res.status(500).json({ success: false, message: "An error occurred while editing the order." });
     }
   };
+  
   
   
   
