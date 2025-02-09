@@ -1254,6 +1254,32 @@ exports.deleteOrder = async (req, res) => {
             status: "Filled",
           });
         }
+  
+        // If an item is being replaced, return the old item to the subRoute and remove it from the customer's stock
+        if (existingOrderItem && existingOrderItem.itemId !== newItem.itemId) {
+          const oldCustomerItem = newCustomerStock.find(item => item.itemId === existingOrderItem.itemId);
+          if (oldCustomerItem) {
+            console.log(`Removing old item ${existingOrderItem.itemName} from customer stock.`);
+            oldCustomerItem.quantity -= existingOrderItem.quantity;
+            if (oldCustomerItem.quantity <= 0) {
+              const index = newCustomerStock.indexOf(oldCustomerItem);
+              newCustomerStock.splice(index, 1);
+            }
+          }
+  
+          const subRouteOldItem = subRouteStock.find(stock => stock.itemId === existingOrderItem.itemId);
+          if (subRouteOldItem) {
+            console.log(`Returning old item ${existingOrderItem.itemName} to subRoute stock.`);
+            subRouteOldItem.quantity += existingOrderItem.quantity;
+          } else {
+            subRouteStock.push({
+              itemId: existingOrderItem.itemId,
+              itemName: existingOrderItem.itemName,
+              quantity: existingOrderItem.quantity,
+              status: "Available",
+            });
+          }
+        }
       }
   
       // Save updated stocks
@@ -1287,6 +1313,7 @@ exports.deleteOrder = async (req, res) => {
       res.status(500).json({ success: false, message: "An error occurred while editing the order." });
     }
   };
+  
   
   
 
