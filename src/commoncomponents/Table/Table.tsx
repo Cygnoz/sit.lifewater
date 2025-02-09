@@ -91,7 +91,7 @@ const PurchaseTable: React.FC<TableProps> = ({
               [...Array(rowsPerPage)].map((_, idx) => <TableSkelton key={idx} columns={skeletonColumns} />)
             ) : currentData && currentData.length > 0 ? (
               currentData.map((item, rowIndex) => (
-                <tr key={item._id || rowIndex} className="relative cursor-pointer hover:bg-[#F9F7F0]">
+                <tr key={item._id || rowIndex} onClick={() => onViewClick && onViewClick(item._id)} className="relative cursor-pointer hover:bg-[#F9F7F0]">
                   {/* Serial Number */}
                   <td className="py-2.5 px-4 border-y border-tableBorder">
                     {(currentPage - 1) * rowsPerPage + rowIndex + 1}
@@ -105,8 +105,8 @@ const PurchaseTable: React.FC<TableProps> = ({
                         : item[col.id] !== undefined &&
                           item[col.id] !== null &&
                           item[col.id].toString().trim() !== ""
-                        ? item[col.id]
-                        : "-"}
+                          ? item[col.id]
+                          : "-"}
                     </td>
                   ))}
 
