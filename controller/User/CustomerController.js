@@ -360,7 +360,7 @@ exports.updateCustomerById = async (req, res) => {
     console.log("Update Customer:", req.body);
     const { id } = req.params;
 
-    // Handle location
+    // Handle location updates
     if (req.body.location) {
       if (typeof req.body.location === "object" && req.body.location !== null) {
         const { address = '', latitude, longitude } = req.body.location;
@@ -393,15 +393,7 @@ exports.updateCustomerById = async (req, res) => {
 
     // Clean and sanitize customer data
     const cleanedData = cleanCustomerData(req.body);
-
-    // Remove the stock field to prevent updating it
-    delete cleanedData.stock;
-
-    console.log("Cleaned Data:", cleanedData);
-
-    if (cleanedData.depositAmount === "NaN") {
-      cleanedData.depositAmount = 0;
-    }
+    delete cleanedData.stock; // Prevent stock updates
 
     if (!cleanedData.fullName) {
       return res.status(400).json({ message: 'Name is required.' });
@@ -413,7 +405,11 @@ exports.updateCustomerById = async (req, res) => {
 
     // Check for unique WhatsApp number
     if (cleanedData.whatsappNumber) {
-      const existingWhatsappNumber = await Customer.findOne({ whatsappNumber: cleanedData.whatsappNumber, _id: { $ne: id } });
+      const existingWhatsappNumber = await Customer.findOne({
+        whatsappNumber: cleanedData.whatsappNumber,
+        _id: { $ne: id },
+      });
+
       if (existingWhatsappNumber) {
         return res.status(400).json({ message: 'A customer with this WhatsApp number already exists.' });
       }
@@ -421,26 +417,44 @@ exports.updateCustomerById = async (req, res) => {
 
     // Check for unique email
     if (cleanedData.email) {
-      const existingEmail = await Customer.findOne({ email: cleanedData.email, _id: { $ne: id } });
+      const existingEmail = await Customer.findOne({
+        email: cleanedData.email,
+        _id: { $ne: id },
+      });
+
       if (existingEmail) {
         return res.status(400).json({ message: 'A customer with this email already exists.' });
       }
     }
 
     // Update the customer in the database
-    const updatedCustomer = await Customer.findByIdAndUpdate(
-      id,
-      cleanedData,
-      { new: true, runValidators: true } 
-    );
+    const updatedCustomer = await Customer.findByIdAndUpdate(id, cleanedData, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updatedCustomer) {
       return res.status(404).json({ message: "Customer not found" });
     }
 
+    // Handle deposit changes in TrialBalance
+    if (cleanedData.depositAmount !== undefined && cleanedData.depositAmount !== existingCustomer.depositAmount) {
+      const trialBalanceEntry = await TrialBalance.findOne({
+        operationId: id,
+        action: "Opening Balance",
+      });
+
+      if (trialBalanceEntry) {
+        trialBalanceEntry.debitAmount = cleanedData.depositAmount || 0;
+        await trialBalanceEntry.save();
+        console.log("Trial balance updated for deposit amount change.");
+      } else {
+        console.warn("No trial balance entry found for customer deposit update.");
+      }
+    }
+
     // Update customerDisplayName in associated Account documents
     if (cleanedData.fullName && cleanedData.fullName !== existingCustomer.fullName) {
-      // Update Accounts
       const updatedAccount = await Account.updateMany(
         { accountName: existingCustomer.fullName },
         { $set: { accountName: cleanedData.fullName } }
@@ -449,19 +463,16 @@ exports.updateCustomerById = async (req, res) => {
         `${updatedAccount.modifiedCount} account(s) associated with the accountName have been updated.`
       );
 
-      // Update TrialBalances
-      console.log("existingCustomer.fullName:", existingCustomer.fullName);
       const updatedTrialBalance = await TrialBalance.updateMany(
-        { operationId: id }, // Use the customer ID as the operationId
+        { operationId: id },
         { $set: { accountName: cleanedData.fullName } }
       );
       console.log(
         `${updatedTrialBalance.modifiedCount} trial balance record(s) associated with the accountName have been updated.`
       );
-  
     }
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: 'Customer Edited successfully',
       data: updatedCustomer,
     });
@@ -470,6 +481,7 @@ exports.updateCustomerById = async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 };
+
 
 
 
@@ -523,70 +535,6 @@ exports.deleteCustomerById = async (req, res) => {
 
 
 
-
-
-// exports.createCouponCustomer = async (req, res) => {
-//   try {
-//     const { customerId, couponId,depositAccountId, paidAmount} = req.body;
-
-
-//     if (!customerId || !couponId || !depositAccountId || !paidAmount) {
-//       return res.status(400).json({ message: 'All fields are required.' });
-//     }
-
-//     const Customer = await Customer.findById(customerId)
-
-//     if (!Customer) {
-//       return res.status(404).json({ message: "Customer not found" })
-//     }
-//     const coupon = await Coupon.findById(couponId)
-
-//     if (!coupon) {
-//       return res.status(404).json({ message: "Coupon not found" })
-//     }
-//     const Accounts = await Accounts.findById(depositAccountId)
-
-//     if (!Accounts) {
-//       return res.status(404).json({ message: "Accounts not found" })
-//     }
-
-
-//     if(coupon.price!==paidAmount){
-//       return res.status(400).json({ message: "Paid amount must be equal to coupon price" })
-//     }
-
-//     const { customerAccount, saleAccount, depositAccount } = await dataExist(customerId, depositAccountId);
-//     if (!customerAccount) {
-//       return res.status(404).json({ message: "Customer Account not found" });
-//     }
-
-
-//     let nextId = 1;
-//     const lastPrefix = await couponCustomer.findOne().sort({ _id: -1 }); 
-//     if (lastPrefix) {
-//       const lastId = parseInt(lastPrefix.couponNumber.slice(7)); 
-//       nextId = lastId + 1; 
-//     }    
-//     const couponNumber = `COUPON-${nextId}`;
-
-//     const newCouponCustomer = new couponCustomer({ customerId, couponId,depositAccountId, paidAmount, couponNumber });
-//     await newCouponCustomer.save();
-
-//     await journal(newCouponCustomer, customerAccount, saleAccount, depositAccount);
-
-//   }catch (error) {
-//     console.error('Error creating coupon customer:', error);
-//     res.status(500).json({ message: "Internal server error." });
-//   }
-// }
-  
-  //Clean Data 
-  
-  
-  
-  
-  
-  
   exports.createCouponCustomer = async (req, res) => {
     try {
       const { customerId, couponId, depositAccountId, paidAmount } = req.body;
