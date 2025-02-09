@@ -67,11 +67,11 @@ import ViewActiveRoute from '../Route/Components/ViewActiveRoute';
 import ViewSubRoute from '../Route/Components/ViewSubRoute';
 import MyComponent from '../dashboard/pages/DashBoard';
 import CreateProfile from '../Settings/Pages/CreateProfile';
-import ChartOfAccounts from '../Accounts/Pages/ChartOfAccount';
-import AccountantViewUI from '../Accounts/accountantview/AccountantView';
-import NewJournal from '../Accounts/manualJournal/newJournal/Newjournal';
-import ManualHome from '../Accounts/manualJournal/ManualHome';
-import ManualView from '../Accounts/manualJournal/ManualView';
+// import ChartOfAccounts from '../Accounts/Pages/ChartOfAccount';
+// import AccountantViewUI from '../Accounts/accountantview/AccountantView';
+// import NewJournal from '../Accounts/manualJournal/newJournal/Newjournal';
+// import ManualHome from '../Accounts/manualJournal/ManualHome';
+// import ManualView from '../Accounts/manualJournal/ManualView';
 import CustomerHome from '../Modules/Customer/CustomerHome.tsx/CustomerHome';
 import Login from '../Settings/Login/Login';
 import CreateStaff from '../Staff/Createstaff';
@@ -80,6 +80,11 @@ import StaffView from '../Staff/VieStaff/StaffView';
 import ViewOrder from '../Orders/components/ViewOrder';
 import ViewWarehouse from '../Stock/Warehouse/Components/ViewWarehouse';
 import { ViewReciept } from '../Sales/Components/ViewReciept';
+import ManualHome from '../accountant/manualJournel/ManualHome';
+import NewJournal from '../accountant/manualJournel/newJournal/NewJournal';
+import ManualView from '../accountant/manualJournel/ManualView';
+import ChartOfAccountant from '../accountant/chartOfAccountant/ChartOfAccountant';
+import AccountantView from '../accountant/accountantView/AccountantView';
 
 const App: React.FC = () => {
   const [selectedNav, setSelectedNav] = useState<string>(() => localStorage.getItem('selectedNav') || '');
@@ -233,11 +238,17 @@ const App: React.FC = () => {
               {/* <Route path='/salesman' element={<Salesman/>}/> */}
 
               {/* ACCOUNTS */}
-              <Route path='/journals' element={<ManualHome/>}/>
+              {/* <Route path='/journals' element={<ManualHome/>}/>
               <Route path='/newjournal' element={<NewJournal/>}/>
               <Route path='/viewjournal/:id' element={<ManualView/>}/>
               <Route path='/chartofaccount' element={<ChartOfAccounts/>}/>
-              <Route path='/accountant/view/:id' element={<AccountantViewUI/>}/>
+              <Route path='/accountant/view/:id' element={<AccountantViewUI/>}/> */}
+                 <Route path='/journals' element={<ManualHome/>}/>
+              <Route path='/newjournal' element={<NewJournal />}/>
+              <Route path='/editjornal/:id' element={<NewJournal page='edit'/>}/>
+              <Route path='/accountant/manualjournal/view/:id' element={<ManualView/>}/>
+              <Route path='/chartofaccount' element={<ChartOfAccountant/>}/>
+              <Route path='/accountant/view/:id' element={<AccountantView/>}/>
 
               {/* SETTINGS */}
               <Route path='/settings' element={<CreateProfile/>}/>

@@ -93,10 +93,15 @@ export const endpoints = {
   ADD_NEW_ACCOUNT: `addaccounts`,
   GET_ALL_ACCOUNTS: `getallaccounts`,
   GET_ONE_TRIAL_BALANCE: `get-one-trial-balance`,
+  EDIT_JOURNAL_ENTRY: `edit-journal-entry`,
+  DELET_JOURNAL_ENTRY: `delete-journal-entry`,
 
   ADD_NEW_JOURNEL_ENTRY: `add-journal-entry`,
   GET_ALL_JOURNALS: `get-all-journal`,
   GET_ONE_JOURNAL: `get-one-journal`,
+  EDIT_NEW_ACCOUNT:`edit-account`,
+  GET_ONE_ACCOUNT:`one-account`,
+  DELETE_ACCONUT:`delete-account`,
 
 
   // receipt 

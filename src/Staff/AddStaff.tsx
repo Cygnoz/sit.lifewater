@@ -581,9 +581,9 @@ function AddStaff({ }: Props) {
                               onClick={togglePasswordVisibility}
                             >
                               {showPassword ? (
-                                <Eye color="#4B5C79" size={18} />
+                                <Eye color="#4B5C79"  />
                               ) : (
-                                <EyeOffIcon color="#4B5C79" size={18} />
+                                <EyeOffIcon color="#4B5C79"  />
                               )}
                             </div>
                           </div>
@@ -609,9 +609,9 @@ function AddStaff({ }: Props) {
                               onClick={toggleConfirmPasswordVisibility}
                             >
                               {showConfirmPassword ? (
-                                <Eye color="#4B5C79" size={18} />
+                                <Eye color="#4B5C79"  />
                               ) : (
-                                <EyeOffIcon color="#4B5C79" size={18} />
+                                <EyeOffIcon color="#4B5C79"  />
                               )}
                             </div>
                             {errorMessage && (
