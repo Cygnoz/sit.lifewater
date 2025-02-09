@@ -52,7 +52,9 @@ const AddReceipt: React.FC = () => {
         endpoints.GET_ALL_ACCOUNTS
       );
       if (!error && response) {
-        const filtered = response.data.filter(
+
+        const formattedData = response.data?.map((item: any) => item._doc);
+        const filtered = formattedData.filter(
           (account: any) => account.accountSubhead === "Cash"
         );
         setFilteredAccounts(filtered);
