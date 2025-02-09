@@ -17,6 +17,7 @@ interface Item {
   amount: number;
   _id?: string;
   resaleable?: boolean;
+  sellingPrice:number
 }
 
 interface WarehouseItem {
@@ -52,6 +53,7 @@ const AddWStock: React.FC<AddWStockProps> = () => {
         costPrice: 0,
         amount: 0,
         resaleable: false,
+        sellingPrice:0
       },
     ], // Set to empty string
     notes: "",
@@ -170,6 +172,7 @@ useEffect(() => {
           costPrice: 0,
           amount: 0,
           resaleable: false,
+          sellingPrice:0
         },
       ],
     }));
@@ -191,6 +194,7 @@ useEffect(() => {
                 amount: 0,
                 _id: "",
                 resaleable: false,
+                sellingPrice:0
               },
             ],
     }));
@@ -207,7 +211,8 @@ useEffect(() => {
         itemName: item.itemName,
         quantity,
         costPrice,
-        amount: costPrice * quantity, // Calculate amount based on rate and quantity
+        sellingPrice:item.sellingPrice,
+        amount: item.sellingPrice * quantity, // Calculate amount based on rate and quantity
         resaleable: item.resaleable,
       };
       return { ...prev, items: newItems };
@@ -227,12 +232,12 @@ useEffect(() => {
       newItems[index] = {
         ...newItems[index],
         [field]:
-          field === "costPrice" || field === "quantity" ? Number(value) : value, // Ensure numbers
+          field === "sellingPrice" || field === "quantity" ? Number(value) : value, // Ensure numbers
       };
 
       const quantity = Number(newItems[index].quantity) || 0;
-      const costPrice = Number(newItems[index].costPrice) || 0;
-      newItems[index].amount = costPrice * quantity;
+      const sellingPrice = Number(newItems[index].sellingPrice) || 0;
+      newItems[index].amount = sellingPrice * quantity;
 
       return { ...prev, items: newItems };
     });
@@ -441,7 +446,7 @@ useEffect(() => {
                                               {filteredItem.itemName}
                                             </p>
                                             <p className="text-xs text-gray-500">
-                                              AED: {filteredItem.costPrice}
+                                              AED: {filteredItem.sellingPrice}
                                             </p>
                                           </div>
                                         </div>
@@ -483,7 +488,7 @@ useEffect(() => {
                           <td className="py-2.5 px-4 border-y border-tableBorder">
                             <input
                               type="number"
-                              value={item.costPrice}
+                              value={item.sellingPrice}
                               disabled
                               className="w-full text-center"
                               placeholder="0"

@@ -5,6 +5,7 @@ import Eye from "../../assets/icons/Eye";
 import Pen from "../../assets/icons/Pen";
 import Trash2 from "../../assets/icons/Trash2";
 import TableSkelton from "../Skelton/TableSkelton";
+import ConfirmModal from "../ConfirmModal";
 
 interface Column {
   id: string;
@@ -40,6 +41,8 @@ const PurchaseTable: React.FC<TableProps> = ({
 }) => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const rowsPerPage = 10;
 
   const filteredData = data?.filter((item) =>
@@ -56,6 +59,11 @@ const PurchaseTable: React.FC<TableProps> = ({
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
+
+  const confirmDelete = (id: string) => {
+    setDeleteId(id);
+    setConfirmModalOpen(true);
   };
 
   return (
@@ -91,7 +99,7 @@ const PurchaseTable: React.FC<TableProps> = ({
               [...Array(rowsPerPage)].map((_, idx) => <TableSkelton key={idx} columns={skeletonColumns} />)
             ) : currentData && currentData.length > 0 ? (
               currentData.map((item, rowIndex) => (
-                <tr key={item._id || rowIndex} onClick={() => onViewClick && onViewClick(item._id)} className="relative cursor-pointer hover:bg-[#F9F7F0]">
+                <tr key={item._id || rowIndex} className="relative cursor-pointer hover:bg-[#F9F7F0]">
                   {/* Serial Number */}
                   <td className="py-2.5 px-4 border-y border-tableBorder">
                     {(currentPage - 1) * rowsPerPage + rowIndex + 1}
@@ -99,7 +107,7 @@ const PurchaseTable: React.FC<TableProps> = ({
 
                   {/* Table Data */}
                   {visibleColumns.map((col) => (
-                    <td key={col.id} className="py-2.5 px-4 border-y border-tableBorder text-center">
+                    <td key={col.id} onClick={() => onViewClick && onViewClick(item._id)} className="py-2.5 px-4 border-y border-tableBorder text-center">
                       {renderColumnContent
                         ? renderColumnContent(col.id, item) || "-"
                         : item[col.id] !== undefined &&
@@ -124,9 +132,10 @@ const PurchaseTable: React.FC<TableProps> = ({
                         </button>
                       )}
                       {onDeleteClick && (
-                        <button onClick={() => onDeleteClick(item._id)} aria-label="Delete">
+                        <button onClick={() => confirmDelete(item._id)} aria-label="Delete">
                           <Trash2 color="#EA1E4F" size={18} />
                         </button>
+
                       )}
                     </td>
                   )}
@@ -137,6 +146,17 @@ const PurchaseTable: React.FC<TableProps> = ({
             )}
           </tbody>
         </table>
+        <ConfirmModal
+          open={isConfirmModalOpen}
+          onClose={() => setConfirmModalOpen(false)}
+          onConfirm={() => {
+            if (deleteId) {
+              onDeleteClick?.(deleteId); // Call the delete function
+              setConfirmModalOpen(false); // Close the modal after deletion
+            }
+          }}
+          message="Are you sure you want to delete?"
+        />
       </div>
 
       {/* Pagination */}
@@ -164,3 +184,5 @@ const PurchaseTable: React.FC<TableProps> = ({
 };
 
 export default PurchaseTable;
+
+

@@ -58,28 +58,25 @@ const ViewWarehouse: React.FC = () => {
             warehouse.stock.map((item: any, index: number) => (
               <div
                 key={index}
-                className="mt-6 bg-gradient-to-r from-[#e3e6d5] to-[#f7e7ce] rounded-lg flex justify-between items-center p-4"
+                className="mt-6 bg-gradient-to-r from-[#e3e6d5] to-[#f7e7ce] rounded-lg grid grid-cols-4 items-center p-4"
               >
                 <div>
-                  <p className="text-sm text-gray-500">Item</p>
-                  <p className="font-semibold">{item.itemName}</p>
+                  <p className="text-sm text-gray-500 text-center">Item</p>
+                  <p className="font-semibold text-center">{item.itemName}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Quantity</p>
-                  <p className="font-semibold"> {item.quantity} Pcs</p>
+                  <p className="text-sm text-gray-500 text-center">Quantity</p>
+                  <p className="font-semibold text-center"> {item.quantity} Pcs</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Amount</p>
-                  <p className="font-semibold"> {item.amount} </p>
+                  <p className="text-sm text-gray-500 text-center">Cost Price</p>
+                  <p className="font-semibold text-center"> {item.costPrice} </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">CostPrice</p>
-                  <p className="font-semibold"> {item.costPrice} </p>
+                  <p className="text-sm text-gray-500 text-center">Selling Price</p>
+                  <p className="font-semibold text-center"> {item.sellingPrice} </p>
                 </div>
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
+                
               </div>
             ))}
 
@@ -95,7 +92,7 @@ const ViewWarehouse: React.FC = () => {
 
           {/* Print Button */}
           <div className="mt-6 flex justify-end">
-            <button className="px-4 py-2 bg-gray-200 text-black rounded-lg flex items-center gap-2">
+            <button className="px-4 hidden py-2 bg-gray-200 text-black rounded-lg  items-center gap-2">
               <img src={printer} alt="Print" /> Print
             </button>
           </div>
