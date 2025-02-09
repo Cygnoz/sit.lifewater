@@ -77,7 +77,7 @@ exports.createStock = async (req, res) => {
         warehouseExists.stock[existingItemIndex].quantity += item.quantity;
         warehouseExists.stock[existingItemIndex].costPrice = item.costPrice;
         warehouseExists.stock[existingItemIndex].amount =
-          warehouseExists.stock[existingItemIndex].quantity * item.costPrice;
+        warehouseExists.stock[existingItemIndex].quantity * item.sellingPrice;
         warehouseExists.stock[existingItemIndex].status = item.resaleable ? "Filled" : undefined;
       } else {
         // If the item does not exist in the stock, add it as a new stock entry
@@ -86,7 +86,7 @@ exports.createStock = async (req, res) => {
           itemName: item.itemName,
           quantity: item.quantity,
           costPrice: item.costPrice,
-          amount: item.quantity * item.costPrice,
+          amount: item.quantity * item.sellingPrice,
           status: item.resaleable ? "Filled" : undefined,
         });
       }
