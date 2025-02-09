@@ -13,6 +13,9 @@ const accountSchema = new Schema({
 
     openingDate: {type:String},    
     description: {type:String},
+
+    createdDateTime: { type: Date, default: () => new Date() },
+
 });
 
 const Accounts = mongoose.model("Accounts", accountSchema);

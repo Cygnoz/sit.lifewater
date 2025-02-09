@@ -1,4 +1,3 @@
-// const BusinessCustomer = require('../Models/BussinessCustomerSchema');
 const Coupon = require('../../Models/CouponSchema');
 const Customer = require('../../Models/CustomerSchema');
 const Accounts = require('../../Models/account');
@@ -84,9 +83,6 @@ exports.createCustomer = async (req, res) => {
       };
     }
 
-    const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai","DD/MM/YY","/");
-    const openingDate = generatedDateTime.dateTime; 
-
     // Create a new customer with the transformed location
     const newCustomer = new Customer({ ...cleanedData, location: transformedLocation });
 
@@ -96,7 +92,6 @@ exports.createCustomer = async (req, res) => {
     const newAccount = new Account({
       accountName: savedCustomer.fullName,
       accountId: savedCustomer._id,
-      openingDate:openingDate,
       accountSubhead: "Sundry Debtors",
       accountHead: "Asset",
       accountGroup: "Asset",
@@ -109,7 +104,6 @@ exports.createCustomer = async (req, res) => {
     const trialEntry = new TrialBalance({
       operationId: savedCustomer._id,
       date: savedCustomer.createdAt,
-      date: savedCustomer.openingDate,
       accountId: savedAccount._id,
       accountName: savedAccount.accountName,
       action: "Opening Balance",
@@ -855,3 +849,78 @@ async function journal(newCouponCustomer, customerAccount, saleAccount, depositA
   console.log('output:',trial); 
   
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exports.ensureAllCustomersHaveAccountsAndTrialBalances = async (req, res) => {
+  try {
+    const customers = await Customer.find();
+
+    for (const customer of customers) {
+      // Check if the customer has an associated account
+      const existingAccount = await Account.findOne({ accountId: customer._id });
+      if (!existingAccount) {
+        // Create a new account for the customer
+        const newAccount = new Account({
+          accountName: customer.fullName,
+          accountId: customer._id,
+          openingDate: new Date(),
+          accountSubhead: "Sundry Debtors",
+          accountHead: "Asset",
+          accountGroup: "Asset",
+          description: "Customer",
+        });
+        await newAccount.save();
+        console.log(`Created new account for customer: ${customer.fullName}`);
+      }
+
+      // Check if the customer has a trial balance entry
+      const existingTrialBalance = await TrialBalance.findOne({ operationId: customer._id });
+      if (!existingTrialBalance) {
+        // Create a new trial balance entry for the customer
+        const trialEntry = new TrialBalance({
+          operationId: customer._id,
+          date: new Date(),
+          accountId: existingAccount ? existingAccount._id : null,
+          accountName: customer.fullName,
+          action: "Opening Balance",
+          debitAmount: customer.depositAmount || 0,
+          creditAmount: 0,
+        });
+        await trialEntry.save();
+        console.log(`Created new trial balance entry for customer: ${customer.fullName}`);
+      }
+    }
+
+    res.status(200).json({ message: 'Checked and ensured all customers have accounts and trial balances.' });
+  } catch (error) {
+    console.error('Error ensuring customers have accounts and trial balances:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};

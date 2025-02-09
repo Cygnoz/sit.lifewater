@@ -4,7 +4,9 @@ const Journal = require("../../Models/journal");
 const Account = require("../../Models/account")
 const TrialBalance = require("../../Models/trialBalance");
 const moment = require('moment-timezone');
+const { cleanData } = require("../../services/cleanData");
 
+const { singleCustomDateTime, multiCustomDateTime } = require("../../services/timeConverter");
 
 
 // Add Journal Entry
@@ -13,8 +15,8 @@ exports.addJournalEntry = async (req, res) => {
     try {
 
         //Clean Data
-        const cleanedData = cleanCustomerData(req.body);
-        cleanedData.transaction = cleanedData.transaction?.map(acc => cleanCustomerData(acc)) || [];
+        const cleanedData = cleanData(req.body);
+        cleanedData.transaction = cleanedData.transaction?.map(acc => cleanData(acc)) || [];
 
         const { transaction, journalId } = cleanedData;
 
@@ -72,7 +74,6 @@ exports.addJournalEntry = async (req, res) => {
         for (const trans of transaction) {
             const newTrialEntry = new TrialBalance({
                 operationId:newJournalEntry._id,
-                date:entryDate,
                 accountId: trans.accountId,
                 accountName: trans.accountName,
                 action: "Journal",
@@ -141,6 +142,127 @@ exports.getOneJournal = async (req, res) => {
 
 
 
+// Update Journal Entry 
+exports.updateJournalEntry = async (req, res) => {
+  console.log("Update Journal Entry:", req.body);
+
+  try {
+    const { id } = req.params; 
+
+      // Fetch existing journal entry
+    const existingJournalEntry = await Journal.findOne({ _id: id });
+    if (!existingJournalEntry) {
+      console.log("Journal entry not found with ID:", id);
+      return res.status(404).json({ message: "Journal entry not found!" });
+    }
+
+    //Clean Data
+    const cleanedData = cleanData(req.body);
+    cleanedData.transaction = cleanedData.transaction?.map(acc => cleanData(acc)) || [];
+
+    const { transaction } = cleanedData;
+
+    const transactionIds = transaction.map(t => t.accountId);
+      
+    // Check for duplicate transactionIds
+    const uniqueTransactionIds = new Set(transactionIds);
+    if (uniqueTransactionIds.size !== transactionIds.length) {            
+      return res.status(400).json({ message: "Duplicate Accounts found!" });
+    }  
+
+    // Ensure `journalId` field matches the existing journal entry
+    if (cleanedData.journalId !== existingJournalEntry.journalId) {
+      return res.status(400).json({
+        message: `The provided journalId does not match the existing record. Expected: ${existingJournalEntry.journalId}`,
+      });
+    }
+
+    // Check if all accounts exist for the given organization
+    const allAccountIds = transaction.map(trans => trans.accountId);
+    const existingAccounts = await Account.find({
+        _id: { $in: allAccountIds }
+    });
+    if (existingAccounts.length !== allAccountIds.length) {
+        return res.status(404).json({
+            message: "One or more accounts not found for the given organization."
+        });
+    }
+      
+    //Validate Inputs  
+    if (!validateInputs(cleanedData, res)) return;
+
+    const mongooseDocument = Journal.hydrate(existingJournalEntry);
+    Object.assign(mongooseDocument, cleanedData);
+    const savedJournal = await mongooseDocument.save();
+    if (!savedJournal) {
+      return res.status(500).json({ message: "Failed to update journal entry!" });
+    }
+
+    // Fetch existing TrialBalance's createdDateTime
+    const existingTrialBalance = await TrialBalance.findOne({
+      operationId: savedJournal._id,
+    });  
+
+    const createdDateTime = existingTrialBalance ? existingTrialBalance.createdDateTime : null;
+
+    // If there are existing entries, delete them
+    if (existingTrialBalance) {
+      await TrialBalance.deleteMany({
+        operationId: savedJournal._id,
+      });
+      console.log(`Deleted existing TrialBalance entries for operationId: ${savedJournal._id}`);
+    }
+
+    // Insert data into TrialBalance collection and update account balances
+    for (const trans of transaction) {
+      const newTrialEntry = new TrialBalance({
+          operationId:savedJournal._id,
+          transactionId: cleanedData.journalId,
+          accountId: trans.accountId,
+          action: "Journal",
+          debitAmount: trans.debitAmount,
+          creditAmount: trans.creditAmount,
+          remark: cleanedData.note,
+          createdDateTime: createdDateTime
+      });
+
+      const entry = await newTrialEntry.save();
+      console.log("Trial entry",entry);
+    }
+
+    res.status(200).json({ message: "Journal entry updated successfully", savedJournal });
+    // console.log("Journal entry updated successfully:", savedJournal);
+  } catch (error) {
+    console.error("Error updating journal entry:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -186,14 +308,7 @@ function generateTimeAndDateForDB(timeZone, dateFormat, dateSplit, baseTime = ne
 
 
 
-  //Clean Data 
-function cleanCustomerData(data) {
-    const cleanData = (value) => (value === null || value === undefined || value === "" ? undefined : value);
-    return Object.keys(data).reduce((acc, key) => {
-      acc[key] = cleanData(data[key]);
-      return acc;
-    }, {});
-  }
+
 
 
 
@@ -285,39 +400,3 @@ function validTransaction( data, transaction, errors ) {
 
 
 
-
-    // Function to generate time and date for storing in the database
-function generateTimeAndDateForDB(
-  timeZone,
-  dateFormat,
-  dateSplit,
-  baseTime = new Date(),
-  timeFormat = "HH:mm:ss",
-  timeSplit = ":"
-) {
-  // Convert the base time to the desired time zone
-  const localDate = moment.tz(baseTime, timeZone);
-
-  // Format date and time according to the specified formats
-  let formattedDate = localDate.format(dateFormat);
-
-  // Handle date split if specified
-  if (dateSplit) {
-    // Replace default split characters with specified split characters
-    formattedDate = formattedDate.replace(/[-/]/g, dateSplit); // Adjust regex based on your date format separators
-  }
-
-  const formattedTime = localDate.format(timeFormat);
-  const timeZoneName = localDate.format("z"); // Get time zone abbreviation
-
-  // Combine the formatted date and time with the split characters and time zone
-  const dateTime = `${formattedDate} ${formattedTime
-    .split(":")
-    .join(timeSplit)}`;
-
-  return {
-    date: formattedDate,
-    time: `${formattedTime} (${timeZoneName})`,
-    dateTime: dateTime,
-  };
-}

@@ -18,6 +18,8 @@ const trialBalanceSchema = new Schema({
     debitAmount: {type:Number},
     creditAmount: {type:Number},
     remark: {type:String},
+
+    createdDateTime: { type: Date, default: () => new Date() },
 });
 
 const TrialBalances = mongoose.model("TrialBalances", trialBalanceSchema);
