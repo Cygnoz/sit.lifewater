@@ -1276,7 +1276,7 @@ exports.deleteOrder = async (req, res) => {
       existingOrder.totalAmount = cleanedData.totalAmount;
       existingOrder.paidAmount = cleanedData.paidAmount;
       existingOrder.balanceAmount = cleanedData.totalAmount - cleanedData.paidAmount;
-      existingOrder.note = cleanedData.note;
+      existingOrder.notes = cleanedData.note;
   
       await existingOrder.save();
       console.log("Order updated successfully.");
