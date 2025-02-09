@@ -182,7 +182,8 @@ const AddOrder = ({ }: Props) => {
             if (!error && response) {
                 setLoading(false);
                 // console.log(loading);
-                const filtered = response?.data.filter((account: any) =>
+                const formattedData = response.data?.map((item: any) => item._doc);
+                const filtered = formattedData.filter((account: any) =>
                     ["Cash", "Bank"].includes(account.accountSubhead)
                 );
                 setFilteredAccounts(filtered);

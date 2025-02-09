@@ -224,7 +224,7 @@ const Orders = ({ }: Props) => {
                     onClick={() => {
                       navigate(`/editorder/${order?._id}`);
                     }}
-                    className="bg-[#F6F6F6] h-6 w-12 text-[13px] hidden rounded-md border border-[#820000] "
+                    className="bg-[#F6F6F6] h-6 w-12 text-[13px]  rounded-md border border-[#820000] "
                   >
                     Edit
                   </button>
