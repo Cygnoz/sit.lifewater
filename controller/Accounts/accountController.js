@@ -3,7 +3,7 @@
 const Account = require("../../Models/account")
 const TrialBalance = require("../../Models/trialBalance")
 const { cleanData } = require("../../services/cleanData");
-
+const mongoose = require("mongoose");
 const { singleCustomDateTime, multiCustomDateTime } = require("../../services/timeConverter");
 
 
@@ -31,7 +31,7 @@ exports.addAccount = async (req, res) => {
         });        
       }     
 
-      const newAccount = new Account({ ...cleanedData, createdDateTime });      
+      const newAccount = new Account({ ...cleanedData });      
       await newAccount.save();
 
       const trialEntry = new TrialBalance({
@@ -52,9 +52,9 @@ exports.addAccount = async (req, res) => {
       console.error("Error creating Account:", error);
       res.status(500).json({ message: "Internal server error." });
     } 
-    const endTime = Date.now();
-    const responseTime = endTime - startTime;
-    console.log(`Response time: ${responseTime} ms`); 
+    // const endTime = Date.now();
+    // // const responseTime = endTime - startTime;
+    // console.log(`Response time: ${responseTime} ms`); 
 };
 
 
@@ -167,26 +167,24 @@ exports.getAllAccount = async (req, res) => {
   }
 };
 
-
-//Get one Account for a given 
 exports.getOneAccount = async (req, res) => {
   try {
     const { accountId } = req.params;
 
+    if (!mongoose.Types.ObjectId.isValid(accountId)) {
+      return res.status(400).json({ message: "Invalid account ID format." });
+    }
 
-    // Find the account by accountId and 
-    const account = await Account.findOne({ _id: accountId });
+    // Convert `accountId` to ObjectId
+    const account = await Account.findOne({ _id: new mongoose.Types.ObjectId(accountId) });
 
     if (!account) {
       return res.status(404).json({
-        message:
-          "Account not found for the provided Organization ID and Account ID.",
+        message: "Account not found for the provided ID.",
       });
     }
 
-    const formattedObjects = singleCustomDateTime(account);    
-
-
+    const formattedObjects = singleCustomDateTime(account);
     res.status(200).json(formattedObjects);
   } catch (error) {
     console.error("Error fetching account:", error);
@@ -203,50 +201,32 @@ exports.deleteAccount = async (req, res) => {
   try {
     const { accountId } = req.params;
 
-    // Check if an account with the given  and accountId exists
-    const account = await Account.findOne({
-      _id: accountId,
-    });
-
+    const account = await Account.findById(accountId);
     if (!account) {
-      return res.status(404).json({
-        message:
-          "Account not found.",
-      });
+      return res.status(404).json({ message: "Account not found." });
     }
 
-    const trialBalanceResult = await trialBalanceCount(account, res);
-    if (trialBalanceResult) {
-      return; 
+    // Remove all references in Trial Balance before deleting the account
+    const trialBalanceEntries = await TrialBalance.find({ accountId: account._id });
+
+    if (trialBalanceEntries.length > 0) {
+      console.log(`Deleting ${trialBalanceEntries.length} Trial Balance references.`);
+      await TrialBalance.deleteMany({ accountId: account._id });
     }
 
-    // systemAccounts check
-    if (account.systemAccounts === true) {
-      console.log("Account cannot be deleted for account ID:", accountId);
-      return res.status(404).json({ message: "This account cannot be deleted!" });
+    if (account.systemAccounts) {
+      return res.status(403).json({ message: "This account cannot be deleted!" });
     }
 
-    // Delete the account
     await account.deleteOne();
 
-    const existingTrialBalance = await TrialBalance.findOne({
-      accountId: existingAccount._id,
-    });  
-    const deleteExistingTrialBalance = await existingTrialBalance.deleteOne();
-    if (!deleteExistingTrialBalance) {
-      console.error("Failed to delete existing trail balance!");
-      return res.status(500).json({ message: "Failed to delete existing trail balance!" });
-    }
-
-    res.status(200).json({
-      message: "Account deleted successfully.",
-    });
-    console.log("Account deleted successfully:", account);
+    res.status(200).json({ message: "Account and associated trial balance entries deleted successfully." });
   } catch (error) {
-    console.error("Error deleting Account:", error);
+    console.error("Error deleting account:", error);
     res.status(500).json({ message: "Internal server error." });
   }
 };
+
 
 
 //Get one Account for a given 
@@ -404,6 +384,9 @@ function validateInputs( data, res ) {
  }
  return true;
 }
+
+
+
 
 
 // Field validation utility
