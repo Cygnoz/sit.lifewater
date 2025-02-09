@@ -4,6 +4,7 @@ const Accounts = require('../../Models/account');
 const Account = require('../../Models/account');
 const couponCustomer = require('../../Models/couponCustomerSchema');
 const TrialBalance = require('../../Models/trialBalance');
+const Order = require('../../Models/OrderSchema')
 const moment = require('moment-timezone')
 
 
@@ -472,10 +473,24 @@ exports.updateCustomerById = async (req, res) => {
 
 
 
-// Delete a business customer by ID
+
 exports.deleteCustomerById = async (req, res) => {
   try {
     const customerId = req.params.id;
+
+    // Check if the customer has any unpaid balance
+    const balanceResult = await Order.aggregate([
+      { $match: { customerId: customerId } },
+      { $group: { _id: null, totalBalance: { $sum: '$balanceAmount' } } }
+    ]);
+
+    const totalBalance = balanceResult[0]?.totalBalance || 0;
+
+    if (totalBalance > 0) {
+      return res.status(400).json({
+        message: `Cannot delete customer due to unpaid balance of ${totalBalance}`,
+      });
+    }
 
     // Find and delete the customer
     const deletedCustomer = await Customer.findByIdAndDelete(customerId);
@@ -498,11 +513,16 @@ exports.deleteCustomerById = async (req, res) => {
     res.status(200).json({
       message: 'Customer, associated account, and trial balance entries deleted successfully',
     });
+
   } catch (error) {
     console.error('Error deleting customer and related data:', error);
     res.status(500).json({ message: 'Error deleting customer and related data', error });
   }
 };
+
+
+
+
 
 
 // exports.createCouponCustomer = async (req, res) => {
