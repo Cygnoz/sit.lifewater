@@ -19,11 +19,11 @@ import AddCustomer from './components/AddCustomer';
 import ViewCustomers from './pages/ViewCustomers';
 import EndRide from './pages/EndRide';
 import Dashboard from './pages/Dashboard';
-import Maps from './pages/Map';
 import EditCustomer from './pages/EditCustomer';
 import Orders from './pages/Orders';
 import AddOrder from './components/AddOrder';
 import InstallPWA from './CommonComponents/InstallPWA';
+import Ride from './pages/Ride';
 // import Routed from './pages/Route';
 
 const App: React.FC = () => {
@@ -63,7 +63,7 @@ const App: React.FC = () => {
           <Route path="/couponcustomer" element={<CouponCustomer />} />
           <Route path="/creditcollection" element={<CreditCollection />} />
           <Route path="/endride" element={<EndRide />} />
-          <Route path="/route" element={<Maps />} />
+          <Route path="/route" element={<Ride />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/addorder" element={<AddOrder />} />
           <Route path="/editorder/:editId" element={<AddOrder/>}/>

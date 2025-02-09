@@ -26,7 +26,6 @@ interface OrdrerData {
     date: string;
     paymentMode: string;
     notes: string;
-    termsAndCondition: string;
     totalAmount: number;
     returnBottle: number;
     ratePerItem: string;
@@ -68,7 +67,6 @@ const AddOrder = ({ }: Props) => {
         date: "",
         paymentMode: "",
         notes: "",
-        termsAndCondition: "",
         totalAmount: 0, // Initialized as a number
         returnBottle: 0, // Initialized as a number
         ratePerItem: "", // Initialized as a number
@@ -102,7 +100,6 @@ const AddOrder = ({ }: Props) => {
                     date: response?.data.date || "",
                     paymentMode: response?.data.paymentMode || "",
                     notes: response?.data.notes || "",
-                    termsAndCondition: response?.data.termsAndCondition || "",
                     totalAmount: response?.data.totalAmount || 0,
                     returnBottle: response?.data.returnBottle || 0,
                     ratePerItem: response?.data.ratePerItem || "",
@@ -519,7 +516,6 @@ const AddOrder = ({ }: Props) => {
                         date: "",
                         paymentMode: "",
                         notes: "",
-                        termsAndCondition: "",
                         totalAmount: 0, // Initialized as a number
                         returnBottle: 0, // Initialized as a number
                         ratePerItem: "", // Initialized as a number

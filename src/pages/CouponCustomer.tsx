@@ -9,12 +9,20 @@ import { Link } from 'react-router-dom';
 import { endpoints } from '../services/ApiEndpoint';
 import useApi from '../Hook/UseApi';
 
+
 interface CouponDetails {
+  customerFullName: string;
+  couponDetails: {
+    couponName: string;
+  };
+  paidAmount: number;
+  couponNumber: string;
   createdAt: string;
 }
 const CouponCustomer: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [couponCustomers, setCouponCustomers] = useState<CouponDetails[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   // get All Coupon customers
   const { request: getAllCouponcustomers } = useApi("get", 4000);
   const getAllCouponCustomers = async () => {
@@ -41,6 +49,22 @@ const CouponCustomer: React.FC = () => {
   useEffect(() => {
     getAllCouponCustomers();
   }, []);
+
+  // Filter the list based on search input
+  const filteredCoupons = couponCustomers.filter(
+    (coupon) =>
+      coupon.customerFullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      coupon.couponDetails.couponName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      coupon.createdAt.toLowerCase().includes(searchQuery.toLowerCase()) 
+  );
+
+  <input
+    type="text"
+    placeholder="Search..."
+    className="pl-10 pr-4 text-sm w-full rounded-xl text-[#8F99A9] h-10 border-0 bg-[#FFFFFF] focus:ring-1 focus:ring-gray-100 focus:outline-none focus:shadow-none"
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+  />
   return (
     <div>
       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-start py-6 pt-6">
@@ -54,6 +78,8 @@ const CouponCustomer: React.FC = () => {
               type="text"
               placeholder="Search..."
               className="pl-10 pr-4 text-sm w-full rounded-xl text-[#8F99A9] h-10 border-0 bg-[#FFFFFF] focus:ring-1 focus:ring-gray-100 focus:outline-none focus:shadow-none"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
             {/* Search Icon */}
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
@@ -69,7 +95,7 @@ const CouponCustomer: React.FC = () => {
             {loading ? (
               <div className="p-2 text-center text-gray-500">Loading...</div>
             ) : couponCustomers?.length > 0 ? (
-              couponCustomers.map((coupon: any) => (
+              filteredCoupons.map((coupon: any) => (
                 <div
                   className="bg-gradient-to-l from-[#E3E6D5] to-[#F7E7CE] w-full my-3 p-5 rounded-xl"
                   key={coupon._id || Math.random()}
