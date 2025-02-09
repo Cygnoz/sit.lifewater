@@ -1156,7 +1156,6 @@ exports.deleteOrder = async (req, res) => {
 
 
 
-
   exports.editOrder = async (req, res) => {
     console.log("Edit Order Request:", req.body);
   
@@ -1196,9 +1195,11 @@ exports.deleteOrder = async (req, res) => {
       console.log("Previous Customer:", prevCustomer);
       console.log("New Customer:", newCustomer);
   
-      // Restore stock to previous customer if customer changed
-      if (prevCustomer && prevCustomer._id.toString() !== newCustomer._id.toString()) {
-        console.log("Restoring stock to previous customer...");
+      // Handle customer change scenario first
+      const isCustomerChanged = prevCustomer && prevCustomer._id.toString() !== newCustomer._id.toString();
+      if (isCustomerChanged) {
+        console.log("Customer changed - handling stock transfer...");
+        // Return all items to previous customer
         for (const oldItem of existingOrder.stock) {
           const prevCustomerItem = prevCustomer.stock.find(item => item.itemId === oldItem.itemId);
           if (prevCustomerItem) {
@@ -1228,56 +1229,72 @@ exports.deleteOrder = async (req, res) => {
       const subRouteStock = subRoute.stock || [];
       const newCustomerStock = newCustomer.stock || [];
   
-      for (const newItem of cleanedData.stock) {
-        const existingOrderItem = existingOrder.stock.find(item => item.itemId === newItem.itemId);
-        const quantityDiff = newItem.quantity - (existingOrderItem?.quantity || 0);
+      // First, handle item removals and returns
+      for (const existingItem of existingOrder.stock) {
+        const newOrderItem = cleanedData.stock.find(item => item.itemId === existingItem.itemId);
+        
+        // If item is not in new order or quantity decreased, handle returns
+        if (!newOrderItem || newOrderItem.quantity < existingItem.quantity) {
+          const returnQuantity = !newOrderItem ? existingItem.quantity : 
+                               (existingItem.quantity - newOrderItem.quantity);
   
-        const subRouteItem = subRouteStock.find(stock => stock.itemId === newItem.itemId);
-        if (!subRouteItem || subRouteItem.quantity < quantityDiff) {
-          console.log(`Insufficient stock for item ${newItem.itemName}.`);
-          return res.status(400).json({
-            success: false,
-            message: `Insufficient stock for item ${newItem.itemName}.`,
-          });
-        }
-  
-        subRouteItem.quantity -= quantityDiff;
-  
-        const newCustomerItem = newCustomerStock.find(item => item.itemId === newItem.itemId);
-        if (newCustomerItem) {
-          newCustomerItem.quantity += newItem.quantity;
-        } else {
-          newCustomerStock.push({
-            itemId: newItem.itemId,
-            itemName: newItem.itemName,
-            quantity: newItem.quantity,
-            status: "Filled",
-          });
-        }
-  
-        // If an item is being replaced, return the old item to the subRoute and remove it from the customer's stock
-        if (existingOrderItem && existingOrderItem.itemId !== newItem.itemId) {
-          const oldCustomerItem = newCustomerStock.find(item => item.itemId === existingOrderItem.itemId);
-          if (oldCustomerItem) {
-            console.log(`Removing old item ${existingOrderItem.itemName} from customer stock.`);
-            oldCustomerItem.quantity -= existingOrderItem.quantity;
-            if (oldCustomerItem.quantity <= 0) {
-              const index = newCustomerStock.indexOf(oldCustomerItem);
-              newCustomerStock.splice(index, 1);
-            }
+          // Return stock to subRoute
+          const subRouteItem = subRouteStock.find(item => item.itemId === existingItem.itemId);
+          if (subRouteItem) {
+            subRouteItem.quantity += returnQuantity;
+          } else {
+            subRouteStock.push({
+              itemId: existingItem.itemId,
+              itemName: existingItem.itemName,
+              quantity: returnQuantity,
+              status: "Filled",
+            });
           }
   
-          const subRouteOldItem = subRouteStock.find(stock => stock.itemId === existingOrderItem.itemId);
-          if (subRouteOldItem) {
-            console.log(`Returning old item ${existingOrderItem.itemName} to subRoute stock.`);
-            subRouteOldItem.quantity += existingOrderItem.quantity;
+          // Remove from customer stock if not changing customers
+          if (!isCustomerChanged) {
+            const customerItem = newCustomerStock.find(item => item.itemId === existingItem.itemId);
+            if (customerItem) {
+              customerItem.quantity -= returnQuantity;
+              if (customerItem.quantity <= 0) {
+                const index = newCustomerStock.indexOf(customerItem);
+                newCustomerStock.splice(index, 1);
+              }
+            }
+          }
+        }
+      }
+  
+      // Then handle new items and quantity increases
+      for (const newItem of cleanedData.stock) {
+        const existingOrderItem = existingOrder.stock.find(item => item.itemId === newItem.itemId);
+        const quantityIncrease = existingOrderItem ? 
+                                Math.max(0, newItem.quantity - existingOrderItem.quantity) : 
+                                newItem.quantity;
+  
+        if (quantityIncrease > 0) {
+          const subRouteItem = subRouteStock.find(stock => stock.itemId === newItem.itemId);
+          if (!subRouteItem || subRouteItem.quantity < quantityIncrease) {
+            console.log(`Insufficient stock for item ${newItem.itemName}.`);
+            return res.status(400).json({
+              success: false,
+              message: `Insufficient stock for item ${newItem.itemName}.`,
+            });
+          }
+  
+          // Deduct from subRoute
+          subRouteItem.quantity -= quantityIncrease;
+  
+          // Add to customer
+          const customerItem = newCustomerStock.find(item => item.itemId === newItem.itemId);
+          if (customerItem) {
+            customerItem.quantity += quantityIncrease;
           } else {
-            // If the item doesn't already exist in the subRoute, add it back
-            subRouteStock.push({
-              itemId: existingOrderItem.itemId,
-              itemName: existingOrderItem.itemName,
-              quantity: existingOrderItem.quantity,
-              status: "Available",
+            newCustomerStock.push({
+              itemId: newItem.itemId,
+              itemName: newItem.itemName,
+              quantity: newItem.quantity,
+              status: "Filled",
             });
           }
         }
@@ -1303,7 +1320,7 @@ exports.deleteOrder = async (req, res) => {
       existingOrder.totalAmount = cleanedData.totalAmount;
       existingOrder.paidAmount = cleanedData.paidAmount;
       existingOrder.balanceAmount = cleanedData.totalAmount - cleanedData.paidAmount;
-      existingOrder.note = cleanedData.note;
+      existingOrder.notes = cleanedData.note;
   
       await existingOrder.save();
       console.log("Order updated successfully.");
@@ -1314,9 +1331,6 @@ exports.deleteOrder = async (req, res) => {
       res.status(500).json({ success: false, message: "An error occurred while editing the order." });
     }
   };
-  
-  
-  
   
 
 
