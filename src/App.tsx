@@ -23,6 +23,7 @@ import Maps from './pages/Map';
 import EditCustomer from './pages/EditCustomer';
 import Orders from './pages/Orders';
 import AddOrder from './components/AddOrder';
+import InstallPWA from './CommonComponents/InstallPWA';
 // import Routed from './pages/Route';
 
 const App: React.FC = () => {
@@ -35,6 +36,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex">
+      <InstallPWA/>
       {/* Conditionally render the Sidebar if not on the login page */}
       {location.pathname !== '/' && location.pathname !== '/start' && location.pathname !== '/addstart' && (
         <Sidebar isSidebarOpen={isSidebarOpen} handleToggleSidebar={handleToggleSidebar} />
