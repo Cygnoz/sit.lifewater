@@ -1005,176 +1005,301 @@ exports.deleteOrder = async (req, res) => {
 };
 
 
-exports.editOrder = async (req, res) => {
-  console.log("Edit Order Request:", req.body);
+// exports.editOrder = async (req, res) => {
+//   console.log("Edit Order Request:", req.body);
 
-  const { id } = req.params;
-  console.log("Order ID:", id);
+//   const { id } = req.params;
+//   console.log("Order ID:", id);
 
-  try {
-    const cleanedData = cleanCustomerData(req.body);
-    cleanedData.stock = (cleanedData.stock || [])
-      .map(item => cleanCustomerData(item))
-      .filter(item => item.itemId && item.itemId.trim() !== "");
+//   try {
+//     const cleanedData = cleanCustomerData(req.body);
+//     cleanedData.stock = (cleanedData.stock || [])
+//       .map(item => cleanCustomerData(item))
+//       .filter(item => item.itemId && item.itemId.trim() !== "");
 
-    if (!id) {
-      return res.status(400).json({ success: false, message: "Order ID is required" });
-    }
+//     if (!id) {
+//       return res.status(400).json({ success: false, message: "Order ID is required" });
+//     }
 
-    // Fetch existing order
-    const existingOrder = await Order.findById(id);
-    if (!existingOrder) {
-      return res.status(404).json({ success: false, message: "Order not found" });
-    }
+//     // Fetch existing order
+//     const existingOrder = await Order.findById(id);
+//     if (!existingOrder) {
+//       return res.status(404).json({ success: false, message: "Order not found" });
+//     }
 
-    const { customerAccount, saleAccount, depositAccount } = await dataExist(
-      cleanedData.customerId,
-      cleanedData.depositAccountId
-    );
+//     const { customerAccount, saleAccount, depositAccount } = await dataExist(
+//       cleanedData.customerId,
+//       cleanedData.depositAccountId
+//     );
 
-    if (!customerAccount) {
-      return res.status(404).json({ message: "Customer Account not found" });
-    }
+//     if (!customerAccount) {
+//       return res.status(404).json({ message: "Customer Account not found" });
+//     }
 
-    const subRoute = await SubRoute.findById(cleanedData.subRouteId);
-    if (!subRoute) {
-      return res.status(404).json({ success: false, message: "Sub Route not found" });
-    }
+//     const subRoute = await SubRoute.findById(cleanedData.subRouteId);
+//     if (!subRoute) {
+//       return res.status(404).json({ success: false, message: "Sub Route not found" });
+//     }
 
-    const customer = await Customer.findById(cleanedData.customerId);
-    if (!customer) {
-      return res.status(404).json({ success: false, message: "Customer not found" });
-    }
+//     const customer = await Customer.findById(cleanedData.customerId);
+//     if (!customer) {
+//       return res.status(404).json({ success: false, message: "Customer not found" });
+//     }
 
-    const subRouteStock = subRoute.stock || [];
-    const customerStock = customer.stock || [];
+//     const subRouteStock = subRoute.stock || [];
+//     const customerStock = customer.stock || [];
 
-    console.log("Validating and updating stock for new order data...");
-    // Validate and update stock for new items
-    for (const newItem of cleanedData.stock) {
-      console.log(`Processing new order item ${newItem.itemName} (ID: ${newItem.itemId}) with new quantity ${newItem.quantity}`);
-      const existingOrderItem = existingOrder.stock.find(item => item.itemId === newItem.itemId);
+//     // Restore stock for existing order items before processing updates
+//     for (const oldItem of existingOrder.stock) {
+//       const subRouteItem = subRouteStock.find(stock => stock.itemId === oldItem.itemId);
+//       if (subRouteItem) {
+//         subRouteItem.quantity += oldItem.quantity;
+//       }
 
-      if (existingOrderItem) {
-        // Calculate quantity difference
-        const quantityDiff = newItem.quantity - existingOrderItem.quantity;
-        console.log(`For item ${newItem.itemName}: previous quantity = ${existingOrderItem.quantity}, new quantity = ${newItem.quantity}, difference = ${quantityDiff}`);
+//       const customerItem = customerStock.find(stock => stock.itemId === oldItem.itemId);
+//       if (customerItem) {
+//         customerItem.quantity -= oldItem.quantity;
+//         if (customerItem.quantity <= 0) {
+//           customerStock.splice(customerStock.indexOf(customerItem), 1);
+//         }
+//       }
+//     }
 
-        // Check if the new order quantity is greater than subroute stock
-        const subRouteItem = subRouteStock.find(stock => stock.itemId === newItem.itemId);
-        const currentSubRouteQuantity = Number(subRouteItem?.quantity || 0);
+//     // Process new stock updates
+//     for (const newItem of cleanedData.stock) {
+//       const subRouteItem = subRouteStock.find(stock => stock.itemId === newItem.itemId);
 
-        if (newItem.quantity <= 0) {
-          // Validate that the new quantity is greater than 0
-          console.log(`Invalid quantity for ${newItem.itemName}: Quantity must be greater than 0`);
-          return res.status(400).json({
-            success: false,
-            message: `Quantity for ${newItem.itemName} must be greater than 0.`,
-          });
-        }
+//       if (!subRouteItem) {
+//         return res.status(400).json({
+//           success: false,
+//           message: `Item ${newItem.itemName} not found in SubRoute stock.`,
+//         });
+//       }
 
-        if (quantityDiff > 0) {
-          // If quantity increased, decrement the difference from subroute stock
-          console.log(
-            `Decreasing ${quantityDiff} from subRoute stock for ${newItem.itemName}. SubRoute stock before: ${currentSubRouteQuantity}`
-          );
-          if (currentSubRouteQuantity < quantityDiff) {
-            return res.status(400).json({
-              success: false,
-              message: `Insufficient stock for item ${newItem.itemName}. Available: ${currentSubRouteQuantity}, Requested additional: ${quantityDiff}`,
+//       if (newItem.quantity <= 0) {
+//         return res.status(400).json({
+//           success: false,
+//           message: `Quantity for ${newItem.itemName} must be greater than 0.`,
+//         });
+//       }
+
+//       if (subRouteItem.quantity < newItem.quantity) {
+//         return res.status(400).json({
+//           success: false,
+//           message: `Insufficient stock for item ${newItem.itemName}. Available: ${subRouteItem.quantity}, Requested: ${newItem.quantity}`,
+//         });
+//       }
+
+//       // Update subRoute stock
+//       subRouteItem.quantity -= newItem.quantity;
+
+//       // Update customer stock
+//       const customerItem = customerStock.find(stock => stock.itemId === newItem.itemId);
+//       if (customerItem) {
+//         customerItem.quantity += newItem.quantity;
+//       } else {
+//         customerStock.push({
+//           itemId: newItem.itemId,
+//           itemName: newItem.itemName,
+//           quantity: newItem.quantity,
+//           status: "Filled",
+//         });
+//       }
+//     }
+
+//     // Save updated stocks
+//     subRoute.stock = subRouteStock;
+//     console.log("Saving updated subRoute stock:", subRoute.stock);
+//     await subRoute.save();
+
+//     customer.stock = customerStock;
+//     console.log("Saving updated customer stock:", customer.stock);
+//     await customer.save();
+
+//     // Update order details
+//     console.log("Updating order details...");
+//     existingOrder.stock = cleanedData.stock.map(item => ({
+//       itemId: item.itemId,
+//       itemName: item.itemName,
+//       quantity: item.quantity,
+//       status: "Sold",
+//     }));
+//     existingOrder.totalAmount = cleanedData.totalAmount;
+//     existingOrder.paidAmount = cleanedData.paidAmount;
+//     existingOrder.balanceAmount = (cleanedData.totalAmount - cleanedData.paidAmount) || 0;
+//     existingOrder.note = cleanedData.note;
+
+//     console.log("Saving updated order:", existingOrder);
+//     await existingOrder.save();
+
+//     res.status(200).json({ success: true, message: "Order updated successfully" });
+//   } catch (error) {
+//     console.error("Error editing order:", error);
+//     res.status(500).json({ success: false, message: "An error occurred while editing the order." });
+//   }
+// };
+
+
+
+
+  // Function to generate time and date for storing in the database
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  exports.editOrder = async (req, res) => {
+    console.log("Edit Order Request:", req.body);
+  
+    const { id } = req.params;
+  
+    try {
+      if (!id) {
+        console.log("Order ID is missing in the request.");
+        return res.status(400).json({ success: false, message: "Order ID is required" });
+      }
+  
+      const cleanedData = cleanCustomerData(req.body);
+      console.log("Cleaned customer data:", cleanedData);
+  
+      cleanedData.stock = (cleanedData.stock || [])
+        .map(item => cleanCustomerData(item))
+        .filter(item => item.itemId && item.itemId.trim() !== "");
+      console.log("Cleaned stock data:", cleanedData.stock);
+  
+      const existingOrder = await Order.findById(id);
+      if (!existingOrder) {
+        console.log(`Order with ID ${id} not found.`);
+        return res.status(404).json({ success: false, message: "Order not found" });
+      }
+  
+      console.log(`Found existing order:`, existingOrder);
+  
+      // Load previous customer and new customer data
+      const prevCustomer = await Customer.findById(existingOrder.customerId);
+      const newCustomer = await Customer.findById(cleanedData.customerId);
+  
+      if (!newCustomer) {
+        console.log("New Customer not found.");
+        return res.status(404).json({ success: false, message: "New Customer not found" });
+      }
+  
+      console.log("Previous Customer:", prevCustomer);
+      console.log("New Customer:", newCustomer);
+  
+      // Restore stock to previous customer if customer changed
+      if (prevCustomer && prevCustomer._id.toString() !== newCustomer._id.toString()) {
+        console.log("Restoring stock to previous customer...");
+        for (const oldItem of existingOrder.stock) {
+          const prevCustomerItem = prevCustomer.stock.find(item => item.itemId === oldItem.itemId);
+          if (prevCustomerItem) {
+            prevCustomerItem.quantity += oldItem.quantity;
+          } else {
+            prevCustomer.stock.push({
+              itemId: oldItem.itemId,
+              itemName: oldItem.itemName,
+              quantity: oldItem.quantity,
+              status: "Filled",
             });
           }
-          subRouteItem.quantity = currentSubRouteQuantity - quantityDiff;
-          console.log(`SubRoute updated for ${newItem.itemName}: new quantity = ${subRouteItem.quantity}`);
-        } else if (quantityDiff < 0) {
-          // If quantity decreased, increment the difference to subroute stock
-          console.log(
-            `Returning ${Math.abs(quantityDiff)} to subRoute stock for ${newItem.itemName}. SubRoute stock before: ${currentSubRouteQuantity}`
-          );
-          subRouteItem.quantity = currentSubRouteQuantity + Math.abs(quantityDiff);
-          console.log(`SubRoute updated for ${newItem.itemName}: new quantity = ${subRouteItem.quantity}`);
         }
-
-        // Update customer stock
-        const customerItem = customerStock.find(stock => stock.itemId === newItem.itemId);
-        if (customerItem) {
-          const currentCustomerQuantity = Number(customerItem.quantity) || 0;
-          const updatedCustomerQuantity = currentCustomerQuantity + quantityDiff;
-          customerItem.quantity = updatedCustomerQuantity;
-          console.log(`Customer: ${newItem.itemName} updated from ${currentCustomerQuantity} to ${updatedCustomerQuantity}`);
-
-          if (updatedCustomerQuantity <= 0) {
-            console.log(`Customer: Removing ${newItem.itemName} as quantity <= 0`);
-            customerStock.splice(customerStock.indexOf(customerItem), 1);
-          }
-        } else if (newItem.quantity > 0) {
-          console.log(`Customer: Adding ${newItem.itemName} with quantity ${newItem.quantity}`);
-          customerStock.push({
+        await prevCustomer.save();
+        console.log("Stock restored to previous customer.");
+      }
+  
+      // Update subRoute and new customer stock
+      const subRoute = await SubRoute.findById(cleanedData.subRouteId);
+      if (!subRoute) {
+        console.log("Sub Route not found.");
+        return res.status(404).json({ success: false, message: "Sub Route not found" });
+      }
+  
+      console.log("Sub Route found:", subRoute);
+  
+      const subRouteStock = subRoute.stock || [];
+      const newCustomerStock = newCustomer.stock || [];
+  
+      for (const newItem of cleanedData.stock) {
+        const existingOrderItem = existingOrder.stock.find(item => item.itemId === newItem.itemId);
+        const quantityDiff = newItem.quantity - (existingOrderItem?.quantity || 0);
+  
+        const subRouteItem = subRouteStock.find(stock => stock.itemId === newItem.itemId);
+        if (!subRouteItem || subRouteItem.quantity < quantityDiff) {
+          console.log(`Insufficient stock for item ${newItem.itemName}.`);
+          return res.status(400).json({
+            success: false,
+            message: `Insufficient stock for item ${newItem.itemName}.`,
+          });
+        }
+  
+        subRouteItem.quantity -= quantityDiff;
+  
+        const newCustomerItem = newCustomerStock.find(item => item.itemId === newItem.itemId);
+        if (newCustomerItem) {
+          newCustomerItem.quantity += newItem.quantity;
+        } else {
+          newCustomerStock.push({
             itemId: newItem.itemId,
             itemName: newItem.itemName,
             quantity: newItem.quantity,
             status: "Filled",
           });
         }
-      } else {
-        // Replacing an item entirely (which is not allowed in order editing)
-        console.log(`Attempted to add or replace item ${newItem.itemName} which is not allowed in order editing.`);
-        return res.status(400).json({
-          success: false,
-          message: "Replacing or adding entirely new items is not permitted during order editing.",
-        });
       }
+  
+      // Save updated stocks
+      subRoute.stock = subRouteStock;
+      await subRoute.save();
+      console.log("Sub Route stock updated.");
+  
+      newCustomer.stock = newCustomerStock;
+      await newCustomer.save();
+      console.log("New Customer stock updated.");
+  
+      // Update order details
+      existingOrder.customerId = cleanedData.customerId;
+      existingOrder.stock = cleanedData.stock.map(item => ({
+        itemId: item.itemId,
+        itemName: item.itemName,
+        quantity: item.quantity,
+        status: "Sold",
+      }));
+      existingOrder.totalAmount = cleanedData.totalAmount;
+      existingOrder.paidAmount = cleanedData.paidAmount;
+      existingOrder.balanceAmount = cleanedData.totalAmount - cleanedData.paidAmount;
+      existingOrder.note = cleanedData.note;
+  
+      await existingOrder.save();
+      console.log("Order updated successfully.");
+  
+      res.status(200).json({ success: true, message: "Order updated successfully" });
+    } catch (error) {
+      console.error("Error editing order:", error);
+      res.status(500).json({ success: false, message: "An error occurred while editing the order." });
     }
-
-    // Save updated stocks
-    subRoute.stock = subRouteStock;
-    console.log("Saving updated subRoute stock:", subRoute.stock);
-    await subRoute.save();
-
-    customer.stock = customerStock;
-    console.log("Saving updated customer stock:", customer.stock);
-    await customer.save();
-
-    // Update order details
-    console.log("Updating order details...");
-    existingOrder.stock = cleanedData.stock.map(item => ({
-      itemId: item.itemId,
-      itemName: item.itemName,
-      quantity: item.quantity,
-      status: "Sold",
-    }));
-    existingOrder.totalAmount = cleanedData.totalAmount;
-    existingOrder.paidAmount = cleanedData.paidAmount;
-    existingOrder.balanceAmount = (cleanedData.totalAmount - cleanedData.paidAmount) || 0;
-    existingOrder.note = cleanedData.note;
-
-    console.log("Saving updated order:", existingOrder);
-    await existingOrder.save();
-
-    // Update journal entries
-    console.log("Updating journal entries...");
-    console.log("Journal params:", {
-      order: existingOrder,
-      customerAccount,
-      saleAccount,
-      depositAccount,
-    });
-    await journal(existingOrder, customerAccount, saleAccount, depositAccount);
-    console.log("Journal update completed.");
-
-    res.status(200).json({ success: true, message: "Order updated successfully" });
-  } catch (error) {
-    console.error("Error editing order:", error);
-    res.status(500).json({ success: false, message: "An error occurred while editing the order." });
-  }
-};
+  };
+  
+  
 
 
 
 
 
-  // Function to generate time and date for storing in the database
-function generateTimeAndDateForDB(
+
+
+
+
+
+  function generateTimeAndDateForDB(
   timeZone,
   dateFormat,
   dateSplit,
