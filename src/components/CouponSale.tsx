@@ -181,8 +181,10 @@ const Couponsale: React.FC = () => {
 
       if (!error && response) {
         setLoading(false);
+
+        const formattedData = response.data?.map((item: any) => item._doc);
         // console.log(loading);
-        const filtered = response?.data.filter(
+        const filtered = formattedData?.filter(
           (account: any) => ["Cash", "Bank"].includes(account.accountSubhead)
         );
         setFilteredAccounts(filtered);
