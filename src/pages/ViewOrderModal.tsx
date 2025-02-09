@@ -118,13 +118,12 @@ const ViewOrderModal = ({ id }: Props) => {
                                     <div className="">
                                         <p className="text-[14px] text-[#303F58]">Payment Mode</p>
                                         <p className="text-[14px] text-[#303F58]">Total Amount</p>
-                                        {
-                                            orderData?.paymentMode === "Cash" && (
-                                                <div>
+                                       
+                                        <div>
                                                     <p className="text-[14px] text-[#303F58]">Paid Amount</p>
                                                     <p className="text-[14px] text-[#303F58]">Balance Amount</p>
-                                                </div>
-                                            )
+                                                </div> {
+                                           
                                         }
                                     </div>
                                     <div className="">
@@ -134,14 +133,14 @@ const ViewOrderModal = ({ id }: Props) => {
                                         <p className="text-[14px] text-[#303F58] font-bold">
                                             : {orderData?.totalAmount}.00 AED
                                         </p>
-                                        {
-                                            orderData?.paymentMode === "Cash" && (
                                                 <div>
                                                     <p className="text-[14px] text-[#303F58] font-semibold">: {orderData?.paidAmount}.00 AED</p>
                                                     <p className="text-[14px] text-[#303F58] font-semibold">: {orderData?.balanceAmount}.00 AED</p>
                                                 </div>
+                                        {/* {
+                                            orderData?.paymentMode === "Cash" && (
                                             )
-                                        }
+                                        } */}
                                     </div>
                                 </div>
                             </div>
