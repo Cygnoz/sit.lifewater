@@ -1183,6 +1183,14 @@ exports.editOrder = async (req, res) => {
 
     console.log(`Found existing order:`, existingOrder);
 
+    const { customerAccount, saleAccount, depositAccount } = await dataExist(
+      cleanedData.customerId,
+      cleanedData.depositAccountId
+    );
+    if (!customerAccount) {
+      return res.status(404).json({ message: "Customer Account not found" });
+    }
+
     // Load previous customer and new customer data
     const prevCustomer = await Customer.findById(existingOrder.customerId);
     const newCustomer = await Customer.findById(cleanedData.customerId);
