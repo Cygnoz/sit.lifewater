@@ -44,12 +44,24 @@ const PersionalDetails = ({ }: Props) => {
         {
             icon: (validity),
             title: "Visa Validity",
-            content: ("NA")
+            content :( staffResponse?.visaValidity
+                ? new Date(staffResponse.visaValidity).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })
+                : "NA")
         },
         {
             icon: (date),
             title: "Date Of Birth",
-            content: ("NA")
+             content :( staffResponse?.dateofBirth
+            ? new Date(staffResponse.dateofBirth).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })
+            : "NA")
         },
         {
             icon: (emirates),
