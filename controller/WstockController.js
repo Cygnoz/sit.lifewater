@@ -88,6 +88,7 @@ exports.createStock = async (req, res) => {
           costPrice: item.costPrice,
           amount: item.quantity * item.sellingPrice,
           status: item.resaleable ? "Filled" : undefined,
+          sellingPrice: item.sellingPrice
         });
       }
     });

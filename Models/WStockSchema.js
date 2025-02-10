@@ -9,6 +9,7 @@ const wStockSchema = new mongoose.Schema({
     itemName: { type: String },
     quantity: { type: Number, min: 1 },
     costPrice: { type: Number },
+    sellingPrice: { type: Number },
     amount: { type: Number },
     status: { type: String ,default: undefined}
   }],
