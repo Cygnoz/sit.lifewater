@@ -225,6 +225,95 @@ exports.createReceipt = async (req, res) => {
   }
 };
 
+
+
+exports.updateReceipt = async (req, res) => {
+  try {
+    const receiptId = req.params.receiptId;
+    if (!receiptId) {
+      return res.status(400).json({ message: 'Receipt ID is required.' });
+    }
+
+    let { customerId, orderId, paidAmount, depositAccountId, salesmanId } = cleanData(req.body);
+
+    // Validate essential fields with specific error messages
+    if (!customerId) {
+      return res.status(400).json({ message: 'Customer ID is required.' });
+    }
+    if (!orderId) {
+      return res.status(400).json({ message: 'Order ID is required.' });
+    }
+    if (!paidAmount && paidAmount !== 0) {
+      return res.status(400).json({ message: 'Paid amount is required.' });
+    }
+    if (paidAmount <= 0) {
+      return res.status(400).json({ message: 'Paid amount must be greater than zero.' });
+    }
+    if (!depositAccountId) {
+      return res.status(400).json({ message: 'Deposit account ID is required.' });
+    }
+
+    // Check if receipt exists
+    const receipt = await Receipt.findById(receiptId);
+    if (!receipt) {
+      return res.status(404).json({ message: 'Receipt not found.' });
+    }
+
+    const { customerAccount, depositAccount } = await dataExist(customerId, depositAccountId);
+    if (!customerAccount) {
+      return res.status(404).json({ message: 'Customer Account not found' });
+    }
+    if (!depositAccount) {
+      return res.status(404).json({ message: 'Deposit Account not found' });
+    }
+
+    // Check if order exists
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found.' });
+    }
+
+    // Validate customer association with the order
+    if (order.customerId.toString() !== customerId) {
+      return res.status(400).json({ message: 'Order does not belong to the specified customer.' });
+    }
+
+    // Check if the paid amount exceeds the balance
+    if (paidAmount > order.balanceAmount) {
+      return res.status(400).json({ message: 'Paid amount exceeds the balance amount.' });
+    }
+
+    // Update order amounts
+    order.balanceAmount -= Number(paidAmount) || 0;
+    order.paidAmount += Number(paidAmount) || 0;
+    await order.save();
+
+    // Update receipt without changing receiptNumber and orderNumber
+    Object.assign(receipt, {
+      customerName: order.customerName,
+      customerId,
+      orderId,
+      salesmanId,
+      depositAccountId,
+      paidAmount: Number(paidAmount),
+    });
+
+    await receipt.save();
+
+    // Journal entry update
+    await journal(receipt, customerAccount, depositAccount);
+
+    return res.status(200).json({
+      message: 'Receipt updated successfully.',
+      receipt,
+    });
+  } catch (error) {
+    console.error('Error updating receipt:', error);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+
      // Function to generate time and date for storing in the database
      function generateTimeAndDateForDB(
       timeZone,

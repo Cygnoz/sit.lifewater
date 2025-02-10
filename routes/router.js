@@ -50,6 +50,8 @@ router.post('/order-receipt', verifyToken, ReceiptController.createReceipt );
 router.get('/receipts', verifyToken,ReceiptController.getAllReceipts);
 router.get('/receipts/:receiptId', verifyToken,ReceiptController.getOneReceipt);
 router.get('/receipts/salesman/:salesmanId', ReceiptController.getReceiptsBySalesmanId);
+router.put('/update-receipt/:receiptId',ReceiptController.updateReceipt);
+
  
 //Unloading
 router.post('/addunload', verifyToken,  unloadController.unloadStock);
