@@ -1621,7 +1621,7 @@ async function createTrialEntry(data) {
   async function editJournal( order, customerAccount, saleAccount, depositAccounts ) { 
         
     const existingTrialBalance = await TrialBalance.findOne({
-      operationId: savedInvoice._id,
+      operationId: order._id,
     });  
 
     const createdDateTime = existingTrialBalance ? existingTrialBalance.createdDateTime : null;
@@ -1629,9 +1629,9 @@ async function createTrialEntry(data) {
     // If there are existing entries, delete them
     if (existingTrialBalance) {
       await TrialBalance.deleteMany({
-        operationId: savedInvoice._id,
+        operationId: order._id,
       });
-      console.log(`Deleted existing TrialBalance entries for operationId: ${savedInvoice._id}`);
+      console.log(`Deleted existing TrialBalance entries for operationId: ${order._id}`);
     }
 
     const sale = {
