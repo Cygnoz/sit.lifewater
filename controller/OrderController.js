@@ -1330,6 +1330,7 @@ exports.editOrder = async (req, res) => {
     await newCustomer.save();
     console.log("New Customer stock updated.");
 
+    
     // Update order details
     existingOrder.customerId = cleanedData.customerId;
     existingOrder.stock = cleanedData.stock.map((item) => ({
