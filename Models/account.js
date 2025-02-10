@@ -10,7 +10,9 @@ const accountSchema = new Schema({
     accountSubhead: {type:String},
     accountHead: {type:String},
     accountGroup: {type:String},
-
+//Opening Balance
+debitOpeningBalance: {type:Number},
+creditOpeningBalance: {type:Number},
     openingDate: {type:String},    
     description: {type:String},
 
