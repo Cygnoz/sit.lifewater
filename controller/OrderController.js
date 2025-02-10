@@ -1348,6 +1348,9 @@ exports.editOrder = async (req, res) => {
     await existingOrder.save();
     console.log("Order updated successfully.");
 
+    await editJournal(existingOrder, customerAccount, saleAccount, depositAccount);
+
+
     res
       .status(200)
       .json({ success: true, message: "Order updated successfully" });
@@ -1539,31 +1542,24 @@ async function journal(order, customerAccount, saleAccount, depositAccounts) {
     };
   }
 
-  const generatedDateTime = generateTimeAndDateForDB(
-    "Asia/Dubai",
-    "DD/MM/YY",
-    "/"
-  );
-  const openingDate = generatedDateTime.dateTime;
 
   // Handle journal entries based on payment mode
   if (order.paymentMode === "Cash") {
-    createTrialEntry(sale, openingDate);
-    createTrialEntry(customer, openingDate);
-    createTrialEntry(customerPaid, openingDate);
-    if (depositAccount) createTrialEntry(depositAccount, openingDate);
+    createTrialEntry(sale);
+    createTrialEntry(customer, );
+    createTrialEntry(customerPaid);
+    if (depositAccount) createTrialEntry(depositAccount);
   } else if (order.paymentMode === "Credit") {
-    createTrialEntry(sale, openingDate);
-    createTrialEntry(customer, openingDate);
+    createTrialEntry(sale);
+    createTrialEntry(customer);
   }
 }
 
-async function createTrialEntry(data, openingDate) {
+async function createTrialEntry(data) {
   const newTrialEntry = new TrialBalance({
     organizationId: data.organizationId,
     operationId: data.operationId,
     transactionId: data.transactionId,
-    date: openingDate,
     accountId: data.accountId,
     action: data.action,
     debitAmount: data.debitAmount,
@@ -1574,3 +1570,144 @@ async function createTrialEntry(data, openingDate) {
 
   console.log("output:", trial);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  async function editJournal( order, customerAccount, saleAccount, depositAccounts ) { 
+        
+    const existingTrialBalance = await TrialBalance.findOne({
+      operationId: savedInvoice._id,
+    });  
+
+    const createdDateTime = existingTrialBalance ? existingTrialBalance.createdDateTime : null;
+
+    // If there are existing entries, delete them
+    if (existingTrialBalance) {
+      await TrialBalance.deleteMany({
+        operationId: savedInvoice._id,
+      });
+      console.log(`Deleted existing TrialBalance entries for operationId: ${savedInvoice._id}`);
+    }
+
+    const sale = {
+      operationId: order._id,
+      transactionId: order.orderNumber,
+      date: order.createdDate,
+      accountId: saleAccount._id || undefined,
+      action: "Sales Invoice",
+      debitAmount: 0,
+      creditAmount: order.totalAmount,
+      remark: order.note,
+    };
+  
+    const customer = {
+      operationId: order._id,
+      transactionId: order.orderNumber,
+      date: order.createdDate,
+      accountId: customerAccount._id || undefined,
+      action: "Sales Invoice",
+      debitAmount:
+        order.paymentMode === "Credit"
+          ? order.totalAmount
+          : order.totalAmount || 0,
+      creditAmount: 0,
+      remark: order.note,
+    };
+  
+    const customerPaid = {
+      operationId: order._id,
+      transactionId: order.orderNumber,
+      date: order.createdDate,
+      accountId: customerAccount._id || undefined,
+      action: "Receipt",
+      debitAmount: 0,
+      creditAmount: order.paymentMode === "Credit" ? 0 : order.paidAmount || 0,
+      remark: order.note,
+    };
+  
+    let depositAccount;
+    if (depositAccounts && order.paymentMode !== "Credit") {
+      depositAccount = {
+        operationId: order._id,
+        transactionId: order.orderNumber,
+        date: order.createdDate,
+        accountId: depositAccounts._id || undefined,
+        action: "Receipt",
+        debitAmount: order.paidAmount || 0,
+        creditAmount: 0,
+        remark: order.note,
+      };
+    }
+  
+  
+    // Handle journal entries based on payment mode
+    if (order.paymentMode === "Cash") {
+      editCreateTrialEntry(sale,createdDateTime);
+      editCreateTrialEntry(customer,createdDateTime );
+      editCreateTrialEntry(customerPaid,createdDateTime);
+      if (depositAccount) editCreateTrialEntry(depositAccount,createdDateTime);
+    } else if (order.paymentMode === "Credit") {
+      editCreateTrialEntry(sale,createdDateTime);
+      editCreateTrialEntry(customer,createdDateTime);
+    }
+    
+    
+  }
+
+
+
+
+
+  async function editCreateTrialEntry( data, createdDateTime ) {
+    const newTrialEntry = new TrialBalance({
+        organizationId:data.organizationId,
+        operationId:data.operationId,
+        transactionId: data.transactionId,
+        date:data.date,
+        accountId: data.accountId,
+        action: data.action,
+        debitAmount: data.debitAmount,
+        creditAmount: data.creditAmount,
+        remark: data.remark,
+        createdDateTime: createdDateTime
+    });
+    
+    await newTrialEntry.save();
+  }
