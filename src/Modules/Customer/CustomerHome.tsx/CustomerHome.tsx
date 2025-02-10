@@ -1,15 +1,17 @@
-import { Link, useNavigate } from "react-router-dom"
+import {
+  //  Link,
+   useNavigate } from "react-router-dom"
 import Cards from "../../../commoncomponents/HomePageCards/Cards"
 import foc from "../../../assets/images/Group 2500.png"
 import cash from "../../../assets/images/Group 2499.png"
 import credit from "../../../assets/images/Group 2498.png"
 import { useContext, useEffect, useState } from "react"
 import Table from "../../../commoncomponents/Table/Table"
-import Button from "../../../commoncomponents/Buttons/Button"
+// import Button from "../../../commoncomponents/Buttons/Button"
 import { TableResponseContext } from "../../../assets/Context/ContextShare"
 import useApi from "../../../Hook/UseApi"
 import { endpoints } from "../../../services/ApiEndpoint"
-import PlusIcon from "../../../assets/icons/PlusIcon"
+// import PlusIcon from "../../../assets/icons/PlusIcon"
 import total from "../../../assets/images/Group 2501.png"
 import { toast, ToastContainer } from "react-toastify"
 
@@ -145,14 +147,14 @@ const CustomerHome = () => {
           <h3 className="text-[#303F58] text-[20px] font-bold">Create Customer</h3>
           <p className="text-[#4B5C79] text-sm">You can show all the details of your customers  </p>
         </div>
-        <div className="flex justify-between">
+        {/* <div className="flex justify-between">
           <Link to={"/addcustomer"}>
             <Button variant="primary" size="sm">
               <PlusIcon color="white" />
               <p>Add New Customer</p>
             </Button>
           </Link>
-        </div>
+        </div> */}
       </div>
 
       <div className="grid grid-cols-4 gap-4 mt-2">
@@ -167,7 +169,7 @@ const CustomerHome = () => {
           data={filteredData}  // Use filteredData here
           searchPlaceholder="Search Customer" 
           loading={loading.skeleton} 
-          searchableFields={["customerID", "fullName", "mobileNo", "mainRoute", "subRoute"]}
+          searchableFields={["customerID", "fullName", "mobileNo", "mainRoute", "subRoute" ,"paymentMode"]}
           onViewClick={handleViewCustomer} // Add this prop
           onEditClick={handleEditCustomer}
           onDeleteClick={handleDeleteCustomer}

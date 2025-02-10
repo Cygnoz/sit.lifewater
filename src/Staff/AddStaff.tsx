@@ -235,7 +235,25 @@ function AddStaff({ }: Props) {
         );
 
         if (!isEditing) {
-          setInitialStaffData(dataToSubmit); // Reset form after adding
+          // Reset the form after adding a new staff member
+          setInitialStaffData({
+            address: "",
+            confirmPassword: "",
+            dateofBirth: "",
+            designation: "",
+            emiratesId: "",
+            firstname: "",
+            lastname: "",
+            mobileNumber: "",
+            nationality: "",
+            password: "",
+            profile: "",
+            username: "",
+            visaNumber: "",
+            visaStatus: "",
+            visaValidity: "",
+            whatsAppNumber: "",
+          });
         }
         if (isEditing) {
           setTimeout(() => {

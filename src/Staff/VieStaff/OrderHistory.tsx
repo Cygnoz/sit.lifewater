@@ -12,6 +12,7 @@ type Order = {
   totalAmount: number;
   paidAmount: number;
   balanceAmount: number;
+  customerName: string;
 };
 
 const OrderHistory = () => {
@@ -35,6 +36,8 @@ const OrderHistory = () => {
       const { response, error } = await getStaff(url);
       if (!error && response) {
         setStaffData(response.data);
+        console.log("Staff Data:", response.data);
+        
       }
     } catch (err) {
       setError("Error fetching staff data");
@@ -49,6 +52,8 @@ const OrderHistory = () => {
       const { response, error } = await getOrders(url);
       if (!error && response) {
         setOrders(response.data);
+        console.log("Orders Data:", response.data);
+        
       }
     } catch (err) {
       setError("Error fetching orders");
@@ -108,6 +113,7 @@ const OrderHistory = () => {
             <table className="w-full border-collapse border border-gray-300 mt-4">
               <thead>
                 <tr className="bg-[#F9F7F0]">
+                  <th className="border p-2">Customer</th>
                   <th className="border p-2">Order Number</th>
                   <th className="border p-2">Main Route</th>
                   <th className="border p-2">Sub Route</th>
@@ -119,6 +125,7 @@ const OrderHistory = () => {
               <tbody>
                 {paginatedOrders.map((order) => (
                   <tr key={order._id} className="border text-center">
+                    <td className="border p-2">{order.customerName}</td>
                     <td className="border p-2">{order.orderNumber}</td>
                     <td className="border p-2">{order.mainRouteName}</td>
                     <td className="border p-2">{order.subRouteName}</td>

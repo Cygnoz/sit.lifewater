@@ -134,7 +134,7 @@ const Table = ({
           fetchAllAccounts();
           setConfirmModalOpen(false);
           setDeleteId(null);
-        }, 3000); // Adjust delay if necessary
+        }, 1000); // Adjust delay if necessary
       } else {
         toast.error(error?.response?.data?.message || "Error deleting account.");
       }
