@@ -23,7 +23,7 @@ interface Customer {
   subRoute: string;
   mainRoute: string;
   paymentMode: string;
-  CouponBottle:string,
+  CouponBottle: string,
   location: {
     address: string;
     coordinates: {
@@ -34,6 +34,8 @@ interface Customer {
 
 const ViewCustomers: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [subRote, setSubRote] = useState("");
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
@@ -42,28 +44,30 @@ const ViewCustomers: React.FC = () => {
   const navigate = useNavigate();
   const defaultImage =
     "https://cdn1.iconfinder.com/data/icons/avatar-3/512/Manager-512.png";
-  const { request: getAllCustomers } = useApi("get", 4000);
+  // const { request: getAllCustomers } = useApi("get", 4000);
   const [loading, setLoading] = useState(false);
 
   // Get All customer
-  const getALLCustomers = async () => {
-    try {
-      const url = `${endpoints.GET_ALL_CUSTOMERS}`;
-      const { response, error } = await getAllCustomers(url);
-      console.log("API RESPONSE :", response);
+  // const getALLCustomers = async () => {
+  //   try {
+  //     const url = `${endpoints.GET_ALL_CUSTOMERS}`;
+  //     const { response, error } = await getAllCustomers(url);
+  //     console.log("API RESPONSE :", response);
 
-      if (!error && response) {
-        setLoading(false);
-        setCustomers(response.data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  //     if (!error && response) {
+  //       setLoading(false);
+  //       setCustomers(response.data);
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
-  useEffect(() => {
-    getALLCustomers();
-  }, []);
+  // useEffect(() => {
+  //   getALLCustomers();
+  // }, []);
+
+  
   console.log(loading);
 
   const filteredCustomers = customers.filter((customer) =>
@@ -85,6 +89,60 @@ const ViewCustomers: React.FC = () => {
       navigate(`/editcustomer/${selectedCustomer._id}`);
     }
   };
+
+  // Fetch activeroute with sales id
+  const { request: getActiveRoute } = useApi("get", 4000);
+  const SalesManId = localStorage.getItem("SalesManId");
+  const fetchActiveRoute = async () => {
+    try {
+      const url = `${endpoints.GET_AN_ACTIVE_ROUTE_WITH_SALESMEN_ID}/${SalesManId}`;
+      const { response, error } = await getActiveRoute(url);
+      console.log("Active route with sales id:", response?.data?.activeRide);
+
+      if (!error && response) {
+        setLoading(false);
+        const activeRide = response?.data?.activeRide;
+
+        if (activeRide) {
+          
+          setSubRote(activeRide.subRouteName)
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    if (subRote) {
+      getALLCustomersBySubRoute(subRote);
+    }
+  }, [subRote]);
+
+  const { request: getAllSubRouteCustomers } = useApi("get", 4000);
+  // Get All customer in the subroute
+  const getALLCustomersBySubRoute = async (subRoute: any) => {
+    if (!subRoute) return; // Prevent API call if subRoute is undefined
+
+    setLoading(true);
+    try {
+      const url = `${endpoints.GET_CUSTOMER_BY_SUBROUTE}/${subRoute}`;
+      const { response, error } = await getAllSubRouteCustomers(url);
+      console.log("Get all customer in SubRoute", response);
+
+      if (!error && response) {
+        setCustomers(response?.data);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchActiveRoute();
+  }, []);
+
   return (
     <>
       <div className="min-h-screen p-4 bg-gray-100">
@@ -224,12 +282,12 @@ const ViewCustomers: React.FC = () => {
                   {selectedCustomer.numberOfBottles}
                 </p>
                 {
-                    selectedCustomer?.CouponBottle &&
-                    <p className="mb-2">
+                  selectedCustomer?.CouponBottle &&
+                  <p className="mb-2">
                     <strong>Balance Coupons:</strong>{" "}
                     {selectedCustomer.CouponBottle}
                   </p>
-                  }
+                }
               </>
             )}
           </Typography>
