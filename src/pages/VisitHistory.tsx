@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import rupee from '../assets/images/rupees.svg';
 import handcoin from '../assets/images/handcoin.svg';
-import user from '../assets/images/Icons/user-round.svg';
+import user from '../assets/images/Icons/user-round1.svg';
 import search from '../assets/images/search (2).svg';
 import { endpoints } from '../services/ApiEndpoint';
 import useApi from '../Hook/UseApi';
-
 
 interface OrderDetails {
   date: string
@@ -14,9 +13,6 @@ interface OrderDetails {
 const Visithistory: React.FC = () => {
   const [subRote, setSubRote] = useState("");
   const [customers, setCustomers] = useState([]);
-
-
-
   const [orders, setOrders] = useState<OrderDetails[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [rideId, setRideId] = useState(null);
