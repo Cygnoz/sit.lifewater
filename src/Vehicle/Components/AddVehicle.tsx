@@ -166,7 +166,7 @@ const AddVehicle: React.FC<Props> = () => {
           }, 2000);
         }
       } else {
-        toast.error("Failed to save vehicle data.");
+        toast.error(error?.response?.data?.message || "An unexpected error occurred.");
       }
     } catch (error) {
       toast.error("An unexpected error occurred.");
