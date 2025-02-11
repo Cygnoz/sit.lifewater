@@ -53,9 +53,9 @@ const AddReceipt: React.FC = () => {
       );
       if (!error && response) {
 
-        const formattedData = response.data?.map((item: any) => item._doc);
-        const filtered = formattedData.filter(
-          (account: any) => account.accountSubhead === "Cash"
+        const formattedData = response?.data;
+        const filtered = formattedData.filter((account: any) =>
+          ["Cash", "Bank"].includes(account.accountSubhead)
         );
         setFilteredAccounts(filtered);
       }

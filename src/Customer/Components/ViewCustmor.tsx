@@ -44,19 +44,18 @@ const ViewCustmor: React.FC = () => {
     "https://cdn1.iconfinder.com/data/icons/avatar-3/512/Manager-512.png";
 
   // Calculate Due Amount
-  const calculateDueAmount = () => {
-    if (customer) {
-      const depositAmount = customer.depositAmount || 0;
-      const numberOfBottles = customer.numberOfBottles || 0;
-      const ratePerBottle = customer.ratePerBottle || 0;
+  // const calculateDueAmount = () => {
+  //   if (customer) {
+  //     const depositAmount = customer.depositAmount || 0;
+  //     const numberOfBottles = customer.numberOfBottles || 0;
+  //     const ratePerBottle = customer.ratePerBottle || 0;
 
-      const dueAmount = depositAmount - (numberOfBottles * ratePerBottle);
-      return dueAmount.toFixed(2); // Round to 2 decimal places
-    }
-    return "0.00"; // Default value if customer data is not available
-  };
+  //     const dueAmount = depositAmount - (numberOfBottles * ratePerBottle);
+  //     return dueAmount.toFixed(2); // Round to 2 decimal places
+  //   }
+  //   return "0.00"; // Default value if customer data is not available
+  // };
 
-  const dueAmount = calculateDueAmount();
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -131,19 +130,19 @@ const ViewCustmor: React.FC = () => {
           >
             <img src={mappinned} alt="Most Visited Route" />
             <div className="text-right">
-             
+
               <p className="text-gray-900">{customer.city}</p>
               <h3 className="text-gray-900">
                 <span >{customer.addressLine1}</span>
               </h3>
               <h3 className="text-gray-600">
-              <span >{customer.addressLine2}</span>
+                <span >{customer.addressLine2}</span>
               </h3>
-             
+
             </div>
           </div>
 
-       
+
 
           {/* License Validity */}
           <div
@@ -185,15 +184,14 @@ const ViewCustmor: React.FC = () => {
         <div className="md:col-span-2 bg-white shadow-md rounded-lg p-6 mx-4">
           {/* Stats Cards */}
           <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="text-center p-4 border-2 rounded-lg bg-gradient-to-r from-[#E3E6D5] to-[#F7E7CE]">
-              <p className="text-gray-700">DUE AMOUNT</p>
-              <h2 className="text-xl font-bold text-gray-800">AED {dueAmount}</h2>
-        
+            <div className="text-center p-4 border-2 rounded-lg bg-gradient-to-r  from-[#E3E6D5] to-[#F7E7CE]">
+              <p className="text-gray-700">Payment Mode</p>
+              <h2 className="text-xl font-bold text-gray-800"> {customer?.paymentMode}</h2>
             </div>
 
             <div className="text-center p-4 border-2 rounded-lg bg-gradient-to-r from-[#E3E6D5] to-[#F7E7CE]">
               <p className="text-gray-700">DEPOSIT AMOUNT</p>
-              <h2 className="text-xl font-bold text-gray-800">AED 0</h2>
+              <h2 className="text-xl font-bold text-gray-800">{customer?.depositAmount} AED</h2>
             </div>
           </div>
 
@@ -202,10 +200,10 @@ const ViewCustmor: React.FC = () => {
             {/* General Details */}
             <div className="bg-gray-5 p-4 rounded-lg">
               <h3 className="font-semibold text-lg text-gray-700 mb-4">
-              {
-                    customer?.CouponBottle &&
-                    <p className="text-gray-700 text-[13px]">Balance Coupon : {customer?.CouponBottle}</p>
-                  }         General Details
+                {
+                  customer?.CouponBottle &&
+                  <p className="text-gray-700 text-[13px]">Balance Coupon : {customer?.CouponBottle}</p>
+                }         General Details
               </h3>
               <div className="space-y-2">
                 <p className="font-bold text-gray-500 text-lg text-[14px]">
@@ -256,7 +254,7 @@ const ViewCustmor: React.FC = () => {
                   })}
                 </p>
 
-                
+
               </div>
             </div>
           </div>
