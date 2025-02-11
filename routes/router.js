@@ -115,13 +115,13 @@ router.get('/rides/completed/:mainRouteId', startRideController.getCompletedRide
 //acoounts
 router.post('/addaccounts', verifyToken, AccountsController.addAccount); // add account
 router.get('/getallaccounts', verifyToken, AccountsController.getAllAccount); // get all accounts
-router.put('/edit-account/:accountId',AccountsController.editAccount)
-router.get('/one-account/:accountId',AccountsController.getOneAccount)
-router.delete('/delete-account/:accountId',AccountsController.deleteAccount)
+router.put('/edit-account/:accountId',verifyToken,AccountsController.editAccount)
+router.get('/one-account/:accountId',verifyToken,AccountsController.getOneAccount)
+router.delete('/delete-account/:accountId',verifyToken,AccountsController.deleteAccount)
 
 
 //addaccount
-router.post('/add-autogenerateaccount', AccountsController.autoGenerateAccount); // add account
+router.post('/add-autogenerateaccount',verifyToken, AccountsController.autoGenerateAccount); // add account
 
 //Journal
 router.post('/add-journal-entry', verifyToken,journalController.addJournalEntry); // add journal entry
@@ -129,6 +129,7 @@ router.get('/get-all-journal', verifyToken,journalController.getAllJournal); // 
 router.get('/get-one-journal/:id', verifyToken,journalController.getOneJournal); // get one journal entry by ID
 router.get('/get-one-trial-balance/:accountId', verifyToken,AccountsController.getOneTrailBalance); // get one journal entry by ID
 router.put('/edit-journal-entry/:id', verifyToken,journalController.updateJournalEntry); // get one journal entry by ID
+router.delete('/delete-journal/:id',verifyToken,journalController.deleteJournalEntry)
 
 
 

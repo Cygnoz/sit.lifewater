@@ -7,6 +7,7 @@ const moment = require('moment-timezone');
 const { cleanData } = require("../../services/cleanData");
 
 const { singleCustomDateTime, multiCustomDateTime } = require("../../services/timeConverter");
+const { default: mongoose } = require("mongoose");
 
 
 // Add Journal Entry
@@ -238,6 +239,57 @@ exports.updateJournalEntry = async (req, res) => {
   }
 }
 
+
+
+// Delete Journal Entry 
+exports.deleteJournalEntry  = async (req, res) => {
+  console.log("Delete journal entry request received:", req.params);
+
+  try {
+      // const { organizationId } = req.user;
+      const { id } = req.params;
+
+      // Validate id
+      if (!mongoose.Types.ObjectId.isValid(id) || id.length !== 24) {
+          return res.status(400).json({ message: `Invalid Journal Entry ID: ${id}` });
+      }
+
+      // Fetch existing journal entry
+      const existingJournalEntry = await Journal.findOne({ _id: id });
+      if (!existingJournalEntry) {
+          console.log("Journal entry not found with ID:", id);
+          return res.status(404).json({ message: "Journal entry not found!" });
+      }
+
+      // Fetch existing TrialBalance's createdDateTime
+      const existingTrialBalance = await TrialBalance.findOne({
+        // organizationId: existingJournalEntry.organizationId,
+        operationId: existingJournalEntry._id,
+      });  
+      // If there are existing entries, delete them
+      if (existingTrialBalance) {
+        await TrialBalance.deleteMany({
+          // organizationId: existingJournalEntry.organizationId,
+          operationId: existingJournalEntry._id,
+        });
+        console.log(`Deleted existing TrialBalance entries for operationId: ${existingJournalEntry._id}`);
+      }
+
+      // Delete the journal entry
+      const deletedJournalEntry = await existingJournalEntry.deleteOne();
+      if (!deletedJournalEntry) {
+          console.error("Failed to delete journal entry!");
+          return res.status(500).json({ message: "Failed to delete journal entry!" });
+      }
+
+      res.status(200).json({ message: "Journal entry deleted successfully!" });
+      console.log("Journal entry deleted successfully with ID:", id);
+
+  } catch (error) {
+      console.error("Error deleting journal entry:", error);
+      res.status(500).json({ message: "Internal server error!" });
+  }
+};
 
 
 
