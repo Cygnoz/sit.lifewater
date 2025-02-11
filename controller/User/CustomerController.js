@@ -735,6 +735,7 @@ exports.deleteCustomerById = async (req, res) => {
           const coupon = await Coupon.findById(entry.couponId);
   
           return {
+            _id: entry._id,
             customerFullName: customer ? customer.fullName : 'N/A',
             couponDetails: coupon || {},
             paidAmount: entry.paidAmount,
