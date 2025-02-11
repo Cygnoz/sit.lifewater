@@ -3,6 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { endpoints } from "../services/ApiEndpoint";
 import useApi from "../Hook/UseApi";
+import SearchDropdown from "../CommonComponents/VehicleDropdown";
+import DriverSearchDropdown from "../CommonComponents/DriverDropdown";
+import HelperSearchDropdown from "../CommonComponents/HelperDropdown";
+import MainrouteSearchDropdown from "../CommonComponents/MainRouteDropdown";
+import SubrouteSearchDropdown from "../CommonComponents/Subroutedropdown";
 
 interface Route {
   _id: string;
@@ -33,7 +38,8 @@ const AddStartRide: React.FC = () => {
   const [selectedSubRoute, setSelectedSubRoute] = useState<{
     subRouteName: string;
     subRouteId: string | null;
-    stock: [];
+    stock: any[];
+
   } | null>(null);
 
   const [mainRouteList, setMainRouteList] = useState<
@@ -53,7 +59,7 @@ const AddStartRide: React.FC = () => {
   const [selectedVehicle, setSelectedVehicle] = useState<{
     vehicleNo: string;
     id: string | null;
-  } | null>(null);  
+  } | null>(null);
 
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [openingStock, setOpeningStock] = useState<number | "">("");
@@ -67,24 +73,14 @@ const AddStartRide: React.FC = () => {
   useEffect(() => {
     setStoredUsername(firstname);
   }, []);
-  const handleMainRouteChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const mainRouteName = event.target.value;
+  const handleMainRouteChange = (selectedRoute: {
+    mainRouteId: string;
+    mainRouteName: string;
+  }) => {
+    setSelectedMainRoute(selectedRoute);
 
-    // Find the selected main route details
-    const selectedMainRouteDetails = mainRouteList.find(
-      (route) => route.mainRouteName === mainRouteName
-    );
-
-    setSelectedMainRoute({
-      mainRouteName,
-      mainRouteId: selectedMainRouteDetails?.mainRouteId || null,
-    });
-
-    // Filter subroutes based on the selected main route
     const filtered = routesList.filter(
-      (route) => route.mainRouteName === mainRouteName
+      (route) => route.mainRouteName === selectedRoute.mainRouteName
     );
 
     setFilteredSubRoutes(
@@ -95,33 +91,22 @@ const AddStartRide: React.FC = () => {
       }))
     );
 
-    // Reset the selected subroute
     setSelectedSubRoute(null);
   };
 
-  const handleSubRouteChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const subRouteId = event.target.value;
+  const handleSubRouteChange = (selectedSubRoute: {
+    subRouteId: string;
+    subRouteName: string;
+    stock: any[];
+  }) => {
+    setSelectedSubRoute({
+      subRouteName: selectedSubRoute.subRouteName,
+      subRouteId: selectedSubRoute.subRouteId,
+      stock: selectedSubRoute.stock,
+    });
 
-    // Find the selected subroute details
-    const selectedSubRouteDetails = filteredSubRoutes.find(
-      (subRoute) => subRoute._id === subRouteId
-    );
-
-    if (selectedSubRouteDetails) {
-      setSelectedSubRoute({
-        subRouteName: selectedSubRouteDetails?.subRouteName || "",
-        subRouteId: selectedSubRouteDetails?._id || null,
-        stock: selectedSubRouteDetails?.stock || [],
-      });
-
-      // Update the opening stock as the length of the stock array
-      setOpeningStock(selectedSubRouteDetails.stock.length);
-    } else {
-      setSelectedSubRoute(null);
-      setOpeningStock(""); // Reset if no subroute is selected
-    }
+    // Update the opening stock based on the stock array length
+    setOpeningStock(selectedSubRoute.stock.length);
   };
 
   const { request: getSubRoute } = useApi("get", 4000);
@@ -211,63 +196,39 @@ const AddStartRide: React.FC = () => {
     getAllStaff();
   }, []);
 
-  const handleHelperChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const helperId = event.target.value;
-
-    // Find the selected helper's details
-    const selectedHelperDetails = staffList.find(
-      (staff) => staff._id === helperId
-    );
-
-    setSelectedHelper({
-      name: `${selectedHelperDetails?.firstname}`,
-      id: selectedHelperDetails?._id || null,
-    });
+  const handleHelperChange = (selectedHelper: { id: string; name: string }) => {
+    setSelectedHelper(selectedHelper);
+  };
+  const handleDriverChange = (selectedDriver: { id: string; name: string }) => {
+    setSelectedDriver(selectedDriver);
   };
 
-  const handleVehicleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const vehicleId = event.target.value;
-  
-    const selectedVehicle = vehicleList.find((vehicle) => vehicle._id === vehicleId);
-  
-    if (selectedVehicle) {
-      setSelectedVehicle({
-        vehicleNo: selectedVehicle.vehicleNo, 
-        id: selectedVehicle._id,
-      });
-    }
+  const handleVehicleChange = (selectedVehicle: {
+    id: string;
+    vehicleNo: string;
+  }) => {
+    setSelectedVehicle(selectedVehicle);
   };
-  
 
   console.log("Selected helper", selectedHelper?.name); // "John Doe"
   console.log("Selected helper", selectedHelper?.id); // "abcd1234"
   console.log("Selected vehicle", selectedVehicle?.vehicleNo); // "abcd1234"
   console.log("Selected vehicle id", selectedVehicle?.id); // "abcd1234"
+  console.log("Selected maaain", selectedMainRoute?.mainRouteName); // "abcd1234"
+  console.log("Selected main id", selectedMainRoute?.mainRouteId); // "abcd1234"
+  console.log("Selected sub ", selectedSubRoute?.subRouteId); // "abcd1234"
+  console.log("Selected sub id", selectedSubRoute?.subRouteName); // "abcd1234"
 
-  const handleDriverChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const driverId = event.target.value;
-
-    // Find the selected helper's details
-    const selectedDriverDetails = staffList.find(
-      (staff) => staff._id === driverId
-    );
-
-    setSelectedDriver({
-      name: `${selectedDriverDetails?.firstname} ${selectedDriverDetails?.lastname}`,
-      id: selectedDriverDetails?._id || null,
-    });
-  };
   // for stock details
   const formattedStock = selectedSubRoute?.stock
-  ?.filter((item: any) => item.quantity > 0) // Filters only items with quantity > 0
-  .map((item: any) => ({
-    itemId: item.itemId, 
-    itemName: item.itemName || "Unknown Item", 
-    quantity: item.quantity, 
-    sellingPrice: item.sellingPrice,
-    status: item.status || "NA",
-  }));
-
+    ?.filter((item: any) => item.quantity > 0) // Filters only items with quantity > 0
+    .map((item: any) => ({
+      itemId: item.itemId,
+      itemName: item.itemName || "Unknown Item",
+      quantity: item.quantity,
+      sellingPrice: item.sellingPrice,
+      status: item.status || "NA",
+    }));
 
   const { request: addStartRide } = useApi("post", 4000);
 
@@ -385,116 +346,36 @@ const AddStartRide: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Main Route Selection */}
 
-          <div>
-            <label
-              htmlFor="helper"
-              className="text-sm font-medium text-gray-700"
-            >
-              Main Route
-            </label>
-            <select
-              onChange={handleMainRouteChange}
-              className="w-full p-2 border border-gray-300 rounded-lg"
-            >
-              <option value="">Select Main Route</option>
-              {mainRouteList.map((route) => (
-                <option key={route.mainRouteId} value={route.mainRouteName}>
-                  {route.mainRouteName}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label
-              htmlFor="helper"
-              className="text-sm font-medium text-gray-700"
-            >
-              Sub Route
-            </label>
-            <select
-              onChange={handleSubRouteChange}
-              className="w-full p-2 border border-gray-300 rounded-lg"
-              required
-            >
-              <option value="">Select Sub Route</option>
-              {filteredSubRoutes.map((subRoute) => (
-                <option key={subRoute._id} value={subRoute._id}>
-                  {subRoute.subRouteName}
-                </option>
-              ))}
-            </select>
-          </div>
+          <MainrouteSearchDropdown
+            options={mainRouteList}
+            onSelect={handleMainRouteChange}
+          />
 
-          <div className="space-y-1">
-            <label
-              htmlFor="helper"
-              className="text-sm font-medium text-gray-700"
-            >
-              Helper
-            </label>
-            <select
-              id="helper"
-              className="w-full p-2 border border-gray-300 rounded-lg"
-              onChange={handleHelperChange}
-              // required
-            >
-              <option value="">Select Helper</option>
-              {staffList
-                .filter((staff) => staff.designation === "Helper")
-                .map((staff) => (
-                  <option key={staff._id} value={staff._id}>
-                    {staff.firstname} {staff.lastname}
-                  </option>
-                ))}
-            </select>
-          </div>
+          <SubrouteSearchDropdown
+            options={filteredSubRoutes}
+            onSelect={handleSubRouteChange}
+            label="Sub Route"
+            placeholder="Search Sub Route..."
+          />
 
-          <div className="space-y-1">
-            <label
-              htmlFor="helper"
-              className="text-sm font-medium text-gray-700"
-            >
-              Driver
-            </label>
-            <select
-              id="helper"
-              className="w-full p-2 border border-gray-300 rounded-lg"
-              onChange={handleDriverChange}
-              // required
-            >
-              <option value="">Select Driver</option>
-              {staffList
-                .filter((staff) => staff.designation === "Driver")
-                .map((staff) => (
-                  <option key={staff._id} value={staff._id}>
-                    {staff.firstname} {staff.lastname}
-                  </option>
-                ))}
-            </select>
-          </div>
+          <HelperSearchDropdown
+            options={staffList.filter(
+              (staff) => staff.designation === "Helper"
+            )}
+            onSelect={handleHelperChange}
+          />
 
-          <div className="space-y-1">
-            <label
-              htmlFor="vehicle"
-              className="text-sm font-medium text-gray-700"
-            >
-              Select Vehicle Number
-            </label>
-            <select
-  id="vehicle"
-  className="w-full p-2 border border-gray-300 rounded-lg"
-  required
-  onChange={handleVehicleChange} // Add this
->
-  <option value="">Select Vehicle No</option>
-  {vehicleList.map((vehicle) => (
-    <option key={vehicle._id} value={vehicle._id}> 
-      {vehicle.vehicleNo}
-    </option>
-  ))}
-</select>
+          <DriverSearchDropdown
+            options={staffList.filter(
+              (staff) => staff.designation === "Driver"
+            )}
+            onSelect={handleDriverChange}
+          />
 
-          </div>
+          <SearchDropdown
+            options={vehicleList}
+            onSelect={handleVehicleChange}
+          />
 
           {/* Stock Section */}
           <div className="grid grid-cols-2 gap-4">
