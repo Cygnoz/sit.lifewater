@@ -429,7 +429,7 @@ exports.updateReceipt = async (req, res) => {
         });
     
         await receipt.save();
-        await journal(receipt, customerAccount, depositAccount);
+        await editJournal(receipt, customerAccount, depositAccount);
     
         console.log('Update successful:', {
           receipt: receipt._id,
@@ -550,11 +550,9 @@ async function journal( receipt, customerAccount, depositAccounts ) {
   // console.log("Total Debit Amount: ", debitAmount );
   // console.log("Total Credit Amount: ", creditAmount );
 
-  const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai","DD/MM/YY","/");
-  const openingDate = generatedDateTime.dateTime; 
 
-  createTrialEntry( customerPaid,openingDate )
-  createTrialEntry( depositAccount,openingDate )
+  createTrialEntry( customerPaid )
+  createTrialEntry( depositAccount )
   
 
 }
@@ -562,12 +560,11 @@ async function journal( receipt, customerAccount, depositAccounts ) {
 
 
 
-async function createTrialEntry( data,openingDate ) {
+async function createTrialEntry( data ) {
   const newTrialEntry = new TrialBalance({
       organizationId:data.organizationId,
       operationId:data.operationId,
       transactionId: data.transactionId,
-      date:openingDate,
       accountId: data.accountId,
       action: data.action,
       debitAmount: data.debitAmount,
@@ -576,4 +573,91 @@ async function createTrialEntry( data,openingDate ) {
 });
     const trial =  await newTrialEntry.save();
     console.log('output:',trial); 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function editJournal( receipt, customerAccount, depositAccounts ) { 
+        
+  const existingTrialBalance = await TrialBalance.findOne({
+    operationId: receipt._id,
+  });  
+
+  const createdDateTime = existingTrialBalance ? existingTrialBalance.createdDateTime : null;
+
+  // If there are existing entries, delete them
+  if (existingTrialBalance) {
+    await TrialBalance.deleteMany({
+      operationId: receipt._id,
+    });
+    console.log(`Deleted existing TrialBalance entries for operationId: ${receipt._id}`);
+  }
+
+  const customerPaid = {
+    operationId: receipt._id,
+    transactionId: receipt.receiptNumber,
+    date: receipt.createdDate,
+    accountId: customerAccount._id || undefined,
+    action: "Receipt",
+    debitAmount: 0,
+    creditAmount: receipt.paidAmount || 0,
+    remark: receipt.note,
+  };
+  let depositAccount 
+ 
+  if(depositAccounts){
+     depositAccount = {
+      operationId: receipt._id,
+      transactionId: receipt.receiptNumber,
+      date: receipt.createdDate,
+      accountId: depositAccounts._id || undefined,
+      action: "Receipt",
+      debitAmount: receipt.paidAmount || 0,
+      creditAmount: 0,
+      remark: receipt.note,
+    };
+  }
+
+  editCreateTrialEntry( customerPaid,createdDateTime )
+  editCreateTrialEntry( depositAccount,createdDateTime )
+
+
+
+  
+  
+}
+
+
+
+
+
+async function editCreateTrialEntry( data, createdDateTime ) {
+  const newTrialEntry = new TrialBalance({
+      organizationId:data.organizationId,
+      operationId:data.operationId,
+      transactionId: data.transactionId,
+      date:data.date,
+      accountId: data.accountId,
+      action: data.action,
+      debitAmount: data.debitAmount,
+      creditAmount: data.creditAmount,
+      remark: data.remark,
+      createdDateTime: createdDateTime
+  });
+  
+  await newTrialEntry.save();
 }
