@@ -126,7 +126,7 @@ exports.createCustomer = async (req, res) => {
 
 
 
-// Ensure correct path to your model
+
 
 // Controller to add a customer from Salesman module
 // const addCustomerFromSalesman = async (req, res) => {
@@ -625,6 +625,102 @@ exports.deleteCustomerById = async (req, res) => {
       res.status(500).json({ message: "Internal server error." });
     }
   };
+
+
+
+
+  //edit coupon customer
+  exports.editCouponCustomer = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { couponId, depositAccountId, paidAmount } = req.body;
+  
+      console.log("Request Params (CouponCustomer ID):", id);
+      console.log("Request Body:", req.body);
+  
+      // Validate required fields
+      if (!couponId || !depositAccountId || !paidAmount) {
+        console.warn("Validation failed: Missing required fields");
+        return res.status(400).json({ message: "All fields are required." });
+      }
+  
+      // Find the existing coupon customer entry
+      const existingCouponCustomer = await couponCustomer.findById(id);
+      console.log("Existing Coupon Customer fetched:", existingCouponCustomer);
+  
+      if (!existingCouponCustomer) {
+        console.warn("CouponCustomer not found for ID:", id);
+        return res.status(404).json({ message: "Coupon Customer not found" });
+      }
+  
+      // Fetch the new coupon, deposit account, and validate paid amount
+      const coupon = await Coupon.findById(couponId);
+      console.log("Coupon fetched:", coupon);
+  
+      if (!coupon) {
+        console.warn("Coupon not found for ID:", couponId);
+        return res.status(404).json({ message: "Coupon not found" });
+      }
+  
+      if (coupon.price !== paidAmount) {
+        console.warn("Paid amount mismatch. Expected:", coupon.price, "Received:", paidAmount);
+        return res.status(400).json({ message: "Paid amount must be equal to coupon price" });
+      }
+  
+      const accounts = await Accounts.findById(depositAccountId);
+      console.log("Accounts fetched:", accounts);
+  
+      if (!accounts) {
+        console.warn("Accounts not found for ID:", depositAccountId);
+        return res.status(404).json({ message: "Accounts not found" });
+      }
+  
+      // Fetch and validate the required account details
+      const { customerAccount, saleAccount, depositAccount } = await dataExist(existingCouponCustomer.customerId, depositAccountId);
+      console.log("Account Details:", { customerAccount, saleAccount, depositAccount });
+  
+      if (!customerAccount) {
+        console.warn("Customer account not found for ID:", existingCouponCustomer.customerId);
+        return res.status(404).json({ message: "Customer Account not found" });
+      }
+  
+      // Update customer bottle count if coupon is changed
+      if (existingCouponCustomer.couponId.toString() !== couponId) {
+        const oldCoupon = await Coupon.findById(existingCouponCustomer.couponId);
+        console.log("Old Coupon fetched:", oldCoupon);
+  
+        const bottlesToRemove = oldCoupon?.numberOfBottles || 0;
+        const bottlesToAdd = coupon.numberOfBottles || 0;
+  
+        const customer = await Customer.findById(existingCouponCustomer.customerId);
+        if (customer) {
+          customer.CouponBottle = (customer.CouponBottle || 0) - bottlesToRemove + bottlesToAdd;
+          await customer.save();
+          console.log(`Updated customer ${customer._id} CouponBottle. New value: ${customer.CouponBottle}`);
+        }
+      }
+  
+      // Update the coupon customer entry
+      existingCouponCustomer.couponId = couponId;
+      existingCouponCustomer.depositAccountId = depositAccountId;
+      existingCouponCustomer.paidAmount = paidAmount;
+      await existingCouponCustomer.save();
+  
+      console.log("Updated Coupon Customer record:", existingCouponCustomer);
+  
+      // Update journal entries
+      await editJournal(existingCouponCustomer, customerAccount, saleAccount, depositAccount);
+      console.log("Journal updated successfully");
+  
+      res.status(200).json({ 
+        message: "Coupon customer updated successfully", 
+        couponCustomer: existingCouponCustomer 
+      });
+    } catch (error) {
+      console.error("Error updating coupon customer:", error);
+      res.status(500).json({ message: "Internal server error." });
+    }
+  };
   
 
 
@@ -824,6 +920,64 @@ async function journal(newCouponCustomer, customerAccount, saleAccount, depositA
 
 
 
+  async function editJournal(existingCouponCustomer, customerAccount, saleAccount, depositAccounts) {
+    const sale = {
+      operationId: existingCouponCustomer._id,
+      transactionId: existingCouponCustomer.couponNumber,
+      date: existingCouponCustomer.createdDate,
+      accountId: saleAccount._id || undefined,
+      action: "Coupon Invoice",
+      debitAmount: 0,
+      creditAmount: existingCouponCustomer.paidAmount || 0,
+      remark: existingCouponCustomer.note,
+    };
+  
+    const customer = {
+      operationId: existingCouponCustomer._id,
+      transactionId: existingCouponCustomer.couponNumber,
+      date: existingCouponCustomer.createdDate,
+      accountId: customerAccount._id || undefined,
+      action: "Coupon Invoice",
+      debitAmount: existingCouponCustomer.paidAmount || 0,
+      creditAmount: 0,
+      remark: existingCouponCustomer.note,
+    };
+  
+    const customerPaid = {
+      operationId: existingCouponCustomer._id,
+      transactionId: existingCouponCustomer.couponNumber,
+      date: existingCouponCustomer.createdDate,
+      accountId: customerAccount._id || undefined,
+      action: "Receipt",
+      debitAmount: 0,
+      creditAmount: existingCouponCustomer.paidAmount || 0,
+      remark: existingCouponCustomer.note,
+    };
+  
+    const depositAccount = {
+      operationId: existingCouponCustomer._id,
+      transactionId: existingCouponCustomer.couponNumber,
+      date: existingCouponCustomer.createdDate,
+      accountId: depositAccounts._id || undefined,
+      action: "Receipt",
+      debitAmount: existingCouponCustomer.paidAmount || 0,
+      creditAmount: 0,
+      remark: existingCouponCustomer.note,
+    };
+  
+    const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai", "DD/MM/YY", "/");
+    const openingDate = generatedDateTime.dateTime;
+  
+    // Update trial balance entries
+    await updateTrialEntry(existingCouponCustomer._id, sale, openingDate);
+    await updateTrialEntry(existingCouponCustomer._id, customer, openingDate);
+    await updateTrialEntry(existingCouponCustomer._id, customerPaid, openingDate);
+    await updateTrialEntry(existingCouponCustomer._id, depositAccount, openingDate);
+  
+    console.log("Journal entries updated successfully.");
+  }
+  
+
 
 
 
@@ -892,3 +1046,8 @@ exports.ensureAllCustomersHaveAccountsAndTrialBalances = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
+
+
+
+
