@@ -149,7 +149,7 @@ exports.getAllAccount = async (req, res) => {
     try {
 
         // Find all accounts where  matches
-        const accounts = await Account.find( );
+        const accounts = await Account.find( ).lean();
 
     if (!accounts.length) {
       return res.status(404).json({
@@ -176,7 +176,7 @@ exports.getOneAccount = async (req, res) => {
     }
 
     // Convert `accountId` to ObjectId
-    const account = await Account.findOne({ _id: new mongoose.Types.ObjectId(accountId) });
+    const account = await Account.findOne({ _id: new mongoose.Types.ObjectId(accountId) }).lean();
 
     if (!account) {
       return res.status(404).json({
@@ -237,7 +237,7 @@ exports.getOneTrailBalance = async (req, res) => {
       // Find the TrialBalance by accountId and 
       const trialBalance = await TrialBalance.find({
           accountId: accountId,
-      });
+      }).lean();
 
       if (!trialBalance) {
           return res.status(404).json({
