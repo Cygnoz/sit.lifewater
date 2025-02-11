@@ -44,7 +44,7 @@ router.post('/orders', verifyToken,  orderController.createOrder);
 router.get('/orders/:id', verifyToken,  orderController.viewOrder);
 router.get('/orders', verifyToken,  orderController.viewAllOrders);
 router.put('/editorder/:id',  orderController.editOrder);
-router.delete('/orders/:id', verifyToken,  orderController.deleteOrder);
+router.delete('/orders/:id',  orderController.deleteOrder);
 router.get('/today/:rideId', verifyToken,orderController.getTodayOrders);
 router.post('/order-receipt', verifyToken, ReceiptController.createReceipt );
 router.get('/receipts', verifyToken,ReceiptController.getAllReceipts);

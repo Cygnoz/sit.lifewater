@@ -397,14 +397,189 @@ exports.getTodayOrders = async (req, res) => {
 
 // Function to delete an order by ID
 exports.deleteOrder = async (req, res) => {
+  console.log("Delete Order Request for ID:", req.params.id);
+  let responseStatus = 200;
+  let responseMessage = { success: true, message: "Order deleted successfully" };
+
   try {
-    const deletedOrder = await Order.findByIdAndDelete(req.params.id);
-    if (!deletedOrder) {
-      return res.status(404).json({ message: "Order not found" });
+    const { id } = req.params;
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Order ID is required" });
     }
-    res.status(200).json({ message: "Order deleted successfully" });
+
+    // Find the order and check if it exists
+    const order = await Order.findById(id);
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    // Check if receipt exists for this order
+    const existingReceipt = await Receipt.findOne({ orderId: id });
+    if (existingReceipt) {
+      return res
+        .status(400)
+        .json({ 
+          success: false, 
+          message: "Cannot delete order: receipt has already been generated"
+        });
+    }
+
+    // Get required accounts for journal reversal
+    const { customerAccount, saleAccount, depositAccount } = await dataExist(
+      order.customerId,
+      order.depositAccountId
+    );
+    if (!customerAccount) {
+      return res
+        .status(404)
+        .json({ message: "Customer Account not found" });
+    }
+
+    // Fetch customer and subroute
+    const customer = await Customer.findById(order.customerId);
+    if (!customer) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Customer not found" });
+    }
+
+    const subRoute = await SubRoute.findById(order.subRouteId);
+    if (!subRoute) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Sub Route not found" });
+    }
+
+    // Initialize arrays if they don't exist
+    const customerStock = customer.stock || [];
+    const subRouteStock = subRoute.stock || [];
+
+    // Return coupon bottles if payment was made by coupon
+    if (order.paymentMode === "Coupon") {
+      const orderTotalQuantity = order.stock.reduce(
+        (sum, item) => sum + item.quantity, 
+        0
+      );
+      customer.CouponBottle = (customer.CouponBottle || 0) + orderTotalQuantity;
+      console.log(`Returned ${orderTotalQuantity} coupon bottles to customer`);
+    }
+
+    // Process each item in the order
+    for (const orderItem of order.stock) {
+      // Remove items from customer stock
+      const customerItemIndex = customerStock.findIndex(
+        item => item.itemId === orderItem.itemId
+      );
+      
+      if (customerItemIndex >= 0) {
+        const customerItem = customerStock[customerItemIndex];
+        customerItem.quantity -= orderItem.quantity;
+
+        // Remove item from customer stock if quantity becomes 0 or less
+        if (customerItem.quantity <= 0) {
+          customerStock.splice(customerItemIndex, 1);
+        }
+      }
+
+      // Return items to subroute stock
+      const subRouteItemIndex = subRouteStock.findIndex(
+        item => item.itemId === orderItem.itemId
+      );
+
+      if (subRouteItemIndex >= 0) {
+        subRouteStock[subRouteItemIndex].quantity += orderItem.quantity;
+      } else {
+        subRouteStock.push({
+          itemId: orderItem.itemId,
+          itemName: orderItem.itemName,
+          quantity: orderItem.quantity,
+          status: "Filled"
+        });
+      }
+    }
+
+    // Handle return bottles if any
+    if (order.returnBottle && order.returnBottle > 0) {
+      for (const orderItem of order.stock) {
+        const subRouteItemIndex = subRouteStock.findIndex(
+          item => item.itemId === orderItem.itemId
+        );
+
+        if (subRouteItemIndex >= 0) {
+          subRouteStock[subRouteItemIndex].returnBottle = 
+            Math.max(0, (subRouteStock[subRouteItemIndex].returnBottle || 0) - order.returnBottle);
+        }
+
+        // Add returned bottles back to customer stock
+        const customerItemIndex = customerStock.findIndex(
+          item => item.itemId === orderItem.itemId
+        );
+
+        if (customerItemIndex >= 0) {
+          customerStock[customerItemIndex].quantity += order.returnBottle;
+        } else {
+          customerStock.push({
+            itemId: orderItem.itemId,
+            itemName: orderItem.itemName,
+            quantity: order.returnBottle,
+            status: "Filled"
+          });
+        }
+      }
+    }
+
+    // Save updated stocks
+    customer.stock = customerStock;
+    await customer.save();
+    console.log("Customer stock updated");
+
+    subRoute.stock = subRouteStock;
+    await subRoute.save();
+    console.log("SubRoute stock updated");
+
+    // Delete associated journal entries if they exist
+    const existingJournal = await TrialBalance.findOne({ operationId: order._id });
+    if (existingJournal) {
+      await TrialBalance.deleteMany({ operationId: order._id });
+      console.log(`Deleted existing Journal entries for operationId: ${order._id}`);
+    }
+
+    // Delete associated trial balance entries if they exist
+    const existingTrialBalance = await TrialBalance.findOne({ operationId: order._id });
+    if (existingTrialBalance) {
+      await TrialBalance.deleteMany({ operationId: order._id });
+      console.log(`Deleted existing TrialBalance entries for operationId: ${order._id}`);
+    }
+
+    // Delete the order
+    await Order.findByIdAndDelete(id);
+
+    console.log('Delete operation successful:', {
+      deletedOrderId: id,
+      finalCustomerState: {
+        stock: customerStock.length,
+        couponBottles: customer.CouponBottle
+      },
+      finalSubRouteState: {
+        stock: subRouteStock.length
+      }
+    });
+
   } catch (error) {
-    res.status(500).json({ message: "Error deleting order", error });
+    console.error("Error deleting order:", error);
+    responseStatus = 500;
+    responseMessage = {
+      success: false,
+      message: "An error occurred while deleting the order"
+    };
+  } finally {
+    // Send response only once at the end
+    res.status(responseStatus).json(responseMessage);
   }
 };
 
@@ -963,8 +1138,6 @@ async function createTrialEntry(data) {
       editCreateTrialEntry(sale,createdDateTime);
       editCreateTrialEntry(customer,createdDateTime);
     }
-    
-    
   }
 
 
