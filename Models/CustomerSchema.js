@@ -14,7 +14,7 @@ const customerSchema = new mongoose.Schema({
   companyName:{type:String},
   customerType: { type: String, required: true },
   logo: { type: String }, 
-  fullName: { type: String, required: true },
+  fullName: { type: String, required: true }, 
   mobileNo: { type: String, trim: true },
   whatsappNumber: { type: String, trim: true },
   email: { type: String, lowercase: true, trim: true },
