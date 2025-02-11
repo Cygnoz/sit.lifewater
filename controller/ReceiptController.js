@@ -227,94 +227,243 @@ exports.createReceipt = async (req, res) => {
 
 
 
-exports.updateReceipt = async (req, res) => {
-  try {
-    const receiptId = req.params.receiptId;
-    if (!receiptId) {
-      return res.status(400).json({ message: 'Receipt ID is required.' });
-    }
+// exports.updateReceipt = async (req, res) => {
+//   try {
+//     const receiptId = req.params.receiptId;
+//     if (!receiptId) {
+//       return res.status(400).json({ message: 'Receipt ID is required.' });
+//     }
 
-    let { customerId, orderId, paidAmount, depositAccountId, salesmanId } = cleanData(req.body);
+//     let { customerId, orderId, paidAmount, depositAccountId, salesmanId } = cleanData(req.body);
 
-    // Validate essential fields with specific error messages
-    if (!customerId) {
-      return res.status(400).json({ message: 'Customer ID is required.' });
-    }
-    if (!orderId) {
-      return res.status(400).json({ message: 'Order ID is required.' });
-    }
-    if (!paidAmount && paidAmount !== 0) {
-      return res.status(400).json({ message: 'Paid amount is required.' });
-    }
-    if (paidAmount <= 0) {
-      return res.status(400).json({ message: 'Paid amount must be greater than zero.' });
-    }
-    if (!depositAccountId) {
-      return res.status(400).json({ message: 'Deposit account ID is required.' });
-    }
+//     // Validate essential fields with specific error messages
+//     if (!customerId) {
+//       return res.status(400).json({ message: 'Customer ID is required.' });
+//     }
+//     if (!orderId) {
+//       return res.status(400).json({ message: 'Order ID is required.' });
+//     }
+//     if (!paidAmount && paidAmount !== 0) {
+//       return res.status(400).json({ message: 'Paid amount is required.' });
+//     }
+//     if (paidAmount <= 0) {
+//       return res.status(400).json({ message: 'Paid amount must be greater than zero.' });
+//     }
+//     if (!depositAccountId) {
+//       return res.status(400).json({ message: 'Deposit account ID is required.' });
+//     }
 
-    // Check if receipt exists
-    const receipt = await Receipt.findById(receiptId);
-    if (!receipt) {
-      return res.status(404).json({ message: 'Receipt not found.' });
-    }
+//     // Check if receipt exists
+//     const receipt = await Receipt.findById(receiptId);
+//     if (!receipt) {
+//       return res.status(404).json({ message: 'Receipt not found.' });
+//     }
 
-    const { customerAccount, depositAccount } = await dataExist(customerId, depositAccountId);
-    if (!customerAccount) {
-      return res.status(404).json({ message: 'Customer Account not found' });
-    }
-    if (!depositAccount) {
-      return res.status(404).json({ message: 'Deposit Account not found' });
-    }
+//     const { customerAccount, depositAccount } = await dataExist(customerId, depositAccountId);
+//     if (!customerAccount) {
+//       return res.status(404).json({ message: 'Customer Account not found' });
+//     }
+//     if (!depositAccount) {
+//       return res.status(404).json({ message: 'Deposit Account not found' });
+//     }
 
-    // Check if order exists
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ message: 'Order not found.' });
-    }
+//     // Check if order exists
+//     const order = await Order.findById(orderId);
+//     if (!order) {
+//       return res.status(404).json({ message: 'Order not found.' });
+//     }
 
-    // Validate customer association with the order
-    if (order.customerId.toString() !== customerId) {
-      return res.status(400).json({ message: 'Order does not belong to the specified customer.' });
-    }
+//     // Validate customer association with the order
+//     if (order.customerId.toString() !== customerId) {
+//       return res.status(400).json({ message: 'Order does not belong to the specified customer.' });
+//     }
 
-    // Check if the paid amount exceeds the balance
-    if (paidAmount > order.balanceAmount) {
-      return res.status(400).json({ message: 'Paid amount exceeds the balance amount.' });
-    }
+//     // Check if the paid amount exceeds the balance
+//     if (paidAmount > order.balanceAmount) {
+//       return res.status(400).json({ message: 'Paid amount exceeds the balance amount.' });
+//     }
 
-    // Update order amounts
-    order.balanceAmount -= Number(paidAmount) || 0;
-    order.paidAmount += Number(paidAmount) || 0;
-    await order.save();
+//     // Update order amounts
+//     order.balanceAmount -= Number(paidAmount) || 0;
+//     order.paidAmount += Number(paidAmount) || 0;
+//     await order.save();
 
-    // Update receipt without changing receiptNumber and orderNumber
-    Object.assign(receipt, {
-      customerName: order.customerName,
-      customerId,
-      orderId,
-      salesmanId,
-      depositAccountId,
-      paidAmount: Number(paidAmount),
-    });
+//     // Update receipt without changing receiptNumber and orderNumber
+//     Object.assign(receipt, {
+//       customerName: order.customerName,
+//       customerId,
+//       orderId,
+//       salesmanId,
+//       depositAccountId,
+//       paidAmount: Number(paidAmount),
+//     });
 
-    await receipt.save();
+//     await receipt.save();
 
-    // Journal entry update
-    await journal(receipt, customerAccount, depositAccount);
+//     // Journal entry update
+//     await journal(receipt, customerAccount, depositAccount);
 
-    return res.status(200).json({
-      message: 'Receipt updated successfully.',
-      receipt,
-    });
-  } catch (error) {
-    console.error('Error updating receipt:', error);
-    return res.status(500).json({ message: 'Internal server error.' });
-  }
-};
+//     return res.status(200).json({
+//       message: 'Receipt updated successfully.',
+//       receipt,
+//     });
+//   } catch (error) {
+//     console.error('Error updating receipt:', error);
+//     return res.status(500).json({ message: 'Internal server error.' });
+//   }
+// };
 
 
      // Function to generate time and date for storing in the database
+     
+exports.updateReceipt = async (req, res) => {
+      try {
+        const { customerId, orderId, paidAmount, depositAccountId, salesmanId } = req.body;
+        const receiptId = req.params.receiptId;
+        console.log('Request body:', { customerId, orderId, paidAmount, depositAccountId, salesmanId, receiptId });
+    
+        // Field validations
+        if (!receiptId || !customerId || !orderId || !depositAccountId || 
+            paidAmount === undefined || paidAmount === null) {
+          const error = { receiptId, customerId, orderId, depositAccountId, paidAmount };
+          console.log('Validation failed:', error);
+          return res.status(400).json({ message: 'All fields are required.', error });
+        }
+    
+        const paidAmountNum = Number(paidAmount);
+        if (isNaN(paidAmountNum) || paidAmountNum <= 0) {
+          console.log('Invalid paid amount:', paidAmount);
+          return res.status(400).json({ message: 'Paid amount must be a valid positive number' });
+        }
+    
+        // Fetch existing receipt
+        const receipt = await Receipt.findById(receiptId);
+        if (!receipt) {
+          console.log('Receipt not found:', receiptId);
+          return res.status(404).json({ message: 'Receipt not found.' });
+        }
+        console.log('Existing receipt:', receipt);
+    
+        // Account validations
+        const { customerAccount, depositAccount } = await dataExist(customerId, depositAccountId);
+        if (!customerAccount || !depositAccount) {
+          console.log('Account validation failed:', { customerAccount, depositAccount });
+          return res.status(404).json({ message: 'Customer or Deposit Account not found' });
+        }
+    
+        // Fetch order
+        const order = await Order.findById(orderId);
+        if (!order) {
+          console.log('Order not found:', orderId);
+          return res.status(404).json({ message: 'Order not found.' });
+        }
+    
+        // Calculate total order amount from current state
+        const originalTotalAmount = order.paidAmount + order.balanceAmount;
+        const oldReceiptAmount = receipt.paidAmount;
+        
+        // Calculate the order's current paid amount excluding this receipt
+        const orderPaidWithoutThisReceipt = order.paidAmount - oldReceiptAmount;
+    
+        console.log('Original state:', {
+          totalAmount: originalTotalAmount,
+          orderCurrentPaid: order.paidAmount,
+          orderCurrentBalance: order.balanceAmount,
+          oldReceiptAmount,
+          orderPaidWithoutThisReceipt,
+          newReceiptAmount: paidAmountNum
+        });
+    
+        if (isNaN(originalTotalAmount) || originalTotalAmount <= 0) {
+          console.log('Invalid order amounts:', { 
+            paidAmount: order.paidAmount, 
+            balanceAmount: order.balanceAmount 
+          });
+          return res.status(400).json({ 
+            message: 'Cannot determine order total amount from existing values' 
+          });
+        }
+    
+        // Customer validation
+        if (order.customerId.toString() !== customerId) {
+          console.log('Customer mismatch:', { orderCustomerId: order.customerId, requestCustomerId: customerId });
+          return res.status(400).json({ message: 'Order does not belong to the specified customer.' });
+        }
+    
+        // Calculate new order paid amount by adding the new receipt amount to the order's paid amount (excluding this receipt)
+        const newOrderPaidAmount = orderPaidWithoutThisReceipt + paidAmountNum;
+    
+        if (newOrderPaidAmount > originalTotalAmount) {
+          console.log('Payment exceeds total:', { 
+            calculatedNewPaid: newOrderPaidAmount, 
+            totalAmount: originalTotalAmount 
+          });
+          return res.status(400).json({ 
+            message: 'Paid amount exceeds the total order amount.',
+            orderTotal: originalTotalAmount,
+            currentPaid: orderPaidWithoutThisReceipt,
+            attemptedNewTotal: newOrderPaidAmount
+          });
+        }
+    
+        // Update order amounts
+        order.paidAmount = newOrderPaidAmount;
+        order.balanceAmount = originalTotalAmount - newOrderPaidAmount;
+    
+        console.log('Updated order state:', {
+          newPaidAmount: order.paidAmount,
+          newBalanceAmount: order.balanceAmount,
+          totalAmount: originalTotalAmount
+        });
+    
+        await order.save();
+    
+        // Update receipt
+        Object.assign(receipt, {
+          customerName: order.customerName,
+          customerId,
+          orderId,
+          salesmanId,
+          depositAccountId,
+          paidAmount: paidAmountNum,
+        });
+    
+        await receipt.save();
+        await journal(receipt, customerAccount, depositAccount);
+    
+        console.log('Update successful:', {
+          receipt: receipt._id,
+          order: order._id,
+          finalBalance: order.balanceAmount,
+          finalPaid: order.paidAmount
+        });
+    
+        return res.status(200).json({
+          message: 'Receipt updated successfully.',
+          receipt,
+          order: {
+            balanceAmount: order.balanceAmount,
+            paidAmount: order.paidAmount,
+            totalAmount: originalTotalAmount
+          }
+        });
+      } catch (error) {
+        console.error('Error updating receipt:', error);
+        return res.status(500).json({ message: 'Internal server error.', error: error.message });
+      }
+    };
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
      function generateTimeAndDateForDB(
       timeZone,
       dateFormat,
