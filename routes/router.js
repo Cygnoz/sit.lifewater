@@ -51,6 +51,7 @@ router.get('/receipts', verifyToken,ReceiptController.getAllReceipts);
 router.get('/receipts/:receiptId', verifyToken,ReceiptController.getOneReceipt);
 router.get('/receipts/salesman/:salesmanId', ReceiptController.getReceiptsBySalesmanId);
 router.put('/update-receipt/:receiptId',ReceiptController.updateReceipt);
+router.delete('/deletereceipt/:receiptId',ReceiptController.deleteReceipt);
 
  
 //Unloading

@@ -4,6 +4,7 @@ const Customer = require('../Models/CustomerSchema');
 const TrialBalance = require('../Models/trialBalance');
 const moment = require('moment-timezone');
 const Account = require('../Models/account');
+const { default: mongoose } = require('mongoose');
 
 
 // Helper function to clean incoming data
@@ -454,6 +455,133 @@ exports.updateReceipt = async (req, res) => {
     };
      
      
+
+
+// Delete Sales Receipt
+exports.deleteReceipt = async (req, res) => {
+  console.log("Delete receipt request received:", req.params);
+
+  try {
+    const { receiptId } = req.params;
+
+    // Validate receiptId
+    if (!mongoose.Types.ObjectId.isValid(receiptId)) {
+      return res.status(400).json({ message: `Invalid Receipt ID: ${receiptId}` });
+    }
+
+    // Fetch existing receipt
+    const existingReceipt = await Receipt.findById(receiptId);
+    if (!existingReceipt) {
+      console.log("Receipt not found with ID:", receiptId);
+      return res.status(404).json({ message: "Receipt not found" });
+    }
+
+    // Fetch the order associated with this receipt
+    const order = await Order.findById(existingReceipt.orderId);
+    if (!order) {
+      console.log("Associated order not found:", existingReceipt.orderId);
+      return res.status(404).json({ message: "Associated order not found" });
+    }
+
+    console.log('Current state before deletion:', {
+      receiptAmount: existingReceipt.paidAmount,
+      orderPaidAmount: order.paidAmount,
+      orderBalanceAmount: order.balanceAmount,
+      totalOrderAmount: order.paidAmount + order.balanceAmount
+    });
+
+    // Calculate new order amounts
+    const totalOrderAmount = order.paidAmount + order.balanceAmount;
+    const newPaidAmount = order.paidAmount - existingReceipt.paidAmount;
+    const newBalanceAmount = totalOrderAmount - newPaidAmount;
+
+    console.log('Calculated new amounts:', {
+      totalOrderAmount,
+      newPaidAmount,
+      newBalanceAmount
+    });
+
+    // Validate calculations
+    if (isNaN(newPaidAmount) || isNaN(newBalanceAmount) || newPaidAmount < 0) {
+      console.error('Invalid calculation result:', {
+        newPaidAmount,
+        newBalanceAmount,
+        totalOrderAmount
+      });
+      return res.status(400).json({
+        message: 'Error calculating new order amounts',
+        details: {
+          currentPaid: order.paidAmount,
+          receiptAmount: existingReceipt.paidAmount,
+          totalAmount: totalOrderAmount
+        }
+      });
+    }
+
+    // Update order amounts
+    order.paidAmount = newPaidAmount;
+    order.balanceAmount = newBalanceAmount;
+
+    // Save order changes
+    await order.save();
+    console.log('Updated order state:', {
+      newPaidAmount: order.paidAmount,
+      newBalanceAmount: order.balanceAmount,
+      totalAmount: totalOrderAmount
+    });
+
+    // Fetch the latest receipt for validation
+    const latestReceipt = await Receipt.findOne({
+      customerId: existingReceipt.customerId,
+      orderId: existingReceipt.orderId
+    }).sort({ createdAt: -1 });
+
+    // Check if attempting to delete a non-latest receipt
+    if (latestReceipt && latestReceipt._id.toString() !== receiptId) {
+      return res.status(400).json({
+        message: "Only the latest receipt can be deleted."
+      });
+    }
+
+    // Delete the receipt
+    await existingReceipt.deleteOne();
+
+    // Delete associated trial balance entries if they exist
+    const existingTrialBalance = await TrialBalance.findOne({
+      operationId: existingReceipt._id,
+    });
+
+    if (existingTrialBalance) {
+      await TrialBalance.deleteMany({
+        operationId: existingReceipt._id,
+      });
+      console.log(`Deleted existing TrialBalance entries for operationId: ${existingReceipt._id}`);
+    }
+
+    console.log('Delete operation successful:', {
+      deletedReceiptId: receiptId,
+      updatedOrderId: order._id,
+      finalOrderState: {
+        paidAmount: order.paidAmount,
+        balanceAmount: order.balanceAmount,
+        totalAmount: totalOrderAmount
+      }
+    });
+
+    res.status(200).json({
+      message: "Receipt deleted successfully",
+      orderStatus: {
+        paidAmount: order.paidAmount,
+        balanceAmount: order.balanceAmount,
+        totalAmount: totalOrderAmount
+      }
+    });
+
+  } catch (error) {
+    console.error("Error deleting receipt:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
+  }
+};
      
      
      
@@ -635,10 +763,6 @@ async function editJournal( receipt, customerAccount, depositAccounts ) {
   editCreateTrialEntry( customerPaid,createdDateTime )
   editCreateTrialEntry( depositAccount,createdDateTime )
 
-
-
-  
-  
 }
 
 
