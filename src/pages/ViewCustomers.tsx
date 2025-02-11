@@ -71,7 +71,8 @@ const ViewCustomers: React.FC = () => {
   console.log(loading);
 
   const filteredCustomers = customers.filter((customer) =>
-    `${customer.fullName}`.toLowerCase().includes(searchTerm.toLowerCase())
+    `${customer.fullName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       `${customer.mobileNo}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleOpen = (customer: Customer) => {

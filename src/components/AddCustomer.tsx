@@ -12,17 +12,17 @@ interface FormData {
   fullName: string;
   addressLine1: string;
   addressLine2: string;
-  city:string;
-  street:string;
-  zipPostalCode:string;
-  flatNumber:string;
+  city: string;
+  street: string;
+  zipPostalCode: string;
+  flatNumber: string;
   email: string;
   numberOfBottles: string;
   ratePerBottle: string;
   paymentMode: "Cash" | "Credit" | "Coupon";
   mobileNo: string;
   whatsappNumber: string;
-  depositAmount: string;
+  depositAmount: number;
   subRoute: string;
   mainRoute: string;
   location: {
@@ -63,7 +63,7 @@ export default function Component() {
     paymentMode: "Cash",
     mobileNo: "",
     whatsappNumber: "",
-    depositAmount: "",
+    depositAmount: 0,
     mainRoute: "",
     subRoute: "",
     location: {
@@ -107,9 +107,9 @@ export default function Component() {
       }));
     }
   };
-  console.log("location saved:",isLocationSaved);
-  console.log("location getting:",isGettingLocation);
-  
+  console.log("location saved:", isLocationSaved);
+  console.log("location getting:", isGettingLocation);
+
 
   const handleMainRouteChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -219,7 +219,7 @@ export default function Component() {
       newErrors.companyName = "Company name is required for business customers";
     }
     if (!formData.fullName) newErrors.fullName = "Full name is required";
-    if (!formData.addressLine1) newErrors.addressLine1 = "addressLine1 is required"; 
+    if (!formData.addressLine1) newErrors.addressLine1 = "addressLine1 is required";
     if (
       isNaN(Number(formData.numberOfBottles)) ||
       Number(formData.numberOfBottles) <= 0
@@ -284,7 +284,7 @@ export default function Component() {
           navigate("/viewcustomers"); // Navigate after success
         }, 2000);
       }
-    } catch (err:any) {
+    } catch (err: any) {
       // Handle unexpected errors
       console.log("Error adding customer:", err);
       // toast.error(err.response?.data?.message || err.message || "Failed to save");
@@ -512,7 +512,7 @@ export default function Component() {
                 onChange={handleInputChange}
                 className="w-full p-2 mt-1 border rounded-md"
                 placeholder="Rate per bottle"
-                 inputMode="numeric"
+                inputMode="numeric"
               />
               {errors.ratePerBottle && (
                 <p className="text-red-500 text-sm">{errors.ratePerBottle}</p>
@@ -542,13 +542,13 @@ export default function Component() {
               value={formData.mobileNo}
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
-              placeholder="Enter Mobile Number" 
+              placeholder="Enter Mobile Number"
             />
             {errors.mobileNumber && (
               <p className="text-red-500 text-sm">{errors.mobileNumber}</p>
             )}
           </div>
-          
+
           <div>
             <label className="block text-gray-700">WhatsApp Number</label>
             <input
@@ -567,12 +567,13 @@ export default function Component() {
           <div>
             <label className="block text-gray-700">Deposit Amount</label>
             <input
-              type="text"
+              type="number"
               name="depositAmount"
               value={formData.depositAmount}
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Deposit Amount"
+              min="0" 
             />
             {errors.depositAmount && (
               <p className="text-red-500 text-sm">{errors.depositAmount}</p>
@@ -633,17 +634,17 @@ export default function Component() {
           {/* {isLocationSaved &&
             formData.location.coordinates.latitude &&
             formData.location.coordinates.longitude && ( */}
-              <div>
+          <div>
             <label htmlFor="location" className="text-sm font-medium text-gray-700">Current Location</label>
-              <iframe
-                src={`https://www.google.com/maps?q=${formData.location.coordinates.latitude},${formData.location.coordinates.longitude}&z=15&output=embed`}
-                width="100%"
-                height="300"
-                className="mt-4 border rounded-md"
-              ></iframe>
-              </div>
-            {/* ) */}
-{/* 
+            <iframe
+              src={`https://www.google.com/maps?q=${formData.location.coordinates.latitude},${formData.location.coordinates.longitude}&z=15&output=embed`}
+              width="100%"
+              height="300"
+              className="mt-4 border rounded-md"
+            ></iframe>
+          </div>
+          {/* ) */}
+          {/* 
           <button
             type="button"
             onClick={handleLocationFetch}

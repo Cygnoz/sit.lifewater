@@ -19,6 +19,7 @@ const Dashboard: React.FC = () => {
   const [totalAmountSum, setTotalAmountSum] = useState<number>(0);
   console.log(loading);
   const { request: GetAllReceip } = useApi("get", 4001);
+console.log(receiptAmount);
 
   const GetAllReceiptBySalemanId = async () => {
     try {
@@ -133,7 +134,7 @@ const Dashboard: React.FC = () => {
     GetAllReceiptBySalemanId();
   }, []);
 
-  const CashInHand = (receiptAmount + orderAmount) || 0;
+  const CashInHand = (orderAmount || 0);
   return (
     <div className="p-4 max-w-4xl mx-auto bg-gray-100 min-h-screen">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 ">

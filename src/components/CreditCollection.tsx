@@ -12,6 +12,9 @@ const CreditCollection: React.FC = () => {
   const { request: getALLOrders } = useApi("get", 4001);
   const { request: getAllAccounts } = useApi("get", 4000);
   const SalesManId = localStorage.getItem("SalesManId");
+  const [activeSubRoute, setActiveSubRoute] = useState("");
+  const [filteredCustomers, setFilteredCustomers] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
   const [formData, setFormData] = useState({
     date: "",
     customerId: "",
@@ -19,24 +22,115 @@ const CreditCollection: React.FC = () => {
     orderNumber: "",
     paidAmount: 0,
     depositAccountId: "",
-    balanceAmount: 0, // Added balanceAmount
     salesmanId: SalesManId
   });
+  const [  balanceAmount, setBalanceAmount] = useState("");
+
   console.log("formData", formData);
 
-  const [customers, setCustomers] = useState<any[]>([]);
+  const [customers, setCustomers] = useState([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
   const [filteredAccounts, setFilteredAccounts] = useState<any[]>([]);
 
+
+
+
+  // Fetch activeroute with sales id
+  const { request: getActiveRoute } = useApi("get", 4000);
+  const fetchActiveRoute = async () => {
+    try {
+      const url = `${endpoints.GET_AN_ACTIVE_ROUTE_WITH_SALESMEN_ID}/${SalesManId}`;
+      const { response, error } = await getActiveRoute(url);
+      console.log("Active route with sales id:", response?.data?.activeRide);
+
+      if (!error && response) {
+        setLoading(false);
+        const activeRide = response?.data?.activeRide;
+
+        if (activeRide) {
+
+          setActiveSubRoute(activeRide.subRouteName)
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   useEffect(() => {
-    const fetchCustomers = async () => {
-      const { response, error } = await getAllCustomers(
-        endpoints.GET_ALL_CUSTOMERS
-      );
-      if (!error && response) setCustomers(response.data);
+    if (activeSubRoute) {
+      getALLCustomersBySubRoute(activeSubRoute);
     };
-    fetchCustomers();
+
+  }, [activeSubRoute]);
+
+  // Get All customer in the subroute
+  const getALLCustomersBySubRoute = async (subRoute: any) => {
+    if (!subRoute) return; // Prevent API call if subRoute is undefined
+
+    setLoading(true);
+    try {
+      const url = `${endpoints.GET_CUSTOMER_BY_SUBROUTE}/${subRoute}`;
+      const { response, error } = await getAllCustomers(url);
+      console.log("Get all customer in SubRoute", response);
+
+      if (!error && response) {
+        setCustomers(response?.data);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchValue(value);
+
+    if (!value.trim()) {
+      setFilteredCustomers(customers); // Reset if input is empty
+      return;
+    }
+    const filtered = customers.filter((customer: any) => {
+      return (
+        customer?.fullName?.toLowerCase().includes(value.toLowerCase()) ||
+        customer?.customerID?.toLowerCase().includes(value.toLowerCase()) ||
+        customer?.city?.toLowerCase().includes(value.toLowerCase()) ||
+        customer?.mobileNo?.toString().includes(value) || // Convert number to string
+        customer?.whatsappNumber?.toString().includes(value) // Convert number to string
+      );
+    });
+
+    setFilteredCustomers(filtered);
+  };
+
+  const handleInputFocus = () => {
+    // Show all customers when the input is focused
+    setFilteredCustomers(customers);
+  };
+
+  const handleCustomerSelect = (customers: any) => {
+    // Handle customer selection (e.g., update order data)
+    setFormData((prevData) => ({
+      ...prevData,
+      customerId: customers?._id,
+    }));
+    //
+    setSearchValue(customers.fullName); // Set the selected customer's name in the input
+    setFilteredCustomers([]); // Clear the dropdown
+  };
+
+
+
+
+
+
+
+
+  useEffect(() => {
+    fetchActiveRoute();
   }, []);
 
   useEffect(() => {
@@ -53,7 +147,7 @@ const CreditCollection: React.FC = () => {
         endpoints.GET_ALL_ACCOUNTS
       );
       if (!error && response) {
-        const formattedData = response.data?.map((item: any) => item._doc);
+        const formattedData = response.data;
 
         const filtered = formattedData?.filter(
           (account: any) => account.accountSubhead === "Cash"
@@ -92,14 +186,14 @@ const CreditCollection: React.FC = () => {
       ...prev,
       orderId: selectedOrder?._id || "",
       orderNumber: selectedOrder?.orderNumber || "",
-      balanceAmount: selectedOrder?.balanceAmount || "", // Set balance amount
     }));
+    setBalanceAmount(selectedOrder?.balanceAmount || "")
   };
 
 
   const { id } = useParams<{ id: string }>();
   const [error, setError] = useState<string | null>(null);
-console.log(error);
+  console.log(error);
 
   const { request: getReceipt } = useApi("get", 4001);
 
@@ -123,9 +217,9 @@ console.log(error);
             orderNumber: Data?.orderNumber || "",
             paidAmount: Data?.paidAmount || 0,
             depositAccountId: Data?.depositAccountId || "",
-            balanceAmount: Data.balanceAmount || 0, // Ensure this exists in response
             salesmanId: Data?.salesmanId || SalesManId, // Default to existing SalesManId
           }));
+          setBalanceAmount(Data.balanceAmount || 0)
         }
       } catch (err) {
         setError("Something went wrong.");
@@ -152,25 +246,25 @@ console.log(error);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     if (!validateForm()) return; // Ensure form validation before proceeding
-  
+
     setLoading(true);
-  
+
     try {
       const url = id
         ? `${endpoints.EDIT_A_RECIEPT}/${id}`
         : `${endpoints.ORDER_RECIEPT}`;
-  
+
       let response, error;
-  
+
       if (id) {
         ({ response, error } = await EditOrder(url, formData));
       } else {
         ({ response, error } = await addReceipt(url, formData));
       }
-      console.log("Handle response",response);
-      
+      console.log("Handle response", response);
+
       if (error) {
         toast.error(error?.response?.data?.message || "Failed to save receipt");
       } else {
@@ -183,7 +277,7 @@ console.log(error);
       setLoading(false);
     }
   };
-  
+
 
   return (
     <div className="flex justify-center items-start min-h-screen bg-gray-100 p-5">
@@ -212,25 +306,48 @@ console.log(error);
           className="w-full p-2 border rounded-md"
         />
 
-        <label className="block text-sm font-medium text-gray-700">
-          Select Customer
-        </label>
+         {/* Search for customer */}
+         <div className="relative">
+              <label className="block text-[#484A4D] font-semibold text-left mb-2">Select Customer</label>
+              <input
+                type="text"
+                value={searchValue}
+                onChange={handleSearchChange}
+                onFocus={handleInputFocus}
+                className="w-full p-2 mt-1 border rounded-md"
+                placeholder="Search Customer"
+              />
+              {/* Dropdown for customer suggestions */}
+              <div className="absolute z-10 w-full bg-white mt-1 max-h-52 overflow-auto rounded shadow-lg">
+                {loading ? (
+                  <div className="p-2 text-gray-500">Loading...</div>
+                ) : customers.length > 0 ? (
+                  <div>
+                    {
+                      filteredCustomers.map((customer: any) => (
+                        <div
+                          key={`${customer.customerID}-${customer.ratePerBottle}`}
+                          onClick={() => handleCustomerSelect(customer)}
+                        >
+                          <div className="p-2 cursor-pointer m-2 border-2 rounded-lg hover:bg-gray-100"                                        >
+                            {customer.fullName}
+                          </div>
+                        </div>
+                      ))
+                    }
+                  </div>
 
-        <select
-          name="customerId"
-          value={formData.customerId}
-          onChange={handleChange}
-          className="w-full p-2 border rounded-md"
-        >
-
-          <option value="">Select a customer</option>
-
-          {customers.map((customer) => (
-            <option key={customer._id} value={customer._id}>
-              {customer.fullName}
-            </option>
-          ))}
-        </select>
+                ) :
+                  (
+                    <div className="p-2">No customers found</div>
+                  )}
+              </div>
+              <Link to={'/addcustomers'}>
+                <div className="flex gap-1 my-1 cursor-pointer">
+                  <p className="text-[#820000] text-[14px] font-semibold">Add New Customer</p>
+                </div>
+              </Link>
+            </div>
 
         <label className="block text-sm font-medium text-gray-700">
           Select Order
@@ -265,7 +382,7 @@ console.log(error);
         <input
           type="text"
           name="balanceAmount"
-          value={`${formData.balanceAmount} AED `}
+          value={`${balanceAmount} AED `}
           readOnly
           className="w-full p-2 border rounded-md bg-gray-100"
         />

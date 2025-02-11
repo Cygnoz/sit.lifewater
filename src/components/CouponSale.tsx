@@ -171,6 +171,8 @@ const Couponsale: React.FC = () => {
     setSearchValue(customers.fullName); // Set the selected customer's name in the input
     setFilteredCustomers([]); // Clear the dropdown
   };
+
+  
   // Fetch accounts from the API
   const { request: getallaccounts } = useApi("get", 4000);
   const fetchAccounts = async () => {
@@ -182,7 +184,7 @@ const Couponsale: React.FC = () => {
       if (!error && response) {
         setLoading(false);
 
-        const formattedData = response.data?.map((item: any) => item._doc);
+        const formattedData = response?.data;
         // console.log(loading);
         const filtered = formattedData?.filter(
           (account: any) => ["Cash", "Bank"].includes(account.accountSubhead)
