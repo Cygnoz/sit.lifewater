@@ -770,7 +770,25 @@ exports.deleteCustomerById = async (req, res) => {
     }
   };
   
-
+  exports.getCouponCustomerById = async (req, res) => {
+    try {
+      const { id } = req.params;
+      console.log("Fetching Coupon Customer with ID:", id);
+  
+      const couponCustomer = await couponCustomer.findById(id);
+  
+      if (!couponCustomer) {
+        console.warn(`Coupon Customer not found for ID: ${id}`);
+        return res.status(404).json({ message: "Coupon Customer not found" });
+      }
+  
+      res.status(200).json(couponCustomer);
+    } catch (error) {
+      console.error("Error fetching coupon customer:", error);
+      res.status(500).json({ message: "Error fetching coupon customer", error });
+    }
+  };
+  
  
   
   

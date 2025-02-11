@@ -91,6 +91,7 @@ router.post('/coupon-customer',verifyToken, CustomerController.createCouponCusto
 router.get('/coupon-customer',verifyToken, CustomerController.getAllUniqueCouponCustomers); // get all coupon customer
 router.get('/getcouponcustomers',verifyToken, CustomerController.getAllCouponCustomers)//get coupon customers
 router.put('edit-couponcustomers/:id', verifyToken, CustomerController.editCouponCustomer) // edit coupon Customer
+router.get('/getone-couponcustomer/:id',CustomerController.getCouponCustomerById)
 
 // // Active Route
 // router.post("/activroutes", verifyToken, ActiveRouteController.createActiveRoute) // add active route
