@@ -342,7 +342,6 @@ const CreditCollection: React.FC = () => {
                       ))
                     }
                   </div>
-
                 ) :
                   (
                     <div className="p-2">No customers found</div>
