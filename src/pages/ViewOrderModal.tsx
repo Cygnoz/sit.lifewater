@@ -18,7 +18,8 @@ interface OrderData {
     totalAmount: string,
     balanceAmount: number,
     paidAmount: number,
-    _id:string
+    _id: string
+    notes: string
 }
 const ViewOrderModal = ({ id }: Props) => {
     const [orderData, setOrderData] = useState<OrderData | null>(null);
@@ -94,6 +95,11 @@ const ViewOrderModal = ({ id }: Props) => {
                                     <p className="text-[#303F58]">Quantity</p>
                                     <p className="text-[#303F58]">Rate Per Item</p>
                                     <p className="text-[#303F58]">Return Empty Bottle</p>
+                                    {
+                                        orderData?.notes &&
+                                        <p className="text-[#303F58]">Notes</p>
+                                    }
+
                                 </div>
                                 <div>
                                     <p className="text-[#303F58]">: {orderData?.orderNumber}</p>
@@ -111,6 +117,11 @@ const ViewOrderModal = ({ id }: Props) => {
                                     </p>
                                     <p className="text-[#303F58]">: {orderData?.ratePerItem}</p>
                                     <p className="text-[#303F58]">: {orderData?.returnBottle ? orderData.returnBottle : "0"}</p>
+                                    {
+                                        orderData?.notes &&
+                                        <p className="text-[#303F58]">: {orderData?.notes || ""}</p>
+                                    }
+
                                 </div>
                             </div>
                             <div className=" bg-[#FFFFFF] px-2 py-1.5 gap-2 mt-2 rounded-md items-center">
@@ -118,13 +129,11 @@ const ViewOrderModal = ({ id }: Props) => {
                                     <div className="">
                                         <p className="text-[14px] text-[#303F58]">Payment Mode</p>
                                         <p className="text-[14px] text-[#303F58]">Total Amount</p>
-                                       
+
                                         <div>
-                                                    <p className="text-[14px] text-[#303F58]">Paid Amount</p>
-                                                    <p className="text-[14px] text-[#303F58]">Balance Amount</p>
-                                                </div> {
-                                           
-                                        }
+                                            <p className="text-[14px] text-[#303F58]">Paid Amount</p>
+                                            <p className="text-[14px] text-[#303F58]">Balance Amount</p>
+                                        </div>
                                     </div>
                                     <div className="">
                                         <p className="text-[14px] text-[#303F58] font-semibold">
@@ -133,10 +142,10 @@ const ViewOrderModal = ({ id }: Props) => {
                                         <p className="text-[14px] text-[#303F58] font-bold">
                                             : {orderData?.totalAmount}.00 AED
                                         </p>
-                                                <div>
-                                                    <p className="text-[14px] text-[#303F58] font-semibold">: {orderData?.paidAmount}.00 AED</p>
-                                                    <p className="text-[14px] text-[#303F58] font-semibold">: {orderData?.balanceAmount}.00 AED</p>
-                                                </div>
+                                        <div>
+                                            <p className="text-[14px] text-[#303F58] font-semibold">: {orderData?.paidAmount}.00 AED</p>
+                                            <p className="text-[14px] text-[#303F58] font-semibold">: {orderData?.balanceAmount}.00 AED</p>
+                                        </div>
                                         {/* {
                                             orderData?.paymentMode === "Cash" && (
                                             )

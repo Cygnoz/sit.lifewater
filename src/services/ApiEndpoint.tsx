@@ -33,6 +33,8 @@ export const endpoints = {
     EDIT_ORDER : `editorder`,
     DELETE_AN_ORDER:`orders`,
     GET_ALL_RECEIPT_BY_SALESMANID:`receipts/salesman`,
+    EDIT_A_RECIEPT:`update-receipt`,
+    VIEW_ONE_RECIEPT:`receipts`,
 
     // Active routes
     GET_ALL_ACTIVE_ROUTE: `active-rides`,

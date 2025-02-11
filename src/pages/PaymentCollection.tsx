@@ -12,6 +12,7 @@ interface Order {
   receiptNumber: string; // receiptNumber is string in the response
   paidAmount: number;
   fullName: string;
+  _id: string
 }
 
 const PaymentCollection: React.FC = () => {
@@ -82,6 +83,8 @@ const PaymentCollection: React.FC = () => {
               <th className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">Order Number</th>
               <th className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">Receipt Number</th>
               <th className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">Paid Amount</th>
+              <th className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2"> Action</th>
+
             </tr>
           </thead>
           <tbody>
@@ -102,6 +105,14 @@ const PaymentCollection: React.FC = () => {
                   </td>
                   <td className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">
                     {order.paidAmount}
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">
+
+                    <Link to={`/edit-creditcollection/${order._id}`}>
+                      <p>
+                        edit
+                      </p>
+                    </Link>
                   </td>
                 </tr>
               ))
@@ -128,11 +139,10 @@ const PaymentCollection: React.FC = () => {
             <button
               key={index}
               onClick={() => paginate(index + 1)}
-              className={`px-4 py-2 rounded-md mx-1 ${
-                currentPage === index + 1
+              className={`px-4 py-2 rounded-md mx-1 ${currentPage === index + 1
                   ? "bg-red-800 text-white"
                   : "bg-gray-200 text-gray-600"
-              }`}
+                }`}
             >
               {index + 1}
             </button>

@@ -258,13 +258,17 @@ const AddStartRide: React.FC = () => {
     });
   };
   // for stock details
-  const formattedStock = selectedSubRoute?.stock.map((item: any) => ({
-    itemId: item.itemId, // Replace with the actual field
-    itemName: item.itemName || "Unknown Item", // Replace with the actual field
-    quantity: item.quantity || 1, // Replace with the actual field
+  const formattedStock = selectedSubRoute?.stock
+  ?.filter((item: any) => item.quantity > 0) // Filters only items with quantity > 0
+  .map((item: any) => ({
+    itemId: item.itemId, 
+    itemName: item.itemName || "Unknown Item", 
+    quantity: item.quantity, 
     sellingPrice: item.sellingPrice,
-    status: item?.status || "NA",
+    status: item.status || "NA",
   }));
+
+
   const { request: addStartRide } = useApi("post", 4000);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

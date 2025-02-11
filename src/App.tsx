@@ -62,6 +62,7 @@ const App: React.FC = () => {
           <Route path="/couponsale" element={<Couponsale />} />
           <Route path="/couponcustomer" element={<CouponCustomer />} />
           <Route path="/creditcollection" element={<CreditCollection />} />
+          <Route path="/edit-creditcollection/:id" element={<CreditCollection />} />
           <Route path="/endride" element={<EndRide />} />
           <Route path="/route" element={<Ride />} />
           <Route path="/orders" element={<Orders />} />

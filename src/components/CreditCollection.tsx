@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { endpoints } from "../services/ApiEndpoint";
 import useApi from "../Hook/UseApi";
@@ -17,13 +17,12 @@ const CreditCollection: React.FC = () => {
     customerId: "",
     orderId: "",
     orderNumber: "",
-    paidAmount: "",
+    paidAmount: 0,
     depositAccountId: "",
-    balanceAmount: "", // Added balanceAmount
-    salesmanId:SalesManId
-    
+    balanceAmount: 0, // Added balanceAmount
+    salesmanId: SalesManId
   });
-console.log("formData",formData);
+  console.log("formData", formData);
 
   const [customers, setCustomers] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
@@ -55,7 +54,7 @@ console.log("formData",formData);
       );
       if (!error && response) {
         const formattedData = response.data?.map((item: any) => item._doc);
- 
+
         const filtered = formattedData?.filter(
           (account: any) => account.accountSubhead === "Cash"
         );
@@ -80,7 +79,7 @@ console.log("formData",formData);
         ...prev,
         orderId: "",
         orderNumber: "",
-        balanceAmount: "",
+        balanceAmount: 0,
       })); // Reset selection
     }
   };
@@ -97,6 +96,46 @@ console.log("formData",formData);
     }));
   };
 
+
+  const { id } = useParams<{ id: string }>();
+  const [error, setError] = useState<string | null>(null);
+console.log(error);
+
+  const { request: getReceipt } = useApi("get", 4001);
+
+  useEffect(() => {
+    const fetchReceipt = async () => {
+      try {
+        if (!id) return; // Ensure id exists before fetching
+
+        const url = `${endpoints.VIEW_ONE_RECIEPT}/${id}`;
+        const { response, error } = await getReceipt(url);
+
+        if (!error && response) {
+          const Data = response?.data?.data
+          console.log("response", Data);
+
+          setFormData((prev) => ({
+            ...prev,
+            date: Data?.updatedAt || "",
+            customerId: Data?.customerId || "",
+            orderId: Data?.orderId || "",
+            orderNumber: Data?.orderNumber || "",
+            paidAmount: Data?.paidAmount || 0,
+            depositAccountId: Data?.depositAccountId || "",
+            balanceAmount: Data.balanceAmount || 0, // Ensure this exists in response
+            salesmanId: Data?.salesmanId || SalesManId, // Default to existing SalesManId
+          }));
+        }
+      } catch (err) {
+        setError("Something went wrong.");
+      }
+    };
+
+    fetchReceipt();
+  }, [id]);
+
+
   const validateForm = () => {
     if (
       !formData.date ||
@@ -109,30 +148,42 @@ console.log("formData",formData);
     }
     return true;
   };
+  const { request: EditOrder } = useApi("put", 4001);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+  
+    if (!validateForm()) return; // Ensure form validation before proceeding
+  
     setLoading(true);
+  
     try {
-      const { response, error } = await addReceipt(
-        endpoints.ORDER_RECIEPT,
-        formData
-      );
-      console.log(response);
-
+      const url = id
+        ? `${endpoints.EDIT_A_RECIEPT}/${id}`
+        : `${endpoints.ORDER_RECIEPT}`;
+  
+      let response, error;
+  
+      if (id) {
+        ({ response, error } = await EditOrder(url, formData));
+      } else {
+        ({ response, error } = await addReceipt(url, formData));
+      }
+      console.log("Handle response",response);
+      
       if (error) {
-        toast.error(error.response?.data?.message || "Failed to save receipt");
+        toast.error(error?.response?.data?.message || "Failed to save receipt");
       } else {
         toast.success("Receipt saved successfully.");
         setTimeout(() => navigate("/collection"), 2000);
       }
-    } catch (err: any) {
-      toast.error(err.message || "Failed to save receipt");
+    } catch (err) {
+      toast.error((err as Error).message || "Failed to save receipt");
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="flex justify-center items-start min-h-screen bg-gray-100 p-5">
@@ -164,14 +215,14 @@ console.log("formData",formData);
         <label className="block text-sm font-medium text-gray-700">
           Select Customer
         </label>
-     
+
         <select
           name="customerId"
           value={formData.customerId}
           onChange={handleChange}
           className="w-full p-2 border rounded-md"
         >
-     
+
           <option value="">Select a customer</option>
 
           {customers.map((customer) => (
