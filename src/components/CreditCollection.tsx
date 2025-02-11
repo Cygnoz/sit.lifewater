@@ -16,7 +16,7 @@ const CreditCollection: React.FC = () => {
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [formData, setFormData] = useState({
-    date: "",
+    date: new Date().toISOString().split("T")[0],
     customerId: "",
     orderId: "",
     orderNumber: "",
@@ -122,6 +122,7 @@ const CreditCollection: React.FC = () => {
     setFilteredCustomers([]); // Clear the dropdown
   };
 
+  
 
 
 
@@ -165,10 +166,6 @@ const CreditCollection: React.FC = () => {
     setFormData((prevState) => ({ ...prevState, [name]: value }));
 
     if (name === "customerId") {
-      const customerOrders = orders.filter(
-        (order) => order.customerId === value && order.balanceAmount > 0
-      );
-      setFilteredOrders(customerOrders);
       setFormData((prev) => ({
         ...prev,
         orderId: "",
@@ -177,6 +174,15 @@ const CreditCollection: React.FC = () => {
       })); // Reset selection
     }
   };
+
+  useEffect(() => {
+    if (formData.customerId) {
+      const customerOrders = orders.filter(
+        (order) => order.customerId === formData.customerId && order.balanceAmount > 0
+      );
+      setFilteredOrders(customerOrders);
+    }
+  }, [formData.customerId, orders]);
 
   const handleOrderSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedOrder = filteredOrders.find(
@@ -342,11 +348,6 @@ const CreditCollection: React.FC = () => {
                     <div className="p-2">No customers found</div>
                   )}
               </div>
-              <Link to={'/addcustomers'}>
-                <div className="flex gap-1 my-1 cursor-pointer">
-                  <p className="text-[#820000] text-[14px] font-semibold">Add New Customer</p>
-                </div>
-              </Link>
             </div>
 
         <label className="block text-sm font-medium text-gray-700">
