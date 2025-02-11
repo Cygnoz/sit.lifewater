@@ -35,8 +35,7 @@ const Coupon: React.FC = () => {
 
   // Handle coupon deletion
   const handleDelete = async (couponId: string) => {
-    const confirmation = window.confirm("Are you sure you want to delete this coupon?");
-    if (!confirmation) return;
+  
 
     try {
       const url = `${endpoints.DELETE_COUPON}/${couponId}`;

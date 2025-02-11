@@ -85,6 +85,7 @@ import NewJournal from '../accountant/manualJournel/newJournal/NewJournal';
 import ManualView from '../accountant/manualJournel/ManualView';
 import ChartOfAccountant from '../accountant/chartOfAccountant/ChartOfAccountant';
 import AccountantView from '../accountant/accountantView/AccountantView';
+import EditReceipt from '../Sales/Components/EditReceipt';
 
 const App: React.FC = () => {
   const [selectedNav, setSelectedNav] = useState<string>(() => localStorage.getItem('selectedNav') || '');
@@ -235,6 +236,7 @@ const App: React.FC = () => {
               <Route path='/reciept' element={<Receipt/>}/>
               <Route path='/addreciept' element={<AddReceipt/>}/>
               <Route path='/receipts/:id' element={<ViewReciept/>}/>
+              <Route path='/editreceipts/:id' element={<EditReceipt/>}/>
               {/* <Route path='/salesman' element={<Salesman/>}/> */}
 
               {/* ACCOUNTS */}

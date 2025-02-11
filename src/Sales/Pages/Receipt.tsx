@@ -6,6 +6,7 @@ import useApi from "../../Hook/UseApi";
 import { TableResponseContext } from "../../assets/Context/ContextShare";
 import Table from "../../commoncomponents/Table/Table";
 import PlusCircle from "../../assets/icons/PlusCircle";
+import { toast, ToastContainer } from "react-toastify";
 
 const Receipt: React.FC = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const Receipt: React.FC = () => {
   // const [filteredOrder, setFilteredOrder] = useState<OrderDetails[]>([])
   const { loading, setLoading } = useContext(TableResponseContext)!;
   const { request: getALLOrders } = useApi("get", 4001);
+  const { request: deleteReceipt } = useApi("delete", 4001);
   const getALLOrderss = async () => {
     try {
       const url = `${endpoints.GET_ALL_RECIEPT}`;
@@ -40,15 +42,32 @@ const Receipt: React.FC = () => {
     { id: "paidAmount", label: "Amount Received", visible: true },
   ];
 
-  // Handle row click
-  // const handleRowClick = (id: string) => {
-  //   navigate(`/viewreceipt/${id}`);
-  // };
+ 
+  const handleDelete = async (receiptId: string) => {
+ 
+
+  
+    try {
+      const url = `${endpoints.DELETE_RECEIPT}/${receiptId}`;
+      const { response, error } = await deleteReceipt(url); // Ensure deleteReceipt is defined in your API hook
+  
+      if (!error && response) {
+        setOrders((prevOrders) => prevOrders.filter((order:any) => order._id !== receiptId));
+        toast.success("Receipt deleted successfully");
+      } else {
+        toast.error("Failed to delete receipt. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error deleting receipt:", err);
+      toast.error("An unexpected error occurred. Please try again.");
+    }
+  };
+  
 
   // Handle edit action
-  // const handleEdit = (id: string) => {
-  //   navigate(`/editreceipt/${id}`);
-  // };
+  const handleEdit = (id: string) => {
+    navigate(`/editreceipts/${id}`);
+  };
   // Handle view action
   const handleView = (id: string) => {
     navigate(`/receipts/${id}`);
@@ -66,6 +85,8 @@ const Receipt: React.FC = () => {
 
   return (
     <div>
+            <ToastContainer position="top-center" autoClose={3000} theme="colored" />
+      
       <div className="flex justify-between items-center p-2">
         <div>
           <h3 className="text-[#303F58] text-[20px] font-bold">Receipt</h3>
@@ -92,8 +113,8 @@ const Receipt: React.FC = () => {
           loading={loading.skeleton}
           searchableFields={["orderNumber", "receiptNumber", "fullName"]}
           onViewClick={handleView} // Add this prop
-          // onEditClick={handleEdit}
-          // onDeleteClick={handleDelete}
+          onEditClick={handleEdit}
+          onDeleteClick={handleDelete}
           renderColumnContent={renderColumnContent}
         />
       </div>

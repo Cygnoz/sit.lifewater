@@ -109,27 +109,27 @@ const CustomerHome = () => {
     {
       imageSrc: total,
       title: "Total Customer",
-      description: "Lorem ipsum dolor sit amet consectetur",
+      description: "Show all the customers",
       count: customersData.length, // Total count
     },
     {
       imageSrc: foc,
-      title: "FOC Customers",
-      description: "Lorem ipsum dolor sit amet consectetur",
+      title: "Coupon Customers",
+      description: "Show all the coupon customers",
       count: getCustomerCountByPaymentMode("Coupon"), // Dynamically calculated count
       filterMode: "Coupon"
     },
     {
       imageSrc: cash,
       title: "Cash Customers",
-      description: "Lorem ipsum dolor sit amet consectetur",
+      description: "Show all the cash customers",
       count: getCustomerCountByPaymentMode("Cash"), // Dynamically calculated count
       filterMode: "Cash"
     },
     {
       imageSrc: credit,
       title: "Credit Customers",
-      description: "Lorem ipsum dolor sit amet consectetur",
+      description: "Show all the credit customers",
       count: getCustomerCountByPaymentMode("Credit"), // Dynamically calculated count
       filterMode: "Credit"
     },

@@ -108,7 +108,8 @@ export const endpoints = {
   GET_ALL_RECIEPT:`receipts`,
   ORDER_RECIEPT:`order-receipt`,
   VIEW_ONE_RECIEPT:`receipts`,
-
+  EDIT_A_RECIEPT:`update-receipt`,
+DELETE_RECEIPT:`deletereceipt`,
 
   // Coupons
   ADD_COUPON: `coupons`,
