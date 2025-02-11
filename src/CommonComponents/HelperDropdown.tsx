@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 interface Staff {
   _id: string;
   firstname: string;
-  lastname: string;
   designation: string;
 }
 
@@ -62,9 +61,9 @@ const HelperSearchDropdown: React.FC<SearchDropdownProps> = ({
                 onMouseDown={() => {
                   onSelect({
                     id: option._id,
-                    name: `${option.firstname} ${option.lastname}`,
+                    name: `${option.firstname}`,
                   });
-                  setSearchTerm(`${option.firstname} ${option.lastname}`);
+                  setSearchTerm(`${option.firstname}`);
                   setIsOpen(false);
                 }}
               >

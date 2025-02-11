@@ -210,15 +210,6 @@ const AddStartRide: React.FC = () => {
     setSelectedVehicle(selectedVehicle);
   };
 
-  console.log("Selected helper", selectedHelper?.name); // "John Doe"
-  console.log("Selected helper", selectedHelper?.id); // "abcd1234"
-  console.log("Selected vehicle", selectedVehicle?.vehicleNo); // "abcd1234"
-  console.log("Selected vehicle id", selectedVehicle?.id); // "abcd1234"
-  console.log("Selected maaain", selectedMainRoute?.mainRouteName); // "abcd1234"
-  console.log("Selected main id", selectedMainRoute?.mainRouteId); // "abcd1234"
-  console.log("Selected sub ", selectedSubRoute?.subRouteId); // "abcd1234"
-  console.log("Selected sub id", selectedSubRoute?.subRouteName); // "abcd1234"
-
   // for stock details
   const formattedStock = selectedSubRoute?.stock
     ?.filter((item: any) => item.quantity > 0) // Filters only items with quantity > 0
