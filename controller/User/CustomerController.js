@@ -108,8 +108,8 @@ exports.createCustomer = async (req, res) => {
       accountId: savedAccount._id,
       accountName: savedAccount.accountName,
       action: "Opening Balance",
-      debitAmount: savedCustomer.depositAmount || 0,
-      creditAmount: 0,
+      creditAmount:  0,
+      debitAmount: 0,
     });
     await trialEntry.save();
     
