@@ -341,7 +341,8 @@ const AddOrder = ({ }: Props) => {
                 customer?.customerID?.toLowerCase().includes(value.toLowerCase()) ||
                 customer?.city?.toLowerCase().includes(value.toLowerCase()) ||
                 customer?.mobileNo?.toString().includes(value) || // Convert number to string
-                customer?.whatsappNumber?.toString().includes(value) // Convert number to string
+                customer?.whatsappNumber?.toString().includes(value)|| // Convert number to string
+                customer?.addressLine1?.toString().includes(value) // Convert number to string
             );
         });
 
