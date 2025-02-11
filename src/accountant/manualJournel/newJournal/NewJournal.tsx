@@ -145,7 +145,7 @@ function NewJournal({ page }: Props) {
         console.log("All accounts", response);
 
         // Extract `_doc` from each object
-        const formattedData = response.data?.map((item: any) => item._doc);
+        const formattedData = response.data
 
         setAccountOptions(formattedData);
         return formattedData;

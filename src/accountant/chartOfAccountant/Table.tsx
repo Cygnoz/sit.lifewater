@@ -49,9 +49,9 @@ const Table = ({
 
   // Process account data properly
   const processedAccounts = accountData.map((item) =>
-    item?._doc
+    item
       ? {
-          ...item._doc,
+          ...item,
           createdDate: item.createdDate,
           createdTime: item.createdTime,
         }
@@ -93,9 +93,9 @@ const Table = ({
 
       if (!error && response) {
         const formattedData = Array.isArray(response.data)
-          ? response.data.map((item: any) => item._doc)
-          : response.data?._doc
-          ? [response.data._doc]
+          ? response.data.map((item: any) => item)
+          : response.data
+          ? [response.data]
           : [];
 
         setOneAccountData(formattedData);

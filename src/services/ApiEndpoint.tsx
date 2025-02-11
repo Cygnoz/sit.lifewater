@@ -94,7 +94,7 @@ export const endpoints = {
   GET_ALL_ACCOUNTS: `getallaccounts`,
   GET_ONE_TRIAL_BALANCE: `get-one-trial-balance`,
   EDIT_JOURNAL_ENTRY: `edit-journal-entry`,
-  DELET_JOURNAL_ENTRY: `delete-journal-entry`,
+  DELET_JOURNAL_ENTRY: `delete-journal`,
 
   ADD_NEW_JOURNEL_ENTRY: `add-journal-entry`,
   GET_ALL_JOURNALS: `get-all-journal`,

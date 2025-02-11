@@ -11,16 +11,17 @@ const InformationStatus = ({ }: Props) => {
     console.log(vehicleResponse,"context");
     
     const Card = [
-        {
-            title: "Today Route",
-            value: ".",
-            amount: "",
-        },
-        {
-            title: "Deposit Amount",
-            value: "AED",
-            amount: "",
-        }, {
+        // {
+        //     title: "Today Route",
+        //     value: ".",
+        //     amount: "",
+        // },
+        // {
+        //     title: "Deposit Amount",
+        //     value: "AED",
+        //     amount: "",
+        // },
+         {
             title: "Insurance Amount",
             value: "AED",
             amount: (vehicleResponse?.insuranceAmount?vehicleResponse.insuranceAmount : "NA"),
@@ -29,39 +30,36 @@ const InformationStatus = ({ }: Props) => {
     const GeneralStatus = [
         {
             title: "Vehicle Number",
-            value: (vehicleResponse?.vehicleNo || "NA"),
+            value: vehicleResponse?.vehicleNo || "NA",
         },
         {
             title: "Insurance Validity",
-            value: vehicleResponse?.insuranceValidity 
-            ? new Date(vehicleResponse.insuranceValidity).toISOString().split("T")[0] 
-            : "NA"        
+            value: vehicleResponse?.insuranceValidity && !isNaN(new Date(vehicleResponse.insuranceValidity).getTime()) 
+                ? new Date(vehicleResponse.insuranceValidity).toISOString().split("T")[0] 
+                : "NA",
         },
-             {
+        {
             title: "Insurance Amount",
-            value: (vehicleResponse?.insuranceAmount || "NA")
-        }, {
+            value: vehicleResponse?.insuranceAmount || "NA",
+        }, 
+        {
             title: "License Validity",
-            value: vehicleResponse?.insuranceValidity 
-            ? new Date(vehicleResponse.licenseValidity
-            ).toISOString().split("T")[0] 
-            : "NA" 
+            value: vehicleResponse?.licenseValidity && !isNaN(new Date(vehicleResponse.licenseValidity).getTime()) 
+                ? new Date(vehicleResponse.licenseValidity).toISOString().split("T")[0] 
+                : "NA",
         },
-    ]
+    ];
+    
     const OtherDetails = [
         {
             title: "Expense",
             value: (vehicleResponse?.expenses || "NA"),
-        }, {
+        },
+         {
             title: "Started Km",
             value: (vehicleResponse?.startingKilometer || "NA"),
-        }, {
-            title: "Ending Km",
-            value: "NA"
-        }, {
-            title: "Total Km",
-            value: "NA"
         },
+      
     ]
     return (
         <div className="flex gap-10">
@@ -84,8 +82,8 @@ const InformationStatus = ({ }: Props) => {
                             <div className="text-end p-4 border-2 rounded-lg bg-gradient-to-r from-[#E3E6D5] to-[#F7E7CE]">
 
                                 <div className="flex gap-3 justify-end">
-                                    <h2 className="text-xl font-semibold text-gray-800">{card.value}</h2>
-                                    <p className="text-[18px]  text-[#303F58] w-400">{card.amount}</p></div>
+                                    <p className="text-[18px]  text-[#303F58] w-400">{card.amount} <span>{card.value}</span></p></div>
+                                    {/* <h2 className="text-xl font-semibold text-gray-800"></h2> */}
                                 <p className="text-[16px] mt-0.5 text-[#303F58] w-400">{card.title}</p>
                             </div>
                         ))

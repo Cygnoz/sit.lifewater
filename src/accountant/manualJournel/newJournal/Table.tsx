@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { TableResponseContext } from "../../../assets/Context/ContextShare";
 import useApi from "../../../Hook/UseApi";
 import { endpoints } from "../../../services/ApiEndpoint";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import SearchBar from "../../../commoncomponents/Searchbar";
 import PencilEdit from "../../../assets/icons/PencilEdit";
 import Eye from "../../../assets/icons/Eye";
 import TrashCan from "../../../Accounts/Components/Trashcan";
 import NoDataFoundTable from "../../../commoncomponents/Table/NoDataFoundTable";
 import ConfirmModal from "../../../commoncomponents/ConfirmModal";
-
+import "react-toastify/dist/ReactToastify.css";
 interface Journal {
   _id: string;
   date: string;
@@ -78,22 +78,34 @@ function Table({}: Props) {
     if (!deleteId) return;
     try {
       const url = `${endpoints.DELET_JOURNAL_ENTRY}/${deleteId}`;
-      const { response, error } = await deleteJournal(url);
-
-      if (!error && response) {
-        toast.success(response.data.message);
-        setJournalData((prevData) => prevData.filter((journal) => journal._id !== deleteId));
-        await getAllJournals();
-      } else {
-        toast.error(error.response.data.message);
+      const result = await deleteJournal(url);
+  
+      console.log("Delete Result:", result); // Debugging
+  
+      if (result?.error) {
+        console.error("Delete Error:", result.error);
+        toast.error(result?.error?.response?.data?.message || "Error deleting journal.");
+        return;
+      }
+  
+      if (result?.response) {
+        console.log("Delete Response:", result.response);
+        toast.success(result?.response?.data?.message || "Journal deleted successfully!");
+  
+        // Delay state updates for toast visibility
+        setTimeout(() => {
+          setJournalData((prevData) => prevData.filter((journal) => journal._id !== deleteId));
+          getAllJournals();
+          setConfirmModalOpen(false);
+          setDeleteId(null);
+        }, 1000); // Adjust if needed
       }
     } catch (error) {
-      toast.error("Error occurred while deleting the journal.");
-    } finally {
-      setConfirmModalOpen(false);
-      setDeleteId(null);
+      console.error("Error deleting journal:", error);
+      toast.error("An error occurred while deleting the journal.");
     }
   };
+  
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -101,6 +113,19 @@ function Table({}: Props) {
 
   return (
     <div className="overflow-x-auto my-1">
+         <ToastContainer
+              position="top-center"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={true}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+              // optional CSS class for further styling
+            />
       <div className="mb-3">
         <SearchBar onSearchChange={setSearchValue} searchValue={searchValue} placeholder="Search Journals" />
       </div>

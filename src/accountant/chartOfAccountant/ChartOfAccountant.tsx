@@ -42,7 +42,7 @@ const fetchAllAccounts = async () => {
     console.log("Fetched Data:", response.data);
 
     // Extract only `_doc` from each object
-    const formattedData = response.data.map((item: any) => item._doc);
+    const formattedData = response.data
 
     setAccountData(formattedData); // Now `accountData` is correctly structured
 

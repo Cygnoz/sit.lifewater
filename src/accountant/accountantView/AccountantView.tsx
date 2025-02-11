@@ -33,7 +33,7 @@ function AccountantView() {
       const { response, error } = await getOneTrialBalance(url);
       if (!error && response) {
         // Extract the _doc field from each object
-        const formattedData = response.data.map((item: any) => item._doc);
+        const formattedData = response.data
         setTrialBalance(formattedData);
       }
     } catch (error) {
