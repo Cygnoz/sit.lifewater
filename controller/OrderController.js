@@ -259,11 +259,14 @@ exports.createOrder = async (req, res) => {
       balanceAmount:
         cleanedData.paymentMode === "Credit"
           ? Number(cleanedData.totalAmount)
-          : Number(cleanedData.totalAmount) - Number(cleanedData.paidAmount) ||
-            0,
+          : cleanedData.paymentMode === "Coupon"
+          ? 0
+          : Number(cleanedData.totalAmount) - Number(cleanedData.paidAmount) || 0,
       paidAmount:
         cleanedData.paymentMode === "Credit"
           ? 0
+          : cleanedData.paymentMode === "Coupon"
+          ? Number(cleanedData.totalAmount)
           : Number(cleanedData.paidAmount),
       notes: cleanedData.notes,
       stock: cleanedData.stock.map((item) => ({
@@ -273,9 +276,14 @@ exports.createOrder = async (req, res) => {
         status: "Sold",
       })),
     });
-
+    
     await order.save();
-    await journal(order, customerAccount, saleAccount, depositAccount);
+    
+
+    if (cleanedData.paymentMode !== "Coupon") {
+      await journal(order, customerAccount, saleAccount, depositAccount);
+    }
+    
 
     res
       .status(200)
