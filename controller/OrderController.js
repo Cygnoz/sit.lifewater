@@ -543,17 +543,12 @@ exports.deleteOrder = async (req, res) => {
     console.log("SubRoute stock updated");
 
     // Delete associated journal entries if they exist
-    const existingJournal = await TrialBalance.findOne({ operationId: order._id });
+    const existingJournal = await TrialBalance.find({ operationId: order._id });
+    console.log('existingjournal:',existingJournal);
+    
     if (existingJournal) {
       await TrialBalance.deleteMany({ operationId: order._id });
       console.log(`Deleted existing Journal entries for operationId: ${order._id}`);
-    }
-
-    // Delete associated trial balance entries if they exist
-    const existingTrialBalance = await TrialBalance.findOne({ operationId: order._id });
-    if (existingTrialBalance) {
-      await TrialBalance.deleteMany({ operationId: order._id });
-      console.log(`Deleted existing TrialBalance entries for operationId: ${order._id}`);
     }
 
     // Delete the order
