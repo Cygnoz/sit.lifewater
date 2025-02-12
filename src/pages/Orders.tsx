@@ -235,7 +235,7 @@ const Orders = ({ }: Props) => {
                 <p className="text-[#303F58] pt-1">Item</p>
                 <button
                   onClick={() => confirmDelete(order._id)}
-                  className="bg-[#F6F6F6] h-6 w-12 hidden text-sm rounded-md border border-red-900 mt-3 p-1  items-center"
+                  className="bg-[#F6F6F6] h-6 w-12 text-sm rounded-md border border-red-900 mt-3 p-1  items-center"
                 >
                   Delete
                 </button>
