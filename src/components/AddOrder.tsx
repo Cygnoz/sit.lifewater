@@ -532,10 +532,12 @@ const AddOrder = ({ }: Props) => {
                 }, 1000);
             } else {
                 toast.error(error?.response?.data?.message || "An error occurred");
+                setIsSubmitting(false)
             }
         } catch (error) {
             toast.error("An unexpected error occurred.");
             console.error("Error submitting order data:", error);
+            setIsSubmitting(false)
         }
     };
 
