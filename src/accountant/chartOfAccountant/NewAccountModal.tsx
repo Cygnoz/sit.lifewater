@@ -9,7 +9,7 @@ import Button from "../../commoncomponents/Buttons/Button";
 import { Modal } from "@mui/material";
 import chartOfAcc from "../../assets/constants/chartOfAcc";
 import CehvronDown from "../../assets/icons/cheveronDown";
-import CashImage from '../../assets/Images/CashImage.png';
+import modalimage from '../../assets/images/imagemodal.png';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 interface NewAccountModalProps {
@@ -100,7 +100,7 @@ console.log(showValidationError,AllAccountz);
   };
  
 
-  
+
   const headGroup = (accountSubhead: string) => {
     for (const [group, heads] of Object.entries(accountCategories)) {
       for (const [head, subheads] of Object.entries(heads)) {
@@ -311,7 +311,7 @@ console.log(showValidationError,AllAccountz);
 
           <form className="flex justify-between" onSubmit={onSubmit}>
             <div>
-              <img src={CashImage} alt="Cash" />
+              <img src={modalimage} alt="Cash" />
             </div>
             <div className="w-[65%]">
               <div className="mb-4">
