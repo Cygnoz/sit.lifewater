@@ -259,11 +259,14 @@ exports.createOrder = async (req, res) => {
       balanceAmount:
         cleanedData.paymentMode === "Credit"
           ? Number(cleanedData.totalAmount)
-          : Number(cleanedData.totalAmount) - Number(cleanedData.paidAmount) ||
-            0,
+          : cleanedData.paymentMode === "Coupon"
+          ? 0
+          : Number(cleanedData.totalAmount) - Number(cleanedData.paidAmount) || 0,
       paidAmount:
         cleanedData.paymentMode === "Credit"
           ? 0
+          : cleanedData.paymentMode === "Coupon"
+          ? Number(cleanedData.totalAmount)
           : Number(cleanedData.paidAmount),
       notes: cleanedData.notes,
       stock: cleanedData.stock.map((item) => ({
@@ -273,9 +276,14 @@ exports.createOrder = async (req, res) => {
         status: "Sold",
       })),
     });
-
+    
     await order.save();
-    await journal(order, customerAccount, saleAccount, depositAccount);
+    
+
+    if (cleanedData.paymentMode !== "Coupon") {
+      await journal(order, customerAccount, saleAccount, depositAccount);
+    }
+    
 
     res
       .status(200)
@@ -543,17 +551,12 @@ exports.deleteOrder = async (req, res) => {
     console.log("SubRoute stock updated");
 
     // Delete associated journal entries if they exist
-    const existingJournal = await TrialBalance.findOne({ operationId: order._id });
+    const existingJournal = await TrialBalance.find({ operationId: order._id });
+    console.log('existingjournal:',existingJournal);
+    
     if (existingJournal) {
       await TrialBalance.deleteMany({ operationId: order._id });
       console.log(`Deleted existing Journal entries for operationId: ${order._id}`);
-    }
-
-    // Delete associated trial balance entries if they exist
-    const existingTrialBalance = await TrialBalance.findOne({ operationId: order._id });
-    if (existingTrialBalance) {
-      await TrialBalance.deleteMany({ operationId: order._id });
-      console.log(`Deleted existing TrialBalance entries for operationId: ${order._id}`);
     }
 
     // Delete the order
