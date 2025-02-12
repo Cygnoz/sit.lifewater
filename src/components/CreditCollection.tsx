@@ -24,7 +24,7 @@ const CreditCollection: React.FC = () => {
     depositAccountId: "",
     salesmanId: SalesManId
   });
-  const [  balanceAmount, setBalanceAmount] = useState("");
+  const [balanceAmount, setBalanceAmount] = useState("");
 
   console.log("formData", formData);
 
@@ -122,9 +122,6 @@ const CreditCollection: React.FC = () => {
     setFilteredCustomers([]); // Clear the dropdown
   };
 
-  
-
-
 
 
 
@@ -150,8 +147,8 @@ const CreditCollection: React.FC = () => {
       if (!error && response) {
         const formattedData = response.data;
 
-        const filtered = formattedData?.filter(
-          (account: any) => account.accountSubhead === "Cash"
+        const filtered = formattedData.filter((account: any) =>
+          ["Cash", "Bank"].includes(account.accountSubhead)
         );
         setFilteredAccounts(filtered);
       }
@@ -217,7 +214,7 @@ const CreditCollection: React.FC = () => {
 
           setFormData((prev) => ({
             ...prev,
-            date: Data?.updatedAt || "",
+            date: Data?.updatedAt ? new Date(Data.updatedAt).toISOString().split("T")[0] : "",
             customerId: Data?.customerId || "",
             orderId: Data?.orderId || "",
             orderNumber: Data?.orderNumber || "",
@@ -312,42 +309,43 @@ const CreditCollection: React.FC = () => {
           className="w-full p-2 border rounded-md"
         />
 
-         {/* Search for customer */}
-         <div className="relative">
-              <label className="block text-[#484A4D] font-semibold text-left mb-2">Select Customer</label>
-              <input
-                type="text"
-                value={searchValue}
-                onChange={handleSearchChange}
-                onFocus={handleInputFocus}
-                className="w-full p-2 mt-1 border rounded-md"
-                placeholder="Search Customer"
-              />
-              {/* Dropdown for customer suggestions */}
-              <div className="absolute z-10 w-full bg-white mt-1 max-h-52 overflow-auto rounded shadow-lg">
-                {loading ? (
-                  <div className="p-2 text-gray-500">Loading...</div>
-                ) : customers.length > 0 ? (
-                  <div>
-                    {
-                      filteredCustomers.map((customer: any) => (
-                        <div
-                          key={`${customer.customerID}-${customer.ratePerBottle}`}
-                          onClick={() => handleCustomerSelect(customer)}
-                        >
-                          <div className="p-2 cursor-pointer m-2 border-2 rounded-lg hover:bg-gray-100"                                        >
-                            {customer.fullName}
-                          </div>
-                        </div>
-                      ))
-                    }
-                  </div>
-                ) :
-                  (
-                    <div className="p-2">No customers found</div>
-                  )}
+
+        {/* Search for customer */}
+        <div className="relative">
+          <label className="block text-[#484A4D] font-semibold text-left mb-2">Select Customer</label>
+          <input
+            type="text"
+            value={searchValue}
+            onChange={handleSearchChange}
+            onFocus={handleInputFocus}
+            className="w-full p-2 mt-1 border rounded-md"
+            placeholder="Search Customer"
+          />
+          {/* Dropdown for customer suggestions */}
+          <div className="absolute z-10 w-full bg-white mt-1 max-h-52 overflow-auto rounded shadow-lg">
+            {loading ? (
+              <div className="p-2 text-gray-500">Loading...</div>
+            ) : customers.length > 0 ? (
+              <div>
+                {
+                  filteredCustomers.map((customer: any) => (
+                    <div
+                      key={`${customer.customerID}-${customer.ratePerBottle}`}
+                      onClick={() => handleCustomerSelect(customer)}
+                    >
+                      <div className="p-2 cursor-pointer m-2 border-2 rounded-lg hover:bg-gray-100"                                        >
+                        {customer.fullName}
+                      </div>
+                    </div>
+                  ))
+                }
               </div>
-            </div>
+            ) :
+              (
+                <div className="p-2">No customers found</div>
+              )}
+          </div>
+        </div>
 
         <label className="block text-sm font-medium text-gray-700">
           Select Order

@@ -537,12 +537,13 @@ export default function Component() {
           <div>
             <label className="block text-gray-700">Mobile Number</label>
             <input
-              type="text"
+              type="number"
               name="mobileNo"
               value={formData.mobileNo}
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter Mobile Number"
+              inputMode="numeric"
             />
             {errors.mobileNumber && (
               <p className="text-red-500 text-sm">{errors.mobileNumber}</p>
@@ -552,12 +553,13 @@ export default function Component() {
           <div>
             <label className="block text-gray-700">WhatsApp Number</label>
             <input
-              type="text"
+              type="number"
               name="whatsappNumber"
               value={formData.whatsappNumber}
               onChange={handleInputChange}
               className="w-full p-2 mt-1 border rounded-md"
               placeholder="Enter WhatsApp Number"
+              inputMode="numeric"
             />
             {errors.whatsappNumber && (
               <p className="text-red-500 text-sm">{errors.whatsappNumber}</p>
