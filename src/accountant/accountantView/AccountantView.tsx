@@ -12,7 +12,7 @@ type TrialBalance = {
   creditAmount: number;
   debitAmount: number;
   remark: string;
-  cumulativeSum: number;
+  cumulativeSum: string;
   createdDate: string;
   createdTime: string;
 };
@@ -33,7 +33,7 @@ function AccountantView() {
       const { response, error } = await getOneTrialBalance(url);
       if (!error && response) {
         // Extract the _doc field from each object
-        const formattedData = response.data
+        const formattedData = response.data;
         setTrialBalance(formattedData);
       }
     } catch (error) {
@@ -87,7 +87,9 @@ function AccountantView() {
       {/* Recent Transactions Table */}
       <div className="p-6 rounded-lg bg-white">
         <div className="flex justify-between mb-4">
-          <p className="font-bold text-textColor text-base">Recent Transactions</p>
+          <p className="font-bold text-textColor text-base">
+            Recent Transactions
+          </p>
         </div>
 
         {/* Table Section */}
@@ -95,12 +97,24 @@ function AccountantView() {
           <table className="min-w-full bg-white border border-tableBorder rounded-lg">
             <thead className="text-[12px] text-center text-dropdownText">
               <tr className="bg-[#F9F7F0]">
-                <th className="py-3 px-4 font-medium border-b border-tableBorder text-sm">Date</th>
-                <th className="py-3 px-4 font-medium border-b border-tableBorder text-sm">Type</th>
-                <th className="py-3 px-4 font-medium border-b border-tableBorder text-sm">Debit Amount</th>
-                <th className="py-3 px-4 font-medium border-b border-tableBorder text-sm">Credit Amount</th>
-                <th className="py-3 px-4 font-medium border-b border-tableBorder text-sm">Cumulative Sum</th>
-                <th className="py-3 px-4 font-medium border-b border-tableBorder text-sm">Note</th>
+                <th className="py-3 px-4 font-medium border-b border-tableBorder text-sm">
+                  Date
+                </th>
+                <th className="py-3 px-4 font-medium border-b border-tableBorder text-sm">
+                  Type
+                </th>
+                <th className="py-3 px-4 font-medium border-b border-tableBorder text-sm">
+                  Debit Amount
+                </th>
+                <th className="py-3 px-4 font-medium border-b border-tableBorder text-sm">
+                  Credit Amount
+                </th>
+                <th className="py-3 px-4 font-medium border-b border-tableBorder text-sm">
+                  Cumulative Sum
+                </th>
+                <th className="py-3 px-4 font-medium border-b border-tableBorder text-sm">
+                  Note
+                </th>
               </tr>
             </thead>
             <tbody className="text-dropdownText text-center text-[13px]">
@@ -114,14 +128,25 @@ function AccountantView() {
                       {item?.action || "-"}
                     </td>
                     <td className="py-3 px-4 border-b border-tableBorder">
-                      {item?.debitAmount ? Number(item.debitAmount).toFixed(2) : "0.00"}
+                      {item?.debitAmount
+                        ? Number(item.debitAmount).toFixed(2)
+                        : "0.00"}
                     </td>
                     <td className="py-3 px-4 border-b border-tableBorder">
-                      {item?.creditAmount ? Number(item.creditAmount).toFixed(2) : "0.00"}
+                      {item?.creditAmount
+                        ? Number(item.creditAmount).toFixed(2)
+                        : "0.00"}
                     </td>
                     <td className="py-3 px-4 border-b border-tableBorder">
-                      {item?.cumulativeSum ? Number(item.cumulativeSum).toFixed(2) : "0.00"}
+                      {item?.cumulativeSum
+                        ? Number(item.cumulativeSum.replace(/\D/g, "")).toFixed(
+                            2
+                          ) +
+                          " " +
+                          item.cumulativeSum.replace(/[0-9.]/g, "")
+                        : "0.00"}
                     </td>
+
                     <td className="py-3 px-4 border-b border-tableBorder">
                       {item?.remark || "-"}
                     </td>
@@ -129,7 +154,10 @@ function AccountantView() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-3 px-4 border-b border-tableBorder text-center text-red-600">
+                  <td
+                    colSpan={6}
+                    className="py-3 px-4 border-b border-tableBorder text-center text-red-600"
+                  >
                     No data found!
                   </td>
                 </tr>
