@@ -232,10 +232,11 @@ const ViewCustomers: React.FC = () => {
             textAlign: "center",
           }}
         >
-          <div className="flex justify-end mb-5 ">
+          <div className="flex justify-end">
+         
             <button
               onClick={handleClose}
-              className="bg-rose-500 text-red p-2 rounded-full"
+              className="bg-gray-200 text-red px-3 rounded-full"
             >
               <img src={close} alt="Close" />
             </button>
@@ -291,12 +292,18 @@ const ViewCustomers: React.FC = () => {
                     {selectedCustomer.CouponBottle}
                   </p>
                 }
+                 <button
+            onClick={handleEdit}
+            className="px-3 py-1  bg-gray-800 text-white rounded-lg font-thin hover:bg-gray-600-500" 
+          >
+            Edit customer
+          </button>
               </>
             )}
           </Typography>
           {/* Conditional Rendering of Google Maps Iframe */}
           {showLocation && selectedCustomer?.location?.coordinates && (
-            <div className="mt-4">
+            <div className="mt-2">
               <iframe
                 src={`https://www.google.com/maps?q=${selectedCustomer.location.coordinates.coordinates[1]},${selectedCustomer.location.coordinates.coordinates[0]}&output=embed`}
                 className="w-full h-[350px]"
@@ -305,12 +312,7 @@ const ViewCustomers: React.FC = () => {
               ></iframe>
             </div>
           )}
-          <button
-            onClick={handleEdit}
-            className="px-6 py-3 mt-4 bg-[#820000] text-white rounded-lg"
-          >
-            Edit
-          </button>
+         
         </Box>
       </Modal>
     </>
