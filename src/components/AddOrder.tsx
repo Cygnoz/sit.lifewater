@@ -235,7 +235,7 @@ const AddOrder = ({ }: Props) => {
             paidAmount: numericValue, // Ensuring it's always a number
         }));
     };
-  
+
 
     const handleInputFocus = () => {
         // Show all customers when the input is focused
@@ -261,15 +261,17 @@ const AddOrder = ({ }: Props) => {
     };
 
     const handleQuantityChange = (value: number) => {
-        if (value < 1) return; // Prevent quantity from going below 1
-        if (value > quantity) {
-            setError(`Only ${quantity} units are left in stock.`);
-            return;
-        }
-        if (value === quantity) {
-            setError("Warning: This item is now out of stock.");
-        } else {
-            setError("");
+        if (!editId) {
+            if (value < 1) return; // Prevent quantity from going below 1
+            if (value > quantity) {
+                setError(`Only ${quantity} units are left in stock.`);
+                return;
+            }
+            if (value === quantity) {
+                setError("Warning: This item is now out of stock.");
+            } else {
+                setError("");
+            }
         }
 
         setOrderData((prevState) => {
@@ -341,7 +343,7 @@ const AddOrder = ({ }: Props) => {
                 customer?.customerID?.toLowerCase().includes(value.toLowerCase()) ||
                 customer?.city?.toLowerCase().includes(value.toLowerCase()) ||
                 customer?.mobileNo?.toString().includes(value) || // Convert number to string
-                customer?.whatsappNumber?.toString().includes(value)|| // Convert number to string
+                customer?.whatsappNumber?.toString().includes(value) || // Convert number to string
                 customer?.addressLine1?.toString().includes(value) // Convert number to string
             );
         });
@@ -469,23 +471,28 @@ const AddOrder = ({ }: Props) => {
     const handleSubmit = async () => {
         if (isSubmitting) return; // Prevent multiple clicks
         setIsSubmitting(true);
+
         if (!orderData.customerId) {
             toast.error("Select a customer.");
+            setIsSubmitting(false);
             return;
         }
 
         if (orderData.stock.length === 0) {
             toast.error("Add at least one stock item.");
+            setIsSubmitting(false);
             return;
         }
 
         if (!orderData.paymentMode) {
             toast.error("Select a payment mode.");
+            setIsSubmitting(false);
             return;
         }
 
         if (orderData.paymentMode === "Cash" && !orderData.depositAccountId) {
             toast.error("Select a Deposit Account.");
+            setIsSubmitting(false);
             return;
         }
 
@@ -496,10 +503,9 @@ const AddOrder = ({ }: Props) => {
         try {
             const orderWithDefaults = {
                 ...orderData,
-                stock: orderData.stock.map((item) => ({
-                    ...item,
-                })),
+                stock: orderData.stock.map((item) => ({ ...item })),
             };
+
             const { response, error } = editId
                 ? await EditOrder(url, orderWithDefaults)
                 : await AddOrder(url, orderWithDefaults);
@@ -518,9 +524,9 @@ const AddOrder = ({ }: Props) => {
                         date: "",
                         paymentMode: "",
                         notes: "",
-                        totalAmount: 0, // Initialized as a number
-                        returnBottle: 0, // Initialized as a number
-                        ratePerItem: "", // Initialized as a number
+                        totalAmount: 0,
+                        returnBottle: 0,
+                        ratePerItem: "",
                         rideId: "",
                         stock: [],
                         depositAccountId: "",
@@ -528,16 +534,16 @@ const AddOrder = ({ }: Props) => {
                     });
                 }
                 setTimeout(() => {
-                    navigate("/orders"); // Navigate to orders page after 1 second
+                    navigate("/orders");
                 }, 1000);
             } else {
                 toast.error(error?.response?.data?.message || "An error occurred");
-                setIsSubmitting(false)
             }
         } catch (error) {
             toast.error("An unexpected error occurred.");
             console.error("Error submitting order data:", error);
-            setIsSubmitting(false)
+        } finally {
+            setIsSubmitting(false); // Ensure it resets no matter what
         }
     };
 
