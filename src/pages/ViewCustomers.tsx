@@ -216,8 +216,10 @@ const ViewCustomers: React.FC = () => {
         onClose={handleClose}
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
+      className="overflow-y-scroll"
       >
         <Box
+
           sx={{
             width: { xs: "90%", sm: "75%", md: "50%", lg: "40%" },
             maxWidth: "600px",
@@ -230,7 +232,7 @@ const ViewCustomers: React.FC = () => {
             textAlign: "center",
           }}
         >
-          <div className="flex justify-end mb-5">
+          <div className="flex justify-end mb-5 ">
             <button
               onClick={handleClose}
               className="bg-rose-500 text-red p-2 rounded-full"

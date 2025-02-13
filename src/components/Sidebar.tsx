@@ -4,8 +4,8 @@ import { Box, Modal, Typography } from "@mui/material";
 import home from "../assets/images/home.svg";
 import orders from "../assets/images/orders.svg";
 import stock from "../assets/images/stock.svg";
-import summary from "../assets/images/summary.svg";
-import ret from "../assets/images/Vector.png";
+// import summary from "../assets/images/summary.svg";
+// import ret from "../assets/images/Vector.png";
 import users from "../assets/images/users.svg";
 import close from "../assets/images/x-mark.svg";
 import bars from "../assets/images/bars-4.svg";
@@ -23,8 +23,8 @@ const menuItems = [
   { title: "Orders", icon: orders, path: "/orders" },
   { title: "Customers", icon: users, path: "/customers" },
   { title: "Stock", icon: stock, path: "/stock" },
-  { title: "Summary", icon: summary, path: "/summary" },
-  { title: "Return", icon: ret, path: "/return" },
+  // { title: "Summary", icon: summary, path: "/summary" },
+  // { title: "Return", icon: ret, path: "/return" },
   { title: "Payment Collection", icon: pay, path: "/collection" },
   // { title: "Credit Issued", icon: credit, path: "/creditcollection" },
   { title: "Coupon Customers", icon: coup, path: "/couponcustomer" },
