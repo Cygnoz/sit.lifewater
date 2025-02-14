@@ -4,6 +4,7 @@ const storage = multer.diskStorage({
   destination: (req, file, callback) => {
     callback(null, './uploads');
   },
+  
   filename: (req, file, callback) => {
     const filename = `image-${Date.now()}-${file.originalname}`;
     callback(null, filename);
@@ -22,6 +23,9 @@ const fileFilter = (req, file, callback) => {
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
+  limits: {
+    fileSize: 8000000 // Compliant: 8MB
+ }
 });
 
 module.exports = upload;

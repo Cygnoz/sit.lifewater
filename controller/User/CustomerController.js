@@ -25,7 +25,7 @@ exports.createCustomer = async (req, res) => {
   try {
     const cleanedData = cleanCustomerData(req.body);
     
-    const { fullName, whatsappNumber, location, email } = cleanedData;
+    const {  location } = cleanedData;
 
     console.log('cleaned data:',cleanedData);
     
@@ -437,21 +437,21 @@ exports.updateCustomerById = async (req, res) => {
       return res.status(404).json({ message: "Customer not found" });
     }
 
-    // Handle deposit changes in TrialBalance
-    if (cleanedData.depositAmount !== undefined && cleanedData.depositAmount !== existingCustomer.depositAmount) {
-      const trialBalanceEntry = await TrialBalance.findOne({
-        operationId: id,
-        action: "Opening Balance",
-      });
+    // // Handle deposit changes in TrialBalance
+    // if (cleanedData.depositAmount !== undefined && cleanedData.depositAmount !== existingCustomer.depositAmount) {
+    //   const trialBalanceEntry = await TrialBalance.findOne({
+    //     operationId: id,
+    //     action: "Opening Balance",
+    //   });
 
-      if (trialBalanceEntry) {
-        trialBalanceEntry.debitAmount = cleanedData.depositAmount || 0;
-        await trialBalanceEntry.save();
-        console.log("Trial balance updated for deposit amount change.");
-      } else {
-        console.warn("No trial balance entry found for customer deposit update.");
-      }
-    }
+    //   if (trialBalanceEntry) {
+    //     trialBalanceEntry.debitAmount = cleanedData.depositAmount || 0;
+    //     await trialBalanceEntry.save();
+    //     console.log("Trial balance updated for deposit amount change.");
+    //   } else {
+    //     console.warn("No trial balance entry found for customer deposit update.");
+    //   }
+    // }
 
     // Update customerDisplayName in associated Account documents
     if (cleanedData.fullName && cleanedData.fullName !== existingCustomer.fullName) {
