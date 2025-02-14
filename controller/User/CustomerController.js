@@ -9,6 +9,7 @@ const moment = require('moment-timezone')
 
 
 
+
 const dataExist = async ( customerId , depositAccountId ) => {
   const [ customerAccount, saleAccount, depositAccount ] = await Promise.all([
     Account.findOne({  accountId:customerId }),
