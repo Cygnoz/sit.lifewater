@@ -3,7 +3,7 @@ const { updateWarehouseStock } = require('../controller/WarehouseController');
 const Warehouse = require('../Models/WarehouseSchema');
 const Item = require('../Models/ItemSchema');
 const SubRoute = require('../Models/SubrouteSchema');
-SubRoute
+
  
 // Function to add a new unload document
 exports.unloadStock = async (req, res) => {
