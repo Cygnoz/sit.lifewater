@@ -32,7 +32,7 @@ const CreditCollection: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
   const [filteredAccounts, setFilteredAccounts] = useState<any[]>([]);
-
+  const { id } = useParams<{ id: string }>();
 
 
 
@@ -174,7 +174,11 @@ const CreditCollection: React.FC = () => {
 
   useEffect(() => {
     if (formData.customerId) {
-      const customerOrders = orders.filter(
+      const customerOrders = id ? 
+      orders.filter(
+        (order) => order.customerId === formData.customerId
+      )
+      : orders.filter(
         (order) => order.customerId === formData.customerId && order.balanceAmount > 0
       );
       setFilteredOrders(customerOrders);
@@ -193,8 +197,6 @@ const CreditCollection: React.FC = () => {
     setBalanceAmount(selectedOrder?.balanceAmount || "")
   };
 
-
-  const { id } = useParams<{ id: string }>();
   const [error, setError] = useState<string | null>(null);
   console.log(error);
 
