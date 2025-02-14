@@ -86,6 +86,7 @@ exports.createStock = async (req, res) => {
           itemName: item.itemName,
           quantity: item.quantity,
           costPrice: item.costPrice,
+          serialNumber: item.serialNumber,
           amount: item.quantity * item.sellingPrice,
           status: item.resaleable ? "Filled" : undefined,
           sellingPrice: item.sellingPrice

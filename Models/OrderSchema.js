@@ -1,63 +1,68 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const mongoose = require("mongoose")
+const Schema = mongoose.Schema
 
+const stockSchema = new Schema(
+  {
+    itemId: { type: String },
+    itemName: { type: String },
+    quantity: { type: Number },
+    status: { type: String },
+  },
+  { _id: false }
+)
 
-const stockSchema = new Schema({
-  itemId: { type: String },
-  itemName: { type: String },
-  quantity: { type: Number },
-  status: { type: String },
-}, { _id: false });
- 
 const orderSchema = new mongoose.Schema({
   // Order identification
   orderNumber: {
     type: String,
-    trim: true
+    trim: true,
   },
-  rideId:{
+  rideId: {
     type: String,
   },
-  mainRouteName:{
-    type:String,
+  mainRouteName: {
+    type: String,
   },
-  mainRouteId:{
-    type:String,
+  mainRouteId: {
+    type: String,
   },
-  subRouteName:{
-    type:String,
+  subRouteName: {
+    type: String,
   },
-  subRouteId:{
-    type:String,
+  subRouteId: {
+    type: String,
   },
   customerId: {
-    type:String,
+    type: String,
   },
   salesman: {
-    type:String,
+    type: String,
   },
   // Order details
   date: {
     type: Date,
     // required: true,
-    default: Date.now
+    default: Date.now,
   },
   paymentMode: {
     type: String,
     // required: true,
-    enum: ['Cash', 'Credit', 'Coupon'],
+    enum: ["Cash", "Credit", "Coupon"],
   },
   // Additional information
   notes: {
     type: String,
-    trim: true
+    trim: true,
   },
   termsAndCondition: {
     type: String,
-    trim: true
+    trim: true,
   },
   returnBottle: {
-    type:Number
+    type: Number,
+  },
+  serialNumber: {
+    type: String,
   },
   ratePerItem: {
     type: String,
@@ -71,16 +76,16 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     // required: true,
   },
-  balanceAmount : {
+  balanceAmount: {
     type: Number,
     // required: true,
   },
   depositAccountId: {
     type: String,
   },
-  stock: { type: [stockSchema], default: undefined }
-});
+  stock: { type: [stockSchema], default: undefined },
+})
 
-const Order = mongoose.model('Order', orderSchema);
+const Order = mongoose.model("Order", orderSchema)
 
-module.exports = Order;
+module.exports = Order

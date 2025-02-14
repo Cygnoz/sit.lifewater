@@ -6,6 +6,8 @@ const stockSchema = new Schema({
   itemId: { type: String },
   itemName: { type: String },
   quantity: { type: Number },
+  price: { type: Number },
+  serialNumber: { type: String },
   status: { type: String },
 }, { _id: false });
  
@@ -30,9 +32,7 @@ const customerSchema = new mongoose.Schema({
   ratePerBottle:{ type: Number },
   paymentMode: { type: String, enum: ['Cash','Credit','Coupon'] },
   resaleItemQuantity:{type:Number},
-  CouponBottle:{
-    type:Number
-  },
+  CouponBottle:{type:Number},
   location: {
     address: {
       type: String,

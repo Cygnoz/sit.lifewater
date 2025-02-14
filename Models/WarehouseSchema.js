@@ -7,6 +7,7 @@ const stockSchema = new Schema({
     quantity: { type: Number },
     costPrice:{type:Number},
     sellingPrice:{type:Number},
+    serialNumber: { type: String },
     amount:{type:Number},
     status: { type: String, default: undefined },
   }, { _id: false });
