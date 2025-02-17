@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const itemSchema = new mongoose.Schema({
   itemName: { type: String },
   sku: { type: String },
-
+  serialNumber: { type: String },
   costPrice: { type: Number },
   sellingPrice: { type: Number },
 
