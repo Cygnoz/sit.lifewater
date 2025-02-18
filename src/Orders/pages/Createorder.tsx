@@ -35,8 +35,8 @@ const CreateOrder: React.FC = () => {
 
   const navigate = useNavigate();
   const { loading, setLoading } = useContext(TableResponseContext)!;
-  const { request: getALLOrders } = useApi("get", 4001);
   const { request: deleteOrder } = useApi("delete", 4001);
+  const { request: getALLOrders } = useApi("get", 4001);
 
   const [orders, setOrders] = useState<OrderDetails[]>([]);
 

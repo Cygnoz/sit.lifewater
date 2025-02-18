@@ -1,14 +1,16 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import back from "../../assets/images/backbutton.svg";
 import { endpoints } from "../../services/ApiEndpoint";
 import useApi from "../../Hook/UseApi";
 
-export default function AddNewVendors() {
+export default function EditSupplier() {
   const navigate = useNavigate();
-  const { request: addSupplier } = useApi("post", 4001);
+  const { id } = useParams(); // Get supplier ID from URL params
+  const { request: getSupplier } = useApi("get", 4001);
+  const { request: editSupplier } = useApi("put", 4001);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -16,12 +18,14 @@ export default function AddNewVendors() {
     companyName: "",
     vendorWebsite: "",
     paymentTerms: "",
-    firstName: "",
-    lastName: "",
+    
+      firstName: "",
+      lastName: "",
+   
     mobileNumber: "",
     customerPhone: {
-      workPhone1: "",
-      workPhone2: "",
+        workPhone01: "",
+        workPhone02: "",
     },
     currency: "",
     state: "",
@@ -37,6 +41,32 @@ export default function AddNewVendors() {
 
   const [loading, setLoading] = useState(false);
 
+  // Fetch supplier details
+  useEffect(() => {
+    const fetchSupplier = async () => {
+      try {
+        const url = `${endpoints.GET_A_SUPPLIER}/${id}`;
+        const { response, error } = await getSupplier(url);
+
+        if (!error && response) {
+          setFormData(response.data?.data);
+          console.log("Supplier data:", response.data?.data);
+
+          
+        } else {
+          toast.error(error?.response?.data?.message || "Failed to fetch supplier.");
+        }
+      } catch (err) {
+        console.error("Error fetching supplier:", err);
+        toast.error("An unexpected error occurred.");
+      }
+    };
+
+    if (id) fetchSupplier();
+  }, [id]);
+
+ 
+
   const handleChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -45,7 +75,7 @@ export default function AddNewVendors() {
     }));
   };
 
-  const handleNestedChange = (e: any, parentKey: any) => {
+  const handleNestedChange = (e: any, parentKey: string) => {
     const { name, value } = e.target;
     setFormData((prevData: any) => ({
       ...prevData,
@@ -61,17 +91,17 @@ export default function AddNewVendors() {
     setLoading(true);
 
     try {
-      const url = endpoints.ADD_SUPPLIER;
-      const { response, error } = await addSupplier(url, formData);
+      const url = `${endpoints.EDIT_SUPPLIER}/${id}`;
+      const { response, error } = await editSupplier(url, formData);
 
       if (!error && response) {
-        toast.success("Supplier added successfully.");
+        toast.success("Supplier updated successfully.");
         setTimeout(() => navigate("/suppliers"), 1000);
       } else {
-        toast.error(error.response?.data?.message || "Failed to add supplier.");
+        toast.error(error?.response?.data?.message || "Failed to update supplier.");
       }
     } catch (err) {
-      console.error("Error adding supplier:", err);
+      console.error("Error updating supplier:", err);
       toast.error("An unexpected error occurred.");
     } finally {
       setLoading(false);
@@ -80,24 +110,18 @@ export default function AddNewVendors() {
 
   return (
     <div>
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar={false}
-      />
+      <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} />
       <div className="flex gap-3 items-center w-full max-w-8xl ms-1 p-3">
         <Link to="/suppliers">
           <img className="bg-gray-200 rounded-full p-2" src={back} alt="Back" />
         </Link>
-        <h2 className="text-[20px] text-[#303F58] font-bold">
-          Add New Supplier
-        </h2>
+        <h2 className="text-[20px] text-[#303F58] font-bold">Edit Supplier</h2>
       </div>
       <div className="w-full mx-auto px-10 py-5 bg-white rounded-lg shadow-md">
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <div>
+            <div>
                 <label className="block text-[#303F58] font-[14px] mb-2">
                   Customer Type
                 </label>
@@ -125,6 +149,7 @@ export default function AddNewVendors() {
                   className="w-full h-[36px] px-3 border rounded-md"
                 />
               </div>
+              
 
               <div>
                 <label>Company Name</label>
@@ -172,68 +197,70 @@ export default function AddNewVendors() {
                 />
               </div>
 
-              <div>
+             <div>
                 <h2 className="font-semibold">Primary Contact </h2>
+               
 
-                <div>
-                  <label>First Name</label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    placeholder="First Name"
-                    className="w-full h-[36px] px-3 border rounded-md"
-                  />
-                </div>
-                <div>
-                  <label>Last Name</label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    placeholder="Last Name"
-                    className="w-full h-[36px] px-3 border rounded-md"
-                  />
-                </div>
-
-                <div>
-                  <label>Mobile Number</label>
-                  <input
-                    type="text"
-                    name="mobileNumber"
-                    value={formData.mobileNumber}
-                    onChange={handleChange}
-                    placeholder="Mobile Number"
-                    className="w-full h-[36px] px-3 border rounded-md"
-                  />
-                </div>
+              <div>
+                <label>First Name</label>
+                <input
+                  type="text"
+                  name="firstName"
+                  value={formData.firstName || ""}
+                  onChange={handleChange}
+                  placeholder="First Name"
+                  className="w-full h-[36px] px-3 border rounded-md"
+                />
               </div>
+              <div>
+                <label>Last Name</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName || ""}
+                  onChange={handleChange}
+                  placeholder="Last Name"
+                  className="w-full h-[36px] px-3 border rounded-md"
+                />
+              </div>
+
+              <div>
+                <label>Mobile Number</label>
+                <input
+                  type="text"
+                  name="mobileNumber"
+                  value={formData.mobileNumber}
+                  onChange={handleChange}
+                  placeholder="Mobile Number"
+                  className="w-full h-[36px] px-3 border rounded-md"
+                />
+              </div>
+              </div> 
             </div>
             <div className="space-y-4">
               <div>
-                <label>Work phone 1</label>
-                <input
-                  type="text"
-                  name="workPhone1"
-                  value={formData.customerPhone.workPhone1}
-                  onChange={(e) => handleNestedChange(e, "customerPhone")}
-                  placeholder="Work Phone 1"
-                  className="w-full h-[36px] px-3 border rounded-md"
-                />
-              </div>
-              <div>
-                <label>Work phone 2</label>
-                <input
-                  type="text"
-                  name="workPhone2"
-                  value={formData.customerPhone.workPhone2}
-                  onChange={(e) => handleNestedChange(e, "customerPhone")}
-                  placeholder="Work Phone 2"
-                  className="w-full h-[36px] px-3 border rounded-md"
-                />
-              </div>
+  <label>Work phone 1</label>
+  <input
+    type="text"
+    name="workPhone01" // Match the API response key
+    value={formData.customerPhone?.workPhone01 || ""}
+    onChange={(e) => handleNestedChange(e, "customerPhone")}
+    placeholder="Work Phone 1"
+    className="w-full h-[36px] px-3 border rounded-md"
+  />
+</div>
+<div>
+  <label>Work phone 2</label>
+  <input
+    type="text"
+    name="workPhone02" // Match the API response key
+    value={formData.customerPhone?.workPhone02 || ""}
+    onChange={(e) => handleNestedChange(e, "customerPhone")}
+    placeholder="Work Phone 2"
+    className="w-full h-[36px] px-3 border rounded-md"
+  />
+</div>
+
               <div>
                 <label>Vendor Email</label>
                 <input

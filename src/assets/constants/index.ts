@@ -5,7 +5,7 @@ import staff from '../images/staff.svg'
 import supply from '../images/supply.svg';
 import customer from '../images/customer.svg';
 import sale from '../images/sale.svg';
-// import purchase from '../images/purchase.svg';
+import purchase from '../images/purchase.svg';
 // import reports from '../images/reports.svg';
 import accountant from '../images/payroll.svg';
 import vehicle from '../images/vehicle.svg';
@@ -155,19 +155,22 @@ const navlist = [
      
     ],
   },
-  // {
-  //   nav: "Purchase",
-  //   icon:purchase,
-  //   route: "/suppliers",
-  //   subhead: [
-  //     { headName: "Dashboard", subRoute: "/" },
-  //     { headName: "Supplier", subRoute: "/suppliers" },
-  //     { headName: "Purchase Order", subRoute: "/purchaseorder" },
-  //     { headName: "Purchase", subRoute: "/purchase" },
-  //     { headName: "Payment Reciept", subRoute: "/paymentreciept" },
+  {
+    nav: "Purchase",
+    icon:purchase,
+    route: "/suppliers",
+    subhead: [
+  
+      { headName: "Supplier", subRoute: "/suppliers" },
+      { headName: "Purchase Order", subRoute: "/purchaseorder" },
+      {
+        headName: "Bills",
+        subRoute: "/warstock",
+      },
+      { headName: "Payment Reciept", subRoute: "/paymentreciept" },
      
-  //   ],
-  // },
+    ],
+  },
   {
     nav: "Accounts",
     icon:accountant,

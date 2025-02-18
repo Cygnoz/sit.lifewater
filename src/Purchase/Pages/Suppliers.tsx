@@ -1,99 +1,99 @@
-import printer from '../../assets/images/printer.svg'
-import split from '../../assets/images/list-filter.svg'
-import search from "../../assets/images/search.svg"
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import plus from "../../assets/circle-plus.svg";
-import { Link } from 'react-router-dom';
-
+import PurchaseTable from "../../commoncomponents/Table/Table";
+import { endpoints } from "../../services/ApiEndpoint";
+import useApi from "../../Hook/UseApi";
 
 const Suppliers: React.FC = () => {
+  const navigate = useNavigate();
+  const columns = [
+    { id: "companyName", label: "Company Name", visible: true },
+    { id: "vendorEmail", label: "Email", visible: true },
+    { id: "mobileNumber", label: "Phone Number", visible: true },
+    { id: "placeOfSupply", label: "Place Of Supply", visible: true },
+  ];
+
+  const [supplier, setSupplier] = useState<any[]>([]);
+  const { request: getSupplier } = useApi("get", 4001);
+  const { request: deleteSupplier } = useApi("delete", 4001);
+
+  useEffect(() => {
+    fetchSuppliers();
+  }, []);
+
+  const fetchSuppliers = async () => {
+    try {
+      const url = `${endpoints.GET_ALL_SUPPLIERS}`;
+      const { response, error } = await getSupplier(url);
+
+      if (!error && response) {
+        setSupplier(response.data?.data);
+      } else {
+        console.error("Failed to fetch suppliers:", error);
+      }
+    } catch (err) {
+      console.error("Error fetching suppliers:", err);
+    }
+  };
+
+  // Handle edit button click
+  const handleEdit = (id: string) => {
+    navigate(`/editsupplier/${id}`);
+  };
+
+  // Handle delete supplier
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this supplier?")) {
+      try {
+        const url = `${endpoints.DELETE_SUPPLIER}/${id}`;
+        const { response, error } = await deleteSupplier(url);
+
+        if (!error && response) {
+          setSupplier((prev) => prev.filter((supplier) => supplier._id !== id));
+          console.log("Supplier deleted successfully");
+        } else {
+          console.error("Failed to delete supplier:", error);
+        }
+      } catch (err) {
+        console.error("Error deleting supplier:", err);
+      }
+    }
+  };
+
   return (
-<div>
-
-<div className="flex justify-between items-center p-2">
-        <div >
-          <h3 className="text-[#303F58] text-[20px]  font-bold">Suppliers</h3>
-          <p className='text-[#4B5C79] m' >Lorem ipsum dolor sit amet consectetur </p>           
+    <div>
+      {/* Header */}
+      <div className="flex justify-between items-center p-2">
+        <div>
+          <h3 className="text-[#303F58] text-[20px] font-bold">Suppliers</h3>
+          <p className="text-[#4B5C79]">Manage your supplier list efficiently</p>
         </div>
-        <div className="flex justify-between">
-          <Link to={'/addvendors'} >
-          <button
-                
-                className="flex justify-between items-center gap-2 bg-[#820000] text-white  px-5 py-2 rounded-md"
-              >
-                <img src={plus} alt="" />
-                <p>New Supplier </p>
-              </button>
-          
+        <div>
+          <Link to={"/addvendors"}>
+            <button className="flex items-center gap-2 bg-[#820000] text-white px-5 py-2 rounded-md">
+              <img src={plus} alt="Add" />
+              <p>New Supplier</p>
+            </button>
           </Link>
-        
-          
         </div>
-</div>
+      </div>
 
-    {/* Table Section */}
-    <div className="bg-white shadow-md rounded-lg p-6 mx-3 my-2">
-          <div className="flex justify-between items-center mb-4">
-              <div className="absolute ml-3 ">
-                <img src={search} alt="search" className="h-5 w-5" />
-              </div>
-              <input
-                className="pl-9 text-sm w-[100%] rounded-md text-start text-gray-800 h-10 p-2 border-0 focus:ring-1 focus:ring-gray-400"
-                style={{
-                  backgroundColor: "rgba(28, 28, 28, 0.04)",
-                  outline: "none",
-                  boxShadow: "none",
-                }}
-                placeholder="Search Debit Note"
-                 
-              />
-              <div className="flex w-[60%] justify-end">
-                <button className="flex border text-[14] w-[500] text-[#565148] border-[#565148] px-4 py-2 me-2 rounded-lg">
-                  <img className="mt-1 me-1" src={split} alt="" />
-                  Sort By
-                </button>
-                <button className="flex border text-[14] w-[500] text-[#565148] border-[#565148] px-4 py-2 rounded-lg">
-                  <img className="mt-1 me-1" src={printer} alt="" />
-                  Print
-                </button>
-              </div>
-            </div>
-            <table className="w-full text-left">
-              <thead className=' bg-[#fdf8f0]'>
-                <tr className="border-b">
-                <th className="p-2 text-[12px] text-center text-[#303F58] w-16"> <input type="checkbox" /></th>
-                  <th className="p-2 text-[12px] text-center text-[#303F58]">Company Name</th>
-                  <th className="p-2 text-[12px] text-center text-[#303F58]">Email</th>
-                  <th className="p-2 text-[12px] text-center text-[#303F58]">Phone Number</th>
-                  <th className="p-2 text-[12px] text-center text-[#303F58]">Location</th>
-
-               </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16"> <input type="checkbox" /></td>
-                  <td className="p-2 text-[14] text-center text-[#4B5C79]">John Doe</td>
-                  <td className="p-2 text-[14] text-center text-[#4B5C79]">abc@gmail.com</td>
-                  <td className="p-2 text-[14] text-center text-[#4B5C79]">1231231231</td>
-                  <td className="p-2 text-[14] text-center text-[#4B5C79]">abc 123,dubai</td>
-                 
-                </tr>
-
-                <tr className="border-b">
-                <td className="p-2 text-[14px] text-center text-[#4B5C79] w-16"> <input type="checkbox" /></td>
-                  <td className="p-2 text-[14] text-center text-[#4B5C79]">John Doe</td>
-                  <td className="p-2 text-[14] text-center text-[#4B5C79]">abc@gmail.com</td>
-                  <td className="p-2 text-[14] text-center text-[#4B5C79]">1231231231</td>
-                  <td className="p-2 text-[14] text-center text-[#4B5C79]">abc 123,dubai</td>
-                 
-                </tr>
-                
-              </tbody>
-            </table>
-</div>
-
-
-</div>
+      {/* Table Section */}
+      <div className="bg-white shadow-md rounded-lg p-6 mx-3 my-2">
+        {/* Reusable Table */}
+        <PurchaseTable
+          columns={columns}
+          data={supplier}
+          searchPlaceholder="Search Suppliers"
+          loading={false}
+          searchableFields={["companyName", "vendorEmail", "mobileNumber", "placeOfSupply"]}
+          onDeleteClick={handleDelete}
+          onEditClick={handleEdit} // Pass handleEdit function
+        />
+      </div>
+    </div>
   );
 };
- 
+
 export default Suppliers;

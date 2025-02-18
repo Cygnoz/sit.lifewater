@@ -19,7 +19,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelect }) => {
 
   return (
     <div className="w-[65px] h-[1200px] pb-[104px] bg-[#820000] flex-col justify-start items-center inline-flex">
-      <div className="h-[860px] flex-col mt-10 items-center gap-2 inline-flex">
+      <div className="h-[860px] flex-col mt-6 items-center gap-2 inline-flex">
         {navlist.map((item, index) => (
           <div
             key={index}

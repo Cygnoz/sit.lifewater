@@ -1,18 +1,28 @@
-import React from 'react';
-import printer from "../../assets/images/printer.svg";
-// import vector from "../../../assets/images/Vector.svg";
-// import trash from "../../../assets/images/trash.svg";
-import split from "../../assets/images/list-filter.svg";
+import React from "react";
+import { Link } from "react-router-dom";
+
 import plus from "../../assets/circle-plus.svg";
-import search from "../../assets/images/search.svg";
-import { Link,} from 'react-router-dom';
+import PurchaseTable from "../../commoncomponents/Table/Table";
 
 const CreatePaymentReceipts: React.FC = () => {
-    // const navigate = useNavigate();
+    const columns = [
+        { id: "date", label: "Date", visible: true },
+        { id: "paymentNumber", label: "Payment Number", visible: true },
+        { id: "vendor", label: "Vendor", visible: true },
+        { id: "referenceNumber", label: "Reference Number", visible: true },
+        { id: "amountPaid", label: "Amount Paid", visible: true },
+    ];
 
-    // const handleEdit = () => {
-    //     navigate('/edititem');
-    // };
+    const data = [
+        {
+            _id: "1",
+            date: "15 May 2023",
+            paymentNumber: "134267",
+            vendor: "John Doe",
+            referenceNumber: "lorem ipsum",
+            amountPaid: "60.00",
+        },
+    ];
 
     return (
         <div className="flex min-h-screen w-full">
@@ -32,68 +42,15 @@ const CreatePaymentReceipts: React.FC = () => {
                         </Link>
                     </div>
                 </div>
-
                 {/* Table Section */}
                 <div className="bg-white shadow-md rounded-lg p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div className="relative w-full max-w-[1100px]">
-                            <img src={search} alt="Search" className="absolute left-3 top-3 w-4 h-4" />
-                            <input
-                                className="pl-9 text-sm w-[100%] rounded-md text-start text-gray-800 h-10 p-2 border-0 focus:ring-1 focus:ring-gray-400"
-                                style={{
-                                    backgroundColor: "rgba(28, 28, 28, 0.04)",
-                                    outline: "none",
-                                    boxShadow: "none",
-                                }}
-                                placeholder="Search item"
-                            />
-                        </div>
-                        <div className="flex space-x-4">
-                            <button className="flex items-center border text-sm text-[#565148] font-medium border-[#565148] px-4 py-2 rounded-lg">
-                                <img className="mr-1" src={split} alt="Sort" />
-                                Sort By
-                            </button>
-                            <button className="flex items-center border text-sm text-[#565148] font-medium  border-[#565148] px-4 py-2 rounded-lg">
-                                <img className="mr-1" src={printer} alt="Print" />
-                                Print
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Table */}
-                    <div className="overflow-x-auto">
-    <table className="w-full text-center"> {/* Changed to text-center for the table */}
-        <thead className="bg-[#fdf8f0]">
-            <tr className="border-b">
-                {/* Checkbox Column */}
-                <th className="px-4 py-3">
-                    <input type="checkbox" />
-                </th>
-                {/* Table Headers */}
-                <th className="px-4 py-3 font-medium text-[#303F58]">Date</th>
-                <th className="px-4 py-3 font-medium text-[#303F58]">Payment Number</th>
-                <th className="px-4 py-3 font-medium text-[#303F58]">Vendor</th>
-                <th className="px-4 py-3 font-medium text-[#303F58]">Reference Number</th>
-                <th className="px-4 py-3 font-medium text-[#303F58]">Amount Paid</th>
-            </tr>
-        </thead>
-        <tbody>
-            {/* Example Row */}
-            <tr className="border-b">
-                <td className="px-4 py-3">
-                    <input type="checkbox" />
-                </td>
-                <td className="px-4 py-3 text-[#4B5C79]">15 May 2023</td>
-                <td className="px-4 py-3 text-[#4B5C79]">134267</td>
-                <td className="px-4 py-3 text-[#4B5C79]">John Doe</td>
-                <td className="px-4 py-3 text-[#4B5C79]">lorem ipsum</td>
-                <td className="px-4 py-3 text-[#4B5C79]">60.00</td>
-            </tr>
-            {/* Repeat for other rows */}
-        </tbody>
-    </table>
-</div>
-
+                    <PurchaseTable 
+                        columns={columns} 
+                        data={data} 
+                        searchPlaceholder="Search item"
+                        loading={false}
+                        searchableFields={["date", "paymentNumber", "vendor"]}
+                    />
                 </div>
             </div>
         </div>
@@ -101,4 +58,3 @@ const CreatePaymentReceipts: React.FC = () => {
 };
 
 export default CreatePaymentReceipts;
-

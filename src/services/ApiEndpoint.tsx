@@ -117,5 +117,13 @@ DELETE_RECEIPT:`deletereceipt`,
   VIEW_A_COUPON: `coupons`,
   EDIT_COUPON: `coupons`,
   DELETE_COUPON: `coupons`,
+
+  // Supplier
+  GET_ALL_SUPPLIERS: `supplier`,
+  ADD_SUPPLIER: `supplier`,
+  GET_A_SUPPLIER: `supplier`,
+  EDIT_SUPPLIER: `supplier`,
+  DELETE_SUPPLIER: `supplier`,
+
 }
 

@@ -35,6 +35,8 @@ function AccountantView() {
         // Extract the _doc field from each object
         const formattedData = response.data;
         setTrialBalance(formattedData);
+        console.log("Trial Balance Data:", formattedData);
+        
       }
     } catch (error) {
       console.error("Error fetching trial balance:", error);

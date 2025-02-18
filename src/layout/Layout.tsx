@@ -39,14 +39,13 @@ import EditMainRoute from '../Route/Pages/EditMainRoute';
 // import StockSold from '../Reportss/Pages/StockSold';
 // import TotalSale from '../Reportss/Pages/TotalSale';
 // import TrailBalance from '../Reportss/Pages/Trailbalance';
-// import AddNewVendors from '../Purchase/Components/AddNewVendors';
-// import AddPaymentReceipt from '../Purchase/Components/AddPaymentReceipt';
-// import AddPurchase from '../Purchase/Components/AddPurchase';
-// import AddPurchaseOrder from '../Purchase/Components/AddPurchaseOrder';
-// import CreatePaymentReceipts from '../Purchase/Pages/CreatePaymentReceipts';
-// import Purchase from '../Purchase/Pages/Purchase';
-// import PurchaseOrder from '../Purchase/Pages/PurchaseOrder';
-// import Suppliers from '../Purchase/Pages/Suppliers';
+import AddNewVendors from '../Purchase/Components/AddNewVendors';
+import AddPaymentReceipt from '../Purchase/Components/AddPaymentReceipt';
+import AddPurchase from '../Purchase/Components/AddPurchase';
+import AddPurchaseOrder from '../Purchase/Components/AddPurchaseOrder';
+import CreatePaymentReceipts from '../Purchase/Pages/CreatePaymentReceipts';
+import Purchase from '../Purchase/Pages/Purchase';
+import PurchaseOrder from '../Purchase/Pages/PurchaseOrder';
 // import AddCollection from '../Sales/Components/AddCollection';
 import AddCoupon from '../Sales/Components/AddCoupon';
 // import AddCreditNote from '../Sales/Components/AddCreditNote';
@@ -86,6 +85,10 @@ import ManualView from '../accountant/manualJournel/ManualView';
 import ChartOfAccountant from '../accountant/chartOfAccountant/ChartOfAccountant';
 import AccountantView from '../accountant/accountantView/AccountantView';
 import EditReceipt from '../Sales/Components/EditReceipt';
+import Suppliers from '../Purchase/Pages/Suppliers';
+import EditSupplier from '../Purchase/Components/EditSupplier';
+
+
 
 const App: React.FC = () => {
   const [selectedNav, setSelectedNav] = useState<string>(() => localStorage.getItem('selectedNav') || '');
@@ -215,14 +218,15 @@ const App: React.FC = () => {
 
               {/* PURCHASE */}
 
-              {/* <Route path='/addvendors' element={<AddNewVendors/>}/>
+              <Route path='/addvendors' element={<AddNewVendors/>}/>
               <Route path='/addpaymentreciept' element={<AddPaymentReceipt/>}/>
               <Route path='/addpurchase' element={<AddPurchase/>}/>
               <Route path='/addpurchaseorder' element={<AddPurchaseOrder/>}/>
               <Route path='/paymentreciept' element={<CreatePaymentReceipts/>}/>
               <Route path='/purchase' element={<Purchase/>}/>
               <Route path='/purchaseorder' element={<PurchaseOrder/>}/>
-              <Route path='/suppliers' element={<Suppliers/>}/> */}
+              <Route path='/suppliers' element={<Suppliers/>}/>
+              <Route path='/editsupplier/:id' element={<EditSupplier/>}/>
 
               {/* SALES */}
               {/* <Route path='/addcollection' element={<AddCollection/>}/> */}
