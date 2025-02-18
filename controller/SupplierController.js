@@ -28,9 +28,16 @@ exports.createSupplier = async (req, res) => {
       companyName: cleanedData.companyName,
       vendorWebsite: cleanedData.vendorWebsite,
       paymentTerms: cleanedData.paymentTerms,
-      primaryContact: cleanedData.primaryContact,
+    
+      firstName: cleanedData.primaryContact?.firstName,
+      lastName: cleanedData.primaryContact?.lastName,
+    
       mobileNumber: cleanedData.mobileNumber,
-      customerPhone: cleanedData.customerPhone,
+      customerPhone: {
+        workPhone01: cleanedData.customerPhone?.workPhone1,
+        workPhone02: cleanedData.customerPhone?.workPhone2,
+      },
+    
       currency: cleanedData.currency || "AED",
       state: cleanedData.state,
       city: cleanedData.city,
@@ -42,8 +49,9 @@ exports.createSupplier = async (req, res) => {
       area: cleanedData.area,
       contactNumber: cleanedData.contactNumber,
     });
-
+    
     const savedSupplier = await newSupplier.save();
+    
 
     // Create a new account for the supplier
     const newAccount = new Account({
