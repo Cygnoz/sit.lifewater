@@ -14,8 +14,8 @@ exports.createSupplier = async (req, res) => {
     }
 
     // Check if email already exists
-    if (cleanedData.email) {
-      const existingEmail = await Supplier.findOne({ email: cleanedData.email });
+    if (cleanedData.vendorEmail) {
+      const existingEmail = await Supplier.findOne({ vendorEmail: cleanedData.vendorEmail });
       if (existingEmail) {      
         return res.status(400).json({ message: 'A supplier with this email already exists.' });
       }
