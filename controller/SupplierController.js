@@ -12,6 +12,9 @@ exports.createSupplier = async (req, res) => {
     if (!cleanedData.fullName) {
       return res.status(400).json({ message: 'Supplier Name is required.' });
     }
+    if (!cleanedData.companyName) {
+      return res.status(400).json({ message: 'companyName Name is required.' });
+    }
 
     // Check if email already exists
     if (cleanedData.vendorEmail) {
@@ -29,8 +32,8 @@ exports.createSupplier = async (req, res) => {
       vendorWebsite: cleanedData.vendorWebsite,
       paymentTerms: cleanedData.paymentTerms,
     
-      firstName: cleanedData.primaryContact?.firstName,
-      lastName: cleanedData.primaryContact?.lastName,
+      firstName: cleanedData.firstName,
+      lastName: cleanedData.lastName,
     
       mobileNumber: cleanedData.mobileNumber,
       customerPhone: {
@@ -38,7 +41,7 @@ exports.createSupplier = async (req, res) => {
         workPhone02: cleanedData.customerPhone?.workPhone2,
       },
     
-      currency: cleanedData.currency || "AED",
+      currency:"AED",
       state: cleanedData.state,
       city: cleanedData.city,
       vendorEmail: cleanedData.vendorEmail,
