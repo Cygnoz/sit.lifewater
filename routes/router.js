@@ -7,6 +7,7 @@ const wStockController = require('../controller/WstockController');
 const orderController = require('../controller/OrderController');
 const unloadController = require('../controller/UnloadController');
 const ReceiptController = require('../controller/ReceiptController');
+const supplierController = require('../controller/SupplierController');
 
 const { verifyToken } = require('../middleware/auth');
 
@@ -52,6 +53,13 @@ router.get('/receipts/:receiptId', verifyToken,ReceiptController.getOneReceipt);
 router.get('/receipts/salesman/:salesmanId', ReceiptController.getReceiptsBySalesmanId);
 router.put('/update-receipt/:receiptId',ReceiptController.updateReceipt);
 router.delete('/deletereceipt/:receiptId',ReceiptController.deleteReceipt);
+
+
+
+//supplier
+router.post('/supplier',  supplierController.createSupplier);
+router.get('/supplier',  supplierController.getAllSuppliers);
+router.get("/supplier/:id", supplierController.getSupplierById);
 
  
 //Unloading
