@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 
 const SupplierSchema = new mongoose.Schema({
-
+  customerType: { type: String, enum: ['Individual','Business'] },
   companyName: {
     type: String,
   },
