@@ -47,7 +47,7 @@ exports.createSupplier = async (req, res) => {
 
     // Create a new account for the supplier
     const newAccount = new Account({
-      accountName: savedSupplier.fullName,
+      accountName: savedSupplier.companyName,
       accountId: savedSupplier._id,
       accountSubhead: "Sundry Creditors",
       accountHead: "Liabilities",
@@ -91,6 +91,50 @@ exports.getAllSuppliers = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching suppliers:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+// Update supplier by ID
+exports.updateSupplier = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const cleanedData = cleanCustomerData(req.body);
+
+    const updatedSupplier = await Supplier.findByIdAndUpdate(id, cleanedData, { new: true });
+
+    if (!updatedSupplier) {
+      return res.status(404).json({ message: "Supplier not found." });
+    }
+
+    return res.status(200).json({
+      message: "Supplier updated successfully!",
+      data: updatedSupplier
+    });
+  } catch (error) {
+    console.error("Error updating supplier:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+
+
+exports.deleteSupplier = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedSupplier = await Supplier.findByIdAndDelete(id);
+    if (!deletedSupplier) {
+      return res.status(404).json({ message: "Supplier not found." });
+    }
+
+    // Optionally, delete related accounts and trial balance entries
+    await Account.deleteOne({ accountId: id });
+    await TrialBalance.deleteMany({ operationId: id });
+
+    return res.status(200).json({ message: "Supplier deleted successfully!" });
+  } catch (error) {
+    console.error("Error deleting supplier:", error);
     return res.status(500).json({ message: "Internal server error." });
   }
 };

@@ -57,9 +57,11 @@ router.delete('/deletereceipt/:receiptId',ReceiptController.deleteReceipt);
 
 
 //supplier
-router.post('/supplier',  supplierController.createSupplier);
+router.post('/supplier', supplierController.createSupplier);
 router.get('/supplier',  supplierController.getAllSuppliers);
 router.get("/supplier/:id", supplierController.getSupplierById);
+router.put("/supplier/:id", supplierController.updateSupplier);
+router.delete("/supplier/:id", supplierController.deleteSupplier);
 
  
 //Unloading

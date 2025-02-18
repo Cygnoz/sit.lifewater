@@ -5,6 +5,9 @@ const SupplierSchema = new mongoose.Schema({
   companyName: {
     type: String,
   },
+  fullName: {
+    type: String,
+  },
   vendorWebsite: {
     type: String,
   },
