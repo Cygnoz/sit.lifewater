@@ -84,10 +84,14 @@ export const endpoints = {
 
 
 
-  //customers
-  GET_ALL_CUSTOMERS: `customer`,
-  DELETE_A_CUSTOMER: `customer`,
-  GET_A_CUSTOMER: `customer`,
+   //customers
+   GET_ALL_CUSTOMERS: `customer`,
+   DELETE_A_CUSTOMER: `customer`,
+   GET_A_CUSTOMER: `customer`,
+   ADD_CUSTOMER: `addcustomer`,
+   UPDATE_CUSTOMER: `editcustomer`,
+   GET_CUSTOMER_BY_SUBROUTE: `customerbysubroute`,
+   GET_ALL_COUPON_CUSTOMER: `getcouponcustomers`,
 
   // ACCOUNTS
   ADD_NEW_ACCOUNT: `addaccounts`,

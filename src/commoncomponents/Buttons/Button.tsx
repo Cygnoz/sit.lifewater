@@ -23,7 +23,7 @@ const buttonVariants = cva("flex text-center items-center", {
         "bg-[#F6F6F6] rounded-md gap-2 border border-[#820000] text-[fourthiary]",
     },
     size: {
-      sm: " py-1 px-[1rem] rounded-[8px]",
+      sm: " py-2 px-[1rem] rounded-[8px]",
       md: "px-[0.625rem] py-3 rounded-lg",
       lg: "px-4 py-3 rounded-lg ",
       xl: "px-4 py-3 rounded-lg",

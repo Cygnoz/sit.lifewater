@@ -1,31 +1,53 @@
 import React, { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import back from "../../assets/images/backbutton.svg"
-import upload from "../../assets/images/upload image.svg"
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-import { addCustomerAPI } from "../../services/CustomerAPI/Customer"
-import { getSubRoutesAPI } from "../../services/RouteAPI/subRouteAPI"
+import { endpoints } from "../../services/ApiEndpoint"
+import useApi from "../../Hook/UseApi"
+import Button from "../../commoncomponents/Buttons/Button"
 
-interface CustomerFormData {
-  fullName: string
-  customerType: string
-  mobileNo: string
-  addressLine1: string
-  addressLine2: string
-  whatsappNumber: string
-  city: string
-  flatNumber: string
-  numberOfBottles: number
-  ratePerBottle: string
-  depositAmount: string
-  paymentMode: string
-  zipPostalCode: string
-  street: string
-  mainRoute: string
-  subRoute: string
-  logo:string
+
+interface FormData {
+  customerType: "Business" | "Individual";
+  companyName: string;
+  fullName: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  street: string;
+  zipPostalCode: string;
+  flatNumber: string;
+  email: string;
+  numberOfBottles: string;
+  ratePerBottle: string;
+  paymentMode: "Cash" | "Credit" | "Coupon";
+  mobileNo: string;
+  whatsappNumber: string;
+  depositAmount: number;
+  subRoute: string;
+  mainRoute: string;
+  location: {
+    address: string;
+    coordinates: {
+      latitude: number | null;
+      longitude: number | null;
+    };
+  };
 }
+
+interface Route {
+  _id: string;
+  subRoute: string;
+  mainRouteId: string;
+  mainRouteName: string;
+  subRouteName: string;
+}
+
+interface FormErrors {
+  [key: string]: string;
+}
+
 
 interface Route {
   _id: string;
@@ -34,326 +56,574 @@ interface Route {
 }
 
 export default function AddCustomer() {
-  const [formData, setFormData] = useState<CustomerFormData>({
-    customerType: "Business",
+  const [formData, setFormData] = useState<FormData>({
+    customerType: "Individual",
+    companyName: "",
     fullName: "",
-    mobileNo: "",
     addressLine1: "",
     addressLine2: "",
-    whatsappNumber: "",
     city: "",
     street: "",
-    flatNumber: "",
-    numberOfBottles: 0,
-    ratePerBottle: "",
-    depositAmount: "",
-    paymentMode: "Cash",
     zipPostalCode: "",
+    flatNumber: "",
+    email: "",
+    numberOfBottles: "",
+    ratePerBottle: "",
+    paymentMode: "Cash",
+    mobileNo: "",
+    whatsappNumber: "",
+    depositAmount: 0,
     mainRoute: "",
     subRoute: "",
-    logo:""
-  })
-
-  const [logo, setLogo] = useState("")
-  const [whatsappSameAsMobile, setWhatsappSameAsMobile] = useState(false)
+    location: {
+      address: "",
+      coordinates: {
+        latitude: null,
+        longitude: null,
+      },
+    },
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isGettingLocation, setIsGettingLocation] = useState(true);
+  const [selectedMainRoute, setSelectedMainRoute] = useState<string>("");
+  const [selectedSubRoute, setSelectedSubRoute] = useState<string>("");
+  const [filteredSubRoutes, setFilteredSubRoutes] = useState<Route[]>([]);
   const [routesList, setRouteList] = useState<Route[]>([]);
   const [mainRouteList, setMainRouteList] = useState<string[]>([]);
-  const [selectedMainRoute, setSelectedMainRoute] = useState<string>('');
-  const [selectedSubRoute, setSelectedSubRoute] = useState<string>('');
-  const [filteredSubRoutes, setFilteredSubRoutes] = useState<Route[]>([]);
+  const [isLocationSaved, setIsLocationSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { request: addCustomer } = useApi("post", 4000);
+  const { request: getSubRoute } = useApi("get", 4000);
 
-  useEffect(() => {
-    const fetchSubRoutes = async () => {
-      try {
-        const response = await getSubRoutesAPI();
-        setRouteList(response);
-        const uniqueMainRoutes: string[] = Array.from(new Set(response.map((route: Route) => route.mainRoute)));
-        setMainRouteList(uniqueMainRoutes);
-      } catch (error) {
-        console.error('Error fetching sub-route data:', error);
-      }
-    };
-  
-    fetchSubRoutes();
-  }, []);
-
-  const handleMainRouteChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const mainRoute = event.target.value;
-    setSelectedMainRoute(mainRoute);
-    setFilteredSubRoutes(routesList.filter(route => route.mainRoute === mainRoute));
-    setSelectedSubRoute('');
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    if (name === "location") {
+      setFormData((prevData) => ({
+        ...prevData,
+        location: {
+          ...prevData.location,
+          address: value,
+        },
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
-   
-  const handleSubRouteChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  console.log("location saved:", isLocationSaved);
+  console.log("location getting:", isGettingLocation);
+
+
+  const handleMainRouteChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const mainRouteName = event.target.value;
+    setSelectedMainRoute(mainRouteName);
+
+    // Filter subroutes based on the selected main route
+    const filtered = routesList.filter(
+      (route) => route.mainRouteName === mainRouteName
+    );
+
+    setFilteredSubRoutes(filtered);
+
+    // Reset the selected subroute when the main route changes
+    setSelectedSubRoute("");
+  };
+
+  const handleSubRouteChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    // Update the selected subroute state
     setSelectedSubRoute(event.target.value);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
-  }
+  useEffect(() => {
+    // Fetch the routes list
+    const fetchSubRoutes = async () => {
+      try {
+        const url = `${endpoints.GET_ALL_SUBROUTE}`;
+        const { response, error } = await getSubRoute(url);
 
-  const handleWhatsappCheckbox = () => {
-    setWhatsappSameAsMobile(!whatsappSameAsMobile)
-    setFormData((prev) => ({
-      ...prev,
-      whatsappNumber: !whatsappSameAsMobile ? prev.mobileNo : "",
-    }))
-  }
+        if (error) {
+          console.error("Error fetching sub-route data:", error);
+          toast.error("Failed to fetch route data. Please try again.");
+          return;
+        }
 
-  const clearForm = () => {
-    setFormData({
-      customerType: "Business",
-      fullName: "",
-      mobileNo: "",
-      addressLine1: "",
-      addressLine2: "",
-      whatsappNumber: "",
-      city: "",
-      flatNumber: "",
-      numberOfBottles: 0,
-      ratePerBottle: "",
-      depositAmount: "",
-      paymentMode: "Cash",
-      zipPostalCode: "",
-      street: "",
-      mainRoute: "",
-      subRoute: "",
-      logo:""
-    })
-    setLogo("")
-    setWhatsappSameAsMobile(false)
-    setSelectedMainRoute('')
-    setSelectedSubRoute('')
-  }
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {    
-    const file = event.target.files?.[0];    
-    if (file) {      
-      const reader = new FileReader();       
-      reader.onloadend = () => {        
-        setLogo(reader.result as string); // Cast to string
-      }; 
-      reader.readAsDataURL(file); // Read the file as a Data URL (Base64)
+        const routes = Array.isArray(response) ? response : response?.data;
+
+        if (routes && Array.isArray(routes)) {
+          // Set the routes list for filtering
+          setRouteList(routes);
+
+          // Extract unique main routes
+          const uniqueMainRoutes = Array.from(
+            new Set(routes.map((route: Route) => route.mainRouteName))
+          );
+          setMainRouteList(uniqueMainRoutes as string[]);
+        }
+      } catch (err) {
+        console.error("Error fetching sub-route data:", err);
+        toast.error("An unexpected error occurred. Please try again.");
+      }
+    };
+
+    fetchSubRoutes();
+  }, []);
+
+  const getCurrentLocation = (): Promise<GeolocationCoordinates> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Geolocation is not supported by your browser"));
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve(position.coords),
+        (error) => reject(error)
+      );
+    });
+  };
+
+  const fetchLocationAutomatically = async () => {
+    try {
+      setIsGettingLocation(true);
+      const coords = await getCurrentLocation();
+      setFormData((prevData) => ({
+        ...prevData,
+        location: {
+          address: "", // Update if you have a way to resolve the address
+          coordinates: {
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+          },
+        },
+      }));
+      setIsLocationSaved(true);
+      // toast.success("Location fetched successfully");
+    } catch (error) {
+      // console.error("Error fetching location:", error);
+      // toast.error("Error fetching location. Please try again.");
+    } finally {
+      setIsGettingLocation(false);
     }
   };
+
+  useEffect(() => {
+    fetchLocationAutomatically();
+  }, []); // Empty dependency array ensures it runs only on component mount
+
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (formData.customerType === "Business" && !formData.companyName) {
+      newErrors.companyName = "Company name is required for business customers";
+    }
+    if (!formData.fullName) newErrors.fullName = "Full name is required";
+    if (!formData.addressLine1) newErrors.addressLine1 = "addressLine1 is required";
+    if (
+      isNaN(Number(formData.numberOfBottles)) ||
+      Number(formData.numberOfBottles) <= 0
+    ) {
+      newErrors.numberOfBottles = "Number of bottles must be a positive number";
+    }
+    if (
+      isNaN(Number(formData.ratePerBottle)) ||
+      Number(formData.ratePerBottle) <= 0
+    ) {
+      newErrors.ratePerBottle = "Rate must be a positive number";
+    }
+    if (
+      isNaN(Number(formData.depositAmount)) ||
+      Number(formData.depositAmount) < 0
+    ) {
+      newErrors.depositAmount = "Deposit amount must be a non-negative number";
+    }
+    if (!selectedMainRoute) newErrors.mainRoute = "Main route is required";
+    if (!selectedSubRoute) newErrors.subRoute = "Sub route is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  console.log(loading);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-  
-    // Prepare customer data
-    const customerData = {
-      ...formData,
-      mainRoute: selectedMainRoute,
-      subRoute: selectedSubRoute,
-      logo: logo, // Assuming logo is a File object or can be converted into one
-    };
-  
-    console.log(customerData);
-  
-    // Create FormData for handling file uploads
-    const formDataWithLogo = new FormData();
-    if (logo) {
-      formDataWithLogo.append("logo", logo); // Add the file
+
+    // Step 1: Validate the form
+    const isValid = validateForm(); // Ensure you have the validateForm function implemented
+    if (!isValid) {
+      // toast.error("Please fix the form errors.");
+      return; // Stop the submission if validation fails
     }
-  
-    // Add other fields to FormData
-    Object.entries(customerData).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== "") {
-        formDataWithLogo.append(key, value.toString());
-      }
-    });
-  
+
+    setLoading(true); // Show loading spinner or message
+
     try {
-      // Send formDataWithLogo if there’s a file upload
-      const response = await addCustomerAPI(formDataWithLogo);
-      handleApiResponse(response); // Handle successful response
-    } catch (error: any) {
-      handleApiError(error); // Handle API error
+      // Step 2: Prepare the payload
+      const payload = {
+        ...formData,
+        mainRoute: selectedMainRoute, // Ensure you're adding the selected main route
+        subRoute: selectedSubRoute, // And the selected subroute
+      };
+      console.log("Payload:", payload);
+
+      // Step 3: Call the API to add the customer
+      const url = `${endpoints.ADD_CUSTOMER}`;
+      const { response, error } = await addCustomer(url, payload); // Assuming addCustomer is correctly hooked up
+      console.log(response);
+
+      if (error) {
+        // Step 4: Handle API errors
+        toast.error(error.response?.data?.message || error.message || "Failed to save");
+
+      } else {
+        // Step 5: Success - Show success message and navigate
+        toast.success("Customer added successfully.");
+        setTimeout(() => {
+          navigate("/customer"); // Navigate after success
+        }, 2000);
+      }
+    } catch (err: any) {
+      // Handle unexpected errors
+      console.log("Error adding customer:", err);
+      // toast.error(err.response?.data?.message || err.message || "Failed to save");
+    } finally {
+      setLoading(false); // Hide loading spinner
     }
   };
-  
-
-  const handleApiResponse = (response: any) => {
-    console.log("Response:", response)
-    if (response.status === 201) {
-      toast.success(response.message || "Customer added successfully")
-      clearForm()
-    } else {
-      toast.error(response.message || "Failed to add customer. Please try again.")
-    }
-  }
-
-  const handleApiError = (error: any) => {
-    console.error("Error submitting the form:", error)
-    toast.error(error.message || "Failed to add customer. Please try again.")
-  }
 
   return (
-    <div>
-      <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop={true} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored" />
-      <div className="flex gap-3 items-center w-full max-w-8xl mb-1 ms-1 p-3">
-        <Link to="/customer">
-          <div className="icon-placeholder">
-            <img className="bg-gray-200 rounded-full p-2" src={back} alt="Back" />
-          </div>
-        </Link>
-        <h2 className="text-[20px] text-[#303F58] font-bold">Create New Customer</h2>
-      </div>
+    <div className="m-3 bg-[#F5F6FA]">
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
 
-      <div className="w-full mx-auto px-10 py-5 bg-white rounded-lg shadow-md">
-        <form >
-          <div className="flex gap-6">
-            <div className="flex flex-col items-center border-2 border-dashed border-gray-300 rounded-lg p-4 w-52">
-              <label className="cursor-pointer">
-                <div className="flex flex-col items-center bg-orange-50 rounded-lg py-4 px-6">
-                  {logo ? (
-                    <img src={logo} alt="Uploaded Logo" className="object-cover w-20 h-20 rounded-md" />
-                  ) : (
-                    <img src={upload} alt="" />
-                  )}
-                  <span className="text-gray-700 font-semibold text-base">{logo ? "Change Image" : "Add Image"}</span>
-                </div>
-                <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+      <div className="p-6 bg-[#FFFFFF] shadow-md rounded-lg">
+        <div className="flex gap-5  mb-4">
+          <Link to="/customer">
+            <button className="bg-gray-200 rounded-full p-3 flex items-center justify-center">
+              <img src={back} alt="Back" className="w-full h-full" />
+
+            </button>
+          </Link>
+          <h2 className="text-2xl mt-1 font-bold ">
+            New Customer
+          </h2>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mt-3 mb-3">
+              Customer Type
+            </label>
+            <div className="flex space-x-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="customerType"
+                  value="Individual"
+                  checked={formData.customerType === "Individual"}
+                  onChange={handleInputChange}
+                  className="mr-2"
+                  required
+                />
+                Individual
               </label>
-              <h2 className="text-gray-800 font-bold mt-2">Upload Company Logo</h2>
-              <p className="text-gray-500 text-sm">Support: JPG, PNG</p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 w-full">
-              <div className="col-span-2">
-                <h3 className="text-gray-800 font-bold mb-2">Basic Details</h3>
-              </div>
-
-              <div className="col-span-1">
-                <label className="block text-[#303F58] font-medium text-sm mb-1">Full Name</label>
-                <input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange} className="w-full h-[36px] px-3 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter Full Name" />
-              </div>
-
-              <div className="col-span-1">
-                <label className="block text-[#303F58] font-medium text-sm mb-1">Customer Type</label>
-                <select name="customerType" value={formData.customerType} onChange={handleInputChange} className="w-full h-[36px] px-3 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="">Select customer type</option>
-                  <option value="Business">Business</option>
-                  <option value="Individual">Individual</option>
-                  <option value="Villa">Villa</option>
-                  <option value="Flat">Flat</option>
-                </select>
-              </div>
-
-              <div className="col-span-1">
-                <label className="block text-[#303F58] font-medium text-sm mb-1">Mobile Number</label>
-                <input type="tel" name="mobileNo" value={formData.mobileNo} onChange={handleInputChange} className="w-full h-[36px] px-3 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter mobile" maxLength={14} />
-              </div>
-
-              <div className="col-span-1">
-                <label className="block text-[#303F58] font-medium text-sm mb-1">
-                  WhatsApp Number
-                  <input type="checkbox" checked={whatsappSameAsMobile} onChange={handleWhatsappCheckbox} className="ml-2" />
-                  <span className="ml-1 text-gray-500 text-xs">Same as Mobile Number</span>
-                </label>
-                <input type="tel" name="whatsappNumber" value={formData.whatsappNumber} onChange={handleInputChange} className="w-full h-[36px] px-3 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter WhatsApp number" maxLength={14} disabled={whatsappSameAsMobile} />
-              </div>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="customerType"
+                  value="Business"
+                  checked={formData.customerType === "Business"}
+                  onChange={handleInputChange}
+                  className="mr-2"
+                  required
+                />
+                Business
+              </label>
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 mt-4">
-            <h3 className="text-gray-800 font-bold mb-2">Address</h3>
-          </div>
+          {formData.customerType === "Business" && (
+            <div>
+              <label className="block text-[#303F58] font-[14px] mb-2">
+                Company Name
+              </label>
+              <input
+                type="text"
+                name="companyName"
+                value={formData.companyName}
+                onChange={handleInputChange}
+                className="w-full h-[36px] px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter Company Name"
+                required
+              />
+              {errors.companyName && (
+                <p className="text-red-500 text-sm">{errors.companyName}</p>
+              )}
+            </div>
+          )}
 
-          <div className="mb-6">
-            <div className="flex flex-col md:flex-row md:space-x-4">
-              <div className="flex-1 mb-4 md:mb-0">
-                <label htmlFor="address1" className="block text-sm font-medium text-gray-700 mb-1">
-                  Address 1
-                </label>
-                <input type="text" name="addressLine1" value={formData.addressLine1} onChange={handleInputChange} placeholder="Enter address" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-              </div>
-              <div className="flex-1">
-                <label htmlFor="address2" className="block text-sm font-medium text-gray-700 mb-1">
-                  Address 2
-                </label>
-                <input type="text" name="addressLine2" value={formData.addressLine2} onChange={handleInputChange} placeholder="Enter address 2" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-              </div>
-            </div>
-          </div>
+          <div className="grid grid-cols-2 gap-2">
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
-                Street
-              </label>
-              <input type="text" name="street" value={formData.street} onChange={handleInputChange} placeholder="Enter street" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-            </div>
-            <div>
-              <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                City
-              </label>
-              <input type="text" name="city" value={formData.city} onChange={handleInputChange} placeholder="Enter city" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-            </div>
-            <div>
-              <label htmlFor="flatNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                Flat number
-              </label>
-              <input type="text" name="flatNumber" value={formData.flatNumber} onChange={handleInputChange} placeholder="Enter flat number" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-            </div>
-            <div>
-              <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-1">
-                Zip Postal Code
-              </label>
-              <input type="text" name="zipPostalCode" value={formData.zipPostalCode} onChange={handleInputChange} placeholder="Enter zip code" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-4 mt-4">
-            <h3 className="text-gray-800 font-bold mb-2">Additional Details</h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            <div>
-              <label htmlFor="bottles" className="block text-sm font-medium text-gray-700 mb-1">
-                Number of bottles
-              </label>
-              <input type="text" name="numberOfBottles" value={formData.numberOfBottles} onChange={handleInputChange} placeholder="Enter number of bottles" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+              <label className="block text-gray-700">Full Name</label>
+              <input
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md"
+                placeholder="Enter Full Name"
+              />
+              {errors.fullName && (
+                <p className="text-red-500 text-sm">{errors.fullName}</p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="rate" className="block text-sm font-medium text-gray-700 mb-1">
-                Rate per bottle
-              </label>
-              <input type="text" name="ratePerBottle" value={formData.ratePerBottle} onChange={handleInputChange} placeholder="Enter rate" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-            </div>
+              <label className="block text-gray-700">Email</label>
+              <input
+                type="text"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md"
+                placeholder="Enter email"
+              />
 
-            <div>
-              <label htmlFor="deposit" className="block text-sm font-medium text-gray-700 mb-1">
-                Deposit amount
-              </label>
-              <input type="text" name="depositAmount" value={formData.depositAmount} onChange={handleInputChange} placeholder="Enter deposit amount" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Payment mode</label>
-              <div className="flex space-x-4 mt-1">
-                <label className="inline-flex items-center">
-                  <input type="radio" name="paymentMode" value="Cash" checked={formData.paymentMode === "Cash"} onChange={handleInputChange} className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" defaultChecked />
-                  <span className="ml-2 text-sm text-gray-700">Cash</span>
-                </label>
-                <label className="inline-flex items-center">
-                  <input type="radio" name="paymentMode" value="Credit" checked={formData.paymentMode === "Credit"} onChange={handleInputChange} className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
-                  <span className="ml-2 text-sm text-gray-700">Credit</span>
-                </label>
-                <label className="inline-flex items-center">
-                  <input type="radio" name="paymentMode" value="Coupon" checked={formData.paymentMode === "Coupon"} onChange={handleInputChange} className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
-                  <span className="ml-2 text-sm text-gray-700">Coupon</span>
-                </label>
-              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2">
+
+
+            <div>
+              <label className="block text-gray-700">AddressLine 1</label>
+              <input
+                type="text"
+                name="addressLine1"
+                value={formData.addressLine1}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md"
+                placeholder="Enter address 1"
+              />
+              {errors.addressLine1 && (
+                <p className="text-red-500 text-sm">{errors.addressLine1}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-gray-700">AddressLine 2</label>
+              <input
+                type="text"
+                name="addressLine2"
+                value={formData.addressLine2}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md"
+                placeholder="Enter address 2"
+              />
+              {/* {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )} */}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+
+
+            <div>
+              <label className="block text-gray-700">City</label>
+              <input
+                type="text"
+                name="city"
+                value={formData.city}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md"
+                placeholder="Enter city"
+              />
+              {/* {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )} */}
+            </div>
+            <div>
+              <label className="block text-gray-700">Street</label>
+              <input
+                type="text"
+                name="street"
+                value={formData.street}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md"
+                placeholder="Enter street"
+              />
+              {/* {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )} */}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+
+
+            <div>
+              <label className="block text-gray-700">Zip Postal Code</label>
+              <input
+                type="number"
+                name="zipPostalCode"
+                value={formData.zipPostalCode}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md"
+                placeholder="Enter zipcode"
+                inputMode="numeric"
+                pattern="[0-9]*"
+              />
+              {/* {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )} */}
+            </div>
+            <div>
+              <label className="block text-gray-700">Flat Number</label>
+              <input
+                type="text"
+                name="flatNumber"
+                value={formData.flatNumber}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md "
+                placeholder="Enter flat number"
+              />
+              {/* {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )} */}
+            </div>
+          </div>
+
+          <div className="flex space-x-2">
+            <div className="w-1/2">
+              <label className="block text-gray-700">Number of Bottles</label>
+              <input
+                type="number"
+                name="numberOfBottles"
+                value={formData.numberOfBottles}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md"
+                placeholder="Number of Bottles"
+                inputMode="numeric"
+              />
+              {errors.numberOfBottles && (
+                <p className="text-red-500 text-sm">{errors.numberOfBottles}</p>
+              )}
+            </div>
+            <div className="w-1/2">
+              <label className="block text-gray-700">Rate per bottle</label>
+              <input
+                type="number"
+                name="ratePerBottle"
+                value={formData.ratePerBottle}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md"
+                placeholder="Rate per bottle"
+                inputMode="numeric"
+              />
+              {errors.ratePerBottle && (
+                <p className="text-red-500 text-sm">{errors.ratePerBottle}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+
+            <div>
+              <label className="block text-gray-700">Payment Mode</label>
+              <select
+                name="paymentMode"
+                value={formData.paymentMode}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md"
+              >
+                <option value="Cash">Cash</option>
+                <option value="Credit">Credit</option>
+                <option value="Coupon">Coupon</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-700">Mobile Number</label>
+              <input
+                type="number"
+                name="mobileNo"
+                value={formData.mobileNo}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md"
+                placeholder="Enter Mobile Number"
+                inputMode="numeric"
+              />
+              {errors.mobileNumber && (
+                <p className="text-red-500 text-sm">{errors.mobileNumber}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+
+
+            <div>
+              <label className="block text-gray-700">WhatsApp Number</label>
+              <input
+                type="number"
+                name="whatsappNumber"
+                value={formData.whatsappNumber}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md"
+                placeholder="Enter WhatsApp Number"
+                inputMode="numeric"
+              />
+              {errors.whatsappNumber && (
+                <p className="text-red-500 text-sm">{errors.whatsappNumber}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-gray-700">Deposit Amount</label>
+              <input
+                type="number"
+                name="depositAmount"
+                value={formData.depositAmount}
+                onChange={handleInputChange}
+                className="w-full p-2 mt-1 border rounded-md"
+                placeholder="Deposit Amount"
+                min="0"
+              />
+              {errors.depositAmount && (
+                <p className="text-red-500 text-sm">{errors.depositAmount}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+
+
             <div className="space-y-1">
-              <label htmlFor="main-route" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="main-route"
+                className="text-sm font-medium text-gray-700"
+              >
                 Main Route
               </label>
               <select
@@ -363,16 +633,22 @@ export default function AddCustomer() {
                 onChange={handleMainRouteChange}
               >
                 <option value="">Select Main Route</option>
-                {mainRouteList.map((mainRoute) => (
-                  <option key={mainRoute} value={mainRoute}>
-                    {mainRoute}
+                {mainRouteList.map((mainRouteName) => (
+                  <option key={mainRouteName} value={mainRouteName}>
+                    {mainRouteName}
                   </option>
                 ))}
               </select>
+              {errors.mainRouteName && (
+                <p className="text-red-500 text-sm">{errors.mainRouteName}</p>
+              )}
             </div>
-   
+
             <div className="space-y-1">
-              <label htmlFor="sub-route" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="sub-route"
+                className="text-sm font-medium text-gray-700"
+              >
                 Sub Route
               </label>
               <select
@@ -384,21 +660,55 @@ export default function AddCustomer() {
               >
                 <option value="">Select Sub Route</option>
                 {filteredSubRoutes.map((route) => (
-                  <option key={route._id} value={route.subRoute}>
-                    {route.subRoute}
+                  <option key={route._id} value={route.subRouteName}>
+                    {route.subRouteName}
                   </option>
                 ))}
               </select>
+              {errors.subRoute && (
+                <p className="text-red-500 text-sm">{errors.subRouteName}</p>
+              )}
             </div>
           </div>
 
-          <div className="flex justify-end">
-            <button className="px-3 py-1 mt-8 bg-[#FEFDFA] text-[#565148] font-[14px] rounded-md mr-2 border-2 border-[#565148] w-[74px] h-[38px]" type="button" onClick={clearForm}>
-              Cancel
-            </button>
-            <button onClick={handleSubmit} className="px-3 py-1 mt-8 bg-[#820000] text-[#FEFDF9] font-[14px] rounded-md w-[142px] h-[38px]" type="submit">
-              Save
-            </button>
+          {/* {isLocationSaved &&
+            formData.location.coordinates.latitude &&
+            formData.location.coordinates.longitude && ( */}
+          <div>
+            <label htmlFor="location" className="text-sm font-medium text-gray-700">Current Location</label>
+            <iframe
+              src={`https://www.google.com/maps?q=${formData.location.coordinates.latitude},${formData.location.coordinates.longitude}&z=15&output=embed`}
+              width="100%"
+              height="300"
+              className="mt-4 border rounded-md"
+            ></iframe>
+          </div>
+          {/* ) */}
+          {/* 
+          <button
+            type="button"
+            onClick={handleLocationFetch}
+            disabled={isGettingLocation}
+            className={`w-full bg-[#820000] text-white p-2 mt-4 rounded-md ${
+              isGettingLocation ? "opacity-70 cursor-not-allowed" : ""
+            }`
+          }
+          >
+            {isLocationSaved
+              ? "Clear Location"
+              : isGettingLocation
+              ? "Fetching Location..."
+              : "Save Location"}
+          </button> */}
+          <div className="mt-6 flex justify-end gap-2">
+            <Link to={"/customer"}>
+              <Button variant="fourthiary">
+                Cancel
+              </Button>
+            </Link>
+            <Button type="submit" variant="primary">
+              Submit
+            </Button>
           </div>
         </form>
       </div>

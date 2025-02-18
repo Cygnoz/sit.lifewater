@@ -1,6 +1,8 @@
 import {
+  Link,
   //  Link,
-   useNavigate } from "react-router-dom"
+  useNavigate
+} from "react-router-dom"
 import Cards from "../../../commoncomponents/HomePageCards/Cards"
 import foc from "../../../assets/images/Group 2500.png"
 import cash from "../../../assets/images/Group 2499.png"
@@ -14,6 +16,8 @@ import { endpoints } from "../../../services/ApiEndpoint"
 // import PlusIcon from "../../../assets/icons/PlusIcon"
 import total from "../../../assets/images/Group 2501.png"
 import { toast, ToastContainer } from "react-toastify"
+import Button from "../../../commoncomponents/Buttons/Button"
+import PlusIcon from "../../../assets/icons/PlusIcon"
 
 const CustomerHome = () => {
   const [activeCardIndex, setActiveCardIndex] = useState<number | null>(null)
@@ -49,21 +53,21 @@ const CustomerHome = () => {
     try {
       const url = `${endpoints.DELETE_A_CUSTOMER}/${id}`;
       const { response, error } = await deleteCustomer(url);
-      
+
       getAllCustomers();
-  
+
       if (!error && response) {
         toast.success(response.data.message);
       } else if (error) {
         toast.error(error.response?.data?.message || "Error occurred while deleting customer.");
       }
-  
+
       console.log(response);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Error occurred while deleting customer.");
     }
   };
-  
+
 
   const getAllCustomers = async () => {
     try {
@@ -140,23 +144,22 @@ const CustomerHome = () => {
   };
 
   return (
-    <div>
+    <div className="p-2">
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop={true} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored" />
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between  items-center">
         <div>
           <h3 className="text-[#303F58] text-[20px] font-bold">Create Customer</h3>
           <p className="text-[#4B5C79] text-sm">You can show all the details of your customers  </p>
         </div>
-        {/* <div className="flex justify-between">
+        <div className="flex justify-between">
           <Link to={"/addcustomer"}>
-            <Button variant="primary" size="sm">
+            <Button variant="primary" >
               <PlusIcon color="white" />
               <p>Add New Customer</p>
             </Button>
           </Link>
-        </div> */}
+        </div>
       </div>
-
       <div className="grid grid-cols-4 gap-4 mt-2">
         {cardData.map((card, index) => (
           <Cards key={index} imageSrc={card.imageSrc} title={card.title} description={card.description} count={card.count} isActive={activeCardIndex === index} onCardClick={() => { setActiveCardIndex(index); handleCardClick(card.filterMode || ""); }} />
@@ -164,12 +167,12 @@ const CustomerHome = () => {
       </div>
 
       <div className="bg-white p-5 mt-5 rounded-lg">
-        <Table 
-          columns={columns} 
+        <Table
+          columns={columns}
           data={filteredData}  // Use filteredData here
-          searchPlaceholder="Search Customer" 
-          loading={loading.skeleton} 
-          searchableFields={["customerID", "fullName", "mobileNo", "mainRoute", "subRoute" ,"paymentMode"]}
+          searchPlaceholder="Search Customer"
+          loading={loading.skeleton}
+          searchableFields={["customerID", "fullName", "mobileNo", "mainRoute", "subRoute", "paymentMode"]}
           onViewClick={handleViewCustomer} // Add this prop
           // onEditClick={handleEditCustomer}
           onDeleteClick={handleDeleteCustomer}
