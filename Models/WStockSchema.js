@@ -3,6 +3,13 @@ const mongoose = require('mongoose');
 const wStockSchema = new mongoose.Schema({
   warehouse:{ type: String },
   transferNumber: { type: String },
+  supplierId:{ type: String },
+  supplierName:{ type: String },
+  paidThroughAccountId: { type: String },
+  paymentMode:{ type: String },
+  paidAmount: { type: Number },
+  totalAmount: { type: Number },
+  balanceAmount: { type: Number },
   date: { type: Date, default: Date.now },
   items: [{
     itemId: { type: String },
