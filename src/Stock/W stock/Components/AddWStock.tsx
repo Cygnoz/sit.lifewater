@@ -17,7 +17,7 @@ interface Item {
   amount: number;
   _id?: string;
   resaleable?: boolean;
-  sellingPrice:number
+  sellingPrice: number;
 }
 
 interface WarehouseItem {
@@ -30,11 +30,18 @@ interface WarehouseItem {
 interface OrderDetails {
   warehouse: string;
   date: string;
+  supplierName: string;
   transferNumber: string;
   items: Item[];
   notes: string;
   termsAndConditions: string;
   _id?: string;
+  paidThroughAccountId: string;
+  supplierId: string;
+  paymentMode: string;
+  paidAmount: number;
+  balanceAmount: number;
+  totalAmount: number;
 }
 interface AddWStockProps {
   onAddNewItem?: () => void;
@@ -45,6 +52,13 @@ const AddWStock: React.FC<AddWStockProps> = () => {
     warehouse: "",
     date: "",
     transferNumber: "",
+    supplierName: "",
+    supplierId: "",
+    paidThroughAccountId: "",
+    totalAmount: 0,
+    paidAmount: 0,
+    balanceAmount: 0,
+    paymentMode: "",
     items: [
       {
         itemId: "",
@@ -53,7 +67,7 @@ const AddWStock: React.FC<AddWStockProps> = () => {
         costPrice: 0,
         amount: 0,
         resaleable: false,
-        sellingPrice:0
+        sellingPrice: 0,
       },
     ], // Set to empty string
     notes: "",
@@ -68,6 +82,7 @@ const AddWStock: React.FC<AddWStockProps> = () => {
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [warehouses, setWarehouses] = useState<WarehouseItem[]>([]);
+  const [supplier, setSupplier] = useState<any[]>([]);
   const navigate = useNavigate();
 
   const { request: getWarehouseData } = useApi("get", 4001);
@@ -103,45 +118,84 @@ const AddWStock: React.FC<AddWStockProps> = () => {
     }
   };
 
-  useEffect(() => {
-    getAllWarehouse(), getAllItems();
-  }, []);
+  const { request: getSuppliers } = useApi("get", 4001);
 
-  // Transffer number auto generating
-
-  const [stocks, setStocks] = useState([]);
-console.log(stocks);
-
-const { request: getWStockData } = useApi("get", 4001);
-
-useEffect(() => {
-  const getAllWarehouseStock = async () => {
+  const getAllsupplier = async () => {
     try {
-      const url = `${endpoints.GET_W_STOCK}`;
-      const { response, error } = await getWStockData(url);
-      if (!error && response && response.data && Array.isArray(response.data.data)) {
-        setStocks(response.data.data);
-        console.log("here", response.data.data);          
+      const url = `${endpoints.GET_ALL_SUPPLIERS}`;
+      const { response, error } = await getSuppliers(url);
 
-        // Auto-generate the transfer number
-        const count = response.data.data.length; // Current number of stocks
-        const newTransferNumber = `TN-${count + 1}`; // Auto-generate with prefix TN-
-        setOrderDetails((prev) => ({
-          ...prev,
-          transferNumber: newTransferNumber,
-        })); // Update transfer number
-      } else {
-        console.log(error);
+      if (!error && response) {
+        setLoading(false);
+        setSupplier(response.data?.data);
+        console.log(response.data?.data, "Suppliers");
       }
     } catch (error) {
       console.log(error);
     }
   };
 
-  getAllWarehouseStock();
-}, []); // Add dependencies if necessary
+  const { request: getAllAccounts } = useApi("get", 4000);
+  const [filteredAccounts, setFilteredAccounts] = useState<any[]>([]);
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      const { response, error } = await getAllAccounts(
+        endpoints.GET_ALL_ACCOUNTS
+      );
+      if (!error && response) {
+        const formattedData = response?.data;
+        const filtered = formattedData.filter((account: any) =>
+          ["Cash", "Bank"].includes(account.accountSubhead)
+        );
+        setFilteredAccounts(filtered);
+        console.log("accounts :", filtered);
+      }
+    };
+    fetchAccounts();
+  }, []);
 
+  useEffect(() => {
+    getAllWarehouse(), getAllItems(), getAllsupplier();
+  }, []);
 
+  // Transffer number auto generating
+
+  const [stocks, setStocks] = useState([]);
+  console.log(stocks);
+
+  const { request: getWStockData } = useApi("get", 4001);
+
+  useEffect(() => {
+    const getAllWarehouseStock = async () => {
+      try {
+        const url = `${endpoints.GET_W_STOCK}`;
+        const { response, error } = await getWStockData(url);
+        if (
+          !error &&
+          response &&
+          response.data &&
+          Array.isArray(response.data.data)
+        ) {
+          setStocks(response.data.data);
+          console.log("here", response.data.data);
+
+          // Auto-generate the transfer number
+          const count = response.data.data.length; // Current number of stocks
+          const newTransferNumber = `TN-${count + 1}`; // Auto-generate with prefix TN-
+          setOrderDetails((prev) => ({
+            ...prev,
+            transferNumber: newTransferNumber,
+          })); // Update transfer number
+        } else {
+          console.log(error);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getAllWarehouseStock();
+  }, []); // Add dependencies if necessary
 
   // Filtered items excluding already selected ones
   const filteredItems = items.filter(
@@ -172,7 +226,7 @@ useEffect(() => {
           costPrice: 0,
           amount: 0,
           resaleable: false,
-          sellingPrice:0
+          sellingPrice: 0,
         },
       ],
     }));
@@ -194,7 +248,7 @@ useEffect(() => {
                 amount: 0,
                 _id: "",
                 resaleable: false,
-                sellingPrice:0
+                sellingPrice: 0,
               },
             ],
     }));
@@ -211,37 +265,39 @@ useEffect(() => {
         itemName: item.itemName,
         quantity,
         costPrice,
-        sellingPrice:item.sellingPrice,
+        sellingPrice: item.sellingPrice,
         amount: item.sellingPrice * quantity, // Calculate amount based on rate and quantity
         resaleable: item.resaleable,
       };
-      return { ...prev, items: newItems };
+        // Calculate total amount
+        const totalAmount = newItems.reduce((sum, item) => sum + item.amount, 0);
+
+        return { ...prev, items: newItems, totalAmount };
     });
 
     setOpenDropdownId(null); // Close the dropdown
     setOpenDropdownType(null);
   };
 
-  const handleItemChange = (
-    index: number,
-    field: keyof Item,
-    value: string
-  ) => {
+  const handleItemChange = (index: number, field: keyof Item, value: string) => {
     setOrderDetails((prev) => {
       const newItems = [...prev.items];
       newItems[index] = {
         ...newItems[index],
-        [field]:
-          field === "sellingPrice" || field === "quantity" ? Number(value) : value, // Ensure numbers
+        [field]: field === "sellingPrice" || field === "quantity" ? Number(value) : value,
       };
-
+  
       const quantity = Number(newItems[index].quantity) || 0;
       const sellingPrice = Number(newItems[index].sellingPrice) || 0;
       newItems[index].amount = sellingPrice * quantity;
-
-      return { ...prev, items: newItems };
+  
+      // Recalculate total amount
+      const totalAmount = newItems.reduce((sum, item) => sum + item.amount, 0);
+  
+      return { ...prev, items: newItems, totalAmount };
     });
   };
+  
 
   const toggleDropdown = (index: number, type: string) => {
     setOpenDropdownId(index === openDropdownId ? null : index);
@@ -303,7 +359,7 @@ useEffect(() => {
                   />
                 </Link>
                 <h1 className="text-[20px] font-[700]  mb-6 text-[#303F58]">
-                  Add W-Stock
+                  New Bill
                 </h1>
               </div>
 
@@ -312,13 +368,42 @@ useEffect(() => {
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block mb-2 font-medium text-[#303F58] text-[14px]">
+                      Supplier
+                    </label>
+                    <select
+                      name="supplierName"
+                      value={orderDetails.supplierName}
+                      onChange={(e) => {
+                        const selectedSupplier = supplier.find(
+                          (item) => item.fullName === e.target.value
+                        );
+                        setOrderDetails((prev) => ({
+                          ...prev,
+                          supplierName: selectedSupplier?.fullName || "",
+                          supplierId: selectedSupplier?._id || "", // Store _id
+                        }));
+                      }}
+                      className="w-full p-2 border rounded-md text-[#16191d] text-[14px]"
+                    >
+                      <option value="" disabled>
+                        Select Supplier
+                      </option>
+                      {supplier.map((item) => (
+                        <option key={item._id} value={item.fullName}>
+                          {item.fullName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block mb-2 font-medium text-[#303F58] text-[14px]">
                       Warehouse
                     </label>
                     <select
                       name="warehouse"
                       value={orderDetails.warehouse}
                       onChange={updateOrder}
-                      className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px]"
+                      className="w-full p-2 border rounded-md  text-[#16191d] text-[14px]"
                     >
                       <option value="" disabled>
                         Select Warehouse
@@ -328,7 +413,6 @@ useEffect(() => {
                           {item.warehouseName}
                         </option>
                       ))}
-                      {/* Add customer options */}
                     </select>
                   </div>
                   <div>
@@ -340,29 +424,63 @@ useEffect(() => {
                       name="date"
                       value={orderDetails.date}
                       onChange={updateOrder}
-                      className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px]"
+                      className="w-full p-2 border rounded-md  text-[#16191d] text-[14px]"
                       required
                     />
                   </div>
-                </div>
 
-                {/* Date and Order Number */}
-                {/* <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="flex  pt-2">
+                    <div className="w-full">
+                      <label className="block text-gray-700">
+                        Payment Mode
+                      </label>
+                      <select
+                        name="paymentMode"
+                        className="w-full p-2 mt-1 border rounded-md"
+                        value={orderDetails.paymentMode}
+                        onChange={updateOrder}
+                        required
+                      >
+                        <option value="">Select Payment Mode</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Credit">Credit</option>
+                      </select>
+                    </div>
+                  </div>
                   <div>
                     <label className="block mb-2 font-medium text-[#303F58] text-[14px]">
-                      Transfer Number
+                      Deposit Account
                     </label>
-
-                    <input
-                      type="text"
-                      name="transferNumber"
-                      value={orderDetails.transferNumber}
+                    <select
+                      name="paidThroughAccountId"
+                      value={orderDetails.paidThroughAccountId}
                       onChange={updateOrder}
-                      placeholder=""
-                      className="w-full p-2 border rounded-md  text-[#8F99A9] text-[14px]"
-                    />
+                      className="w-full p-2 border rounded-md  text-[#16191d] text-[14px]"
+                    >
+                      <option value="" disabled>
+                        Select Deposit Account
+                      </option>
+                      {filteredAccounts.map((account) => (
+                        <option key={account._id} value={account._id}>
+                          {account.accountName}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                </div> */}
+                  {orderDetails.paymentMode === "Cash" && (
+                    <div className="pt-2">
+                      <label className="block text-gray-700">Paid Amount</label>
+                      <input
+                        type="text"
+                        name="paidAmount"
+                        value={orderDetails.paidAmount}
+                        onChange={updateOrder}
+                        className="w-full p-2 mt-1 border rounded-md"
+                        placeholder="Enter Paid Amount"
+                      />
+                    </div>
+                  )}
+                </div>
 
                 {/* Add Item Section */}
                 <div className="rounded-lg border-2 border-tableBorder mt-5">
@@ -558,7 +676,7 @@ useEffect(() => {
                 {/* Total and Actions */}
                 <div className="flex justify-end space-x-4 mt-3">
                   <Link to={"/warstock"}>
-                  <Button variant="fourthiary">Cancel</Button>
+                    <Button variant="fourthiary">Cancel</Button>
                   </Link>
                   <Button variant="primary" onClick={handleSubmit}>
                     Save

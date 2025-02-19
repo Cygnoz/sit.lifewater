@@ -162,7 +162,7 @@ const navlist = [
     subhead: [
   
       { headName: "Supplier", subRoute: "/suppliers" },
-      { headName: "Purchase Order", subRoute: "/purchaseorder" },
+      // { headName: "Purchase Order", subRoute: "/purchaseorder" },
       {
         headName: "Bills",
         subRoute: "/warstock",

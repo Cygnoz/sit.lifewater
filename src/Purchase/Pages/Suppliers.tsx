@@ -60,6 +60,8 @@ const Suppliers: React.FC = () => {
       }
     }
   };
+  const handleView = (id: string) => {
+    navigate(`/viewsupplier/${id}`);  }
 
   return (
     <div>
@@ -90,6 +92,7 @@ const Suppliers: React.FC = () => {
           searchableFields={["companyName", "vendorEmail", "mobileNumber", "placeOfSupply"]}
           onDeleteClick={handleDelete}
           onEditClick={handleEdit} // Pass handleEdit function
+          onViewClick={handleView}
         />
       </div>
     </div>

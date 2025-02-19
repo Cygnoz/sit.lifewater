@@ -83,7 +83,7 @@ const CreateWStock: React.FC = () => {
           <div className="flex justify-between items-center">
             <div>
               <h3 className="text-[#303F58] text-[20px] font-bold">
-                Create W-Stock
+                Bills
               </h3>
               <p className="text-[#4B5C79]">
                 Manage your warehouse stock efficiently.
@@ -91,7 +91,7 @@ const CreateWStock: React.FC = () => {
             </div>
             <div className="flex">
               <Link to={"/addWstock"}>
-                <AddNewButton>Add New Stock</AddNewButton>
+                <AddNewButton>New Bill</AddNewButton>
               </Link>
             </div>
           </div>
