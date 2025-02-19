@@ -36,13 +36,16 @@ export default function CustomerTypeChart() {
         const totalCustomers = response.data.length;
         const cashCount = response.data.filter((customer: { paymentMode: string; }) => customer.paymentMode === 'Cash').length;
         const creditCount = response.data.filter((customer: { paymentMode: string; }) => customer.paymentMode === 'Credit').length;
+        const couponCount = response.data.filter((customer: { paymentMode: string; }) => customer.paymentMode === 'Coupon').length;
 
         const cashPercentage = totalCustomers ? Math.round((cashCount / totalCustomers) * 100) : 0;
         const creditPercentage = totalCustomers ? Math.round((creditCount / totalCustomers) * 100) : 0;
+        const couponPercentage = totalCustomers ? Math.round((couponCount / totalCustomers) * 100) : 0;
 
         setData([
           { label: 'Cash Customer', value: cashPercentage },
-          { label: 'Credit Customer', value: creditPercentage }
+          { label: 'Credit Customer', value: creditPercentage },
+          { label: 'Coupon Customer', value: couponPercentage }
         ]);
       }
     } catch (error) {
@@ -55,7 +58,8 @@ export default function CustomerTypeChart() {
     getAllCustomers();
   }, []);
 
-  const colors = ['hsl(210, 20%, 20%)', 'hsl(340, 20%, 80%)'];
+  const colors = ['hsl(210, 20%, 20%)', 'hsl(340, 20%, 80%)', 'hsla(37, 72%, 89%, 1)']; // Added green for Coupon Customer
+
 
   const PieCenterLabel = ({ primaryText }: { primaryText: string }) => {
     return (
