@@ -88,6 +88,7 @@ import EditReceipt from '../Sales/Components/EditReceipt';
 import Suppliers from '../Purchase/Pages/Suppliers';
 import EditSupplier from '../Purchase/Components/EditSupplier';
 import ViewSupplier from '../Purchase/Pages/ViewSupplier';
+import ViewWStock from '../Stock/W stock/Components/ViewWStocks';
 
 
 
@@ -229,6 +230,7 @@ const App: React.FC = () => {
               <Route path='/suppliers' element={<Suppliers/>}/>
               <Route path='/editsupplier/:id' element={<EditSupplier/>}/>
               <Route path='/viewsupplier/:id' element={<ViewSupplier/>}/>
+              <Route path='/viewWstock/:id' element={<ViewWStock/>}/>
 
               {/* SALES */}
               {/* <Route path='/addcollection' element={<AddCollection/>}/> */}

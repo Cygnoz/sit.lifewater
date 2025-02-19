@@ -42,6 +42,7 @@ interface OrderDetails {
   paidAmount: number;
   balanceAmount: number;
   totalAmount: number;
+  warehouseId: string;
 }
 interface AddWStockProps {
   onAddNewItem?: () => void;
@@ -50,6 +51,7 @@ interface AddWStockProps {
 const AddWStock: React.FC<AddWStockProps> = () => {
   const [orderDetails, setOrderDetails] = useState<OrderDetails>({
     warehouse: "",
+    warehouseId: "",
     date: "",
     transferNumber: "",
     supplierName: "",
@@ -234,9 +236,8 @@ const AddWStock: React.FC<AddWStockProps> = () => {
   };
 
   const removeItem = (index: number) => {
-    setOrderDetails((prev) => ({
-      ...prev,
-      items:
+    setOrderDetails((prev) => {
+      const updatedItems =
         prev.items.length > 1
           ? prev.items.filter((_, i) => i !== index)
           : [
@@ -250,9 +251,15 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                 resaleable: false,
                 sellingPrice: 0,
               },
-            ],
-    }));
+            ];
+  
+      // Recalculate total amount after item removal
+      const totalAmount = updatedItems.reduce((sum, item) => sum + item.amount, 0);
+  
+      return { ...prev, items: updatedItems, totalAmount };
+    });
   };
+  
 
   const handleItemSelect = (item: Item, index: number) => {
     const quantity = 1; // Default quantity is 1
@@ -269,35 +276,41 @@ const AddWStock: React.FC<AddWStockProps> = () => {
         amount: item.sellingPrice * quantity, // Calculate amount based on rate and quantity
         resaleable: item.resaleable,
       };
-        // Calculate total amount
-        const totalAmount = newItems.reduce((sum, item) => sum + item.amount, 0);
+      // Calculate total amount
+      const totalAmount = newItems.reduce((sum, item) => sum + item.amount, 0);
 
-        return { ...prev, items: newItems, totalAmount };
+      return { ...prev, items: newItems, totalAmount };
     });
 
     setOpenDropdownId(null); // Close the dropdown
     setOpenDropdownType(null);
   };
 
-  const handleItemChange = (index: number, field: keyof Item, value: string) => {
+  const handleItemChange = (
+    index: number,
+    field: keyof Item,
+    value: string
+  ) => {
     setOrderDetails((prev) => {
       const newItems = [...prev.items];
       newItems[index] = {
         ...newItems[index],
-        [field]: field === "sellingPrice" || field === "quantity" ? Number(value) : value,
+        [field]:
+          field === "sellingPrice" || field === "quantity"
+            ? Number(value)
+            : value,
       };
-  
+
       const quantity = Number(newItems[index].quantity) || 0;
       const sellingPrice = Number(newItems[index].sellingPrice) || 0;
       newItems[index].amount = sellingPrice * quantity;
-  
+
       // Recalculate total amount
       const totalAmount = newItems.reduce((sum, item) => sum + item.amount, 0);
-  
+
       return { ...prev, items: newItems, totalAmount };
     });
   };
-  
 
   const toggleDropdown = (index: number, type: string) => {
     setOpenDropdownId(index === openDropdownId ? null : index);
@@ -375,11 +388,11 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                       value={orderDetails.supplierName}
                       onChange={(e) => {
                         const selectedSupplier = supplier.find(
-                          (item) => item.fullName === e.target.value
+                          (item) => item.companyName === e.target.value
                         );
                         setOrderDetails((prev) => ({
                           ...prev,
-                          supplierName: selectedSupplier?.fullName || "",
+                          supplierName: selectedSupplier?.companyName || "",
                           supplierId: selectedSupplier?._id || "", // Store _id
                         }));
                       }}
@@ -389,8 +402,8 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                         Select Supplier
                       </option>
                       {supplier.map((item) => (
-                        <option key={item._id} value={item.fullName}>
-                          {item.fullName}
+                        <option key={item._id} value={item.companyName}>
+                          {item.companyName}
                         </option>
                       ))}
                     </select>
@@ -402,7 +415,16 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                     <select
                       name="warehouse"
                       value={orderDetails.warehouse}
-                      onChange={updateOrder}
+                      onChange={(e) => {
+                        const selectedWarehouse = warehouses.find(
+                          (item) => item.warehouseName === e.target.value
+                        );
+                        setOrderDetails((prev) => ({
+                          ...prev,
+                          warehouse: selectedWarehouse?.warehouseName || "",
+                          warehouseId: selectedWarehouse?._id || "", // Store _id
+                        }));
+                      }}
                       className="w-full p-2 border rounded-md  text-[#16191d] text-[14px]"
                     >
                       <option value="" disabled>
@@ -429,9 +451,9 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                     />
                   </div>
 
-                  <div className="flex  pt-2">
+                  <div className="flex ">
                     <div className="w-full">
-                      <label className="block text-gray-700">
+                      <label className="block mb-2 font-medium text-[#303F58] text-[14px]">
                         Payment Mode
                       </label>
                       <select
@@ -447,28 +469,218 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                       </select>
                     </div>
                   </div>
-                  <div>
-                    <label className="block mb-2 font-medium text-[#303F58] text-[14px]">
-                      Deposit Account
-                    </label>
-                    <select
-                      name="paidThroughAccountId"
-                      value={orderDetails.paidThroughAccountId}
-                      onChange={updateOrder}
-                      className="w-full p-2 border rounded-md  text-[#16191d] text-[14px]"
-                    >
-                      <option value="" disabled>
-                        Select Deposit Account
-                      </option>
-                      {filteredAccounts.map((account) => (
-                        <option key={account._id} value={account._id}>
-                          {account.accountName}
-                        </option>
-                      ))}
-                    </select>
+                </div>
+
+                {/* Add Item Section */}
+                <div>
+                  <label className="block mb-2 font-medium text-[#303F58] text-[14px]">
+                    Select Item
+                  </label>
+                  <div className="rounded-lg border-2 border-tableBorder mt-5">
+                    <table className="min-w-full bg-white rounded-lg relative pb-4 border-dropdownText">
+                      <thead className="text-[12px] text-center bg-[#FDF8F0] text-dropdownText">
+                        <tr className="bg-lightPink">
+                          {[
+                            "Product",
+                            "Quantity",
+                            "Rate per Item",
+                            "Total Amount",
+                            "Actions",
+                          ].map((item, index) => (
+                            <th
+                              key={index}
+                              className="py-2 px-4 font-medium border-b border-tableBorder relative"
+                            >
+                              {item}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="text-dropdownText text-center text-[13px]">
+                        {orderDetails.items.map((item, index) => (
+                          <tr key={index}>
+                            {/* Product Selection */}
+                            <td className="border-y py-3 px-2 border-tableBorder">
+                              <div
+                                className="relative w-full"
+                                onClick={() =>
+                                  toggleDropdown(index, "searchProduct")
+                                }
+                              >
+                                {item.itemName ? (
+                                  <div className="cursor-pointer gap-2 grid grid-cols-12 appearance-none items-center justify-center h-9 text-zinc-400 bg-white text-sm">
+                                    <div className="col-span-8 text-start">
+                                      <p className="text-textColor text-center">
+                                        {item.itemName}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="cursor-pointer flex appearance-none items-center justify-center h-9 text-zinc-400 bg-white text-sm gap-2">
+                                    <p>Type or click</p>
+                                    <p>
+                                      <img src={downarrow} alt="" width={12} />
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                              {/* Dropdown for selecting items */}
+                              {openDropdownId === index &&
+                                openDropdownType === "searchProduct" && (
+                                  <div
+                                    ref={dropdownRef}
+                                    className="absolute z-10 bg-white shadow rounded-md mt-1 p-2 w-[40%] space-y-1"
+                                  >
+                                    <input
+                                      type="text"
+                                      value={searchValue}
+                                      onChange={(e) =>
+                                        setSearchValue(e.target.value)
+                                      }
+                                      placeholder="Select Item"
+                                      className="w-full p-2 border rounded-lg h-12 bg-[#F9F7F5]"
+                                    />
+                                    {loading ? (
+                                      <p>Loading...</p>
+                                    ) : filteredItems.length > 0 ? (
+                                      filteredItems.map((filteredItem, idx) => (
+                                        <div
+                                          key={idx}
+                                          onClick={() =>
+                                            handleItemSelect(
+                                              filteredItem,
+                                              index
+                                            )
+                                          }
+                                          className="grid bg-[#FDF8F0] grid-cols-12 gap-1 p-2 hover:bg-gray-100 cursor-pointer border border-slate-400 rounded-lg"
+                                        >
+                                          <div className="col-span-10 flex">
+                                            <div className="text-start">
+                                              <p className="font-bold text-sm text-black">
+                                                {filteredItem.itemName}
+                                              </p>
+                                              <p className="text-xs text-gray-500">
+                                                AED: {filteredItem.sellingPrice}
+                                              </p>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <div className="text-center border-slate-400 border rounded-lg">
+                                        <p className="text-red-500 text-sm py-4">
+                                          Items Not Found!
+                                        </p>
+                                      </div>
+                                    )}
+                                    <Link to="/additem">
+                                      <button className="bg-darkGreen text-[#820000] mt-1 rounded-lg py-4 px-6 flex items-center text-sm font-bold border-slate-400 border gap-2 w-full hover:bg-lightRed">
+                                        <img src={circleplus} alt="" />{" "}
+                                        <p>Add New Item</p>
+                                      </button>
+                                    </Link>
+                                  </div>
+                                )}
+                            </td>
+                            {/* Quantity Input */}
+                            <td className="py-2.5 px-4 border-y border-tableBorder">
+                              <input
+                                type="number"
+                                value={item.quantity}
+                                onChange={(e) =>
+                                  handleItemChange(
+                                    index,
+                                    "quantity",
+                                    e.target.value
+                                  )
+                                }
+                                className="text-center w-20"
+                                placeholder="0"
+                              />
+                            </td>
+                            {/* Rate Display */}
+                            <td className="py-2.5 px-4 border-y border-tableBorder">
+                              <input
+                                type="number"
+                                value={item.sellingPrice}
+                                disabled
+                                className="w-full text-center"
+                                placeholder="0"
+                              />
+                              <input
+                                type="hidden" // Hidden input for itemId
+                                value={item.itemId}
+                              />
+                            </td>
+
+                            {/* Amount Display */}
+                            <td className="py-2.5 px-4 border-y border-tableBorder">
+                              <input
+                                value={item.amount}
+                                disabled
+                                className="w-full text-center"
+                                placeholder="0"
+                              />
+                            </td>
+                            {/* Actions */}
+                            <td className="py-2.5 px-4 border-y border-tableBorder text-center">
+                              <button
+                                onClick={() => removeItem(index)}
+                                className="text-red-500 px-2 py-1"
+                              >
+                                <img src={trash} alt="" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
+
+                  <button
+                    className="flex items-center text-[#820000] text-md font-bold gap-2 mx-1 my-4"
+                    onClick={addItem}
+                  >
+                    <img src={circleplus} alt="" /> <p>Add Item</p>
+                  </button>
+                </div>
+                <div className="flex justify-end ">
+                  <h5 className="block mb-2 font-bold text-black text-[18px] bg-[#FDF8F0] p-2 rounded-lg">
+                    Total Amount = {orderDetails.totalAmount} AED
+                  </h5>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-4">
                   {orderDetails.paymentMode === "Cash" && (
-                    <div className="pt-2">
+                    <div className="flex">
+                      <div className="w-full">
+                        <label className="block text-gray-700">
+                          Deposit Account
+                        </label>
+                        <select
+                          name="depositAccount"
+                          className="w-full p-2 mt-1 border rounded-md"
+                          value={orderDetails.paidThroughAccountId}
+                          onChange={updateOrder} // Pass function reference
+                          required
+                        >
+                          <option value="">Select Account</option>
+                          {Array.isArray(filteredAccounts) &&
+                          filteredAccounts.length > 0 ? (
+                            filteredAccounts.map((account: any) => (
+                              <option key={account._id} value={account._id}>
+                                {account.accountName}
+                              </option>
+                            ))
+                          ) : (
+                            <option>No accounts available</option>
+                          )}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                  {orderDetails.paymentMode === "Cash" && (
+                    <div className="">
                       <label className="block text-gray-700">Paid Amount</label>
                       <input
                         type="text"
@@ -481,172 +693,6 @@ const AddWStock: React.FC<AddWStockProps> = () => {
                     </div>
                   )}
                 </div>
-
-                {/* Add Item Section */}
-                <div className="rounded-lg border-2 border-tableBorder mt-5">
-                  <table className="min-w-full bg-white rounded-lg relative pb-4 border-dropdownText">
-                    <thead className="text-[12px] text-center bg-[#FDF8F0] text-dropdownText">
-                      <tr className="bg-lightPink">
-                        {[
-                          "Product",
-                          "Quantity",
-                          "Rate",
-                          "Amount",
-                          "Actions",
-                        ].map((item, index) => (
-                          <th
-                            key={index}
-                            className="py-2 px-4 font-medium border-b border-tableBorder relative"
-                          >
-                            {item}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="text-dropdownText text-center text-[13px]">
-                      {orderDetails.items.map((item, index) => (
-                        <tr key={index}>
-                          {/* Product Selection */}
-                          <td className="border-y py-3 px-2 border-tableBorder">
-                            <div
-                              className="relative w-full"
-                              onClick={() =>
-                                toggleDropdown(index, "searchProduct")
-                              }
-                            >
-                              {item.itemName ? (
-                                <div className="cursor-pointer gap-2 grid grid-cols-12 appearance-none items-center justify-center h-9 text-zinc-400 bg-white text-sm">
-                                  <div className="col-span-8 text-start">
-                                    <p className="text-textColor text-center">
-                                      {item.itemName}
-                                    </p>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="cursor-pointer flex appearance-none items-center justify-center h-9 text-zinc-400 bg-white text-sm gap-2">
-                                  <p>Type or click</p>
-                                  <p>
-                                    <img src={downarrow} alt="" width={12} />
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                            {/* Dropdown for selecting items */}
-                            {openDropdownId === index &&
-                              openDropdownType === "searchProduct" && (
-                                <div
-                                  ref={dropdownRef}
-                                  className="absolute z-10 bg-white shadow rounded-md mt-1 p-2 w-[40%] space-y-1"
-                                >
-                                  <input
-                                    type="text"
-                                    value={searchValue}
-                                    onChange={(e) =>
-                                      setSearchValue(e.target.value)
-                                    }
-                                    placeholder="Select Item"
-                                    className="w-full p-2 border rounded-lg h-12 bg-[#F9F7F5]"
-                                  />
-                                  {loading ? (
-                                    <p>Loading...</p>
-                                  ) : filteredItems.length > 0 ? (
-                                    filteredItems.map((filteredItem, idx) => (
-                                      <div
-                                        key={idx}
-                                        onClick={() =>
-                                          handleItemSelect(filteredItem, index)
-                                        }
-                                        className="grid bg-[#FDF8F0] grid-cols-12 gap-1 p-2 hover:bg-gray-100 cursor-pointer border border-slate-400 rounded-lg"
-                                      >
-                                        <div className="col-span-10 flex">
-                                          <div className="text-start">
-                                            <p className="font-bold text-sm text-black">
-                                              {filteredItem.itemName}
-                                            </p>
-                                            <p className="text-xs text-gray-500">
-                                              AED: {filteredItem.sellingPrice}
-                                            </p>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))
-                                  ) : (
-                                    <div className="text-center border-slate-400 border rounded-lg">
-                                      <p className="text-red-500 text-sm py-4">
-                                        Items Not Found!
-                                      </p>
-                                    </div>
-                                  )}
-                                  <Link to="/additem">
-                                    <button className="bg-darkGreen text-[#820000] mt-1 rounded-lg py-4 px-6 flex items-center text-sm font-bold border-slate-400 border gap-2 w-full hover:bg-lightRed">
-                                      <img src={circleplus} alt="" />{" "}
-                                      <p>Add New Item</p>
-                                    </button>
-                                  </Link>
-                                </div>
-                              )}
-                          </td>
-                          {/* Quantity Input */}
-                          <td className="py-2.5 px-4 border-y border-tableBorder">
-                            <input
-                              type="number"
-                              value={item.quantity}
-                              onChange={(e) =>
-                                handleItemChange(
-                                  index,
-                                  "quantity",
-                                  e.target.value
-                                )
-                              }
-                              className="text-center w-20"
-                              placeholder="0"
-                            />
-                          </td>
-                          {/* Rate Display */}
-                          <td className="py-2.5 px-4 border-y border-tableBorder">
-                            <input
-                              type="number"
-                              value={item.sellingPrice}
-                              disabled
-                              className="w-full text-center"
-                              placeholder="0"
-                            />
-                            <input
-                              type="hidden" // Hidden input for itemId
-                              value={item.itemId}
-                            />
-                          </td>
-
-                          {/* Amount Display */}
-                          <td className="py-2.5 px-4 border-y border-tableBorder">
-                            <input
-                              value={item.amount}
-                              disabled
-                              className="w-full text-center"
-                              placeholder="0"
-                            />
-                          </td>
-                          {/* Actions */}
-                          <td className="py-2.5 px-4 border-y border-tableBorder text-center">
-                            <button
-                              onClick={() => removeItem(index)}
-                              className="text-red-500 px-2 py-1"
-                            >
-                              <img src={trash} alt="" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <button
-                  className="flex items-center text-[#820000] text-md font-bold gap-2 mx-1 my-4"
-                  onClick={addItem}
-                >
-                  <img src={circleplus} alt="" /> <p>Add Item</p>
-                </button>
 
                 {/* Notes and Terms */}
                 <div className="mb-4">

@@ -20,6 +20,7 @@ export const endpoints = {
   // stock
   ADD_W_STOCK: `wstock`,
   GET_W_STOCK: `wstock`,
+  GET_A_WAREHOUSE_STOCK: `wstock`,
   ADD_STOCK_LOAD: `stock`,
   GET_ALL_LOADED_STOCK: `stock`,
   DELETE_STOCK_LOAD:`deletestock`,

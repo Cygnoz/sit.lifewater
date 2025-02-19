@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useApi from "../../../Hook/UseApi";
 import { endpoints } from "../../../services/ApiEndpoint";
 import AddNewButton from "../../../commoncomponents/Buttons/AddNewButton";
@@ -22,7 +22,7 @@ interface StockData {
 const CreateWStock: React.FC = () => {
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [loading, setLoading] = useState(true);
-
+const navigate = useNavigate();
   const { request: getWStockData } = useApi("get", 4001);
 
   const fetchWarehouseStock = async () => {
@@ -51,6 +51,9 @@ const CreateWStock: React.FC = () => {
     { id: "warehouse", label: "Warehouse", visible: true },
     { id: "transferNumber", label: "Transfer Number", visible: true },
   ];
+
+  const handleView = (id: string) => {
+    navigate(`/viewWstock/${id}`);}
 
   const renderColumnContent = (colId: any, stock: any) => {
     switch (colId) {
@@ -105,7 +108,7 @@ const CreateWStock: React.FC = () => {
               searchPlaceholder="Search Stock"
               searchableFields={["warehouse", "transferNumber","date"]}
               renderColumnContent={renderColumnContent}
-              showAction={false}
+             onViewClick={handleView}
             />
             
           </div>

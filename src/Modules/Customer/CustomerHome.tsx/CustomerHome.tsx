@@ -43,9 +43,9 @@ const CustomerHome = () => {
     navigate(`/viewcustomer/${id}`);
   };
 
-  // const handleEditCustomer = (id: string) => {
-  //   navigate(`/editcustomer/${id}`);
-  // }
+  const handleEditCustomer = (id: string) => {
+    navigate(`/editcustomer/${id}`);
+  }
 
   const { request: deleteCustomer } = useApi("delete", 4000);
 
@@ -174,7 +174,7 @@ const CustomerHome = () => {
           loading={loading.skeleton}
           searchableFields={["customerID", "fullName", "mobileNo", "mainRoute", "subRoute", "paymentMode"]}
           onViewClick={handleViewCustomer} // Add this prop
-          // onEditClick={handleEditCustomer}
+          onEditClick={handleEditCustomer}
           onDeleteClick={handleDeleteCustomer}
         />
       </div>

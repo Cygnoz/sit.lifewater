@@ -104,10 +104,10 @@ const navlist = [
         headName: "Warehouse",
         subRoute: "/warehouse",
       },
-      {
-        headName: "W Stock",
-        subRoute: "/warstock",
-      },
+      // {
+      //   headName: "W Stock",
+      //   subRoute: "/warstock",
+      // },
 
       
       

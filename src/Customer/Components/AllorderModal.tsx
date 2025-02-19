@@ -6,6 +6,7 @@ interface StockItem {
   itemName: string;
   quantity: number;
   status: string;
+  
 }
 
 interface Order {
@@ -15,6 +16,9 @@ interface Order {
   totalAmount: number | string;
   stock: StockItem[];
   customerName: string;
+  paymentMode: string;
+  paidAmount: number;
+  
 }
 
 interface OrderModalProps {
@@ -31,7 +35,8 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, orders = [] })
     { id: "orderNumber", label: "Order Number", visible: true },
     { id: "itemName", label: "Item Name", visible: true },
     { id: "quantity", label: "Quantity", visible: true },
-    { id: "status", label: "Status", visible: true },
+    { id: "paymentMode", label: "Payment Mode", visible: true },
+    { id: "paidAmount", label: "Amount Paid", visible: true },
     { id: "totalAmount", label: "Total", visible: true },
   ];
 
@@ -40,8 +45,11 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, orders = [] })
     customerName: order.customerName,
       date: new Date(order.date).toLocaleDateString(),
       orderNumber: order.orderNumber,
+      paymentMode:order.paymentMode,
+      paidAmount:order.paidAmount,
       itemName: item.itemName,
       quantity: item.quantity,
+       
       status: item.status,
       totalAmount: `${Number(order.totalAmount || 0).toFixed(2)} AED`,
     }))
@@ -51,7 +59,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, orders = [] })
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-3xl">
+      <div className="bg-white p-6 rounded-lg shadow-lg ">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">All Orders
              {/* <span className="text-red-900">{formattedData[0].customerName || ""}</span> */}
