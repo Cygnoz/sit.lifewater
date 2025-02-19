@@ -49,12 +49,13 @@ exports.createStock = async (req, res) => {
     }
 
 
-    const { supplierAccount } = await dataExist(
+    const { supplierAccount, paidThroughAccount } = await dataExist(
       cleanedData.supplierId,
-      cleanedData.paidThroughAccountId
+      cleanedData.paidThroughAccountId,
+
     );
     if (!supplierAccount) {
-      return res.status(404).json({ message: "Customer Account not found" });
+      return res.status(404).json({ message: "Supplier Account not found" });
     }
 
     if(cleanedData.paidAmount > cleanedData.totalAmount){
@@ -135,7 +136,7 @@ exports.createStock = async (req, res) => {
     await wStock.save();
     console.log("Stock record created:", wStock);
     
-    await journal(supplierAccount, purchaseAccount, depositAccount);
+    await journal(supplierAccount,paidThroughAccount);
 
 
 
@@ -152,12 +153,12 @@ exports.createStock = async (req, res) => {
 };
 
 
-async function journal( wStock, customerAccount, purchaseAccount, depositAccounts ) {
+async function journal( wStock, customerAccount, purchaseAccount, paidThroughAccount ) {
 
     console.log('customeracc:',customerAccount);
     console.log('wStockdepositid:',wStock.depositAccountId);
     console.log('purchaseAccount:',purchaseAccount);
-    console.log('depositacc:',depositAccounts);
+    console.log('paidthroughAcc:',paidThroughAccount);
 
     const sale = {
       operationId: wStock._id,
@@ -190,14 +191,15 @@ async function journal( wStock, customerAccount, purchaseAccount, depositAccount
       creditAmount: wStock.paidAmount || 0,
       remark: wStock.note,
     };
-    let depositAccount
+    
+    let paidThroughAccounts
 
-    if(depositAccounts){
-       depositAccount = {
+    if(paidThroughAccount){
+      paidThroughAccounts = {
         operationId: wStock._id,
         transactionId: wStock.transferNumber,
         date: wStock.createdDate,
-        accountId: depositAccounts._id || undefined,
+        accountId: paidThroughAccount._id || undefined,
         action: "Receipt",
         debitAmount: wStock.paidAmount || 0,
         creditAmount: 0,
@@ -215,25 +217,62 @@ async function journal( wStock, customerAccount, purchaseAccount, depositAccount
 
     // console.log("Total Debit Amount: ", debitAmount );
     // console.log("Total Credit Amount: ", creditAmount );
-
-   
-   
-   
+    
     const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai","DD/MM/YY","/");
     const openingDate = generatedDateTime.dateTime;
-
+    
     //credit
 
     if(order.paymentMode === 'Cash'){
       createTrialEntry( sale ,openingDate )
       createTrialEntry( supplier,openingDate )
         createTrialEntry( supplierPaid,openingDate )
-        createTrialEntry( depositAccount,openingDate )
+        createTrialEntry( paidThroughAccounts,openingDate )
     }
 if(order.paymentMode === 'Credit'){
   createTrialEntry( sale ,openingDate )
   createTrialEntry( supplier,openingDate )
   }
+   
+   
+
+
+}
+
+
+function generateTimeAndDateForDB(
+  timeZone,
+  dateFormat,
+  dateSplit,
+  baseTime = new Date(),
+  timeFormat = "HH:mm:ss",
+  timeSplit = ":"
+) {
+  // Convert the base time to the desired time zone
+  const localDate = moment.tz(baseTime, timeZone);
+
+  // Format date and time according to the specified formats
+  let formattedDate = localDate.format(dateFormat);
+
+  // Handle date split if specified
+  if (dateSplit) {
+    // Replace default split characters with specified split characters
+    formattedDate = formattedDate.replace(/[-/]/g, dateSplit); // Adjust regex based on your date format separators
+  }
+
+  const formattedTime = localDate.format(timeFormat);
+  const timeZoneName = localDate.format("z"); // Get time zone abbreviation
+
+  // Combine the formatted date and time with the split characters and time zone
+  const dateTime = `${formattedDate} ${formattedTime
+    .split(":")
+    .join(timeSplit)}`;
+
+  return {
+    date: formattedDate,
+    time: `${formattedTime} (${timeZoneName})`,
+    dateTime: dateTime,
+  };
 }
   
   
@@ -259,10 +298,11 @@ exports.getAllStock = async (req, res) => {
 };
 
 
-async function createTrialEntry(data) {
+async function createTrialEntry(data, openingDate) {
   const newTrialEntry = new TrialBalance({
     organizationId: data.organizationId,
     operationId: data.operationId,
+    openingDate: openingDate,
     transactionId: data.transactionId,
     accountId: data.accountId,
     action: data.action,
