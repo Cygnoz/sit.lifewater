@@ -201,16 +201,19 @@ async function journal(wStock, supplierAccount, purchaseAccount, paidThroughAcco
 
   //credit
 
-  if (wStock.paymentMode === "Cash") {
-    createTrialEntry(supplier, openingDate)
-    createTrialEntry(supplier, openingDate)
-    createTrialEntry(supplierPaid, openingDate)
-    createTrialEntry(paidThroughAccounts, openingDate)
+if (wStock.paymentMode === "Cash") {
+  createTrialEntry(purchase, openingDate); // Ensure purchase entry is made
+  createTrialEntry(supplier, openingDate);
+  createTrialEntry(supplierPaid, openingDate);
+  if (paidThroughAccounts) {
+    createTrialEntry(paidThroughAccounts, openingDate); // Ensure paidThroughAccount is recorded
   }
-  if (wStock.paymentMode === "Credit") {
-    createTrialEntry(supplier, openingDate)
-    createTrialEntry(supplier, openingDate)
-  }
+}
+
+if (wStock.paymentMode === "Credit") {
+  createTrialEntry(purchase, openingDate); // Ensure purchase entry is made
+  createTrialEntry(supplier, openingDate);
+}
 }
 
 function generateTimeAndDateForDB(timeZone, dateFormat, dateSplit, baseTime = new Date(), timeFormat = "HH:mm:ss", timeSplit = ":") {
