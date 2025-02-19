@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const wStockSchema = new mongoose.Schema({
   warehouse:{ type: String },
+  warehouseId:{ type: String },
   transferNumber: { type: String },
   supplierId:{ type: String },
   supplierName:{ type: String },

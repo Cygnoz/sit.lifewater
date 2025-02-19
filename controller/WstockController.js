@@ -132,6 +132,129 @@ exports.createStock = async (req, res) => {
   }
 }
 
+
+
+
+// Get all stock entries
+exports.getAllStock = async (req, res) => {
+  try {
+    const stocks = await WStock.find().sort({ createdAt: -1 })
+
+    res.status(200).json({
+      success: true,
+      data: stocks,
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    })
+  }
+}
+
+
+
+//viewoneWarehouseStock
+exports.getOneWStock = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const stock = await WStock.findById(id);
+
+    if (!stock) {
+      return res.status(404).json({
+        success: false,
+        message: "Stock not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: stock,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+//deleteWarehouseStock
+exports.deleteWStock = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find the stock entry to be deleted
+    const stock = await WStock.findById(id);
+    if (!stock) {
+      return res.status(404).json({
+        success: false,
+        message: "Stock not found",
+      });
+    }
+
+    // Find the associated warehouse
+    const warehouse = await Warehouse.findOne({ warehouseName: stock.warehouse });
+    if (!warehouse) {
+      return res.status(404).json({
+        success: false,
+        message: "Warehouse not found",
+      });
+    }
+
+    // Remove the stock items from the warehouse stock
+    stock.items.forEach((item) => {
+      const existingItemIndex = warehouse.stock.findIndex((stockItem) => stockItem.itemId === item.itemId);
+
+      if (existingItemIndex > -1) {
+        if (warehouse.stock[existingItemIndex].quantity > item.quantity) {
+          // Reduce the quantity if more remains
+          warehouse.stock[existingItemIndex].quantity -= item.quantity;
+          warehouse.stock[existingItemIndex].amount = warehouse.stock[existingItemIndex].quantity * warehouse.stock[existingItemIndex].sellingPrice;
+        } else {
+          // Remove the item completely if quantity matches or is less
+          warehouse.stock.splice(existingItemIndex, 1);
+        }
+      }
+    });
+
+    // Save the updated warehouse document
+    await warehouse.save();
+    console.log("Warehouse stock updated after deletion:", warehouse);
+
+    // Delete associated trial entries
+    const existingJournal = await TrialBalance.find({ operationId: stock._id });
+    if (existingJournal.length) {
+      await TrialBalance.deleteMany({ operationId: stock._id });
+      console.log(`Deleted existing Journal entries for operationId: ${stock._id}`);
+    }
+
+    // Delete the stock entry from WStock
+    await WStock.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Stock and associated trial entries deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting stock:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+    });
+  }
+};
+
+
+
+
+
+
+
+
+
+
 async function journal(wStock, supplierAccount, purchaseAccount, paidThroughAccount) {
   console.log("supplierAccount:", supplierAccount)
   console.log("paidthroughAcc:", paidThroughAccount)
@@ -233,49 +356,7 @@ function generateTimeAndDateForDB(timeZone, dateFormat, dateSplit, baseTime = ne
   }
 }
 
-// Get all stock entries
-exports.getAllStock = async (req, res) => {
-  try {
-    const stocks = await WStock.find().sort({ createdAt: -1 })
 
-    res.status(200).json({
-      success: true,
-      data: stocks,
-    })
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    })
-  }
-}
-
-
-
-//viewoneWarehouseStock
-exports.getOneWStock = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const stock = await WStock.findById(id);
-
-    if (!stock) {
-      return res.status(404).json({
-        success: false,
-        message: "Stock not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: stock,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
 
 async function createTrialEntry(data, openingDate) {
   const newTrialEntry = new TrialBalance({

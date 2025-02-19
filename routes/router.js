@@ -32,7 +32,8 @@ router.delete('/item/:id', verifyToken,  itemController.deleteItem);
 //Wstock
 router.post('/wstock', verifyToken,  wStockController.createStock);
 router.get('/wstock', verifyToken,  wStockController.getAllStock);
-router.get('/wstock/:id',   wStockController.getOneWStock);
+router.get('/wstock/:id',wStockController.getOneWStock);
+router.delete('/wstock/:id',  wStockController.deleteWStock );
 
 //Warehouse
 router.post('/warehouse', verifyToken,  warehouseController.addWarehouse);
