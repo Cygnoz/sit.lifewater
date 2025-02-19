@@ -185,16 +185,7 @@ async function journal(wStock, supplierAccount, purchaseAccount, paidThroughAcco
     }
   }
 
-  // console.log("sale", sale.debitAmount,  sale.creditAmount);
-  // console.log("supplier", supplier.debitAmount,  supplier.creditAmount);
-  // console.log("supplierPaid", supplierPaid.debitAmount,  supplierPaid.creditAmount);
-  // console.log("depositAccount", depositAccount.debitAmount,  depositAccount.creditAmount);
 
-  // const  debitAmount =  sale.debitAmount  + supplier.debitAmount + supplierPaid.debitAmount +  depositAccount.debitAmount;
-  // const  creditAmount = sale.creditAmount  + supplier.creditAmount + supplierPaid.creditAmount +  depositAccount.creditAmount ;
-
-  // console.log("Total Debit Amount: ", debitAmount );
-  // console.log("Total Credit Amount: ", creditAmount );
 
   const generatedDateTime = generateTimeAndDateForDB("Asia/Dubai", "DD/MM/YY", "/")
   const openingDate = generatedDateTime.dateTime
@@ -258,6 +249,33 @@ exports.getAllStock = async (req, res) => {
     })
   }
 }
+
+
+
+//viewoneWarehouseStock
+exports.getOneWStock = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const stock = await WStock.findById(id);
+
+    if (!stock) {
+      return res.status(404).json({
+        success: false,
+        message: "Stock not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: stock,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 async function createTrialEntry(data, openingDate) {
   const newTrialEntry = new TrialBalance({
